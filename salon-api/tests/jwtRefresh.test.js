@@ -1,9 +1,26 @@
 const jwt = require('jsonwebtoken');
 const request = require('supertest');
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const { app } = require('../src/app');
 
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'test_access_secret_123';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'test_refresh_secret_456';
+
+jest.setTimeout(180000);
+
+let mongoServer;
+
+beforeAll(async () => {
+  mongoServer = await MongoMemoryServer.create({ binary: { version: '6.0.6' } });
+  const uri = mongoServer.getUri();
+  await mongoose.connect(uri);
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
+  if (mongoServer) await mongoServer.stop();
+});
 
 describe('High-Risk Logic: JWT Authentication & Refresh Token Flow', () => {
   test('Token mechanics: Valid refresh token verifies, while expired/invalid tokens are rejected', () => {

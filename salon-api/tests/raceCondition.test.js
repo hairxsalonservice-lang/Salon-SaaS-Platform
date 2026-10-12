@@ -42,7 +42,7 @@ describe('High-Risk Logic: Slot Booking Race Condition', () => {
       return await Slot.findOneAndUpdate(
         { _id: slot._id, status: 'AVAILABLE' },
         { $set: { status: 'BOOKED', appointmentId } },
-        { new: true }
+        { returnDocument: 'after' }
       );
     };
 

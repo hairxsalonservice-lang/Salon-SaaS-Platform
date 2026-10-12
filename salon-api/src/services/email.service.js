@@ -89,7 +89,9 @@ const transporter = createTransporter()
 const EMAIL_FROM = process.env.EMAIL_FROM || '"HairX" <stcut8454@gmail.com>'
 
 // ── BullMQ & Connection Setup ─────────────────────────────
-const isRedisEnabled = (process.env.REDIS_ENABLED ?? 'true').toLowerCase() !== 'false'
+const isRedisEnabled =
+  process.env.NODE_ENV !== 'test' &&
+  (process.env.REDIS_ENABLED ?? 'true').toLowerCase() !== 'false'
 const isRedisConfigured = Boolean(
   process.env.REDIS_URL || process.env.REDIS_HOST || process.env.REDISHOST
 )

@@ -24,10 +24,12 @@ const app = express();
 app.set("trust proxy", 1);
 
 // ================================
-// Connect to MongoDB
+// Connect to MongoDB & Cron Jobs (Skip in test environment)
 // ================================
-console.log("📦 Initializing database connection...");
-connectDB();
+if (process.env.NODE_ENV !== "test") {
+  console.log("📦 Initializing database connection...");
+  connectDB();
+}
 
 // Register all models
 console.log("📦 Registering Mongoose models...");
@@ -46,10 +48,12 @@ const adminRoutes = require('./routes/admin.routes')
 const adminController = require('./controllers/admin.controller')
 
 // Initialize cron jobs
-console.log("🕒 Initializing cron jobs...");
-const { initCronJobs } = require("./config/cron");
-initCronJobs();
-console.log("✅ Cron jobs initialized.");
+if (process.env.NODE_ENV !== "test") {
+  console.log("🕒 Initializing cron jobs...");
+  const { initCronJobs } = require("./config/cron");
+  initCronJobs();
+  console.log("✅ Cron jobs initialized.");
+}
 
 // ================================
 // Security Middleware
