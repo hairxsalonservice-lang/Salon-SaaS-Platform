@@ -1,0 +1,43 @@
+name: Salon SaaS Platform CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          cd salon-api
+          npm ci
+
+      - name: Run Syntax Check & Linter
+        run: |
+          cd salon-api
+          node -c src/app.js src/services/cache.service.js src/controllers/appointment.controller.js
+
+      - name: Run Test Verification Suite
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test_jwt_secret_key_12345
+          REDIS_ENABLED: "false"
+        run: |
+          cd salon-api
+          node test_cache_invalidation.js
+          node test_pubsub_sync.js
+          node test_circuit_breaker.js
+          node test_rate_limiter.js
+          node test_api_versioning.js
+          node test_swagger_docs.js

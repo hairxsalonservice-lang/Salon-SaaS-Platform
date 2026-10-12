@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Neutrals — clean and sharp */
+  --color-ink:      #0f0f0f;
+  --color-charcoal: #2a2a2a;
+  --color-slate:    #64748b;
+  --color-muted:    #94a3b8;
+  --color-border:   #e2e8f0;
+  --color-subtle:   #f1f5f9;
+  --color-surface:  #f8fafc;
+  --color-white:    #ffffff;
+
+  /* Accents */
+  --color-primary:    #0f172a;
+  --color-accent:     #6366f1;
+  --color-accent-lt:  #eef2ff;
+  --color-success:    #10b981;
+  --color-warning:    #f59e0b;
+  --color-danger:     #ef4444;
+
+  /* Legacy compatibility */
+  --color-ash:     #64748b;
+  --color-silver:  #cbd5e1;
+  --color-smoke:   #e2e8f0;
+  --color-paper:   #f8fafc;
+  --color-gold:    #6366f1;
+  --color-gold-lt: #eef2ff;
+
+  /* Typography */
+  --font-family-sans:    'DM Sans', system-ui, sans-serif;
+  --font-family-display: 'Playfair Display', Georgia, serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f4f6fb;
+  color: #0f172a;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in  { animation: fadeIn  0.4s ease forwards; }
+.animate-slide-up { animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-slide-in { animation: slideIn 0.3s ease forwards; }
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
