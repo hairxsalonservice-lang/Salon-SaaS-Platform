@@ -8,9 +8,9 @@ const logger = require('../utils/logger')
 const parseFromString = (fromStr) => {
   const match = /^"?([^"<]*)"?\s*<(.+)>$/.exec(fromStr || '')
   if (match) {
-    return { name: match[1].trim() || 'ST CUT', email: match[2].trim() }
+    return { name: match[1].trim() || 'HairX', email: match[2].trim() }
   }
-  return { name: process.env.MAIL_FROM_NAME || 'ST CUT', email: fromStr || process.env.MAIL_FROM || 'stcut8454@gmail.com' }
+  return { name: process.env.MAIL_FROM_NAME || 'HairX', email: fromStr || process.env.MAIL_FROM || 'stcut8454@gmail.com' }
 }
 
 // Initialize Transporter — uses Brevo HTTP API if BREVO_API_KEY exists, else falls back to SMTP / Mock
@@ -86,7 +86,7 @@ const createTransporter = () => {
 }
 
 const transporter = createTransporter()
-const EMAIL_FROM = process.env.EMAIL_FROM || '"ST CUT" <stcut8454@gmail.com>'
+const EMAIL_FROM = process.env.EMAIL_FROM || '"HairX" <stcut8454@gmail.com>'
 
 // ── BullMQ & Connection Setup ─────────────────────────────
 const isRedisEnabled = (process.env.REDIS_ENABLED ?? 'true').toLowerCase() !== 'false'
@@ -235,8 +235,8 @@ const wrapTemplate = (title, content) => `
       ${content}
     </div>
     <div class="footer">
-      <p>Thank you for choosing ST CUT.</p>
-      <p>© ${new Date().getFullYear()} ST CUT. All rights reserved.</p>
+      <p>Thank you for choosing HairX.</p>
+      <p>© ${new Date().getFullYear()} HairX. All rights reserved.</p>
     </div>
   </div>
 </body>
@@ -425,7 +425,7 @@ const sendOwnerRegistrationReceivedEmail = async ({ to, ownerName, salonName }) 
   const html = wrapTemplate('Registration Received', `
     <div class="badge badge-rescheduled">⏳ PENDING APPROVAL</div>
     <h2 style="margin-top:0; color:#ffffff;">Hello ${ownerName || 'Salon Owner'},</h2>
-    <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">Thank you for registering your salon <strong>"${salonName}"</strong> on ST CUT!</p>
+    <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">Thank you for registering your salon <strong>"${salonName}"</strong> on HairX!</p>
     
     <div class="details-box">
       <div class="detail-row">
@@ -466,7 +466,7 @@ const sendOwnerRegistrationReceivedEmail = async ({ to, ownerName, salonName }) 
 const sendOwnerRegistrationApprovedEmail = async ({ to, ownerName, salonName }) => {
   if (!to) return
 
-  const subject = `Account Approved! Welcome to ST CUT — ${salonName}`
+  const subject = `Account Approved! Welcome to HairX — ${salonName}`
   const html = wrapTemplate('Account Approved', `
     <div class="badge badge-confirmed">✓ APPROVED & ACTIVATED</div>
     <h2 style="margin-top:0; color:#ffffff;">Congratulations, ${ownerName}!</h2>
@@ -597,12 +597,12 @@ const sendEmailVerificationLink = async ({ to, userName, token }) => {
   const baseUrl = process.env.APP_BASE_URL || `http://${getLocalIp()}:${port}`;
   const verifyUrl = `${baseUrl}/api/v1/auth/verify-email-landing?token=${token}`;
 
-  const subject = "Confirm your ST CUT email address";
+  const subject = "Confirm your HairX email address";
   const html = wrapTemplate("Confirm Your Email", `
     <div class="badge badge-rescheduled">✉️ EMAIL VERIFICATION</div>
     <h2 style="margin-top:0; color:#ffffff;">Confirm Your Account, ${userName || "Valued Member"}!</h2>
     <p style="color:#cbd5e1; font-size:14.5px; line-height:1.6;">
-      Thank you for creating an account with <strong>ST CUT</strong>. Tap the button below to confirm your email address and activate your account:
+      Thank you for creating an account with <strong>HairX</strong>. Tap the button below to confirm your email address and activate your account:
     </p>
 
     <!-- Prominently Highlighted Verification Link Button -->
@@ -618,7 +618,7 @@ const sendEmailVerificationLink = async ({ to, userName, token }) => {
     </p>
 
     <p style="color: #64748b; font-size: 12.5px; line-height: 1.5; margin-top: 24px;">
-      This link expires in <strong>1 hour</strong>. If you did not create an account with ST CUT, you can safely ignore this email.
+      This link expires in <strong>1 hour</strong>. If you did not create an account with HairX, you can safely ignore this email.
     </p>
   `);
 
@@ -631,7 +631,7 @@ const sendEmailVerificationLink = async ({ to, userName, token }) => {
     from: EMAIL_FROM,
     to,
     subject,
-    text: `Confirm your ST CUT email address: ${verifyUrl}`,
+    text: `Confirm your HairX email address: ${verifyUrl}`,
     html,
   });
 };
@@ -643,21 +643,21 @@ const sendWelcomeOAuthEmail = async ({ to, userName, provider = "Google" }) => {
   if (!to) return;
 
   const isGoogle = provider.toLowerCase() === "google";
-  const subject = `Welcome to ST CUT, ${userName || "Valued Member"}! 🎉`;
+  const subject = `Welcome to HairX, ${userName || "Valued Member"}! 🎉`;
   const badgeText = isGoogle ? "✓ VERIFIED WITH GOOGLE" : "✓ ACCOUNT ACTIVATED";
   const bodyText = isGoogle
     ? "Your account has been successfully signed up using <strong>Google Sign-In</strong>."
-    : "Your email address has been successfully verified and your ST CUT account is now fully active!";
+    : "Your email address has been successfully verified and your HairX account is now fully active!";
 
-  const html = wrapTemplate("Welcome to ST CUT", `
+  const html = wrapTemplate("Welcome to HairX", `
     <div class="badge badge-confirmed">${badgeText}</div>
-    <h2 style="margin-top:0; color:#ffffff;">Welcome to ST CUT, ${userName || "Valued Member"}!</h2>
+    <h2 style="margin-top:0; color:#ffffff;">Welcome to HairX, ${userName || "Valued Member"}!</h2>
     <p style="color:#cbd5e1; font-size:14.5px; line-height:1.6;">
       ${bodyText}
     </p>
 
     <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid #6366f1; border-radius: 16px; padding: 20px; text-align: center; margin: 24px 0; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);">
-      <p style="color: #a5b4fc; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 6px 0;">✨ YOUR ST CUT ACCOUNT IS ACTIVE</p>
+      <p style="color: #a5b4fc; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 6px 0;">✨ YOUR HAIRX ACCOUNT IS ACTIVE</p>
       <p style="color: #ffffff; font-size: 18px; font-weight: 800; margin: 0;">Explore &amp; Book Top Rated Luxury Salons Near You</p>
     </div>
 
@@ -674,7 +674,7 @@ const sendWelcomeOAuthEmail = async ({ to, userName, provider = "Google" }) => {
     from: EMAIL_FROM,
     to,
     subject,
-    text: `Welcome to ST CUT, ${userName || "Valued Member"}! Your account is active.`,
+    text: `Welcome to HairX, ${userName || "Valued Member"}! Your account is active.`,
     html,
   });
 };

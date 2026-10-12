@@ -590,7 +590,7 @@ export default function OnboardingScreen({ onFinish, navigate }) {
             style={{ width: 36, height: 36, borderRadius: 8, marginRight: 8 }}
             resizeMode="contain"
           />
-          <Text style={styles.logoText}>ST CUT</Text>
+          <Text style={styles.logoText}>HairX</Text>
         </View>
 
         {currentIndex < SLIDES.length - 1 && (

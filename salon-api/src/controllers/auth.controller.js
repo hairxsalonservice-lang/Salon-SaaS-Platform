@@ -1,12 +1,14 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const jwksClient = require("jwks-rsa");
 
-const appleJwksClient = jwksClient({
-  jwksUri: "https://appleid.apple.com/auth/keys",
-});
-
+let appleJwksClient;
 function getAppleSigningKey(header, callback) {
+  if (!appleJwksClient) {
+    const jwksClient = require("jwks-rsa");
+    appleJwksClient = jwksClient({
+      jwksUri: "https://appleid.apple.com/auth/keys",
+    });
+  }
   appleJwksClient.getSigningKey(header.kid, function (err, key) {
     if (err) {
       return callback(err, null);
@@ -409,10 +411,10 @@ res.status(200).json({
 };
 
 // PATCH /api/v1/auth/me
-// Update the logged-in user's own profile (name / phone)
+// Update the logged-in user's own profile (name / phone / gender)
 const updateMe = async (req, res, next) => {
   try {
-    const { name, phone } = req.body || {};
+    const { name, phone, gender } = req.body || {};
     const updates = {};
 
     if (name !== undefined) {
@@ -431,6 +433,14 @@ const updateMe = async (req, res, next) => {
       updates.phone = trimmed;
     }
 
+    if (gender !== undefined) {
+      const normalized = String(gender).trim().toLowerCase();
+      if (!["male", "female", "other"].includes(normalized)) {
+        return next(new AppError("Gender must be male, female, or other", 400));
+      }
+      updates.gender = normalized;
+    }
+
     if (Object.keys(updates).length === 0) {
       return next(new AppError("Nothing to update", 400));
     }
@@ -439,7 +449,7 @@ const updateMe = async (req, res, next) => {
       new: true,
       runValidators: true,
     })
-      .select("name email phone")
+      .select("name email phone gender")
       .lean();
 
     if (!updatedUser) {
@@ -454,6 +464,7 @@ const updateMe = async (req, res, next) => {
           name: updatedUser.name,
           email: updatedUser.email,
           phone: updatedUser.phone,
+          gender: updatedUser.gender,
         },
       },
     });
@@ -763,11 +774,25 @@ const forgotPassword = async (req, res, next) => {
 // ================================
 // POST /api/v1/auth/reset-password
 // ================================
+// Same strength rules as registration (validators/auth.validator.js); reset and change used to accept anything
+function getPasswordProblem(password) {
+  const pw = String(password || "");
+  if (pw.length < 8) return "Password must be at least 8 characters";
+  if (!/[A-Z]/.test(pw)) return "Password must contain an uppercase letter";
+  if (!/[0-9]/.test(pw)) return "Password must contain a number";
+  if (!/[!@#$%^&*]/.test(pw)) return "Password must contain a special character";
+  return null;
+}
+
 const resetPassword = async (req, res, next) => {
   try {
     const { email, otp, newPassword } = req.body;
     if (!email || !otp || !newPassword) {
       return next(new AppError("Email, OTP code, and new password are required", 400));
+    }
+    const resetPasswordProblem = getPasswordProblem(newPassword);
+    if (resetPasswordProblem) {
+      return next(new AppError(resetPasswordProblem, 400));
     }
 
     const user = await User.findOne({ email: email.toLowerCase() }).select(
@@ -810,6 +835,10 @@ const changePassword = async (req, res, next) => {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
       return next(new AppError("Current and new passwords are required", 400));
+    }
+    const changePasswordProblem = getPasswordProblem(newPassword);
+    if (changePasswordProblem) {
+      return next(new AppError(changePasswordProblem, 400));
     }
 
     const userId = req.user.userId || req.user._id;
@@ -953,7 +982,7 @@ const verifyEmailLanding = async (req, res) => {
 
         success = true;
         title = "Email Confirmed!";
-        message = "Your ST CUT account is active. Tap the button below to return to the app.";
+        message = "Your HairX account is active. Tap the button below to return to the app.";
       }
     } catch (err) {
       if (err.name === "TokenExpiredError") {
@@ -968,7 +997,7 @@ const verifyEmailLanding = async (req, res) => {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ST CUT — Email Verification</title>
+  <title>HairX — Email Verification</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0D0D0D; color: #F4F4F2; margin: 0; padding: 24px; display: flex; align-items: center; justify-content: center; min-height: 100vh; }
     .card { background: #1C1C1E; border: 1px solid #2A2A2C; border-radius: 24px; padding: 40px 32px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
@@ -983,7 +1012,7 @@ const verifyEmailLanding = async (req, res) => {
     <div class="icon">${success ? "✨" : "❌"}</div>
     <h1>${title}</h1>
     <p>${message}</p>
-    ${success ? `<a href="stcut://verify-email?token=${token}" class="btn">Open ST CUT App</a>` : `<p style="color:#D49B45; font-weight:600;">Return to ST CUT app to request a new link.</p>`}
+    ${success ? `<a href="stcut://verify-email?token=${token}" class="btn">Open HairX App</a>` : `<p style="color:#D49B45; font-weight:600;">Return to HairX app to request a new link.</p>`}
   </div>
 </body>
 </html>

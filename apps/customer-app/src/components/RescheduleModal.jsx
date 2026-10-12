@@ -39,12 +39,25 @@ export default function RescheduleModal({ visible, onClose, onConfirm, booking }
     booking?.staff?.id ||
     (typeof booking?.staffId === "object" ? booking?.staffId?._id : booking?.staffId);
 
+  const servicesList = Array.isArray(booking?.services) && booking.services.length
+    ? booking.services.filter((s) => s && typeof s === "object")
+    : booking?.serviceId && typeof booking.serviceId === "object" ? [booking.serviceId] : [];
+  const serviceLabel =
+    booking?.service?.name || booking?.serviceName || servicesList.map((s) => s.name).filter(Boolean).join(", ") || "Salon visit";
+  const salonLabel =
+    booking?.salon?.name ||
+    booking?.salonName ||
+    (typeof booking?.salonId === "object" ? booking.salonId?.name : null) ||
+    (typeof booking?.branchId === "object" ? booking.branchId?.name : null) ||
+    "Salon";
+
   const serviceDuration =
     booking?.service?.durationMinutes ||
     booking?.service?.duration ||
-    (booking?.services && Array.isArray(booking.services)
-      ? booking.services.reduce((sum, s) => sum + (s.durationMinutes || s.duration || 30), 0)
-      : 30);
+    (booking?.totalDurationMinutes ||
+      (servicesList.length
+        ? servicesList.reduce((sum, s) => sum + (s.durationMinutes || s.duration || 30), 0)
+        : 30));
 
   useEffect(() => {
     if (!visible || !branchId) return;
@@ -90,7 +103,10 @@ export default function RescheduleModal({ visible, onClose, onConfirm, booking }
 
         setSlots(flatSlots);
       } catch (err) {
-        if (!cancelled) setSlots([]);
+        if (!cancelled) {
+          setSlots([]);
+          setErrorMessage("Couldn't load available times. Check your connection and try another date.");
+        }
       } finally {
         if (!cancelled) setLoadingSlots(false);
       }
@@ -130,8 +146,7 @@ export default function RescheduleModal({ visible, onClose, onConfirm, booking }
             <View>
               <Text style={styles.title}>RESCHEDULE APPOINTMENT</Text>
               <Text style={styles.subtitle}>
-                {booking?.service?.name || booking?.serviceName || "Salon Visit"} •{" "}
-                {booking?.salon?.name || booking?.salonName || "Salon"}
+                {serviceLabel} • {salonLabel}
               </Text>
             </View>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>

@@ -133,9 +133,9 @@ export default function LayoutWrapper({
       (user ? "Ramesh Salon" : null);
 
     if (sName) {
-      document.title = `ST CUT - ${sName}`;
+      document.title = `HairX - ${sName}`;
     } else {
-      document.title = "ST CUT - Partner Salon Management";
+      document.title = "HairX - Partner Salon Management";
     }
   }, [salon?.name, salonDetails?.name, user, selectedBranch?.name]);
 

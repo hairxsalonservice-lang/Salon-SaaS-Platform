@@ -170,12 +170,12 @@ export default function Sidebar({
             <div className="flex items-center gap-3 min-w-0">
               <img
                 src="/logo.png"
-                alt="ST CUT Logo"
+                alt="HairX Logo"
                 className="w-10 h-10 rounded-xl object-contain bg-black p-1 shrink-0 shadow-md border border-slate-800"
               />
               <div className="min-w-0">
                 <p className="text-[9px] font-extrabold tracking-[0.18em] text-slate-400 uppercase">
-                  ST CUT PARTNER
+                  HAIRX PARTNER
                 </p>
                 <h1 className="text-sm font-extrabold text-slate-900 leading-tight truncate">
                   {salonName || "Ramesh Salon"}
@@ -185,7 +185,7 @@ export default function Sidebar({
           ) : (
             <img
               src="/logo.png"
-              alt="ST CUT Logo"
+              alt="HairX Logo"
               className="w-9 h-9 rounded-xl object-contain bg-black p-1 shrink-0 shadow-md border border-slate-800"
             />
           )}

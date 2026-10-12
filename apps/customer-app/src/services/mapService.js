@@ -23,6 +23,15 @@ export function getTileUrl(isDark = false) {
 /**
  * Generate full Leaflet HTML content string for WebView & iframe rendering
  */
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function generateMapHtml({
   salons = [],
   centerLat = 19.3150,
@@ -45,11 +54,15 @@ export function generateMapHtml({
   const sanitizedSalons = salons
     .filter((s) => s && Number.isFinite(Number(s.latitude)) && Number.isFinite(Number(s.longitude)))
     .map((s) => ({
-      id: s.id,
-      name: s.name || "Salon",
+      id: String(s.id),
+      // Escaped here because the map page builds its popups with innerHTML
+      name: escapeHtml(s.name || "Salon"),
       lat: Number(s.latitude),
       lng: Number(s.longitude),
-      image: s.image || "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=500&q=80",
+      image: encodeURI(s.image || "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=500&q=80"),
+      // Pre-formatted on the app side; no invented ratings, review counts or distances
+      ratingText: escapeHtml(s.ratingText || "New"),
+      distanceText: s.distanceText ? escapeHtml(s.distanceText) : "",
       isSelected: s.id === selectedSalonId,
     }));
 
@@ -316,16 +329,16 @@ export function generateMapHtml({
 
           var marker = L.marker([s.lat, s.lng], { icon: customIcon }).addTo(map);
 
-          var popupHtml = '<div class="custom-leaflet-popup" onclick="sendNavMessage(&apos;' + s.id + '&apos;)">' +
+          var popupHtml = '<div class="custom-leaflet-popup" onclick="sendNavMessage(&apos;' + String(s.id).replace(/[^a-zA-Z0-9_-]/g, '') + '&apos;)">' +
                             '<div class="popup-img" style="background-image: url(' + s.image + ')"></div>' +
                             '<div class="popup-content">' +
                               '<div class="popup-title">' + (s.name || 'Salon') + '</div>' +
                               '<div class="popup-subtitle">' +
-                                '<span style="color: #F59E0B; margin-right: 3px;">★</span> ' + 
-                                '<span style="font-weight: 700; color: #18181B; margin-right: 2px;">' + (s.rating || '4.8') + '</span> ' +
-                                '<span>(' + (s.reviewsCount > 999 ? (s.reviewsCount/1000).toFixed(1) + 'k' : (s.reviewsCount || 45)) + ')</span>' +
-                                '<span style="margin: 0 4px; color: #D1D5DB">•</span>' +
-                                '<span>' + (s.distanceKm || '2.0') + ' km</span>' +
+                                '<span style="color: #F59E0B; margin-right: 3px;">★</span> ' +
+                                '<span style="font-weight: 700; color: #18181B; margin-right: 2px;">' + s.ratingText + '</span>' +
+                                (s.distanceText
+                                  ? '<span style="margin: 0 4px; color: #D1D5DB">•</span><span>' + s.distanceText + '</span>'
+                                  : '') +
                               '</div>' +
                             '</div>' +
                             '<div class="popup-chevron-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#18181B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>' +

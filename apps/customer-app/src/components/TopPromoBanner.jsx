@@ -129,13 +129,13 @@ export default function TopPromoBanner({ onPressBanner, refreshTrigger }) {
     }
   };
 
+  // Only track clicks for real DB banners (valid 24-char hex MongoDB ObjectIds).
+  // Fallback placeholder banners (id: "1", "2", etc.) are excluded to avoid
+  // sending invalid IDs to the API which would cause a Cast to ObjectId error.
+  const IS_OBJECT_ID = /^[a-f\d]{24}$/i;
+
   const handleBannerClick = (banner) => {
-    if (
-      banner.id &&
-      typeof banner.id === "string" &&
-      !banner.id.startsWith("1") &&
-      !banner.id.startsWith("2")
-    ) {
+    if (banner.id && IS_OBJECT_ID.test(banner.id)) {
       apiClient.post(`/banners/${banner.id}/click`).catch(() => {});
     }
     if (onPressBanner) onPressBanner(banner);

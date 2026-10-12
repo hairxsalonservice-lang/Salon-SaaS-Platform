@@ -14,20 +14,15 @@ import {
 import { C, S, FS, FW, R, TYPO } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import Ios26HomeHero from "../components/Ios26HomeHero";
-import TopPromoBanner from "../components/TopPromoBanner";
-import QuickRebookWidget from "../components/QuickRebookWidget";
 import SalonCard from "../components/SalonCard";
 import * as Location from "expo-location";
 import Constants, { ExecutionEnvironment } from "expo-constants";
 import PermissionPromptModal from "../components/PermissionPromptModal";
 import LocationPickerModal from "../components/LocationPickerModal";
 import InteractiveMapModal from "../components/InteractiveMapModal";
-import AddReviewModal from "../components/AddReviewModal";
-import AppleTouchable from "../components/AppleTouchable";
 import ComingSoonLocation from "../components/ComingSoonLocation";
 import { browseService } from "../services/browseService";
-import { appointmentService } from "../services/appointmentService";
+import { customerService } from "../services/customerService";
 import { useAuth } from "../context/AuthContext";
 import { storage } from "../services/storage";
 import { cleanCityName, getCurrentLocation } from "../services/locationService";
@@ -47,7 +42,7 @@ const DEFAULT_HERO_BANNERS = [
     _id: "b-1",
     tag: "B E A U T Y · C A R E · Y O U",
     title: "Self Care\nFeels Better",
-    subtitle: (city) => `Book trusted salons & beauty experts in ${city}`,
+    subtitle: null, // resolved dynamically using selectedCity in the render
     ctaText: "Book Now",
     imageUrl: "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1000&auto=format&fit=crop",
   },
@@ -55,7 +50,7 @@ const DEFAULT_HERO_BANNERS = [
     _id: "b-2",
     tag: "S P E C I A L  S P A  &  G L O W",
     title: "Radiant Skin\nPure Bliss",
-    subtitle: (city) => `Discover rejuvenating facial & spa treatments in ${city}`,
+    subtitle: null, // resolved dynamically
     ctaText: "Explore Offers",
     imageUrl: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=1000&auto=format&fit=crop",
   },
@@ -63,10 +58,17 @@ const DEFAULT_HERO_BANNERS = [
     _id: "b-3",
     tag: "E X P E R T  H A I R  C A R E",
     title: "Fresh Look\nNew Confidence",
-    subtitle: (city) => `Top hair stylists and coloring specialists in ${city}`,
+    subtitle: null, // resolved dynamically
     ctaText: "View Salons",
     imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1000&auto=format&fit=crop",
   },
+];
+
+// Subtitle templates for DEFAULT_HERO_BANNERS (kept as data, not functions, to avoid non-serializable nav params)
+const DEFAULT_BANNER_SUBTITLES = [
+  (city) => `Book trusted salons & beauty experts in ${city}`,
+  (city) => `Discover rejuvenating facial & spa treatments in ${city}`,
+  (city) => `Top hair stylists and coloring specialists in ${city}`,
 ];
 
 const SalonCarousel = memo(({ salons, onSalonPress, styles }) => (
@@ -116,10 +118,11 @@ function sanitizeImageUrl(url) {
   return cleaned;
 }
 
-const PAGE_SIZE = 5;
 
 function HomeScreen({ navigate, onScroll }) {
-  const { isDark } = useTheme();
+  const { theme, isDark } = useTheme();
+  const styles = React.useMemo(() => buildStyles(theme, isDark), [theme, isDark]);
+  const palette = React.useMemo(() => getPalette(theme, isDark), [theme, isDark]);
   const { user, isAuthenticated } = useAuth();
   const selectedCity = useLocationStore((state) => state.selectedCity);
   const setSelectedCity = useLocationStore((state) => state.setSelectedCity);
@@ -132,24 +135,16 @@ function HomeScreen({ navigate, onScroll }) {
   const [loading, setLoading] = useState(initialSalons.length === 0);
   const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState(null);
-  const [page, setPage] = useState(1);
   const [locationModalVisible, setLocationModalVisible] = useState(false);
   const [mapModalVisible, setMapModalVisible] = useState(false);
   const [permissionModalType, setPermissionModalType] = useState(null); // "location" | "notification" | null
   const [permissionLoading, setPermissionLoading] = useState(false);
-  const [upcomingAppt, setUpcomingAppt] = useState(null);
-  const [reviewModalAppt, setReviewModalAppt] = useState(null);
-  const promptedReviewIdsRef = React.useRef(new Set());
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Filter salons to only show those with > 3 stars rating
   const topRatedSalons = React.useMemo(() => {
     return (salons || []).filter((s) => getSalonRating(s) > 3.0);
   }, [salons]);
-
-  // Paginated list slice
-  const paginatedSalons = React.useMemo(() => {
-    return topRatedSalons.slice(0, page * PAGE_SIZE);
-  }, [topRatedSalons, page]);
 
   const [activeBannerIndex, setActiveBannerIndex] = useState(0);
   const bannerScrollRef = React.useRef(null);
@@ -186,21 +181,6 @@ function HomeScreen({ navigate, onScroll }) {
       setActiveBannerIndex(newIndex);
     }
   }, [displayBanners.length]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [selectedCity]);
-
-  const handleAddReviewSubmit = async ({ rating, comment }) => {
-    if (!reviewModalAppt) return;
-    const apptId = reviewModalAppt._id || reviewModalAppt.id;
-    try {
-      await appointmentService.rateAppointment(apptId, rating, comment);
-      setReviewModalAppt(null);
-    } catch (e) {
-      console.warn("Failed to submit review", e);
-    }
-  };
 
   useEffect(() => {
     let active = true;
@@ -293,11 +273,8 @@ function HomeScreen({ navigate, onScroll }) {
     }
   };
 
-  const salonsRef = React.useRef(salons);
-  salonsRef.current = salons;
-  const upcomingApptRef = React.useRef(upcomingAppt);
-  upcomingApptRef.current = upcomingAppt;
   const salonCacheRef = React.useRef({});
+  const loadRequestIdRef = React.useRef(0);
   const prevCityRef = React.useRef(selectedCity);
 
   useEffect(() => {
@@ -315,13 +292,17 @@ function HomeScreen({ navigate, onScroll }) {
     const cleanCity = cleanCityName(selectedCity);
     const cachedList = GLOBAL_SALON_CACHE[cleanCity] || salonCacheRef.current[cleanCity] || [];
     const hasCachedData = cachedList.length > 0;
+    // A slower response for a previously selected city must not overwrite the current one
+    const requestId = ++loadRequestIdRef.current;
+    const isStale = () => requestId !== loadRequestIdRef.current;
     try {
       setLoadError(null);
       if (!silent && !hasCachedData) setLoading(true);
-      const res = await browseService.getSalons({ city: cleanCity });
+      const res = await browseService.getSalons({ city: cleanCity, limit: 100, bypassCache: true });
       const salonList = res.data?.salons || (Array.isArray(res.data) ? res.data : []);
       salonCacheRef.current[cleanCity] = salonList;
       GLOBAL_SALON_CACHE[cleanCity] = salonList;
+      if (isStale()) return;
       setSalons(salonList);
 
       try {
@@ -331,45 +312,29 @@ function HomeScreen({ navigate, onScroll }) {
           (Array.isArray(bannerRes?.data?.data) ? bannerRes.data.data : null) ||
           (Array.isArray(bannerRes) ? bannerRes : null) ||
           [];
-        console.log(`\n==============================================`);
-        console.log(`📱 [CUSTOMER APP HOME SCREEN] Banners received from DB count: ${fetchedBanners.length}`);
-        fetchedBanners.forEach((b, i) => {
-          console.log(`   [${i + 1}] ID: ${b._id || b.id} | Title: "${b.title}" | PromoCode: "${b.promoCode || 'N/A'}"`);
-        });
-        console.log(`==============================================\n`);
-        setBanners(fetchedBanners);
+        if (!isStale()) setBanners(fetchedBanners);
       } catch (e) {
         console.warn("Failed to fetch banners", e);
       }
+
+      // Review prompts for completed visits are handled by the Bookings tab, which is mounted alongside this one
       if (isAuthenticated) {
         try {
-          const apptRes = await appointmentService.getAppointments();
-          const list = apptRes.data?.appointments || (Array.isArray(apptRes.data) ? apptRes.data : []);
-          const active = list.find((a) => ["PENDING", "CONFIRMED", "IN_PROGRESS"].includes((a.status || "").toUpperCase()));
-          const target = active || (list.length > 0 ? list[0] : null);
-          if (JSON.stringify(target) !== JSON.stringify(upcomingApptRef.current)) setUpcomingAppt(target);
-
-          // Auto-popup review modal for the last completed appointment
-          const lastUnratedCompleted = list
-            .filter(
-              (a) =>
-                (a.status || "").toUpperCase() === "COMPLETED" &&
-                (!a.rating || !a.rating.score) &&
-                !promptedReviewIdsRef.current.has(a._id || a.id)
-            )
-            .sort((a, b) => new Date(b.updatedAt || b.appointmentDate || b.createdAt || 0) - new Date(a.updatedAt || a.appointmentDate || a.createdAt || 0))[0];
-
-          if (lastUnratedCompleted) {
-            promptedReviewIdsRef.current.add(lastUnratedCompleted._id || lastUnratedCompleted.id);
-            setReviewModalAppt(lastUnratedCompleted);
-          }
-        } catch (e) { if (upcomingApptRef.current !== null) setUpcomingAppt(null); }
-      } else { if (upcomingApptRef.current !== null) setUpcomingAppt(null); }
+          const unreadRes = await customerService.getUnreadCount();
+          const count = unreadRes?.data?.unreadCount ?? unreadRes?.data?.count ?? 0;
+          if (!isStale()) setUnreadCount(count);
+        } catch (e) { }
+      } else {
+        setUnreadCount(0);
+      }
     } catch (err) {
+      if (isStale()) return;
       if (!hasCachedData) { setSalons([]); setLoadError(err.message || "Unable to connect"); }
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (!isStale()) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
   }, [selectedCity, isAuthenticated]);
 
@@ -388,7 +353,6 @@ function HomeScreen({ navigate, onScroll }) {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    setPage(1);
     loadData(true);
   }, [loadData]);
 
@@ -397,32 +361,35 @@ function HomeScreen({ navigate, onScroll }) {
   }, [navigate]);
 
   const handleSearchClick = useCallback(() => { if (navigate) navigate("Explore"); }, [navigate]);
+  // Only track clicks for real DB banners — valid 24-char hex MongoDB ObjectIds.
+  // Default placeholder banners (_id: "b-1", "b-2", "b-3") must NOT be sent to the API.
+  const IS_OBJECT_ID = /^[a-f\d]{24}$/i;
+
   const handleBannerPress = useCallback((banner) => {
     if (!navigate) return;
-    if (banner._id || banner.id) {
-      browseService.trackBannerClick(banner._id || banner.id);
+    const bannerId = banner._id || banner.id;
+    if (bannerId && IS_OBJECT_ID.test(bannerId)) {
+      browseService.trackBannerClick(bannerId);
     }
-    navigate("BannerDetail", { banner });
-  }, [navigate]);
-  const handleRebook = useCallback(() => {
-    if (!navigate) return;
-    const apptSalonId =
-      upcomingAppt?.salonId?._id ||
-      upcomingAppt?.salonId ||
-      upcomingAppt?.salon?._id ||
-      upcomingAppt?.salon?.id;
-    const match = salons.find((s) => String(s._id || s.id) === String(apptSalonId));
-    if (match) navigate("SalonDetail", { salon: match });
-    else if (salons.length > 0) navigate("SalonDetail", { salon: salons[0] });
-    else navigate("Explore");
-  }, [salons, navigate, upcomingAppt]);
+    // Resolve subtitle to a plain string BEFORE passing to navigation.
+    // Passing a function as a route param causes a non-serializable warning
+    // and a 'Functions are not valid as a React child' crash in BannerDetail.
+    const bannerIdx = displayBanners.indexOf(banner);
+    const resolvedSubtitle =
+      typeof banner.subtitle === "function"
+        ? banner.subtitle(selectedCity)
+        : typeof banner.subtitle === "string" && banner.subtitle
+        ? banner.subtitle
+        : (DEFAULT_BANNER_SUBTITLES[bannerIdx] || DEFAULT_BANNER_SUBTITLES[0])(selectedCity);
+    navigate("BannerDetail", {
+      banner: { ...banner, subtitle: resolvedSubtitle },
+    });
+  }, [navigate, displayBanners, selectedCity]);
   const handleExplore = useCallback(() => { if (navigate) navigate("Explore"); }, [navigate]);
   const handleCitySelect = useCallback((city) => { setSelectedCity(city); storage.setItem("@user_selected_city", city); }, []);
   const handleLocationClose = useCallback(() => setLocationModalVisible(false), []);
   const handleLocationClick = useCallback(() => setLocationModalVisible(true), []);
   const handleSearchSubmit = useCallback((term) => { if (navigate) navigate("Explore", { search: term }); }, [navigate]);
-
-  const styles = buildStyles();
 
   return (
     <View style={styles.screen}>
@@ -432,28 +399,28 @@ function HomeScreen({ navigate, onScroll }) {
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.main} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.primary} colors={[palette.primary]} progressBackgroundColor={palette.surface} />}
       >
         {/* NEW HEADER */}
         <View style={styles.headerRow}>
           <TouchableOpacity onPress={handleLocationClick} style={styles.headerLocation}>
-            <Ionicons name="location" size={22} color="#B3261E" />
+            <Ionicons name="location" size={22} color={palette.primary} />
             <View style={{ marginLeft: 6 }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={styles.headerCityText}>{selectedCity}</Text>
-                <Ionicons name="chevron-down" size={14} color="#333333" style={{ marginLeft: 4 }} />
+                <Ionicons name="chevron-down" size={14} color={palette.body} style={{ marginLeft: 4 }} />
               </View>
               <Text style={styles.headerSubtitleText}>Your beauty destination</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.headerBellBtn} onPress={() => navigate && navigate("NotificationCenter")}>
-            <Ionicons name="notifications-outline" size={22} color="#1E1E1E" />
-            <View style={styles.headerBellBadge} />
+            <Ionicons name="notifications-outline" size={22} color={palette.ink} />
+            {unreadCount > 0 ? <View style={styles.headerBellBadge} /> : null}
           </TouchableOpacity>
         </View>
 
         {/* HERO BANNER & CATEGORIES — Only shown when salons are available */}
-        {!loading && salons.length === 0 ? null : (
+        {!loading && (salons.length === 0 || loadError) ? null : (
           <>
             {/* HERO BANNER - AUTOMATIC SLIDE */}
             <View style={{ marginBottom: 24 }}>
@@ -470,9 +437,22 @@ function HomeScreen({ navigate, onScroll }) {
                   const screenWidth = Dimensions.get("window").width;
                   const cardWidth = screenWidth - 32;
                   const titleText = banner.title || "Self Care\nFeels Better";
-                  const subText = typeof banner.subtitle === "function"
-                    ? banner.subtitle(selectedCity)
-                    : (banner.subtitle || banner.details || `Book trusted salons & beauty experts in ${selectedCity}`);
+                  // Resolve subtitle: DB banners have a plain string; default banners have null
+                  // with a companion template in DEFAULT_BANNER_SUBTITLES keyed by banner index.
+                  let subText;
+                  if (typeof banner.subtitle === "string" && banner.subtitle) {
+                    subText = banner.subtitle;
+                  } else if (typeof banner.subtitle === "function") {
+                    // Safety fallback: DB banners should never have function subtitles,
+                    // but guard here just in case.
+                    subText = banner.subtitle(selectedCity);
+                  } else {
+                    // Default banner: look up the template by index
+                    const templateFn = DEFAULT_BANNER_SUBTITLES[idx];
+                    subText = templateFn
+                      ? templateFn(selectedCity)
+                      : `Book trusted salons & beauty experts in ${selectedCity}`;
+                  }
                   const tagText = banner.tag || banner.eyebrow || "B E A U T Y · C A R E · Y O U";
                   const ctaText = banner.ctaText || "Book Now";
 
@@ -529,11 +509,11 @@ function HomeScreen({ navigate, onScroll }) {
             {/* CATEGORIES */}
             <View style={styles.categoriesContainer}>
               {[
-                { id: "haircut", label: "Haircut", icon: "cut-outline", color: "#FCE8E8" },
-                { id: "facial", label: "Facial", icon: "happy-outline", color: "#FEF1E6" },
-                { id: "makeup", label: "Makeup", icon: "color-wand-outline", color: "#F1EBFC" },
-                { id: "massage", label: "Massage", icon: "leaf-outline", color: "#E9F8F1" },
-                { id: "nails", label: "Nails", icon: "hand-left-outline", color: "#FDF0F3" },
+                { id: "haircut", label: "Haircut", icon: "cut-outline" },
+                { id: "facial", label: "Facial", icon: "happy-outline" },
+                { id: "makeup", label: "Makeup", icon: "color-wand-outline" },
+                { id: "massage", label: "Massage", icon: "leaf-outline" },
+                { id: "nails", label: "Nails", icon: "hand-left-outline" },
               ].map((cat, idx) => (
                 <TouchableOpacity
                   key={idx}
@@ -542,10 +522,10 @@ function HomeScreen({ navigate, onScroll }) {
                     navigate && navigate("CategoryDetail", { category: cat.label })
                   }
                 >
-                  <View style={[styles.categoryIconCircle, { backgroundColor: cat.color }]}>
-                    <Ionicons name={cat.icon} size={24} color="#1E1E1E" />
+                  <View style={[styles.categoryIconCircle, { backgroundColor: CATEGORY_TINTS[cat.id][isDark ? 1 : 0] }]}>
+                    <Ionicons name={cat.icon} size={24} color={palette.ink} />
                   </View>
-                  <Text style={[styles.categoryLabel, idx === 0 && { color: "#B3261E", fontWeight: "700" }]}>{cat.label}</Text>
+                  <Text style={styles.categoryLabel}>{cat.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -554,8 +534,18 @@ function HomeScreen({ navigate, onScroll }) {
 
         {loading ? (
           <View style={styles.emptyBlock}>
-            <ActivityIndicator size="small" color={C.main} />
+            <ActivityIndicator size="small" color={palette.primary} />
             <Text style={styles.emptyText}>Loading salons in {selectedCity}…</Text>
+          </View>
+        ) : loadError && salons.length === 0 ? (
+          <View style={styles.emptyBlock}>
+            <Ionicons name="cloud-offline-outline" size={32} color={palette.muted} />
+            <Text style={styles.emptyTitle}>Couldn't load salons</Text>
+            <Text style={styles.emptyText}>Check your internet connection and try again.</Text>
+            <TouchableOpacity style={styles.retryBtn} onPress={() => loadData(false)} activeOpacity={0.85}>
+              <Ionicons name="refresh" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.retryBtnText}>Try again</Text>
+            </TouchableOpacity>
           </View>
         ) : salons.length === 0 ? (
           <ComingSoonLocation
@@ -572,7 +562,7 @@ function HomeScreen({ navigate, onScroll }) {
               </View>
               <TouchableOpacity style={styles.seeAllBtn} onPress={() => navigate && navigate("AllSalons", { city: selectedCity })}>
                 <Text style={styles.seeAllText}>See All</Text>
-                <Ionicons name="arrow-forward" size={14} color="#1E1E1E" style={{ marginLeft: 4 }} />
+                <Ionicons name="arrow-forward" size={14} color={palette.ink} style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             </View>
 
@@ -581,14 +571,14 @@ function HomeScreen({ navigate, onScroll }) {
             ) : null}
 
             {/* THANK YOU LETTER */}
-            <View style={[styles.offerBannerContainer, { backgroundColor: "#F3EBE1", padding: 20, justifyContent: 'center' }]}>
-              <Text style={{ fontSize: 14, fontWeight: "700", color: "#6D554D", letterSpacing: 1.5, marginBottom: 12, textAlign: "center" }}>
+            <View style={styles.noteCard}>
+              <Text style={styles.noteEyebrow}>
                 A NOTE FROM US
               </Text>
-              <Text style={{ fontSize: 18, fontStyle: "italic", color: "#1E1E1E", lineHeight: 26, textAlign: "center", marginBottom: 12 }}>
+              <Text style={styles.noteQuote}>
                 "Thank you for letting us be a part of your beauty journey. We promise to bring you the best experts, the finest salons, and an experience you'll love."
               </Text>
-              <Text style={{ fontSize: 14, fontWeight: "600", color: "#5D3B3E", textAlign: "center" }}>
+              <Text style={styles.noteSignature}>
                 — The Salon Team
               </Text>
             </View>
@@ -602,23 +592,6 @@ function HomeScreen({ navigate, onScroll }) {
 
             <SalonVerticalList salons={paginatedSalons} onSalonPress={handleSalonPress} styles={styles} /> */}
 
-            {topRatedSalons.length > paginatedSalons.length ? (
-              <AppleTouchable
-                style={styles.loadMoreBtn}
-                onPress={() => setPage((p) => p + 1)}
-                scaleTo={0.96}
-                hapticType="medium"
-              >
-                <Text style={styles.loadMoreText}>
-                  Load More Salons ({topRatedSalons.length - paginatedSalons.length} remaining)
-                </Text>
-                <Ionicons name="chevron-down" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
-              </AppleTouchable>
-            ) : topRatedSalons.length > PAGE_SIZE ? (
-              <View style={styles.endOfListBlock}>
-                <Text style={styles.endOfListText}>Showing all {topRatedSalons.length} salons</Text>
-              </View>
-            ) : null}
           </>
         )}
 
@@ -635,23 +608,41 @@ function HomeScreen({ navigate, onScroll }) {
       />
       <LocationPickerModal visible={locationModalVisible} selectedCity={selectedCity} onSelectCity={handleCitySelect} onClose={handleLocationClose} />
       <InteractiveMapModal visible={mapModalVisible} onClose={() => setMapModalVisible(false)} salons={salons} onSelectSalon={handleSalonPress} />
-      <AddReviewModal
-        visible={!!reviewModalAppt}
-        onClose={() => setReviewModalAppt(null)}
-        onSubmit={handleAddReviewSubmit}
-        appointment={reviewModalAppt}
-      />
     </View>
   );
 }
 
 export default memo(HomeScreen);
 
-function buildStyles() {
+// Category tile tints — pastel on light, translucent on dark so icons stay readable
+const CATEGORY_TINTS = {
+  haircut: ["#FCE8E8", "rgba(230, 57, 115, 0.16)"],
+  facial: ["#FEF1E6", "rgba(245, 158, 11, 0.16)"],
+  makeup: ["#F1EBFC", "rgba(139, 92, 246, 0.18)"],
+  massage: ["#E9F8F1", "rgba(16, 185, 129, 0.16)"],
+  nails: ["#FDF0F3", "rgba(236, 72, 153, 0.16)"],
+};
+
+function getPalette(theme = {}, isDark = false) {
+  return {
+    canvas: theme.canvas || (isDark ? "#0D0D0D" : "#FBFBF9"),
+    header: isDark ? theme.canvas || "#0D0D0D" : "#FFFFFF",
+    surface: theme.surface || (isDark ? "#1C1C1E" : "#FFFFFF"),
+    ink: theme.ink || (isDark ? "#F4F4F2" : "#1E1E1E"),
+    body: isDark ? "#D0D0CB" : "#333333",
+    muted: isDark ? "#A0A09C" : "#666666",
+    hairline: theme.hairline || (isDark ? "#2A2A2C" : "#EEEEEE"),
+    primary: theme.primary || (isDark ? "#E63973" : "#B3261E"),
+  };
+}
+
+function buildStyles(theme, isDark) {
+  const p = getPalette(theme, isDark);
+
   return StyleSheet.create({
     screen: {
       flex: 1,
-      backgroundColor: C.bg, // Flat white canvas
+      backgroundColor: p.canvas,
     },
     scroller: {
       flex: 1,
@@ -673,7 +664,7 @@ function buildStyles() {
     sectionTitle: {
       fontSize: FS.titleLg,
       fontWeight: "700",
-      color: C.ink,
+      color: p.ink,
       letterSpacing: -0.32,
     },
     seeAllBtn: {
@@ -683,8 +674,10 @@ function buildStyles() {
     seeAllText: {
       fontSize: 13,
       fontWeight: "600",
-      color: "#1E1E1E",
+      color: p.ink,
     },
+
+    // Header
     headerRow: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -692,7 +685,7 @@ function buildStyles() {
       paddingHorizontal: 16,
       paddingTop: 54,
       paddingBottom: 16,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: p.header,
     },
     headerLocation: {
       flexDirection: "row",
@@ -701,20 +694,20 @@ function buildStyles() {
     headerCityText: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#1E1E1E",
+      color: p.ink,
     },
     headerSubtitleText: {
       fontSize: 12,
-      color: "#666666",
+      color: p.muted,
       marginTop: 2,
     },
     headerBellBtn: {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: p.surface,
       borderWidth: 1,
-      borderColor: "#EEEEEE",
+      borderColor: p.hairline,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -727,17 +720,15 @@ function buildStyles() {
       borderRadius: 3,
       backgroundColor: "#FF3B30",
     },
+
+    // Hero banner — a cream wash on light, a dark scrim on dark, so text contrast holds either way
     heroBannerContainer: {
       marginHorizontal: 16,
       borderRadius: 16,
       overflow: "hidden",
       height: 220,
-      backgroundColor: "#F3EBE1",
+      backgroundColor: isDark ? p.surface : "#F3EBE1",
       marginBottom: 24,
-      // shadowColor: "#000",
-      // shadowOpacity: 0.3,
-      // shadowRadius: 10,
-      // elevation: 5,
     },
     heroBannerImage: {
       ...StyleSheet.absoluteFillObject,
@@ -747,7 +738,7 @@ function buildStyles() {
     },
     heroBannerOverlay: {
       ...StyleSheet.absoluteFillObject,
-      backgroundColor: "rgba(245, 239, 230, 0.72)",
+      backgroundColor: isDark ? "rgba(10, 10, 12, 0.66)" : "rgba(245, 239, 230, 0.72)",
       zIndex: 1,
     },
     heroBannerContent: {
@@ -760,7 +751,7 @@ function buildStyles() {
     heroEyebrow: {
       fontSize: 10,
       fontWeight: "700",
-      color: "#6D554D",
+      color: isDark ? "#E5B05D" : "#6D554D",
       letterSpacing: 1.5,
       marginBottom: 0,
     },
@@ -782,18 +773,18 @@ function buildStyles() {
     heroTitle: {
       fontSize: 26,
       fontWeight: "800",
-      color: "#1E1E1E",
+      color: isDark ? "#FFFFFF" : "#1E1E1E",
       lineHeight: 32,
       marginBottom: 8,
     },
     heroSubtitle: {
       fontSize: 12,
-      color: "#333333",
+      color: isDark ? "rgba(255, 255, 255, 0.82)" : "#333333",
       lineHeight: 18,
       marginBottom: 16,
     },
     heroBookBtn: {
-      backgroundColor: "#1E1E1E",
+      backgroundColor: isDark ? p.primary : "#1E1E1E",
       paddingHorizontal: 16,
       paddingVertical: 10,
       borderRadius: 24,
@@ -817,12 +808,14 @@ function buildStyles() {
       width: 6,
       height: 6,
       borderRadius: 3,
-      backgroundColor: "rgba(0,0,0,0.2)",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.2)",
     },
     heroDotActive: {
       width: 16,
-      backgroundColor: "#5D3B3E",
+      backgroundColor: isDark ? "#FFFFFF" : "#5D3B3E",
     },
+
+    // Categories
     categoriesContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -844,103 +837,44 @@ function buildStyles() {
     },
     categoryLabel: {
       fontSize: 12,
-      color: "#333333",
+      color: p.body,
       fontWeight: "500",
       textAlign: "center",
     },
-    offerBannerContainer: {
+
+    // "A note from us" card
+    noteCard: {
       marginHorizontal: 16,
+      marginTop: 16,
       minHeight: 140,
       borderRadius: 16,
-      overflow: "hidden",
-      backgroundColor: "#FCE8E8",
-      marginTop: 16,
-      // marginBottom: 24,
-    },
-    offerBannerImage: {
-      ...StyleSheet.absoluteFillObject,
-    },
-    offerBannerContent: {
       padding: 20,
       justifyContent: "center",
-      flex: 1,
-      zIndex: 1,
+      backgroundColor: isDark ? "#1F1A16" : "#F3EBE1",
+      borderWidth: isDark ? 1 : 0,
+      borderColor: isDark ? "#2E2620" : "transparent",
     },
-    offerEyebrow: {
-      fontSize: 10,
+    noteEyebrow: {
+      fontSize: 14,
       fontWeight: "700",
-      color: "#1E1E1E",
-      letterSpacing: 0,
-      marginBottom: 6,
+      color: isDark ? "#C9A68E" : "#6D554D",
+      letterSpacing: 1.5,
+      marginBottom: 12,
+      textAlign: "center",
     },
-    offerTitle: {
-      fontSize: 24,
-      fontWeight: "800",
-      color: "#1E1E1E",
-      marginBottom: 4,
+    noteQuote: {
+      fontSize: 18,
+      fontStyle: "italic",
+      color: p.ink,
+      lineHeight: 26,
+      textAlign: "center",
+      marginBottom: 12,
     },
-    offerSubtitle: {
-      fontSize: 13,
-      color: "#333333",
-      marginBottom: 16,
-    },
-    offerCodeRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-    },
-    offerCodeBox: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "rgba(255,255,255,0.6)",
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 8,
-    },
-    offerCodeTextPrefix: {
-      fontSize: 11,
-      color: "#333333",
-      marginRight: 6,
-    },
-    offerCodeText: {
-      fontSize: 13,
-      fontWeight: "700",
-      color: "#1E1E1E",
-    },
-    offerArrowBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: "#FFFFFF",
-      alignItems: "center",
-      justifyContent: "center",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    headerActions: {
-      flexDirection: "row",
-      gap: 6,
-    },
-
-    // button-secondary spec per cursor/DESIGN.md (white bg, 1px hairline border, 8px radius)
-    buttonSecondary: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      backgroundColor: C.surface,
-      paddingHorizontal: S.sm,
-      paddingVertical: 6,
-      borderRadius: R.md, // 8px radius
-      borderWidth: 1,
-      borderColor: C.borderDark,
-    },
-    buttonSecondaryText: {
-      fontSize: FS.bodySm,
-      fontWeight: FW.medium,
-      color: C.ink,
+    noteSignature: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: isDark ? "#D9B8A8" : "#5D3B3E",
+      textAlign: "center",
     },
 
     horizontalCarousel: {
@@ -950,66 +884,42 @@ function buildStyles() {
       paddingHorizontal: S.md,
     },
 
-    // Empty / Loading states
+    // Empty / loading / error states
     emptyBlock: {
       paddingVertical: S.xxl,
       alignItems: "center",
       marginHorizontal: S.md,
-      backgroundColor: C.surface,
+      backgroundColor: p.surface,
       borderRadius: R.lg,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: p.hairline,
       padding: S.lg,
       gap: S.xs,
     },
     emptyTitle: {
       fontSize: FS.body,
-      fontWeight: FW.semiBold,
-      color: C.ink,
+      fontWeight: "700",
+      color: p.ink,
+      textAlign: "center",
     },
     emptyText: {
       fontSize: FS.bodySm,
-      color: C.body,
+      color: p.muted,
       textAlign: "center",
     },
     retryBtn: {
-      marginTop: S.xs,
-      paddingHorizontal: S.md,
-      paddingVertical: 8,
-      backgroundColor: C.main, // Cursor Orange
-      borderRadius: R.md,
-    },
-    retryText: {
-      color: C.bg,
-      fontWeight: FW.medium,
-      fontSize: FS.bodySm,
-    },
-
-    // Pagination Styles
-    loadMoreBtn: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: C.main,
-      paddingVertical: S.sm,
-      paddingHorizontal: S.md,
-      borderRadius: R.button,
-      marginTop: S.md,
-      marginHorizontal: S.md,
+      marginTop: 14,
+      paddingHorizontal: 20,
+      height: 42,
+      borderRadius: 12,
+      backgroundColor: p.primary,
     },
-    loadMoreText: {
+    retryBtnText: {
       color: "#FFFFFF",
-      fontSize: FS.bodySm,
-      fontWeight: FW.semiBold,
-    },
-    endOfListBlock: {
-      alignItems: "center",
-      marginTop: S.md,
-      paddingVertical: S.xs,
-    },
-    endOfListText: {
-      fontSize: FS.caption,
-      color: C.muted,
+      fontSize: 14,
+      fontWeight: "700",
     },
   });
 }

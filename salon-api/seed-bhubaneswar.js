@@ -194,20 +194,16 @@ async function seedBhubaneswar() {
             city: item.city,
             state: "Odisha",
             pincode: item.pincode,
+            // Branch schema stores coordinates here; item.coordinates is [lng, lat]
+            coordinates: { lat: item.coordinates[1], lng: item.coordinates[0] },
           },
           citySlug: item.citySlug,
-          location: {
-            type: "Point",
-            coordinates: item.coordinates,
-          },
-          rating: item.rating,
-          reviewsCount: item.reviewsCount,
           isActive: true,
         });
       } else {
-        branch.rating = item.rating;
-        branch.reviewsCount = item.reviewsCount;
         branch.isActive = true;
+        // Backfill coordinates on branches created before they were stored correctly
+        branch.address.coordinates = { lat: item.coordinates[1], lng: item.coordinates[0] };
         await branch.save();
       }
 
@@ -265,28 +261,34 @@ async function seedBhubaneswar() {
         seededServices.push(service);
       }
 
-      // 7. Slots (Today & Tomorrow)
+      // 7. Slots (Next 7 Days for all services)
       const timeslots = ["09:00", "10:30", "12:00", "14:00", "15:30", "17:00", "18:30", "20:00"];
-      for (const dateStr of [todayStr, tomorrowStr]) {
-        for (const time of timeslots) {
-          const existingSlot = await Slot.findOne({ branchId: branch._id, date: dateStr, startTime: time });
-          if (!existingSlot) {
-            const [h, m] = time.split(":").map(Number);
-            const endMin = h * 60 + m + 45;
-            const endH = String(Math.floor(endMin / 60)).padStart(2, "0");
-            const endM = String(endMin % 60).padStart(2, "0");
+      for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+        const d = new Date();
+        d.setDate(d.getDate() + dayOffset);
+        const dateStr = d.toISOString().split("T")[0];
 
-            await Slot.create({
-              salonId: salon._id,
-              branchId: branch._id,
-              serviceId: seededServices[0]._id,
-              staffId: staffUser._id,
-              date: dateStr,
-              startTime: time,
-              endTime: `${endH}:${endM}`,
-              status: "AVAILABLE",
-              price: seededServices[0].price,
-            });
+        for (const service of seededServices) {
+          for (const time of timeslots) {
+            const existingSlot = await Slot.findOne({ staffId: staffUser._id, date: dateStr, startTime: time });
+            if (!existingSlot) {
+              const [h, m] = time.split(":").map(Number);
+              const endMin = h * 60 + m + (service.durationMinutes || 45);
+              const endH = String(Math.floor(endMin / 60)).padStart(2, "0");
+              const endM = String(endMin % 60).padStart(2, "0");
+
+              await Slot.create({
+                salonId: salon._id,
+                branchId: branch._id,
+                serviceId: service._id,
+                staffId: staffUser._id,
+                date: dateStr,
+                startTime: time,
+                endTime: `${endH}:${endM}`,
+                status: "AVAILABLE",
+                price: service.price,
+              });
+            }
           }
         }
       }

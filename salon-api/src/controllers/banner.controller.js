@@ -1,4 +1,5 @@
 // salon-api/src/controllers/banner.controller.js
+const mongoose = require('mongoose');
 const Banner = require('../models/Banner');
 const { delCachePattern } = require('../services/cache.service');
 
@@ -134,6 +135,12 @@ exports.deleteBanner = async (req, res, next) => {
  */
 exports.trackBannerClick = async (req, res, next) => {
   try {
+    // Validate that the ID is a real MongoDB ObjectId before querying.
+    // Fallback/placeholder banner IDs (e.g. "b-1", "1", "2") are silently ignored
+    // since click tracking is a best-effort, fire-and-forget operation.
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(200).json({ success: true });
+    }
     await Banner.findByIdAndUpdate(req.params.id, { $inc: { clickCount: 1 } });
     res.status(200).json({ success: true });
   } catch (error) {

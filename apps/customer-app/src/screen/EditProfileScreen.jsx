@@ -13,32 +13,47 @@ import {
   StatusBar,
   Alert,
   Modal,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { authService } from "../services/authService";
 
 const MALE_AVATAR_ASSET = require("../../assets/male-avatar.png");
 const FEMALE_AVATAR_ASSET = require("../../assets/female-avatar.png");
 
 const TOP_INSET = Platform.OS === "ios" ? 52 : (StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 36);
 
+// The API stores gender lowercase ("male" | "female" | "other")
+const GENDER_OPTIONS = [
+  { id: "male", label: "Male" },
+  { id: "female", label: "Female" },
+  { id: "other", label: "Other" },
+];
+const ACCENT = "#B3261E";
+
+function normalizeGender(value) {
+  const v = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return GENDER_OPTIONS.some((g) => g.id === v) ? v : "";
+}
+
 export default function EditProfileScreen({ goBack }) {
   const { user, updateUser } = useAuth();
   const { isDark } = useTheme();
 
-  const [name, setName] = useState(user?.name || "Robert Fox");
-  const [email, setEmail] = useState(user?.email || "robert_fox@gmail.com");
-  const [gender, setGender] = useState(user?.gender || "Male");
-  const [birthDate, setBirthDate] = useState(user?.birthDate || "08/15/2012");
-  const [address, setAddress] = useState(user?.address || "6391 Elgin St. Celina, Delaware 10299");
-  const [phone, setPhone] = useState(user?.phone || "365248667");
-  const [countryCode, setCountryCode] = useState("+91");
+  // Start from the real profile — never pre-fill invented details that a Save would write back
+  const [name, setName] = useState(user?.name || "");
+  const [gender, setGender] = useState(normalizeGender(user?.gender));
+  const [phone, setPhone] = useState(user?.phone || "");
+  const email = user?.email || "";
 
   const [avatarUri, setAvatarUri] = useState(user?.avatarUrl || null);
   const [saving, setSaving] = useState(false);
   const [showGenderModal, setShowGenderModal] = useState(false);
+
+  const genderLabel = GENDER_OPTIONS.find((g) => g.id === gender)?.label || "Select";
 
   const handlePickAvatar = async () => {
     try {
@@ -59,27 +74,45 @@ export default function EditProfileScreen({ goBack }) {
       }
     } catch (err) {
       console.log("Error picking image:", err);
+      Alert.alert("Couldn't open photos", "Please try again.");
     }
   };
 
   const handleSave = async () => {
+    if (saving) return;
+    const cleanName = name.trim();
+    const cleanPhone = phone.trim();
+    const phoneDigits = cleanPhone.replace(/\D/g, "");
+
+    if (cleanName.length < 2 || cleanName.length > 50) {
+      Alert.alert("Check your name", "Name must be 2–50 characters.");
+      return;
+    }
+    if (phoneDigits.length < 10 || phoneDigits.length > 13) {
+      Alert.alert("Check your phone number", "Please enter a valid phone number.");
+      return;
+    }
+
     setSaving(true);
     try {
-      if (updateUser) {
-        await updateUser({
-          name: name.trim(),
-          email: email.trim(),
-          gender,
-          birthDate,
-          address: address.trim(),
-          phone: phone.trim(),
-          avatarUrl: avatarUri,
-        });
-      }
-      Alert.alert("Success", "Profile updated successfully!");
+      // Save to the server first; previously this only changed the copy stored on the phone
+      const updates = { name: cleanName, phone: cleanPhone };
+      if (gender) updates.gender = gender;
+      const res = await authService.updateProfile(updates);
+      const saved = res?.data?.user || {};
+
+      updateUser({
+        name: saved.name ?? cleanName,
+        phone: saved.phone ?? cleanPhone,
+        ...(gender ? { gender: saved.gender ?? gender } : {}),
+        // The photo isn't uploaded yet, so it's only kept on this device
+        avatarUrl: avatarUri,
+      });
+
+      Alert.alert("Saved", "Your profile has been updated.");
       if (goBack) goBack();
     } catch (err) {
-      Alert.alert("Error", err.message || "Failed to update profile.");
+      Alert.alert("Couldn't save", err.message || "Failed to update profile.");
     } finally {
       setSaving(false);
     }
@@ -87,21 +120,29 @@ export default function EditProfileScreen({ goBack }) {
 
   const getAvatarSource = () => {
     if (avatarUri) return { uri: avatarUri };
-    if (gender.toLowerCase() === "female") return FEMALE_AVATAR_ASSET;
+    if (gender === "female") return FEMALE_AVATAR_ASSET;
     return MALE_AVATAR_ASSET;
   };
 
   const styles = getStyles(isDark);
+  const helperColor = isDark ? "#8E8E93" : "#71717A";
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Top Header Row with Close Button */}
         <View style={styles.topHeader}>
           <View style={{ flex: 1 }} />
-          <TouchableOpacity onPress={goBack} style={styles.closeBtn} activeOpacity={0.7}>
+          <TouchableOpacity onPress={goBack} style={styles.closeBtn} activeOpacity={0.7} disabled={saving}>
             <Ionicons name="close" size={24} color={isDark ? "#FFFFFF" : "#18181B"} />
           </TouchableOpacity>
         </View>
@@ -116,7 +157,6 @@ export default function EditProfileScreen({ goBack }) {
           </TouchableOpacity>
         </View>
 
-        {/* Form Inputs */}
         {/* 1. Full Name */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Full name</Text>
@@ -127,83 +167,50 @@ export default function EditProfileScreen({ goBack }) {
               onChangeText={setName}
               placeholder="Enter full name"
               placeholderTextColor="#A0A0AB"
+              autoCapitalize="words"
+              autoComplete="name"
+              textContentType="name"
+              maxLength={50}
             />
           </View>
         </View>
 
-        {/* 2. Email */}
+        {/* 2. Email — it's the sign-in identity, so it can't be edited here */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Email</Text>
-          <View style={styles.inputBox}>
-            <TextInput
-              style={styles.textInput}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              placeholder="Enter email address"
-              placeholderTextColor="#A0A0AB"
-            />
+          <View style={[styles.inputBox, { opacity: 0.6 }]}>
+            <Text style={styles.selectText} numberOfLines={1}>{email || "—"}</Text>
+            <Ionicons name="lock-closed-outline" size={15} color="#66666E" />
           </View>
+          <Text style={{ fontSize: 12, color: helperColor, marginTop: 6 }}>
+            Your email is used to sign in and can't be changed here.
+          </Text>
         </View>
 
-        {/* 3. Gender & Birth of Date (Side by side) */}
-        <View style={styles.twoColumnRow}>
-          <View style={styles.columnField}>
-            <Text style={styles.label}>Gender</Text>
-            <TouchableOpacity style={styles.inputBox} onPress={() => setShowGenderModal(true)} activeOpacity={0.8}>
-              <Text style={styles.selectText}>{gender}</Text>
-              <Ionicons name="chevron-down" size={16} color="#66666E" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.columnField}>
-            <Text style={styles.label}>Birth of date</Text>
-            <View style={styles.inputBox}>
-              <TextInput
-                style={styles.textInput}
-                value={birthDate}
-                onChangeText={setBirthDate}
-                placeholder="MM/DD/YYYY"
-                placeholderTextColor="#A0A0AB"
-              />
-            </View>
-          </View>
-        </View>
-
-        {/* 4. Address */}
+        {/* 3. Gender */}
         <View style={styles.fieldGroup}>
-          <Text style={styles.label}>Address</Text>
-          <View style={styles.inputBox}>
-            <TextInput
-              style={styles.textInput}
-              value={address}
-              onChangeText={setAddress}
-              placeholder="Enter address"
-              placeholderTextColor="#A0A0AB"
-            />
-          </View>
+          <Text style={styles.label}>Gender</Text>
+          <TouchableOpacity style={styles.inputBox} onPress={() => setShowGenderModal(true)} activeOpacity={0.8}>
+            <Text style={styles.selectText}>{genderLabel}</Text>
+            <Ionicons name="chevron-down" size={16} color="#66666E" />
+          </TouchableOpacity>
         </View>
 
-        {/* 5. Phone Number */}
+        {/* 4. Phone Number */}
         <View style={styles.fieldGroup}>
           <Text style={styles.label}>Phone number</Text>
-          <View style={styles.phoneInputRow}>
-            <View style={styles.countryCodeBox}>
-              <Text style={styles.flagText}>🇮🇳</Text>
-              <Text style={styles.countryCodeText}>{countryCode}</Text>
-              <Ionicons name="chevron-down" size={14} color="#66666E" style={{ marginLeft: 3 }} />
-            </View>
-
-            <View style={[styles.inputBox, { flex: 1, marginLeft: 10 }]}>
-              <TextInput
-                style={styles.textInput}
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                placeholder="Phone number"
-                placeholderTextColor="#A0A0AB"
-              />
-            </View>
+          <View style={[styles.inputBox, { flex: 1 }]}>
+            <TextInput
+              style={styles.textInput}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              placeholder="Phone number"
+              placeholderTextColor="#A0A0AB"
+              autoComplete="tel"
+              textContentType="telephoneNumber"
+              maxLength={16}
+            />
           </View>
         </View>
 
@@ -220,27 +227,35 @@ export default function EditProfileScreen({ goBack }) {
       </ScrollView>
 
       {/* Gender Picker Modal */}
-      <Modal visible={showGenderModal} transparent animationType="fade">
+      <Modal
+        visible={showGenderModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowGenderModal(false)}
+      >
         <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowGenderModal(false)}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Select Gender</Text>
-            {["Male", "Female", "Other"].map((g) => (
-              <TouchableOpacity
-                key={g}
-                style={styles.genderOption}
-                onPress={() => {
-                  setGender(g);
-                  setShowGenderModal(false);
-                }}
-              >
-                <Text style={[styles.genderOptionText, gender === g && { color: "#6C5CE7", fontWeight: "700" }]}>{g}</Text>
-                {gender === g && <Ionicons name="checkmark" size={18} color="#6C5CE7" />}
-              </TouchableOpacity>
-            ))}
+            {GENDER_OPTIONS.map((g) => {
+              const isSelected = gender === g.id;
+              return (
+                <TouchableOpacity
+                  key={g.id}
+                  style={styles.genderOption}
+                  onPress={() => {
+                    setGender(g.id);
+                    setShowGenderModal(false);
+                  }}
+                >
+                  <Text style={[styles.genderOptionText, isSelected && { color: ACCENT, fontWeight: "700" }]}>{g.label}</Text>
+                  {isSelected && <Ionicons name="checkmark" size={18} color={ACCENT} />}
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </TouchableOpacity>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -317,37 +332,6 @@ function getStyles(isDark) {
     selectText: {
       fontSize: 14.5,
       fontWeight: "500",
-      color: isDark ? "#FFFFFF" : "#18181B",
-    },
-    twoColumnRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 20,
-    },
-    columnField: {
-      flex: 1,
-      marginRight: 10,
-    },
-    phoneInputRow: {
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    countryCodeBox: {
-      height: 52,
-      borderRadius: 14,
-      backgroundColor: isDark ? "#1E1E26" : "#F7F7FA",
-      paddingHorizontal: 12,
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    flagText: {
-      fontSize: 16,
-      marginRight: 6,
-    },
-    countryCodeText: {
-      fontSize: 14,
-      fontWeight: "600",
       color: isDark ? "#FFFFFF" : "#18181B",
     },
     saveBtn: {

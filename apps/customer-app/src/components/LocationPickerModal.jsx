@@ -27,8 +27,19 @@ export default function LocationPickerModal({
 }) {
   const { theme, isDark } = useTheme();
   const styles = getStyles(isDark);
+
+  // No invented fallback city: a geocode result without a city is treated as "couldn't detect"
+  const toLocation = (geoResult) => {
+    const city = geoResult?.city ? cleanCityName(geoResult.city) : "";
+    if (!city) return null;
+    const state = geoResult.state || "";
+    const area =
+      geoResult.area ||
+      (state && state.toLowerCase() !== city.toLowerCase() ? `${state}, India` : "India");
+    return { id: city, name: city, city, state, area, label: `${city}, ${area}` };
+  };
   const storeCity = useLocationStore((state) => state.selectedCity);
-  const selectedCity = propSelectedCity || storeCity || "Brahmapur";
+  const selectedCity = propSelectedCity || storeCity || "";
 
   const [search, setSearch] = useState("");
   const [isDetecting, setIsDetecting] = useState(false);
@@ -78,18 +89,8 @@ export default function LocationPickerModal({
         setDetectStatus("Detecting location...");
         getCurrentLocation()
           .then((geoResult) => {
-            const city = cleanCityName(geoResult.city || "Brahmapur");
-            const state = geoResult.state || "Odisha";
-            const area = geoResult.area || (state && state.toLowerCase() !== city.toLowerCase() ? `${state}, India` : "India");
-
-            const locObj = {
-              id: city,
-              name: city,
-              city,
-              state,
-              area,
-              label: `${city}, ${area}`,
-            };
+            const locObj = toLocation(geoResult);
+            if (!locObj) throw new Error("No city in location result");
 
             setDetectedGps(locObj);
             if (!activeLocation) setActiveLocation(locObj);
@@ -115,9 +116,15 @@ export default function LocationPickerModal({
 
     const timer = setTimeout(async () => {
       setIsSearching(true);
-      const results = await searchLocations(search);
-      setSearchResults(results);
-      setIsSearching(false);
+      try {
+        const results = await searchLocations(search);
+        setSearchResults(Array.isArray(results) ? results : []);
+      } catch (e) {
+        console.warn("Location search failed:", e?.message);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
     }, 400);
 
     return () => clearTimeout(timer);
@@ -125,9 +132,8 @@ export default function LocationPickerModal({
 
   const handleLocationSelect = useCallback(
     (placeObj) => {
-      const cityName = cleanCityName(
-        placeObj.name || placeObj.city || placeObj.id || "Brahmapur"
-      );
+      const cityName = cleanCityName(placeObj.city || placeObj.name || placeObj.id || "");
+      if (!cityName) return;
       const areaName = placeObj.area || placeObj.name || cityName;
       const stateName =
         placeObj.state ||
@@ -165,65 +171,35 @@ export default function LocationPickerModal({
   );
 
   const handleGpsClick = async () => {
-    if (detectedGps) {
-      handleLocationSelect(detectedGps);
-      return;
-    }
-
+    if (isDetecting) return;
     setIsDetecting(true);
     setDetectStatus("Detecting location...");
 
     try {
-      const geoResult = await getCurrentLocation();
-      const city = cleanCityName(geoResult.city || "Brahmapur");
-      const state = geoResult.state || "Odisha";
-      const area = geoResult.area || (state && state.toLowerCase() !== city.toLowerCase() ? `${state}, India` : "India");
-
-      const locObj = {
-        id: city,
-        name: city,
-        city,
-        state,
-        area,
-        label: `${city}, ${area}`,
-      };
+      // Always a fresh fix: the cached result may be from another city
+      const locObj = toLocation(await getCurrentLocation());
+      if (!locObj) throw new Error("No city in location result");
 
       setDetectedGps(locObj);
       setActiveLocation(locObj);
       storage.setItem("@cached_gps_loc", JSON.stringify(locObj));
-      setDetectStatus(`Detected: ${city}`);
-
-      setTimeout(() => {
-        setIsDetecting(false);
-        setDetectStatus("");
-        handleLocationSelect(locObj);
-      }, 300);
+      setIsDetecting(false);
+      setDetectStatus("");
+      handleLocationSelect(locObj);
     } catch (err) {
-      setDetectStatus("Using Brahmapur");
-      const fallbackObj = {
-        id: "Brahmapur",
-        name: "Brahmapur",
-        city: "Brahmapur",
-        state: "Odisha",
-        area: "Odisha, India",
-        label: "Brahmapur, Odisha, India",
-      };
-      setDetectedGps(fallbackObj);
-      setActiveLocation(fallbackObj);
-      setTimeout(() => {
-        setIsDetecting(false);
-        setDetectStatus("");
-        handleLocationSelect(fallbackObj);
-      }, 300);
+      // Previously this silently switched the user to Brahmapur and closed the sheet
+      console.warn("GPS detection failed:", err?.message);
+      setIsDetecting(false);
+      setDetectStatus("Couldn't detect your location. Check location permission, or search for your city.");
     }
   };
 
   const currentCardData =
     activeLocation ||
     detectedGps || {
-      city: selectedCity || "Brahmapur",
-      state: "Odisha",
-      area: "Odisha, India",
+      city: selectedCity || "Choose your city",
+      state: "",
+      area: selectedCity ? "" : "Search or use your current location",
     };
 
   return (
@@ -261,9 +237,11 @@ export default function LocationPickerModal({
           </View>
           <View style={styles.gpsTextInfo}>
             <Text style={styles.gpsTitle}>Use Current Location</Text>
-            <Text style={styles.gpsSub} numberOfLines={1}>
+            <Text style={styles.gpsSub} numberOfLines={2}>
               {isDetecting
                 ? detectStatus || "Detecting location..."
+                : detectStatus
+                ? detectStatus
                 : detectedGps
                 ? `${detectedGps.city}${detectedGps.area ? `, ${detectedGps.area}` : ""}`
                 : "Tap to detect your current location"}
@@ -307,14 +285,14 @@ export default function LocationPickerModal({
                 activeOpacity={0.85}
               >
                 <View style={styles.currentLocIconCircle}>
-                  <Ionicons name="location-sharp" size={20} color="#7A0026" />
+                  <Ionicons name="location-sharp" size={20} color={isDark ? "#F9A8C4" : "#7A0026"} />
                 </View>
                 <View style={styles.currentLocTextWrap}>
                   <Text style={styles.currentLocCity}>
                     {currentCardData.city || currentCardData.name}
                   </Text>
                   <Text style={styles.currentLocSub} numberOfLines={1}>
-                    {currentCardData.area || "Odisha, India"}
+                    {currentCardData.area || ""}
                   </Text>
                 </View>
 
@@ -439,7 +417,7 @@ function getStyles(isDark) {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 12,
@@ -488,7 +466,7 @@ function getStyles(isDark) {
     currentLocCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
       padding: 14,
       borderRadius: 16,
       borderWidth: 1.5,
@@ -498,7 +476,7 @@ function getStyles(isDark) {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 12,
@@ -509,15 +487,15 @@ function getStyles(isDark) {
     currentLocCity: {
       fontSize: 15,
       fontWeight: "700",
-      color: "#18181B",
+      color: isDark ? "#FFFFFF" : "#18181B",
     },
     currentLocSub: {
       fontSize: 12,
-      color: "#71717A",
+      color: isDark ? "#A1A1AA" : "#71717A",
       marginTop: 2,
     },
     currentBadge: {
-      backgroundColor: "#FFFFFF",
+      backgroundColor: isDark ? "#2A2A2C" : "#FFFFFF",
       paddingHorizontal: 10,
       paddingVertical: 4,
       borderRadius: 12,
@@ -526,7 +504,7 @@ function getStyles(isDark) {
     currentBadgeText: {
       fontSize: 11,
       fontWeight: "600",
-      color: "#7A0026",
+      color: isDark ? "#F9A8C4" : "#7A0026",
     },
     checkCircle: {
       width: 22,
@@ -559,13 +537,13 @@ function getStyles(isDark) {
     },
     cityCardSelected: {
       borderColor: "#C05278",
-      backgroundColor: "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
     },
     cityIconWrap: {
       width: 48,
       height: 48,
       borderRadius: 12,
-      backgroundColor: "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 14,

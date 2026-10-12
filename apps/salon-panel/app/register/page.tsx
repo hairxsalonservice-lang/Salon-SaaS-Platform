@@ -117,7 +117,7 @@ export default function RegisterPage() {
             <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
               <Sparkles size={16} className="text-white" />
             </div>
-            <p className="font-display text-2xl text-ink">ST CUT Partner</p>
+            <p className="font-display text-2xl text-ink">HairX Partner</p>
           </div>
 
           <div className="bg-white rounded-3xl p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)] border border-border/50">
@@ -157,7 +157,7 @@ export default function RegisterPage() {
           </div>
 
           <p className="text-center mt-8 text-[11px] text-muted/60 font-medium">
-            © 2026 ST CUT PARTNER PLATFORM. ALL RIGHTS RESERVED.
+            © 2026 HAIRX PARTNER PLATFORM. ALL RIGHTS RESERVED.
           </p>
         </div>
       </div>
@@ -178,7 +178,7 @@ export default function RegisterPage() {
           <Link href="/login" className="inline-flex items-center justify-center gap-2 mb-2">
             <img
               src="/logo.png"
-              alt="ST CUT Logo"
+              alt="HairX Logo"
               className="w-10 h-10 rounded-xl object-contain bg-black p-1 shrink-0 shadow-md"
             />
           </Link>
@@ -199,7 +199,7 @@ export default function RegisterPage() {
             <div className="space-y-5">
               <Input
                 label="Salon Name"
-                placeholder="ST CUT Studio"
+                placeholder="HairX Studio"
                 value={salonName}
                 onChange={(e) => {
                   setSalonName(e.target.value);
@@ -328,7 +328,7 @@ export default function RegisterPage() {
         </div>
 
         <p className="text-center mt-10 text-[11px] text-muted/60 font-medium">
-          © 2026 ST CUT PARTNER PLATFORM. ALL RIGHTS RESERVED.
+          © 2026 HAIRX PARTNER PLATFORM. ALL RIGHTS RESERVED.
         </p>
       </div>
     </div>

@@ -657,8 +657,8 @@ const getAppointments = async (req, res, next) => {
         .populate("staffId", "name")
         .populate("serviceId", "name price durationMinutes category")
         .populate("services", "name price durationMinutes category")
-        .populate("branchId", "name address")
-        .populate("salonId", "name")
+        .populate("branchId", "name address contactPhone")
+        .populate("salonId", "name coverImage logo contactPhone")
         .sort({ date: -1, startTime: 1 })
         .skip(skip)
         .limit(limit)
@@ -696,7 +696,7 @@ const getAppointment = async (req, res, next) => {
       .populate("staffId", "name")
       .populate("serviceId", "name price durationMinutes category")
       .populate("services", "name price durationMinutes category")
-      .populate("branchId", "name address")
+      .populate("branchId", "name address contactPhone")
       .populate("slotId", "date startTime endTime")
       .lean();
 

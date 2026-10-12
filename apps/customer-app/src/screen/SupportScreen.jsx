@@ -23,8 +23,8 @@ const TOP_INSET = Platform.OS === "ios" ? 52 : (StatusBar.currentHeight ? Status
 const FAQS_DATA = [
   {
     id: "f1",
-    question: "What is Flo Cutters?",
-    answer: "Flo Cutters (ST CUT) is a premier salon booking platform connecting you with top-rated hair stylists, beauty salons, and luxury spa treatments near you.",
+    question: "What is HairX?",
+    answer: "HairX is a premier salon booking platform connecting you with top-rated hair stylists, beauty salons, and luxury spa treatments near you.",
   },
   {
     id: "f2",

@@ -57,16 +57,12 @@ function ComboServiceModal({
       ? service.includedServices
       : DEFAULT_INCLUDED_SERVICES;
 
-  const offerTag =
-    service.packageOfferTag ||
-    service.offerTag ||
-    "Completed Package Offer till sep 18, 2026";
+  // Only what the salon actually set — no invented offers, deadlines, copy or durations
+  const offerTag = service.packageOfferTag || service.offerTag || null;
 
-  const description =
-    service.description ||
-    "Women want to feel attractive. We offer timeless beauty package to accentuate their natural beauty so they can feel beautiful in every day.";
+  const description = service.description || null;
 
-  const durationMins = service.durationMinutes || service.duration || 120;
+  const durationMins = service.durationMinutes || service.duration || null;
 
   const handleToggleSelect = () => {
     if (onSelectService) {
@@ -133,7 +129,7 @@ function ComboServiceModal({
             </View>
 
             {/* Description Text */}
-            <Text style={styles.descriptionText}>{description}</Text>
+            {description ? <Text style={styles.descriptionText}>{description}</Text> : null}
 
             {/* Included Services Checklist */}
             <View style={styles.servicesSection}>
@@ -170,9 +166,11 @@ function ComboServiceModal({
                 <Text style={styles.priceValue}>
                   {paiseToINR(service.price)}
                 </Text>
-                <Text style={styles.durationValue}>
-                  • {durationMins} mins
-                </Text>
+                {durationMins ? (
+                  <Text style={styles.durationValue}>
+                    • {durationMins} mins
+                  </Text>
+                ) : null}
               </View>
             </View>
 

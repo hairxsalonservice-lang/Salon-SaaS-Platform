@@ -17,11 +17,13 @@ import { customerService } from "../services/customerService";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableNotificationItem from "../components/SwipeableNotificationItem";
+import { useAuth } from "../context/AuthContext";
 
 function formatTimestamp(dateStr) {
   if (!dateStr) return "Just now";
   try {
     const d = new Date(dateStr);
+    if (Number.isNaN(d.getTime())) return "";
     const now = new Date();
     const diffMs = now - d;
     const diffMins = Math.floor(diffMs / 60000);
@@ -30,7 +32,7 @@ function formatTimestamp(dateStr) {
 
     if (diffMins < 1) return "Just now";
     if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffHours < 24) return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
     if (diffDays === 1) return "1 day ago";
     if (diffDays < 7) return `${diffDays} days ago`;
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -39,66 +41,43 @@ function formatTimestamp(dateStr) {
   }
 }
 
-const DEFAULT_DEMO_NOTIFICATIONS = [
-  {
-    _id: "demo-1",
-    title: "Appointment Reminder",
-    body: "You have an appointment at The Galleria Hair Salon at 8:00am today",
-    highlightWord: "appointment",
-    createdAt: new Date().toISOString(),
-    isRead: false,
-  },
-  {
-    _id: "demo-2",
-    title: "Password Changed",
-    body: "Your password is successfully changed",
-    highlightWord: "password",
-    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    isRead: true,
-  },
-  {
-    _id: "demo-3",
-    title: "Profile Completion",
-    body: "Completed your profile to be better health consults.",
-    actionText: "Complete Profile",
-    createdAt: new Date(Date.now() - 3 * 86400 * 1000).toISOString(),
-    isRead: true,
-  },
-];
-
 export default function NotificationCenterScreen({ navigate, onBack }) {
   const { isDark } = useTheme();
+  const { isAuthenticated } = useAuth();
   const styles = getStyles(isDark);
   const insets = useSafeAreaInsets();
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const unreadCount = useMemo(() => {
     return notifications.filter((n) => !n.isRead).length;
   }, [notifications]);
 
   const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated) {
+      setNotifications([]);
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
     try {
       const res = await customerService.getNotifications();
       let list = [];
       if (res?.data?.notifications) list = res.data.notifications;
       else if (Array.isArray(res?.data)) list = res.data;
-
-      if (list.length === 0) {
-        setNotifications(DEFAULT_DEMO_NOTIFICATIONS);
-      } else {
-        setNotifications(list);
-      }
+      setNotifications(list);
+      setLoadFailed(false);
     } catch (err) {
       console.warn("Failed to fetch notifications:", err.message);
-      setNotifications(DEFAULT_DEMO_NOTIFICATIONS);
+      setLoadFailed(true);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
     fetchNotifications();
@@ -110,36 +89,51 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
   };
 
   const handleMarkAllRead = async () => {
+    if (unreadCount === 0) return;
+    const previous = notifications;
+    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     try {
       await customerService.markAllNotificationsRead();
     } catch (e) {
+      // Put the unread state back so the screen doesn't claim something the server didn't save
       console.warn("Failed to mark all read", e);
+      setNotifications(previous);
     }
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
   const handleToggleRead = async (item) => {
     const id = item._id || item.id;
     if (!item.isRead) {
-      try {
-        await customerService.markNotificationRead(id);
-      } catch (e) {}
+      setNotifications((prev) =>
+        prev.map((n) => ((n._id || n.id) === id ? { ...n, isRead: true } : n))
+      );
+      customerService.markNotificationRead(id).catch((e) => console.warn("Failed to mark read:", e?.message));
     }
-    setNotifications((prev) =>
-      prev.map((n) => ((n._id || n.id) === id ? { ...n, isRead: true } : n))
-    );
-    if (navigate && (item.type?.includes("appointment") || item.body?.toLowerCase().includes("appointment"))) {
+    const type = typeof item.type === "string" ? item.type.toLowerCase() : "";
+    const body = typeof item.body === "string" ? item.body.toLowerCase() : "";
+    if (navigate && (type.includes("appointment") || body.includes("appointment"))) {
       navigate("Bookings");
     }
   };
 
   const handleDeleteNotification = useCallback(async (item) => {
     const id = item._id || item.id;
-    setNotifications((prev) => prev.filter((n) => (n._id || n.id) !== id));
+    let removedIndex = -1;
+    setNotifications((prev) => {
+      removedIndex = prev.findIndex((n) => (n._id || n.id) === id);
+      return prev.filter((n) => (n._id || n.id) !== id);
+    });
     try {
       await customerService.deleteNotification(id);
     } catch (e) {
+      // Restore it in place; otherwise it silently reappears on the next refresh
       console.warn("Failed to delete notification:", e.message);
+      setNotifications((prev) => {
+        if (prev.some((n) => (n._id || n.id) === id)) return prev;
+        const next = [...prev];
+        next.splice(removedIndex >= 0 ? removedIndex : next.length, 0, item);
+        return next;
+      });
     }
   }, []);
 
@@ -198,8 +192,9 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
         {/* Enhanced Sub-Header Actions Bar */}
         <View style={styles.actionsBar}>
           <TouchableOpacity
-            style={styles.markAllBtn}
+            style={[styles.markAllBtn, unreadCount === 0 && { opacity: 0.4 }]}
             onPress={handleMarkAllRead}
+            disabled={unreadCount === 0}
             activeOpacity={0.7}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
@@ -223,14 +218,40 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
         <View style={styles.loadingCenter}>
           <ActivityIndicator size="large" color={isDark ? "#FF5252" : "#B3261E"} />
         </View>
-      ) : notifications.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <View style={styles.emptyIconCircle}>
-            <Ionicons name="notifications-off-outline" size={32} color={isDark ? "#FF5252" : "#B3261E"} />
+      ) : !isAuthenticated || notifications.length === 0 ? (
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          refreshControl={
+            isAuthenticated ? (
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={isDark ? "#FF5252" : "#B3261E"} />
+            ) : undefined
+          }
+        >
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconCircle}>
+              <Ionicons
+                name={!isAuthenticated ? "log-in-outline" : loadFailed ? "cloud-offline-outline" : "notifications-off-outline"}
+                size={32}
+                color={isDark ? "#FF5252" : "#B3261E"}
+              />
+            </View>
+            <Text style={styles.emptyTitle}>
+              {!isAuthenticated ? "Sign in to see notifications" : loadFailed ? "Couldn't load notifications" : "No Notifications"}
+            </Text>
+            <Text style={styles.emptySubtitle}>
+              {!isAuthenticated
+                ? "Booking confirmations and reminders will show up here once you're signed in."
+                : loadFailed
+                  ? "Check your connection and pull down to try again."
+                  : "You're all caught up! When you have new alerts, they will show up here."}
+            </Text>
+            {!isAuthenticated ? (
+              <TouchableOpacity style={styles.emptyCta} activeOpacity={0.85} onPress={() => navigate && navigate("Login")}>
+                <Text style={styles.emptyCtaText}>Sign in</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
-          <Text style={styles.emptyTitle}>No Notifications</Text>
-          <Text style={styles.emptySubtitle}>You're all caught up! When you have new alerts, they will show up here.</Text>
-        </View>
+        </ScrollView>
       ) : (
         <ScrollView
           style={styles.scrollView}
@@ -261,6 +282,20 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
 
 function getStyles(isDark) {
   return StyleSheet.create({
+    emptyCta: {
+      marginTop: 18,
+      paddingHorizontal: 24,
+      height: 44,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: isDark ? "#FF5252" : "#B3261E",
+    },
+    emptyCtaText: {
+      color: "#FFFFFF",
+      fontSize: 14,
+      fontWeight: "700",
+    },
     container: {
       flex: 1,
       backgroundColor: isDark ? "#121216" : "#FFFFFF",

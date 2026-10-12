@@ -74,158 +74,44 @@ const CATEGORY_CONFIGS = {
   },
 };
 
-const SAMPLE_SALONS = [
-  {
-    id: "s-1",
-    _id: "s-1",
-    name: "Royal Cut Luxury Salon & Spa",
-    isVerified: true,
-    isPopular: true,
-    rating: { avgScore: 4.8, totalReviews: 1200 },
-    address: { formattedAddress: "Brahmapur Main Road" },
-    distance: "1.2 km",
-    coverImage: "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80",
-    tags: ["Men's Haircut", "Beard Styling", "Hair Spa"],
-    audience: "Men",
-    startingPrice: 350,
-  },
-  {
-    id: "s-2",
-    _id: "s-2",
-    name: "Urban Edge Unisex Salon",
-    isVerified: true,
-    isPopular: false,
-    rating: { avgScore: 4.6, totalReviews: 856 },
-    address: { formattedAddress: "City Centre, Brahmapur" },
-    distance: "1.8 km",
-    coverImage: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80",
-    tags: ["Haircut", "Hair Color", "Styling"],
-    audience: "Unisex",
-    startingPrice: 300,
-  },
-  {
-    id: "s-3",
-    _id: "s-3",
-    name: "Looks Family Salon",
-    isVerified: true,
-    isPopular: false,
-    rating: { avgScore: 4.4, totalReviews: 642 },
-    address: { formattedAddress: "Gosani Nuagaon" },
-    distance: "2.1 km",
-    coverImage: "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=800&q=80",
-    tags: ["Haircut", "Kids Haircut", "Hair Spa"],
-    audience: "Kids",
-    startingPrice: 250,
-  },
-  {
-    id: "s-4",
-    _id: "s-4",
-    name: "Style Hub Salon",
-    isVerified: false,
-    isPopular: false,
-    rating: { avgScore: 4.3, totalReviews: 530 },
-    address: { formattedAddress: "Berhampur Bypass" },
-    distance: "2.8 km",
-    coverImage: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&w=800&q=80",
-    tags: ["Haircut", "Beard Styling", "Hair Treatment"],
-    audience: "Men",
-    startingPrice: 280,
-  },
-  {
-    id: "s-5",
-    _id: "s-5",
-    name: "Glow & Radiance Skincare Clinic",
-    isVerified: true,
-    isPopular: true,
-    rating: { avgScore: 4.9, totalReviews: 940 },
-    address: { formattedAddress: "Silk City Square, Brahmapur" },
-    distance: "3.2 km",
-    coverImage: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?auto=format&fit=crop&w=800&q=80",
-    tags: ["Fruit Facial", "Clean Up", "Gold Facial"],
-    audience: "Women",
-    startingPrice: 500,
-  },
-  {
-    id: "s-6",
-    _id: "s-6",
-    name: "Velvet Makeup Studio",
-    isVerified: true,
-    isPopular: false,
-    rating: { avgScore: 4.7, totalReviews: 480 },
-    address: { formattedAddress: "Gandhi Nagar 1st Lane, Brahmapur" },
-    distance: "3.8 km",
-    coverImage: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=800&q=80",
-    tags: ["Bridal Makeup", "Party Makeup", "HD Makeup"],
-    audience: "Women",
-    startingPrice: 1500,
-  },
-  {
-    id: "s-7",
-    _id: "s-7",
-    name: "Zenith Body Spa & Massage Center",
-    isVerified: true,
-    isPopular: true,
-    rating: { avgScore: 4.8, totalReviews: 710 },
-    address: { formattedAddress: "Engineering School Road, Brahmapur" },
-    distance: "4.1 km",
-    coverImage: "https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=800&q=80",
-    tags: ["Swedish Massage", "Deep Tissue", "Head Massage"],
-    audience: "Unisex",
-    startingPrice: 800,
-  },
-  {
-    id: "s-8",
-    _id: "s-8",
-    name: "Polished Nail Art Studio",
-    isVerified: true,
-    isPopular: false,
-    rating: { avgScore: 4.6, totalReviews: 390 },
-    address: { formattedAddress: "Prem Nagar Main Road, Brahmapur" },
-    distance: "4.5 km",
-    coverImage: "https://images.unsplash.com/photo-1604654894610-df63bc536371?auto=format&fit=crop&w=800&q=80",
-    tags: ["Nail Art", "Gel Polish", "Manicure"],
-    audience: "Women",
-    startingPrice: 400,
-  },
-];
+// Home screen category labels -> service.category enum values in the API
+const API_CATEGORY = {
+  haircut: "hair",
+  facial: "skin",
+  massage: "spa",
+  makeup: "makeup",
+  nails: "nails",
+};
 
-function isSalonInCategory(s, catName) {
-  if (!catName) return true;
-  const target = catName.toLowerCase().trim();
+const LIVE_CITIES = ["brahmapur", "bhubaneswar"];
+const PLACEHOLDER_COVER = "https://images.unsplash.com/photo-1560066984-138dadb4c035?auto=format&fit=crop&w=800&q=80";
 
-  const keywordsMap = {
-    haircut: ["haircut", "hair cut", "hair", "barber", "cut", "trim", "beard", "styling"],
-    facial: ["facial", "clean up", "skin", "face", "glow", "bleach", "derma"],
-    makeup: ["makeup", "bridal", "party makeup", "cosmetic", "glam", "eye makeup"],
-    massage: ["massage", "spa", "body spa", "therapy", "head massage", "wellness"],
-    nails: ["nail", "manicure", "pedicure", "gel polish", "nail art", "extensions"],
+// Area is the last segment of the branch street: "Plot 12, KIIT Square, Patia" -> "Patia"
+function getArea(salon) {
+  const addr = (salon.address && typeof salon.address === "object" ? salon.address : null) || salon.branches?.[0]?.address;
+  const parts = (addr?.street || "").split(",").map((p) => p.trim()).filter(Boolean);
+  return parts[parts.length - 1] || addr?.city || null;
+}
+
+// Map an API salon to what the list renders, without inventing ratings, distances or tags
+function normalizeSalon(s) {
+  const ratingObj = s.rating && typeof s.rating === "object" ? s.rating : null;
+  const reviewCount = s.totalReviews ?? s.reviewsCount ?? ratingObj?.totalReviews ?? 0;
+  const score = typeof s.rating === "number" ? s.rating : ratingObj?.avgScore || 0;
+  const tags = (s.categories || s.tags || []).filter((t) => typeof t === "string");
+  return {
+    _id: s._id || s.id,
+    raw: s,
+    name: s.name || "Salon",
+    score,
+    reviewCount,
+    area: getArea(s),
+    distance: s.distance ?? s.distanceKm ?? null,
+    coverImage: s.coverImage || s.logo || PLACEHOLDER_COVER,
+    tags,
+    isVerified: s.isVerified === true,
+    startingPrice: typeof s.startingPrice === "number" ? s.startingPrice : null,
   };
-
-  const keywords = keywordsMap[target] || [target];
-
-  // 1. Check tags / categories array
-  const tags = s.tags || s.categories || [];
-  const matchesTag = tags.some((t) =>
-    keywords.some((kw) => (t || "").toLowerCase().includes(kw))
-  );
-  if (matchesTag) return true;
-
-  // 2. Check name / description
-  const nameDesc = `${s.name || ""} ${s.description || ""}`.toLowerCase();
-  const matchesNameDesc = keywords.some((kw) => nameDesc.includes(kw));
-  if (matchesNameDesc) return true;
-
-  // 3. Check attached services if any
-  if (Array.isArray(s.services)) {
-    const matchesServices = s.services.some((svc) => {
-      const sName = (svc.name || "").toLowerCase();
-      const sCat = (svc.category || "").toLowerCase();
-      return keywords.some((kw) => sName.includes(kw) || sCat.includes(kw));
-    });
-    if (matchesServices) return true;
-  }
-
-  return false;
 }
 
 export default function CategoryDetailScreen({ goBack, navigate, routeParams = {} }) {
@@ -249,64 +135,34 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
     tags: [categoryName, "Styling", "Treatment", "Grooming"],
   };
 
-  const [activeAudience, setActiveAudience] = useState("Men");
-  const [activeSort, setActiveSort] = useState("Recommended");
-  const [isNearMe, setIsNearMe] = useState(false);
+  const [activeSort, setActiveSort] = useState("Recommended"); // "Recommended" | "Rating" | "Price"
   const [ratingFilter, setRatingFilter] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [salons, setSalons] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const isCityEmpty = !loading && salons.length === 0;
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+  const [reloadKey, setReloadKey] = useState(0);
+  const isCityLive = LIVE_CITIES.includes(cleanCityName(selectedCity).toLowerCase());
 
-  // Fetch real salons from browseService if available and filter strictly by category
+  // The API already filters by category, so its results are used as-is
   useEffect(() => {
     let isMounted = true;
     async function loadSalons() {
       setLoading(true);
+      setLoadError(null);
       try {
         const cleanCity = cleanCityName(selectedCity);
-        const res = await browseService.getSalons({ city: cleanCity, category: categoryName, bypassCache: true });
+        // The API matches the service's stored category (hair, skin, spa, ...), not the display label
+        const apiCategory = API_CATEGORY[categoryName.toLowerCase()] || categoryName.toLowerCase();
+        const res = await browseService.getSalons({ city: cleanCity, category: apiCategory, limit: 100, bypassCache: true });
         const fetched = res.data?.salons || (Array.isArray(res.data) ? res.data : []);
-
-        if (isMounted && fetched.length > 0) {
-          const mapped = fetched.map((s, idx) => ({
-            id: s._id || s.id || `s-${idx}`,
-            _id: s._id || s.id,
-            name: s.name,
-            isVerified: true,
-            isPopular: idx === 0,
-            rating: s.rating || { avgScore: 4.5, totalReviews: 320 },
-            address: s.address || { formattedAddress: s.city || selectedCity },
-            distance: s.distance || `${(1.2 + idx * 0.5).toFixed(1)} km`,
-            coverImage: s.coverImage || SAMPLE_SALONS[idx % SAMPLE_SALONS.length].coverImage,
-            tags: s.categories || s.tags || config.tags,
-            audience: idx % 2 === 0 ? "Men" : "Unisex",
-            startingPrice: s.startingPrice || 300,
-            services: s.services || [],
-          }));
-
-          const categoryFiltered = mapped.filter((s) => isSalonInCategory(s, categoryName));
-          setSalons(categoryFiltered.length > 0 ? categoryFiltered : mapped);
-        } else if (isMounted) {
-          const LIVE_CITIES = ["brahmapur", "bhubaneswar"];
-          if (selectedCity && !LIVE_CITIES.includes(selectedCity.toLowerCase())) {
-            setSalons([]);
-          } else {
-            const fallbackFiltered = SAMPLE_SALONS.filter((s) => isSalonInCategory(s, categoryName));
-            setSalons(fallbackFiltered);
-          }
-        }
+        if (isMounted) setSalons(fetched.map(normalizeSalon));
       } catch (err) {
         console.warn("Failed to fetch salons for category screen:", err);
         if (isMounted) {
-          const LIVE_CITIES = ["brahmapur", "bhubaneswar"];
-          if (selectedCity && !LIVE_CITIES.includes(selectedCity.toLowerCase())) {
-            setSalons([]);
-          } else {
-            const fallbackFiltered = SAMPLE_SALONS.filter((s) => isSalonInCategory(s, categoryName));
-            setSalons(fallbackFiltered);
-          }
+          setSalons([]);
+          setLoadError(err.message || "Unable to load salons");
         }
       } finally {
         if (isMounted) setLoading(false);
@@ -314,53 +170,38 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
     }
     loadSalons();
     return () => { isMounted = false; };
-  }, [selectedCity, categoryName]);
+  }, [selectedCity, categoryName, reloadKey]);
 
-  // Audience options
-  const audienceOptions = ["Men", "Women", "Kids", "Unisex"];
-
-  // Filtering logic
   const filteredSalons = useMemo(() => {
-    return salons.filter((s) => {
-      // Category filter safety check
-      if (!isSalonInCategory(s, categoryName)) return false;
-
-      // Search query filter
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesName = s.name.toLowerCase().includes(q);
-        const matchesAddress = (s.address?.formattedAddress || "").toLowerCase().includes(q);
-        const matchesTag = s.tags.some((t) => t.toLowerCase().includes(q));
-        if (!matchesName && !matchesAddress && !matchesTag) return false;
+    const q = searchQuery.trim().toLowerCase();
+    const list = salons.filter((s) => {
+      if (q) {
+        const haystack = [s.name, s.area, ...s.tags].filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
       }
-
-      // Audience filter
-      if (activeAudience && activeAudience !== "Unisex") {
-        if (s.audience && s.audience !== activeAudience && s.audience !== "Unisex") {
-          return false;
-        }
-      }
-
-      // Rating filter
-      if (ratingFilter) {
-        const score = s.rating?.avgScore || s.rating?.rating || 0;
-        if (score < ratingFilter) return false;
-      }
+      // Salons without reviews have no real rating, so they can't satisfy a rating filter
+      if (ratingFilter && (s.reviewCount === 0 || s.score < ratingFilter)) return false;
       return true;
     });
-  }, [salons, categoryName, searchQuery, activeAudience, ratingFilter]);
+
+    if (activeSort === "Rating") {
+      list.sort((a, b) => (b.reviewCount > 0 ? b.score : 0) - (a.reviewCount > 0 ? a.score : 0) || b.reviewCount - a.reviewCount);
+    } else if (activeSort === "Price") {
+      list.sort((a, b) => (a.startingPrice ?? Infinity) - (b.startingPrice ?? Infinity));
+    }
+    return list;
+  }, [salons, searchQuery, ratingFilter, activeSort]);
 
   const handleSalonPress = useCallback((salon) => {
     if (navigate) {
-      navigate("SalonDetail", { salonId: salon._id || salon.id, salon });
+      navigate("SalonDetail", { salonId: salon._id, salon: salon.raw });
     }
   }, [navigate]);
 
-  const handleBookNow = useCallback((salon) => {
-    if (navigate) {
-      navigate("Booking", { salon });
-    }
-  }, [navigate]);
+  // Booking needs a branch and chosen services, which are picked on the salon page
+  const handleBookNow = handleSalonPress;
+
+  const toggleSort = (sort) => setActiveSort((prev) => (prev === sort ? "Recommended" : sort));
 
   const styles = buildStyles(isDark);
 
@@ -434,88 +275,41 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
           </View>
         </View>
 
-        {/* Gender / Audience Filter Pills Bar */}
-        <View style={styles.audienceRow}>
-          {audienceOptions.map((item) => {
-            const isActive = activeAudience === item;
-            return (
+        {/* Sort & Filter Controls Row */}
+        {isCityLive && !loadError ? (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.filterRow}
+          >
+            {[
+              { key: "Rating", label: "Top rated", icon: "trending-up", active: activeSort === "Rating", onPress: () => toggleSort("Rating") },
+              { key: "Price", label: "Price: low to high", icon: "pricetag-outline", active: activeSort === "Price", onPress: () => toggleSort("Price") },
+              { key: "Stars", label: "4.0+", icon: "star", active: ratingFilter === 4.0, onPress: () => setRatingFilter((prev) => (prev === 4.0 ? null : 4.0)) },
+            ].map((pill) => (
               <TouchableOpacity
-                key={item}
-                style={[
-                  styles.audiencePill,
-                  isActive && styles.audiencePillActive,
-                ]}
-                onPress={() => setActiveAudience(item)}
+                key={pill.key}
+                style={[styles.filterPill, pill.active && styles.filterPillActive]}
+                onPress={pill.onPress}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.audienceText, isActive && styles.audienceTextActive]}>
-                  {item}
-                </Text>
+                <Ionicons
+                  name={pill.icon}
+                  size={14}
+                  color={pill.active ? "#C05278" : isDark ? "#D4D4D8" : "#3F3F46"}
+                  style={{ marginRight: 5 }}
+                />
+                <Text style={[styles.filterPillText, pill.active && styles.filterPillTextActive]}>{pill.label}</Text>
               </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        {/* Sort & Filter Controls Row */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterRow}
-        >
-          {/* Sort Pill */}
-          <TouchableOpacity
-            style={[styles.filterPill, activeSort !== "Recommended" && styles.filterPillActive]}
-            onPress={() => setActiveSort((prev) => (prev === "Recommended" ? "Rating" : "Recommended"))}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="swap-vertical" size={14} color={activeSort !== "Recommended" ? "#C05278" : "#3F3F46"} style={{ marginRight: 4 }} />
-            <Text style={[styles.filterPillText, activeSort !== "Recommended" && styles.filterPillTextActive]}>
-              Sort
-            </Text>
-            <Ionicons name="chevron-down" size={12} color="#71717A" style={{ marginLeft: 3 }} />
-          </TouchableOpacity>
-
-          {/* Near Me Pill */}
-          <TouchableOpacity
-            style={[styles.filterPill, isNearMe && styles.filterPillActive]}
-            onPress={() => setIsNearMe((prev) => !prev)}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="location-outline" size={14} color={isNearMe ? "#C05278" : "#3F3F46"} style={{ marginRight: 4 }} />
-            <Text style={[styles.filterPillText, isNearMe && styles.filterPillTextActive]}>
-              Near me
-            </Text>
-          </TouchableOpacity>
-
-          {/* Price Pill */}
-          <TouchableOpacity
-            style={styles.filterPill}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.filterPillIcon}>₹</Text>
-            <Text style={styles.filterPillText}>Price</Text>
-            <Ionicons name="chevron-down" size={12} color="#71717A" style={{ marginLeft: 3 }} />
-          </TouchableOpacity>
-
-          {/* Ratings Pill */}
-          <TouchableOpacity
-            style={[styles.filterPill, ratingFilter === 4.0 && styles.filterPillActive]}
-            onPress={() => setRatingFilter((prev) => (prev === 4.0 ? null : 4.0))}
-            activeOpacity={0.8}
-          >
-            <Ionicons name="star" size={13} color={ratingFilter ? "#F59E0B" : "#71717A"} style={{ marginRight: 4 }} />
-            <Text style={[styles.filterPillText, ratingFilter && styles.filterPillTextActive]}>
-              Ratings
-            </Text>
-            <Ionicons name="chevron-down" size={12} color="#71717A" style={{ marginLeft: 3 }} />
-          </TouchableOpacity>
-        </ScrollView>
+            ))}
+          </ScrollView>
+        ) : null}
 
         {/* Count Header & Map View Button */}
-        {!isCityEmpty && (
+        {!loading && isCityLive && !loadError && salons.length > 0 && (
           <View style={styles.listHeaderRow}>
             <Text style={styles.salonsCountText}>
-              {filteredSalons.length} salons found
+              {filteredSalons.length} {filteredSalons.length === 1 ? "salon" : "salons"} found
             </Text>
 
             <TouchableOpacity
@@ -533,14 +327,30 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
         {loading ? (
           <View style={styles.loadingBox}>
             <ActivityIndicator size="small" color="#C05278" />
-            <Text style={styles.loadingText}>Loading top salons...</Text>
+            <Text style={styles.loadingText}>Loading salons...</Text>
           </View>
-        ) : isCityEmpty ? (
+        ) : !isCityLive ? (
           <ComingSoonLocation
             city={selectedCity}
             onChangeLocation={() => setLocationModalVisible(true)}
             onSelectQuickCity={(c) => setSelectedCity(c)}
           />
+        ) : loadError ? (
+          <View style={styles.emptyBox}>
+            <Ionicons name="cloud-offline-outline" size={40} color="#A1A1AA" />
+            <Text style={styles.emptyTitle}>Couldn't load salons</Text>
+            <Text style={styles.emptySub}>Check your internet connection and try again.</Text>
+            <TouchableOpacity style={styles.retryBtn} onPress={() => setReloadKey((k) => k + 1)} activeOpacity={0.85}>
+              <Ionicons name="refresh" size={14} color="#FFFFFF" style={{ marginRight: 5 }} />
+              <Text style={styles.retryBtnText}>Try again</Text>
+            </TouchableOpacity>
+          </View>
+        ) : salons.length === 0 ? (
+          <View style={styles.emptyBox}>
+            <Ionicons name="storefront-outline" size={40} color="#A1A1AA" />
+            <Text style={styles.emptyTitle}>No {config.title.toLowerCase()} salons yet</Text>
+            <Text style={styles.emptySub}>No salons in {selectedCity} offer this service right now.</Text>
+          </View>
         ) : filteredSalons.length === 0 ? (
           <View style={styles.emptyBox}>
             <Ionicons name="search-outline" size={40} color="#A1A1AA" />
@@ -549,13 +359,14 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
           </View>
         ) : (
           filteredSalons.map((salon) => {
-            const rawScore = typeof salon.rating === "number" ? salon.rating : (salon.rating?.avgScore || salon.rating?.score || salon.avgScore || 5.0);
-            const score = typeof rawScore === "number" && !isNaN(rawScore) ? rawScore : 5.0;
-            const reviewCount = salon.totalReviews ?? salon.reviewsCount ?? salon.rating?.totalReviews ?? salon.rating?.reviewsCount ?? 0;
+            const isNew = salon.reviewCount === 0;
+            const distanceText =
+              salon.distance == null ? null : typeof salon.distance === "number" ? `${salon.distance} km` : salon.distance;
+            const locationLine = [salon.area || selectedCity, distanceText].filter(Boolean).join(" · ");
 
             return (
               <TouchableOpacity
-                key={salon.id || salon._id}
+                key={salon._id}
                 style={styles.salonCard}
                 onPress={() => handleSalonPress(salon)}
                 activeOpacity={0.9}
@@ -567,12 +378,6 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
                     style={styles.salonThumb}
                     resizeMode="cover"
                   />
-                  {salon.isPopular ? (
-                    <View style={styles.popularBadge}>
-                      <Ionicons name="sparkles" size={11} color="#FFD700" style={{ marginRight: 3 }} />
-                      <Text style={styles.popularBadgeText}>Popular</Text>
-                    </View>
-                  ) : null}
                 </View>
 
                 {/* Center Salon Details */}
@@ -582,7 +387,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
                     <Text style={styles.salonName} numberOfLines={1}>
                       {salon.name}
                     </Text>
-                    {salon.isVerified !== false ? (
+                    {salon.isVerified ? (
                       <Ionicons name="checkmark-circle" size={16} color="#1DA1F2" style={{ marginLeft: 4 }} />
                     ) : null}
                   </View>
@@ -590,24 +395,33 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
                   {/* Rating & Reviews */}
                   <View style={styles.ratingRow}>
                     <Ionicons name="star" size={13} color="#F59E0B" />
-                    <Text style={styles.ratingScore}>{score.toFixed(1)}</Text>
-                    <Text style={styles.ratingCount}>
-                      ({reviewCount >= 1000 ? `${(reviewCount / 1000).toFixed(1)}k` : reviewCount} reviews)
-                    </Text>
+                    {isNew ? (
+                      <Text style={styles.ratingScore}>New</Text>
+                    ) : (
+                      <>
+                        <Text style={styles.ratingScore}>{(salon.score || 0).toFixed(1)}</Text>
+                        <Text style={styles.ratingCount}>
+                          ({salon.reviewCount >= 1000 ? `${(salon.reviewCount / 1000).toFixed(1)}k` : salon.reviewCount} {salon.reviewCount === 1 ? "review" : "reviews"})
+                        </Text>
+                      </>
+                    )}
                   </View>
 
                   {/* Location & Distance */}
                   <View style={styles.locationRow}>
                     <Ionicons name="location-outline" size={13} color="#71717A" />
-                    <Text style={styles.locationText} numberOfLines={1}>
-                      {salon.address?.formattedAddress || selectedCity} · {salon.distance || "1.2 km"}
-                    </Text>
+                    <Text style={styles.locationText} numberOfLines={1}>{locationLine}</Text>
                   </View>
 
-                  {/* Service Tags */}
+                  {/* Starting price & tags */}
                   <View style={styles.tagsRow}>
-                    {(salon.tags || config.tags).slice(0, 3).map((tag, idx) => (
-                      <View key={idx} style={styles.tagPill}>
+                    {salon.startingPrice != null ? (
+                      <View style={styles.tagPill}>
+                        <Text style={styles.tagText}>From ₹{salon.startingPrice}</Text>
+                      </View>
+                    ) : null}
+                    {salon.tags.slice(0, 2).map((tag) => (
+                      <View key={tag} style={styles.tagPill}>
                         <Text style={styles.tagText}>{tag}</Text>
                       </View>
                     ))}
@@ -618,13 +432,13 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
                 <View style={styles.rightActions}>
                   <TouchableOpacity
                     style={styles.favBtn}
-                    onPress={() => toggleFavorite(salon)}
+                    onPress={() => toggleFavorite(salon.raw)}
                     activeOpacity={0.7}
                   >
                     <Ionicons
-                      name={isFav ? "heart" : "heart-outline"}
+                      name={isFavorite(salon._id) ? "heart" : "heart-outline"}
                       size={20}
-                      color={isFav ? "#E11D48" : "#A1A1AA"}
+                      color={isFavorite(salon._id) ? "#E11D48" : "#A1A1AA"}
                     />
                   </TouchableOpacity>
 
@@ -649,7 +463,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
 
           <View style={styles.ctaTextWrap}>
             <Text style={styles.ctaTitle}>Not sure what to choose?</Text>
-            <Text style={styles.ctaSub}>Get free consultation from our hair experts.</Text>
+            <Text style={styles.ctaSub}>Get free advice from our beauty experts.</Text>
           </View>
 
           <TouchableOpacity
@@ -658,7 +472,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
             activeOpacity={0.8}
           >
             <Text style={styles.chatNowText}>Chat Now</Text>
-            <Ionicons name="arrow-forward" size={13} color="#7A0026" style={{ marginLeft: 3 }} />
+            <Ionicons name="arrow-forward" size={13} color={isDark ? "#F9A8C4" : "#7A0026"} style={{ marginLeft: 3 }} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -808,33 +622,6 @@ function buildStyles(isDark) {
       textAlign: "center",
       fontStyle: "italic",
     },
-    /* Audience Filter Pills */
-    audienceRow: {
-      flexDirection: "row",
-      marginBottom: 14,
-      backgroundColor: isDark ? "#1E1E24" : "#F4F4F6",
-      borderRadius: 24,
-      padding: 4,
-    },
-    audiencePill: {
-      flex: 1,
-      paddingVertical: 9,
-      alignItems: "center",
-      justifyContent: "center",
-      borderRadius: 20,
-    },
-    audiencePillActive: {
-      backgroundColor: isDark ? "#3F3F46" : "#22222D",
-    },
-    audienceText: {
-      fontSize: 13,
-      fontWeight: "600",
-      color: isDark ? "#A1A1AA" : "#71717A",
-    },
-    audienceTextActive: {
-      color: "#FFFFFF",
-      fontWeight: "700",
-    },
     /* Filter Row */
     filterRow: {
       flexDirection: "row",
@@ -855,12 +642,6 @@ function buildStyles(isDark) {
     filterPillActive: {
       borderColor: "#C05278",
       backgroundColor: isDark ? "#2A1B22" : "#FDF0F2",
-    },
-    filterPillIcon: {
-      fontSize: 13,
-      fontWeight: "700",
-      color: "#71717A",
-      marginRight: 4,
     },
     filterPillText: {
       fontSize: 13,
@@ -923,22 +704,6 @@ function buildStyles(isDark) {
     salonThumb: {
       width: "100%",
       height: "100%",
-    },
-    popularBadge: {
-      position: "absolute",
-      top: 6,
-      left: 6,
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "rgba(0, 0, 0, 0.72)",
-      paddingHorizontal: 6,
-      paddingVertical: 3,
-      borderRadius: 8,
-    },
-    popularBadgeText: {
-      fontSize: 9,
-      fontWeight: "700",
-      color: "#FFFFFF",
     },
     salonDetails: {
       flex: 1,
@@ -1017,7 +782,7 @@ function buildStyles(isDark) {
     bookNowText: {
       fontSize: 12,
       fontWeight: "700",
-      color: "#7A0026",
+      color: isDark ? "#F9A8C4" : "#7A0026",
     },
     /* Consultation Banner */
     ctaBanner: {
@@ -1063,7 +828,7 @@ function buildStyles(isDark) {
     chatNowText: {
       fontSize: 12,
       fontWeight: "700",
-      color: "#7A0026",
+      color: isDark ? "#F9A8C4" : "#7A0026",
     },
     loadingBox: {
       alignItems: "center",
@@ -1088,6 +853,21 @@ function buildStyles(isDark) {
       fontSize: 12,
       color: "#71717A",
       marginTop: 4,
+      textAlign: "center",
+    },
+    retryBtn: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 14,
+      paddingHorizontal: 18,
+      height: 40,
+      borderRadius: 12,
+      backgroundColor: "#C05278",
+    },
+    retryBtnText: {
+      color: "#FFFFFF",
+      fontSize: 13,
+      fontWeight: "700",
     },
   });
 }

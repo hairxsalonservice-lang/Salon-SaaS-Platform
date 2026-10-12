@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { C, S, FS, FW, R, TYPO } from "../theme";
@@ -15,6 +15,18 @@ function minutesToTime(totalMins) {
   const h = Math.floor(totalMins / 60) % 24;
   const m = totalMins % 60;
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+function isSlotFree(slot) {
+  const st = (slot.status || "").toUpperCase();
+  return (st === "" || st === "AVAILABLE") && slot.isAvailable !== false;
+}
+
+// "YYYY-MM-DD" as a local date (new Date("YYYY-MM-DD") parses as UTC midnight)
+function parseLocalDate(str) {
+  const [y, m, d] = String(str || "").split("-").map(Number);
+  const date = new Date(y, (m || 1) - 1, d || 1);
+  return isNaN(date.valueOf()) ? new Date() : date;
 }
 
 export default function SlotPicker({
@@ -41,11 +53,7 @@ export default function SlotPicker({
         map.set(timeKey, s);
       } else {
         const existing = map.get(timeKey);
-        const existingStatus = (existing.status || "").toUpperCase();
-        const newStatus = (s.status || "").toUpperCase();
-        const existingAvailable = existingStatus === "AVAILABLE" || existingStatus === "" || existing.isAvailable !== false;
-        const newAvailable = newStatus === "AVAILABLE" || newStatus === "" || s.isAvailable !== false;
-        if (!existingAvailable && newAvailable) {
+        if (!isSlotFree(existing) && isSlotFree(s)) {
           map.set(timeKey, s);
         }
       }
@@ -56,9 +64,27 @@ export default function SlotPicker({
     return list;
   }, [slots]);
 
+  // Minutes since midnight now, but only when the selected date is today (otherwise nothing is "past")
+  const isToday = selectedDate === toLocalDateStr(new Date());
+  const [nowTick, setNowTick] = useState(0);
+  useEffect(() => {
+    if (!isToday) return;
+    const t = setInterval(() => setNowTick((n) => n + 1), 60000);
+    return () => clearInterval(t);
+  }, [isToday]);
+  const nowMins = useMemo(() => {
+    if (!isToday) return -1;
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }, [isToday, nowTick]);
+
   const slotAvailabilityMap = useMemo(() => {
     const map = new Map();
     const duration = serviceDurationMinutes > 0 ? serviceDurationMinutes : 30;
+    const freeByStart = new Map();
+    uniqueSlots.forEach((s) => {
+      if (isSlotFree(s)) freeByStart.set(timeToMinutes(s.startTime || s.time), s);
+    });
 
     uniqueSlots.forEach((slot) => {
       const slotId = slot._id || slot.id;
@@ -66,55 +92,34 @@ export default function SlotPicker({
       const targetEndMins = startMins + duration;
       const targetEndTimeStr = minutesToTime(targetEndMins);
 
-      const rawStatus = (slot.status || "").toUpperCase();
-      const singleIsBooked =
-        rawStatus === "BOOKED" ||
-        rawStatus === "BLOCKED" ||
-        rawStatus === "RESERVED" ||
-        rawStatus === "UNAVAILABLE" ||
-        (rawStatus !== "" && rawStatus !== "AVAILABLE") ||
-        slot.isAvailable === false;
-
-      if (singleIsBooked) {
+      if (!isSlotFree(slot) || startMins <= nowMins) {
         map.set(slotId, { isBooked: true, calculatedEndTime: slot.endTime });
         return;
       }
 
-      const rangeSlots = uniqueSlots.filter((other) => {
-        const otherMins = timeToMinutes(other.startTime || other.time);
-        return otherMins >= startMins && otherMins < targetEndMins;
-      });
-
-      const allAvailable = rangeSlots.every((other) => {
-        const st = (other.status || "").toUpperCase();
-        return st === "AVAILABLE" || st === "" || other.isAvailable !== false;
-      });
-
-      let maxEndMins = 0;
-      rangeSlots.forEach((other) => {
-        const endStr = other.endTime;
-        if (endStr) {
-          const endMins = timeToMinutes(endStr);
-          if (endMins > maxEndMins) maxEndMins = endMins;
-        }
-      });
-
-      const coversDuration = rangeSlots.length > 0 && (
-        maxEndMins >= targetEndMins ||
-        (rangeSlots.length * 30 >= duration)
-      );
-
-      const isValid = allAvailable && coversDuration;
+      // Walk back-to-back free slots from this start until the service fits.
+      // Uses each slot's real end time (slots aren't always 30 min) and stops at any gap or booked slot.
+      const chain = [];
+      let cursor = startMins;
+      while (cursor < targetEndMins) {
+        const next = freeByStart.get(cursor);
+        if (!next) break;
+        chain.push(next);
+        const nextEnd = next.endTime ? timeToMinutes(next.endTime) : cursor + 30;
+        if (!(nextEnd > cursor)) break;
+        cursor = nextEnd;
+      }
+      const isValid = cursor >= targetEndMins;
 
       map.set(slotId, {
         isBooked: !isValid,
         calculatedEndTime: targetEndTimeStr,
-        consecutiveSlots: rangeSlots,
+        consecutiveSlots: chain,
       });
     });
 
     return map;
-  }, [uniqueSlots, serviceDurationMinutes]);
+  }, [uniqueSlots, serviceDurationMinutes, nowMins]);
 
   const dates = Array.from({ length: 30 }, (_, i) => {
     const d = new Date();
@@ -125,12 +130,19 @@ export default function SlotPicker({
     return { isoStr, dayName, dayNum, dateObj: d };
   });
 
-  const selectedDateObj = useMemo(() => {
-    const d = new Date(selectedDate);
-    return isNaN(d.valueOf()) ? new Date() : d;
-  }, [selectedDate]);
+  const selectedDateObj = useMemo(() => parseLocalDate(selectedDate), [selectedDate]);
 
   const currentMonthYear = selectedDateObj.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+  const tabOf = (slot) => {
+    const mins = timeToMinutes(slot.startTime || slot.time);
+    return mins < 12 * 60 ? "Morning" : mins < 17 * 60 ? "Afternoon" : "Evening";
+  };
+  useEffect(() => {
+    const firstOpen = uniqueSlots.find((s) => !slotAvailabilityMap.get(s._id || s.id)?.isBooked);
+    if (firstOpen) setTimeTab(tabOf(firstOpen));
+    // only when the day's slots change, not on every tab tap
+  }, [uniqueSlots]);
 
   const filteredSlots = uniqueSlots.filter(slot => {
     const slotMins = timeToMinutes(slot.startTime || slot.time);

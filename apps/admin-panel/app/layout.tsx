@@ -4,8 +4,8 @@ import Providers from "./providers";
 import LayoutWrapper from "@/app/LayoutWrapper";
 
 export const metadata: Metadata = {
-  title: "ST CUT — SuperAdmin Control Panel",
-  description: "Super admin control panel for ST CUT platform",
+  title: "HairX — SuperAdmin Control Panel",
+  description: "Super admin control panel for HairX platform",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

@@ -63,12 +63,20 @@ export default function ForgotPasswordModal({ visible, onClose }) {
       setError("Please enter both the verification code and your new password.");
       return;
     }
-    if (confirmPassword && newPassword !== confirmPassword) {
-      setError("Passwords do not match. Please verify.");
+    // Always confirm: an empty confirm field used to skip the check, so a typo could lock the user out
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match. Please re-enter the new password to confirm.");
       return;
     }
-    if (newPassword.length < 8) {
-      setError("New password must be at least 8 characters long.");
+    // Same rules the server enforces for every password
+    const missing = [
+      newPassword.length >= 8 ? null : "8+ characters",
+      /[A-Z]/.test(newPassword) ? null : "an uppercase letter",
+      /[0-9]/.test(newPassword) ? null : "a number",
+      /[!@#$%^&*]/.test(newPassword) ? null : "one of ! @ # $ % ^ & *",
+    ].filter(Boolean);
+    if (missing.length) {
+      setError(`Your new password needs ${missing.join(", ")}.`);
       return;
     }
     setError("");

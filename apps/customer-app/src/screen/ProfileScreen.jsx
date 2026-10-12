@@ -52,7 +52,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
   const handleShareApp = async () => {
     try {
       await Share.share({
-        message: "Book your luxury salon appointments on ST CUT! Download now: https://stcut.app",
+        message: "Book your luxury salon appointments on HairX! Download now: https://stcut.app",
       });
     } catch (error) {
       console.log(error.message);

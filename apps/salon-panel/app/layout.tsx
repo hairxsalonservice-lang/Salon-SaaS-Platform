@@ -17,9 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ST CUT - Partner Salon Management",
+  title: "HairX - Partner Salon Management",
   description:
-    "The all-in-one salon management platform for ST CUT partner studios. Bookings, staff, services and revenue.",
+    "The all-in-one salon management platform for HairX partner studios. Bookings, staff, services and revenue.",
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",

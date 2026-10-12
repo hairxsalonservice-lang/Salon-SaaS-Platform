@@ -48,7 +48,7 @@ async function seedBrahmapur() {
     const adminEmail = "admin@stcut.com";
     const adminPassword = "AdminPassword123!";
     const adminUser = await User.create({
-      name: "ST CUT SuperAdmin",
+      name: "HairX SuperAdmin",
       email: adminEmail,
       password: adminPassword,
       role: roles.superadmin._id,
@@ -517,7 +517,7 @@ async function seedBrahmapur() {
     console.log("✅ Sample customer ratings & reviews seeded successfully.");
 
     console.log("\n=======================================================");
-    console.log("  ST CUT SEED COMPLETE — BRAHMAPUR LOCATION");
+    console.log("  HAIRX SEED COMPLETE — BRAHMAPUR LOCATION");
     console.log("=======================================================\n");
 
     process.exit(0);

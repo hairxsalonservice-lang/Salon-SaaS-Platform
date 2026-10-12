@@ -17,6 +17,15 @@ import { C, S, R } from "../theme";
 import { paiseToINR } from "../services/apiClient";
 import { useTheme } from "../context/ThemeContext";
 
+const STATUS_LABELS = {
+  PENDING: "PENDING",
+  CONFIRMED: "CONFIRMED",
+  IN_PROGRESS: "IN SERVICE",
+  COMPLETED: "COMPLETED",
+  CANCELLED: "CANCELLED",
+  NO_SHOW: "MISSED",
+};
+
 function formatDate(dateStr) {
   if (!dateStr) return "Date unavailable";
   try {
@@ -134,6 +143,7 @@ export default function AppointmentDetailModal({
   appointment,
   onClose,
   onCancel,
+  onReschedule,
 }) {
   const { theme, isDark } = useTheme();
   const styles = getStyles();
@@ -143,7 +153,7 @@ export default function AppointmentDetailModal({
     appointment.salon?.name ||
     (typeof appointment.salonId === "object" ? appointment.salonId?.name : null) ||
     (typeof appointment.branchId === "object" ? appointment.branchId?.name : null) ||
-    "Luxe Salon Brahmapur";
+    "Salon";
 
   const rawAddress =
     (typeof appointment.branchId === "object" ? appointment.branchId?.address : null) ||
@@ -197,10 +207,16 @@ export default function AppointmentDetailModal({
   const bookingPassCode = `LX-${refCode}`;
 
   const isCancelable = status === "PENDING" || status === "CONFIRMED";
+  const statusLabel = STATUS_LABELS[status] || status.replace(/_/g, " ");
+
+  const salonObj = appointment.salon || (typeof appointment.salonId === "object" ? appointment.salonId : null);
+  const branchObj = appointment.branch || (typeof appointment.branchId === "object" ? appointment.branchId : null);
+  // Never fall back to a made-up number: with no phone on file, the Call button is hidden
+  const salonPhone = branchObj?.contactPhone || salonObj?.contactPhone || null;
 
   const coverImage =
-    appointment.salon?.coverImage ||
-    appointment.salon?.logo ||
+    salonObj?.coverImage ||
+    salonObj?.logo ||
     "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500&q=80";
 
   return (
@@ -243,13 +259,15 @@ export default function AppointmentDetailModal({
                       <View style={styles.salonNameRow}>
                         <Text style={styles.salonNameText} numberOfLines={1}>{salonName}</Text>
                         <View style={styles.statusPill}>
-                          <Text style={styles.statusPillText}>{status}</Text>
+                          <Text style={styles.statusPillText}>{statusLabel}</Text>
                         </View>
                       </View>
-                      <View style={styles.salonAddressRow}>
-                        <Ionicons name="location" size={14} color="#6B7280" style={{ marginTop: 2 }} />
-                        <Text style={styles.salonAddressText} numberOfLines={2}>{branchAddress || "Silk City Road, Near Old Bus Stand, Brahmapur, Odisha"}</Text>
-                      </View>
+                      {branchAddress ? (
+                        <View style={styles.salonAddressRow}>
+                          <Ionicons name="location" size={14} color="#6B7280" style={{ marginTop: 2 }} />
+                          <Text style={styles.salonAddressText} numberOfLines={2}>{branchAddress}</Text>
+                        </View>
+                      ) : null}
                     </View>
                   </View>
                 </View>
@@ -315,8 +333,8 @@ export default function AppointmentDetailModal({
                   <TouchableOpacity
                     style={styles.actionBtnOutline}
                     onPress={() => {
-                      const addr = branchAddress || salonName;
-                      Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`);
+                      const query = [salonName, branchAddress].filter(Boolean).join(", ");
+                      Linking.openURL(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`).catch(() => {});
                     }}
                     activeOpacity={0.8}
                   >
@@ -324,18 +342,34 @@ export default function AppointmentDetailModal({
                     <Text style={styles.actionBtnOutlineText}>Directions</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={styles.actionBtnOutline}
-                    onPress={() => {
-                      const phone = appointment.branch?.contactPhone || "9876543210";
-                      Linking.openURL(`tel:${phone.replace(/\s+/g, "")}`);
-                    }}
-                    activeOpacity={0.8}
-                  >
-                    <Ionicons name="call-outline" size={18} color="#6F2A3B" style={{ marginRight: 6 }} />
-                    <Text style={styles.actionBtnOutlineText}>Call Salon</Text>
-                  </TouchableOpacity>
+                  {salonPhone ? (
+                    <TouchableOpacity
+                      style={styles.actionBtnOutline}
+                      onPress={() => {
+                        Linking.openURL(`tel:${String(salonPhone).replace(/\s+/g, "")}`).catch(() => {});
+                      }}
+                      activeOpacity={0.8}
+                    >
+                      <Ionicons name="call-outline" size={18} color="#6F2A3B" style={{ marginRight: 6 }} />
+                      <Text style={styles.actionBtnOutlineText}>Call Salon</Text>
+                    </TouchableOpacity>
+                  ) : null}
                 </View>
+
+                {/* Reschedule — the Bookings screen passed onReschedule but it was never shown */}
+                {isCancelable && onReschedule ? (
+                  <TouchableOpacity
+                    style={[styles.actionBtnOutline, { marginTop: 12, flex: 0 }]}
+                    onPress={() => {
+                      onClose();
+                      onReschedule(appointment);
+                    }}
+                    activeOpacity={0.82}
+                  >
+                    <Ionicons name="calendar-outline" size={18} color="#6F2A3B" style={{ marginRight: 6 }} />
+                    <Text style={styles.actionBtnOutlineText}>Reschedule</Text>
+                  </TouchableOpacity>
+                ) : null}
 
                 {/* Cancel Booking Action */}
                 {isCancelable && onCancel ? (
@@ -343,7 +377,7 @@ export default function AppointmentDetailModal({
                     style={styles.cancelBtn}
                     onPress={() => {
                       onClose();
-                      onCancel(appointment._id || appointment.id);
+                      onCancel(appointment);
                     }}
                     activeOpacity={0.82}
                   >

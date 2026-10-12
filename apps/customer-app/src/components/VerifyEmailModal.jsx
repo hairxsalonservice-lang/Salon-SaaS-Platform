@@ -90,7 +90,7 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
           <Text style={[styles.description, { color: isDark ? "#A0A09C" : "#666666" }]}>
             We've sent a verification link to{"\n"}
             <Text style={{ color: C.main, fontWeight: "700" }}>{targetEmail || "your email"}</Text>.
-            Tap the link to activate your ST CUT account.
+            Tap the link to activate your HairX account.
           </Text>
 
           {resendStatus !== "" && (

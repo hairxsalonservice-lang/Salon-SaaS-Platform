@@ -19,27 +19,52 @@ const REASONS = [
   "Other",
 ];
 
+// Appointments from the API carry populated salonId / serviceId / services, not flat names
+function getBookingNames(booking) {
+  const services = Array.isArray(booking?.services) && booking.services.length
+    ? booking.services
+    : booking?.serviceId && typeof booking.serviceId === "object" ? [booking.serviceId] : [];
+  const serviceName =
+    booking?.serviceName ||
+    booking?.service?.name ||
+    services.map((s) => (typeof s === "object" ? s?.name : null)).filter(Boolean).join(", ") ||
+    "your service";
+  const salonName =
+    booking?.salonName ||
+    booking?.salon?.name ||
+    (typeof booking?.salonId === "object" ? booking.salonId?.name : null) ||
+    (typeof booking?.branchId === "object" ? booking.branchId?.name : null) ||
+    "the salon";
+  return { serviceName, salonName };
+}
+
 export default function CancelBookingModal({ visible, onClose, onConfirm, booking }) {
   const styles = getStyles();
   const [selectedReason, setSelectedReason] = useState(REASONS[0]);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const { serviceName, salonName } = getBookingNames(booking);
 
   const handleCancel = async () => {
+    if (loading || !booking) return;
     setLoading(true);
+    setErrorMessage(null);
     try {
       if (onConfirm) {
         await onConfirm(booking.id || booking._id, selectedReason);
       }
       onClose();
     } catch (e) {
+      // Previously swallowed: the sheet just sat there with no explanation
       console.warn("Failed to cancel", e);
+      setErrorMessage(e?.message || "Couldn't cancel this booking. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={() => !loading && onClose()}>
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.warningIconBox}>
@@ -48,8 +73,14 @@ export default function CancelBookingModal({ visible, onClose, onConfirm, bookin
 
           <Text style={styles.title}>CANCEL APPOINTMENT?</Text>
           <Text style={styles.subtitle}>
-            Are you sure you want to cancel your visit for <Text style={styles.bold}>{booking?.serviceName || "Service"}</Text> at <Text style={styles.bold}>{booking?.salonName || "Salon"}</Text>?
+            Are you sure you want to cancel your visit for <Text style={styles.bold}>{serviceName}</Text> at <Text style={styles.bold}>{salonName}</Text>?
           </Text>
+
+          {errorMessage ? (
+            <Text style={{ color: C.error || "#DC2626", fontSize: 13, textAlign: "center", marginBottom: 12 }}>
+              {errorMessage}
+            </Text>
+          ) : null}
 
           <Text style={styles.reasonHeader}>REASON FOR CANCELLATION</Text>
           {REASONS.map((r) => {
@@ -70,7 +101,7 @@ export default function CancelBookingModal({ visible, onClose, onConfirm, bookin
           })}
 
           <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.keepBtn} onPress={onClose} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.keepBtn} onPress={onClose} disabled={loading} activeOpacity={0.8}>
               <Text style={styles.keepBtnText}>Keep Booking</Text>
             </TouchableOpacity>
 

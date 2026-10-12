@@ -1,5 +1,5 @@
 // src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect, useContext, useCallback } from "react";
+import React, { createContext, useState, useEffect, useContext, useCallback, useRef } from "react";
 import { setAuthToken, setRefreshTokenHandler, setUnauthorizedHandler } from "../services/apiClient";
 import { authService } from "../services/authService";
 import { storage } from "../services/storage";
@@ -17,11 +17,17 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // "Remember me" off: the session lives only in memory and ends when the app is closed.
+  // The refresh token is kept here so silent refresh still works during that session.
+  const rememberRef = useRef(true);
+  const memoryRefreshTokenRef = useRef(null);
+
   const logout = useCallback(async () => {
     await notificationService.unregisterPushToken();
     setUser(null);
     setToken(null);
     setAuthToken(null);
+    memoryRefreshTokenRef.current = null;
     await storage.removeItem(AUTH_TOKEN_KEY);
     await storage.removeItem(AUTH_REFRESH_TOKEN_KEY);
     await storage.removeItem(AUTH_USER_KEY);
@@ -29,7 +35,7 @@ export function AuthProvider({ children }) {
 
   const handleSilentRefresh = useCallback(async () => {
     try {
-      const savedRefreshToken = await storage.getItem(AUTH_REFRESH_TOKEN_KEY);
+      const savedRefreshToken = memoryRefreshTokenRef.current || (await storage.getItem(AUTH_REFRESH_TOKEN_KEY));
       if (!savedRefreshToken) {
         throw new Error("No refresh token available");
       }
@@ -41,7 +47,7 @@ export function AuthProvider({ children }) {
       if (newAccessToken) {
         setToken(newAccessToken);
         setAuthToken(newAccessToken);
-        await storage.setItem(AUTH_TOKEN_KEY, newAccessToken);
+        if (rememberRef.current) await storage.setItem(AUTH_TOKEN_KEY, newAccessToken);
         console.log("[AuthContext] Silent token refresh succeeded.");
         return newAccessToken;
       }
@@ -94,7 +100,7 @@ export function AuthProvider({ children }) {
     restoreSession();
   }, []);
 
-  const login = useCallback(async (email, password) => {
+  const login = useCallback(async (email, password, { remember = true } = {}) => {
     setError(null);
     setLoading(true);
     try {
@@ -107,14 +113,24 @@ export function AuthProvider({ children }) {
         setToken(accessToken);
         setUser(userData || null);
         setAuthToken(accessToken);
+        rememberRef.current = remember;
 
-        // Persist session securely across app restarts
-        await storage.setItem(AUTH_TOKEN_KEY, accessToken);
-        if (refreshToken) {
-          await storage.setItem(AUTH_REFRESH_TOKEN_KEY, refreshToken);
-        }
-        if (userData) {
-          await storage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
+        if (remember) {
+          // Persist session securely across app restarts
+          memoryRefreshTokenRef.current = null;
+          await storage.setItem(AUTH_TOKEN_KEY, accessToken);
+          if (refreshToken) {
+            await storage.setItem(AUTH_REFRESH_TOKEN_KEY, refreshToken);
+          }
+          if (userData) {
+            await storage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
+          }
+        } else {
+          // Keep this session in memory only, and drop any older saved session
+          memoryRefreshTokenRef.current = refreshToken || null;
+          await storage.removeItem(AUTH_TOKEN_KEY);
+          await storage.removeItem(AUTH_REFRESH_TOKEN_KEY);
+          await storage.removeItem(AUTH_USER_KEY);
         }
 
         return { success: true, user: userData };
@@ -142,6 +158,9 @@ export function AuthProvider({ children }) {
         setToken(accessToken);
         setUser(userData || null);
         setAuthToken(accessToken);
+        // These sign-in flows always keep the session
+        rememberRef.current = true;
+        memoryRefreshTokenRef.current = null;
 
         // Persist session securely across app restarts
         await storage.setItem(AUTH_TOKEN_KEY, accessToken);
@@ -177,6 +196,9 @@ export function AuthProvider({ children }) {
         setToken(accessToken);
         setUser(userData || null);
         setAuthToken(accessToken);
+        // These sign-in flows always keep the session
+        rememberRef.current = true;
+        memoryRefreshTokenRef.current = null;
 
         await storage.setItem(AUTH_TOKEN_KEY, accessToken);
         if (refreshToken) {
@@ -211,6 +233,9 @@ export function AuthProvider({ children }) {
         setToken(accessToken);
         setUser(userData || null);
         setAuthToken(accessToken);
+        // These sign-in flows always keep the session
+        rememberRef.current = true;
+        memoryRefreshTokenRef.current = null;
 
         await storage.setItem(AUTH_TOKEN_KEY, accessToken);
         if (refreshToken) {

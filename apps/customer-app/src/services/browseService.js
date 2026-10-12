@@ -42,10 +42,11 @@ export const browseService = {
   },
 
   getSalons: async (params = {}) => {
-    const queryParams = resolveCityParam(params);
+    const { bypassCache, ...restParams } = params;
+    const queryParams = resolveCityParam(restParams);
     const query = new URLSearchParams(queryParams).toString();
     const endpoint = `/browse/salons${query ? `?${query}` : ""}`;
-    return await apiClient.get(endpoint);
+    return await apiClient.get(endpoint, { bypassCache });
   },
 
   getSalonById: async (salonId) => {

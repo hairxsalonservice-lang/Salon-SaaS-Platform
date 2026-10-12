@@ -24,13 +24,13 @@ import { C, S, FS, FW, R, TYPO, FONT_FAMILY } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { BlurView } from 'expo-blur';
 import CategoryAccordionList from "../components/CategoryAccordionList";
-import AddReviewModal from "../components/AddReviewModal";
 import SpringTouchable from "../components/SpringTouchable";
 import ServiceCard from "../components/ServiceCard";
 import ErrorCardModal from "../components/ErrorCardModal";
 import ReviewsSection from "../components/ReviewsSection";
 import { ServiceCardSkeleton } from "../components/SkeletonLoader";
 import { browseService } from "../services/browseService";
+import { appointmentService } from "../services/appointmentService";
 import { paiseToINR } from "../services/apiClient";
 import { useFavorites } from "../context/FavoritesContext";
 import { useAuth } from "../context/AuthContext";
@@ -48,174 +48,22 @@ const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=1000&auto=format&fit=crop",
 ];
 
-const AMENITIES = [
-  { id: "1", icon: "wifi-outline", label: "Wi-Fi", description: "High-speed complimentary Wi-Fi for all clients" },
-  { id: "2", icon: "snow-outline", label: "Air conditioning", description: "Climate-controlled private treatment rooms" },
-  { id: "3", icon: "cafe-outline", label: "Beverages", description: "Complimentary green tea, espresso & gourmet coffee" },
-  { id: "4", icon: "car-outline", label: "Parking", description: "Reserved valet parking space at salon entrance" },
-  { id: "5", icon: "shield-checkmark-outline", label: "Sanitized Equipment", description: "Hospital-grade UV sterilization for all styling equipment" },
-  { id: "6", icon: "card-outline", label: "Digital Payments", description: "All major credit cards, UPI, and contactless payments accepted" },
-  { id: "7", icon: "sparkles-outline", label: "Private VIP Suite", description: "Exclusive private dressing room for specialized beauty sessions" },
-];
+// "21:00" -> "9:00 PM"
+function formatClock(time) {
+  if (!time || typeof time !== "string") return "";
+  const [h, m = "00"] = time.split(":");
+  const hours = parseInt(h, 10);
+  if (Number.isNaN(hours)) return time;
+  return `${hours % 12 || 12}:${m.slice(0, 2)} ${hours >= 12 ? "PM" : "AM"}`;
+}
 
-const GALLERY_THUMBNAILS = [
-  "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=300&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=300&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=300&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=300&auto=format&fit=crop",
-];
-
-const ServiceList = memo(({ services, selectedServices = [], onSelect, onViewCombo }) => {
-  return services.map((svc) => {
-    const svcId = svc._id || svc.id;
-    const isSelected = selectedServices.some((s) => (s._id || s.id) === svcId);
-    return (
-      <ServiceCard
-        key={svcId}
-        service={svc}
-        selected={isSelected}
-        onSelect={onSelect}
-        onViewCombo={onViewCombo}
-      />
-    );
-  });
-});
-
-const SqueezingOpenBadge = memo(({ isOpen, styles, isHeaderPill = false }) => {
-  const animValue = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    // 0 = close (collapsed dot circle)
-    // 1 = open (expanded wide pill)
-    animValue.setValue(0);
-
-    // Sequence:
-    // 1. Initially 0 (close/dot circle)
-    // 2. When opened: animate to 1 (expands open pill)
-    // 3. Hold for 1 second (1000ms)
-    // 4. After 1 sec: animate back to 0 (squeezes closed into dot circle)
-    const animSequence = Animated.sequence([
-      Animated.timing(animValue, {
-        toValue: 1,
-        duration: 380,
-        easing: Easing.out(Easing.back(1.2)),
-        useNativeDriver: false,
-      }),
-      Animated.delay(1000),
-      Animated.timing(animValue, {
-        toValue: 0,
-        duration: 450,
-        easing: Easing.inOut(Easing.cubic),
-        useNativeDriver: false,
-      }),
-    ]);
-
-    animSequence.start();
-
-    return () => animSequence.stop();
-  }, [isOpen]);
-
-  const containerWidth = animValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [isHeaderPill ? 24 : 32, isHeaderPill ? 64 : 78],
-  });
-
-  const containerPadding = animValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 9],
-  });
-
-  const textWidth = animValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, isHeaderPill ? 34 : 40],
-  });
-
-  const textOpacity = animValue.interpolate({
-    inputRange: [0, 0.3, 1],
-    outputRange: [0, 0, 1],
-  });
-
-  const textMarginLeft = animValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 5],
-  });
-
-  if (isHeaderPill) {
-    return (
-      <Animated.View
-        key="hdr_badge_v3"
-        style={[
-          styles.statusBadgePill,
-          isOpen ? styles.statusBadgeOpen : styles.statusBadgeClosed,
-          {
-            width: containerWidth,
-            height: 24,
-            borderRadius: 12,
-            paddingHorizontal: containerPadding,
-            justifyContent: "center",
-            alignItems: "center",
-            flexDirection: "row",
-            overflow: "hidden",
-          },
-        ]}
-      >
-        <View style={[styles.statusBadgeDot, isOpen ? styles.statusDotOpen : styles.statusDotClosed]} />
-        <Animated.View
-          style={{
-            width: textWidth,
-            opacity: textOpacity,
-            marginLeft: textMarginLeft,
-            overflow: "hidden",
-          }}
-        >
-          <Text
-            style={[styles.statusBadgeText, isOpen ? styles.statusTextOpen : styles.statusTextClosed]}
-            numberOfLines={1}
-          >
-            {isOpen ? "OPEN" : "CLOSED"}
-          </Text>
-        </Animated.View>
-      </Animated.View>
-    );
-  }
-
-  return (
-    <Animated.View
-      key="hero_badge_v3"
-      style={[
-        styles.heroStatusBadgePill,
-        isOpen ? styles.heroStatusOpen : styles.heroStatusClosed,
-        {
-          width: containerWidth,
-          height: 32,
-          borderRadius: 16,
-          paddingHorizontal: containerPadding,
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "row",
-          overflow: "hidden",
-        },
-      ]}
-    >
-      <View style={[styles.heroStatusDot, isOpen ? styles.heroDotOpen : styles.heroDotClosed]} />
-      <Animated.View
-        style={{
-          width: textWidth,
-          opacity: textOpacity,
-          marginLeft: textMarginLeft,
-          overflow: "hidden",
-        }}
-      >
-        <Text
-          style={[styles.heroStatusText, isOpen ? styles.heroTextOpen : styles.heroTextClosed]}
-          numberOfLines={1}
-        >
-          {isOpen ? "OPEN" : "CLOSED"}
-        </Text>
-      </Animated.View>
-    </Animated.View>
-  );
-});
+// 75 -> "1 hr 15 mins"
+function formatDuration(totalMins) {
+  if (!totalMins) return "";
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  return [h ? `${h} hr` : null, m ? `${m} mins` : null].filter(Boolean).join(" ");
+}
 
 function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
   const { theme, isDark } = useTheme();
@@ -227,7 +75,6 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [fetchingSalon, setFetchingSalon] = useState(false);
   const [salonData, setSalonData] = useState(salon);
   const MAIN_TABS = useMemo(() => ["About", "Services", "Reviews"], []);
   const [activeMainTab, setActiveMainTab] = useState("About");
@@ -248,12 +95,9 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     }).start();
   }, [activeMainTab, MAIN_TABS, tabIndicatorAnim]);
   const [error, setError] = useState(null);
-  const [showAmenitiesModal, setShowAmenitiesModal] = useState(false);
   const [reviewsList, setReviewsList] = useState([]);
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [showVerifyModal, setShowVerifyModal] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
   const [activeComboService, setActiveComboService] = useState(null);
 
   const totalPrice = useMemo(() => {
@@ -265,36 +109,36 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
   }, [selectedServices]);
 
   const handleGetDirections = useCallback(() => {
-    const lat = selectedBranch?.coordinates?.coordinates?.[1] || selectedBranch?.latitude || salonData?.latitude || 19.3150;
-    const lng = selectedBranch?.coordinates?.coordinates?.[0] || selectedBranch?.longitude || salonData?.longitude || 84.7941;
-    const branchTitle = selectedBranch?.name || salonData?.name || "ST CUT Salon";
-    const encodedTitle = encodeURIComponent(branchTitle);
+    // Use the branch's stored coordinates when present, otherwise search by name + address
+    const coords = selectedBranch?.address?.coordinates;
+    const hasCoords = Number.isFinite(coords?.lat) && Number.isFinite(coords?.lng);
+    const addr = selectedBranch?.address;
+    const addressQuery = [
+      salonData?.name,
+      typeof addr === "string" ? addr : addr?.street,
+      typeof addr === "object" ? addr?.city : null,
+      typeof addr === "object" ? addr?.state : null,
+    ].filter(Boolean).join(", ");
 
-    const mapsUrl = Platform.select({
-      ios: `maps:0,0?q=${encodedTitle}@${lat},${lng}`,
-      android: `geo:${lat},${lng}?q=${lat},${lng}(${encodedTitle})`,
-      default: `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+    if (!hasCoords && !addressQuery) {
+      setError("This salon hasn't added its address yet.");
+      return;
+    }
+    const destination = hasCoords ? `${coords.lat},${coords.lng}` : encodeURIComponent(addressQuery);
+    Linking.openURL(`https://www.google.com/maps/dir/?api=1&destination=${destination}`).catch(() => {
+      setError("Couldn't open maps on this device.");
     });
-
-    const googleMapsWebUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${encodedTitle}`;
-
-    Linking.canOpenURL(mapsUrl)
-      .then((supported) => {
-        if (supported) {
-          Linking.openURL(mapsUrl);
-        } else {
-          Linking.openURL(googleMapsWebUrl);
-        }
-      })
-      .catch(() => {
-        Linking.openURL(googleMapsWebUrl);
-      });
   }, [selectedBranch, salonData]);
 
   const handleCallSalon = useCallback(() => {
-    const phone = selectedBranch?.contactPhone || selectedBranch?.phone || salonData?.contactPhone || "9861012345";
-    const telUrl = `tel:${phone.replace(/\s+/g, "")}`;
-    Linking.openURL(telUrl).catch((err) => console.log("Call error:", err));
+    const phone = selectedBranch?.contactPhone || selectedBranch?.phone || salonData?.contactPhone;
+    if (!phone) {
+      setError("This salon hasn't added a phone number yet.");
+      return;
+    }
+    Linking.openURL(`tel:${String(phone).replace(/\s+/g, "")}`).catch(() => {
+      setError("Couldn't start a call on this device.");
+    });
   }, [selectedBranch, salonData]);
 
   const animVal = useRef(new Animated.Value(selectedServices.length > 0 ? 1 : 0)).current;
@@ -346,15 +190,6 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
   const coverImage = salonData?.coverImage || salonData?.image || HERO_IMAGES[0];
   const carouselImages = salonData?.images?.length ? salonData.images : [coverImage];
 
-  const handleScrollImage = (event) => {
-    const slideSize = event.nativeEvent.layoutMeasurement.width;
-    const index = event.nativeEvent.contentOffset.x / slideSize;
-    const roundIndex = Math.round(index);
-    if (roundIndex !== activeImageIndex) {
-      setActiveImageIndex(roundIndex);
-    }
-  };
-
   const displayRating = useMemo(() => {
     const rawAvg = salonData?.rating?.avgScore || salonData?.rating?.score || (typeof salonData?.rating === "number" ? salonData.rating : null) || salonData?.avgScore;
     if (typeof rawAvg === "number" && !isNaN(rawAvg) && rawAvg > 0) return rawAvg.toFixed(1);
@@ -372,103 +207,82 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     return 0;
   }, [salonData, reviewsList]);
 
-  const addressText = useMemo(() => {
-    const target = selectedBranch || salonData;
-    if (!target) return "Silk City Road, Brahmapur, Odisha";
-    if (typeof target.address === "string" && target.address.trim()) return target.address;
-    if (target.address && typeof target.address === "object") {
-      const parts = [target.address.street, target.address.city, target.address.state].filter(Boolean);
-      if (parts.length > 0) return parts.join(", ");
-    }
-    return target.name || "Brahmapur, Odisha";
-  }, [selectedBranch, salonData]);
-
+  // null when the branch hasn't published hours — shown as "Hours not available" rather than invented times
   const weeklySchedule = useMemo(() => {
     const workingHours = selectedBranch?.workingHours || salonData?.workingHours;
+    if (!Array.isArray(workingHours) || workingHours.length === 0) return null;
+
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const todayIdx = new Date().getDay();
-
-    if (Array.isArray(workingHours) && workingHours.length > 0) {
-      return [1, 2, 3, 4, 5, 6, 0].map((dayNum) => {
-        const found = workingHours.find((w) => w.day === dayNum);
-        const isToday = dayNum === todayIdx;
-        return {
-          dayName: dayNames[dayNum],
-          isOpen: found ? found.isOpen !== false : true,
-          openTime: found?.openTime || "09:00 AM",
-          closeTime: found?.closeTime || "09:00 PM",
-          isToday,
-        };
-      });
-    }
-
-    return [1, 2, 3, 4, 5, 6, 0].map((dayNum) => ({
-      dayName: dayNames[dayNum],
-      isOpen: true,
-      openTime: "09:00 AM",
-      closeTime: "09:00 PM",
-      isToday: dayNum === todayIdx,
-    }));
-  }, [selectedBranch, salonData]);
-
-  const galleryImages = useMemo(() => {
-    const branchImgs = selectedBranch?.images || [];
-    const salonImgs = salonData?.images || [];
-    const combined = [...branchImgs, ...salonImgs];
-    if (combined.length > 0) return combined;
-    return [
-      "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1562322140-8baeececf3df?q=80&w=800&auto=format&fit=crop",
-      "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=800&auto=format&fit=crop",
-    ];
+    return [1, 2, 3, 4, 5, 6, 0].map((dayNum) => {
+      const found = workingHours.find((w) => w.day === dayNum);
+      return {
+        dayName: dayNames[dayNum],
+        // A day missing from the schedule is closed, matching the open/closed status logic
+        isOpen: Boolean(found) && found.isOpen !== false,
+        openTime: formatClock(found?.openTime),
+        closeTime: formatClock(found?.closeTime),
+        isToday: dayNum === todayIdx,
+      };
+    });
   }, [selectedBranch, salonData]);
 
   const handleBack = useCallback(() => {
     if (goBack) goBack();
   }, [goBack]);
 
-  useEffect(() => {
-    const salonId = salon?._id || salon?.id;
-    if (!salonId) return;
+  const routeSalonId = salon?._id || salon?.id;
 
-    const cachedSalonRes = browseService.getCachedSalonById(salonId);
+  useEffect(() => {
+    if (!routeSalonId) return;
+    let cancelled = false;
+
+    // Opening a different salon on the same screen must not keep the previous one's state
+    setSalonData(salon);
+    setSelectedBranch(null);
+    setSelectedServices([]);
+    setServices([]);
+    setReviewsList([]);
+    setSelectedCategory("all");
+
+    const cachedSalonRes = browseService.getCachedSalonById(routeSalonId);
     if (cachedSalonRes) {
       const fullSalon = cachedSalonRes.data?.salon || cachedSalonRes.data;
       if (fullSalon) setSalonData(fullSalon);
     }
 
-    if (!salon?.branches || salon.branches.length === 0) {
-      const fetchSalon = async () => {
-        if (!cachedSalonRes) setFetchingSalon(true);
-        try {
-          const res = await browseService.getSalonById(salonId);
-          const fullSalon = res.data?.salon || res.data;
-          if (fullSalon) {
-            setSalonData(fullSalon);
-          }
-        } catch (err) {
-          console.log("Error fetching salon details:", err.message);
-        } finally {
-          setFetchingSalon(false);
-        }
-      };
-      fetchSalon();
-    }
-  }, [salon]);
+    // Always fetch the full salon: list screens pass branches without hours or phone numbers
+    const fetchSalon = async () => {
+      try {
+        const res = await browseService.getSalonById(routeSalonId);
+        const fullSalon = res.data?.salon || res.data;
+        if (fullSalon && !cancelled) setSalonData(fullSalon);
+      } catch (err) {
+        console.log("Error fetching salon details:", err.message);
+      }
+    };
+    fetchSalon();
+    return () => { cancelled = true; };
+  }, [routeSalonId]);
 
   const branches = salonData?.branches || [];
 
+  // Pick the first branch, and swap a partial branch object for the full one once it arrives
   useEffect(() => {
-    if (branches.length > 0) {
-      setSelectedBranch((prev) => prev || branches[0]);
-    }
+    if (branches.length === 0) return;
+    setSelectedBranch((prev) => {
+      if (!prev) return branches[0];
+      const prevId = prev._id || prev.id;
+      return branches.find((b) => (b._id || b.id) === prevId) || branches[0];
+    });
   }, [branches]);
 
+  const selectedBranchId = selectedBranch?._id || selectedBranch?.id || null;
+
   useEffect(() => {
-    if (!selectedBranch) return;
+    if (!selectedBranchId) return;
     let cancelled = false;
-    const branchId = selectedBranch._id || selectedBranch.id || selectedBranch;
+    const branchId = selectedBranchId;
 
     // Check client-side memory cache first for instant render (no loading state on re-open!)
     const cachedRes = browseService.getCachedBranchServices(branchId);
@@ -499,14 +313,14 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     return () => {
       cancelled = true;
     };
-  }, [selectedBranch]);
+  }, [selectedBranchId]);
 
   useEffect(() => {
     if (!salonId) return;
     let cancelled = false;
     const fetchReviews = async () => {
       try {
-        const branchId = selectedBranch?._id || selectedBranch?.id;
+        const branchId = selectedBranchId;
         const res = branchId
           ? await browseService.getBranchReviews(branchId)
           : await browseService.getSalonReviews(salonId);
@@ -521,23 +335,7 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     return () => {
       cancelled = true;
     };
-  }, [salonId, selectedBranch]);
-
-  const lowestServicePrice = useMemo(() => {
-    const servicePrices = services
-      .map((s) => s.price)
-      .filter((p) => typeof p === "number" && p > 0)
-      .map((p) => (p >= 1000 ? p / 100 : p));
-
-    const candidatePrices = [
-      ...servicePrices,
-      salonData?.minServicePrice ? (salonData.minServicePrice >= 1000 ? salonData.minServicePrice / 100 : salonData.minServicePrice) : null,
-      salonData?.startingPrice ? (salonData.startingPrice >= 1000 ? salonData.startingPrice / 100 : salonData.startingPrice) : null,
-    ].filter((p) => typeof p === "number" && p > 0);
-
-    if (!candidatePrices.length) return 499;
-    return Math.round(Math.min(...candidatePrices));
-  }, [services, salonData]);
+  }, [salonId, selectedBranchId]);
 
   const categories = useMemo(() => {
     const set = new Set();
@@ -578,20 +376,22 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     const dayOfWeek = now.getDay();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-    const todayWorking = workingHours.find((w) => w.day === dayOfWeek);
-    if (!todayWorking || todayWorking.isOpen === false) {
-      let nextDayText = "Closed today. You can still book an advance slot.";
+    // Next day (after today) the salon opens, e.g. "Opens tomorrow at 9:00 AM"
+    const nextOpening = () => {
       for (let i = 1; i <= 7; i++) {
         const nextDayIdx = (dayOfWeek + i) % 7;
         const nextWorking = workingHours.find((w) => w.day === nextDayIdx && w.isOpen !== false);
         if (nextWorking) {
           const dayName = i === 1 ? "tomorrow" : `on ${dayNames[nextDayIdx]}`;
-          const openT = nextWorking.openTime || "9:00 AM";
-          nextDayText = `Opens ${dayName} at ${openT}. Advance booking available.`;
-          break;
+          return `Opens ${dayName} at ${formatClock(nextWorking.openTime)}.`;
         }
       }
-      return { isOpen: false, nextOpenText: nextDayText };
+      return "Advance booking available.";
+    };
+
+    const todayWorking = workingHours.find((w) => w.day === dayOfWeek);
+    if (!todayWorking || todayWorking.isOpen === false) {
+      return { isOpen: false, nextOpenText: nextOpening() };
     }
 
     if (todayWorking.openTime && todayWorking.closeTime) {
@@ -601,14 +401,14 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
       const closeMinutes = closeH * 60 + (closeM || 0);
 
       if (currentMinutes < openMinutes) {
-        return { isOpen: false, nextOpenText: `Opens today at ${todayWorking.openTime}.` };
+        return { isOpen: false, nextOpenText: `Opens today at ${formatClock(todayWorking.openTime)}.` };
       }
       if (currentMinutes >= closeMinutes) {
-        return { isOpen: false, nextOpenText: `Closed for today (${todayWorking.closeTime}). Opens tomorrow.` };
+        return { isOpen: false, nextOpenText: nextOpening() };
       }
     }
 
-    return { isOpen: true, closeTime: todayWorking?.closeTime };
+    return { isOpen: true, closeTime: formatClock(todayWorking?.closeTime) };
   }, [selectedBranch, salonData]);
 
   const handleSelectService = useCallback((svc) => {
@@ -637,7 +437,8 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
       setShowVerifyModal(true);
       return;
     }
-    const targetServices = selectedServices.length > 0 ? selectedServices : (services.length > 0 ? [services[0]] : []);
+    // Only book what the customer actually picked
+    const targetServices = selectedServices;
     if (targetServices.length === 0) return;
     if (navigate) {
       const currentRating = displayRating && displayRating !== "0.0" ? parseFloat(displayRating) : (salonData?.rating?.avgScore || salonData?.rating || 5.0);
@@ -655,6 +456,41 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
       });
     }
   }, [selectedServices, services, selectedBranch, navigate, salonData, user, displayRating, displayReviewCount, reviewsList]);
+
+  // Reviews are ratings on the customer's own completed visit, so find one at this salon to attach it to.
+  // Throwing keeps the typed review in the box when it can't be saved.
+  const handleSubmitReview = useCallback(async ({ rating, comment }) => {
+    if (!isAuthenticated) {
+      if (navigate) navigate("Login");
+      throw new Error("Not signed in");
+    }
+    try {
+      const res = await appointmentService.getAppointments();
+      const list = res.data?.appointments || (Array.isArray(res.data) ? res.data : []);
+      const visit = list.find((a) => {
+        const apptSalonId = typeof a.salonId === "object" ? a.salonId?._id : a.salonId;
+        return (
+          String(apptSalonId) === String(salonId) &&
+          (a.status || "").toUpperCase() === "COMPLETED" &&
+          !a.rating?.score
+        );
+      });
+      if (!visit) {
+        setError("You can review this salon after a completed visit. Visits you've already rated can't be rated again.");
+        throw new Error("No eligible visit");
+      }
+
+      await appointmentService.rateAppointment(visit._id || visit.id, rating, comment);
+
+      const reviewsRes = selectedBranchId
+        ? await browseService.getBranchReviews(selectedBranchId)
+        : await browseService.getSalonReviews(salonId);
+      setReviewsList(reviewsRes.data?.reviews || []);
+    } catch (err) {
+      if (err.message !== "No eligible visit") setError(err.message || "Couldn't submit your review. Please try again.");
+      throw err;
+    }
+  }, [isAuthenticated, navigate, salonId, selectedBranchId]);
 
   const handleShare = async () => {
     try {
@@ -702,28 +538,17 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
 
           </View>
 
-          {/* Bottom Pills Row */}
-          <View style={styles.bottomPillsRow}>
-            <View style={styles.mediaPill}>
-              <Ionicons name="image-outline" size={14} color="#FFFFFF" />
-              <Text style={styles.mediaPillText}>1/10 Photos</Text>
-            </View>
-            <View style={styles.mediaPill}>
-              <Ionicons name="play-circle-outline" size={14} color="#FFFFFF" />
-              <Text style={styles.mediaPillText}>Watch Video</Text>
-            </View>
-          </View>
         </View>
 
         <View style={styles.titleSection}>
           <View style={styles.titleRow}>
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
               <Text style={[styles.salonTitle, { flexShrink: 1 }]} numberOfLines={1}>{selectedBranch?.name || salonData?.name}</Text>
-              <VerifiedBadge size={20} color={C.verified} />
+              {salonData?.isVerified ? <VerifiedBadge size={20} color={C.verified} /> : null}
             </View>
             <View style={styles.headerRatingBlock}>
               <Ionicons name="star" size={16} color="#FBBF24" />
-              <Text style={styles.headerRatingText}>{displayRating}</Text>
+              <Text style={styles.headerRatingText}>{displayReviewCount > 0 ? displayRating : "New"}</Text>
             </View>
           </View>
 
@@ -736,9 +561,11 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
               </Text>
             </View>
             <Text style={styles.headerReviewCount}>
-              ({displayReviewCount >= 1000
-                ? (displayReviewCount / 1000).toFixed(1).replace(/\.0$/, '') + "k"
-                : displayReviewCount} reviews)
+              {displayReviewCount === 0
+                ? "No reviews yet"
+                : `(${displayReviewCount >= 1000
+                    ? (displayReviewCount / 1000).toFixed(1).replace(/\.0$/, '') + "k"
+                    : displayReviewCount} ${displayReviewCount === 1 ? "review" : "reviews"})`}
             </Text>
           </View>
 
@@ -901,48 +728,20 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
                   <View style={styles.sectionBlock}>
                     <Text style={styles.aboutText}>
                       {selectedBranch?.description || salonData?.description ||
-                        "Premier luxury styling, hair treatment & wellness sanctuary in Brahmapur."}
+                        "This salon hasn't added a description yet."}
                     </Text>
                   </View>
-
-                  {/* Amenities Section inside About tab */}
-                  <View style={[styles.sectionBlock, { marginTop: 16 }]}>
-                    <Text style={styles.sectionLabel}>Amenities & Facilities</Text>
-                    <View style={styles.amenitiesContainer}>
-                      {AMENITIES.slice(0, 4).map((item) => (
-                        <TouchableOpacity
-                          key={item.id}
-                          style={styles.amenityItem}
-                          onPress={() => setShowAmenitiesModal(true)}
-                          activeOpacity={0.7}
-                        >
-                          <View style={styles.amenityIconCircle}>
-                            <Ionicons name={item.icon} size={18} color={isDark ? "#FFFFFF" : "#1E1E1E"} />
-                          </View>
-                          <Text style={styles.amenityLabel} numberOfLines={1}>
-                            {item.label === "Air conditioning" ? "AC" : item.label}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                      <TouchableOpacity
-                        style={styles.amenityItem}
-                        onPress={() => setShowAmenitiesModal(true)}
-                        activeOpacity={0.7}
-                      >
-                        <View style={[styles.amenityIconCircle, styles.moreAmenityCircle]}>
-                          <Text style={styles.moreAmenityText}>+{AMENITIES.length - 4}</Text>
-                        </View>
-                        <Text style={styles.amenityLabel}>More</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </View>
-
 
                   {/* Opening Hours Schedule */}
                   <View style={[styles.sectionBlock, { marginTop: 20 }]}>
                     <Text style={styles.sectionLabel}>Opening Hours</Text>
                     <View style={styles.workingHoursCard}>
-                      {weeklySchedule.map((item, idx) => (
+                      {!weeklySchedule ? (
+                        <Text style={[styles.timeText, { paddingVertical: 12, textAlign: "center" }]}>
+                          Hours not available
+                        </Text>
+                      ) : null}
+                      {(weeklySchedule || []).map((item, idx) => (
                         <View key={idx} style={[styles.hoursRow, item.isToday && styles.hoursRowToday]}>
                           <View style={styles.dayCol}>
                             <Text style={[styles.dayText, item.isToday && styles.dayTextToday]}>
@@ -1000,6 +799,13 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
                       </View>
                     ) : (
                       <>
+                        {filteredServices.length === 0 ? (
+                          <Text style={[styles.aboutText, { textAlign: "center", paddingVertical: 24 }]}>
+                            {services.length === 0
+                              ? "This location hasn't listed any services yet."
+                              : "No services in this category."}
+                          </Text>
+                        ) : null}
                         {filteredServices.map(svc => (
                           <ServiceCard
                             key={svc._id || svc.id}
@@ -1020,7 +826,7 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
                     reviews={reviewsList}
                     overallRating={displayRating}
                     totalReviews={displayReviewCount}
-                    onOpenAddReview={() => setShowReviewModal(true)}
+                    onSubmitReview={handleSubmitReview}
                   />
                 </View>
               </Animated.View>
@@ -1029,77 +835,6 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
         })()}
       </ScrollView>
 
-      <AddReviewModal
-        visible={showReviewModal}
-        onClose={() => setShowReviewModal(false)}
-        onSubmit={async ({ rating, comment, aspects }) => {
-          if (reviewsList.length > 0) {
-            const firstAppt = reviewsList[0];
-            const apptId = firstAppt._id || firstAppt.id;
-            try {
-              await appointmentService.rateAppointment(apptId, rating, comment);
-            } catch (e) { }
-          }
-          setShowReviewModal(false);
-        }}
-        salonName={salonData?.name}
-      />
-
-      <Modal
-        visible={showAmenitiesModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowAmenitiesModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={styles.modalBackdropTouch}
-            activeOpacity={1}
-            onPress={() => setShowAmenitiesModal(false)}
-          />
-          <View style={styles.amenitiesSheetContainer}>
-            <View style={styles.dragHandle} />
-
-            <View style={styles.amenitiesHeaderRow}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.amenitiesModalTitle}>Salon Amenities</Text>
-                <Text style={styles.amenitiesModalSub}>Available for your comfort & care</Text>
-              </View>
-
-              <TouchableOpacity
-                style={styles.modalCloseBtn}
-                onPress={() => setShowAmenitiesModal(false)}
-                activeOpacity={0.8}
-              >
-                <Ionicons name="close" size={20} color={C.ink} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.amenitiesListScroll}>
-              {AMENITIES.map((item) => (
-                <View key={item.id} style={styles.amenityRowCard}>
-                  <View style={styles.amenityRowIconCircle}>
-                    <Ionicons name={item.icon} size={20} color={C.ink} />
-                  </View>
-                  <View style={styles.amenityRowTextContent}>
-                    <Text style={styles.amenityRowTitle}>{item.label}</Text>
-                    <Text style={styles.amenityRowDesc}>{item.description}</Text>
-                  </View>
-                  <Ionicons name="checkmark-circle" size={18} color={GOLD} />
-                </View>
-              ))}
-            </ScrollView>
-
-            <TouchableOpacity
-              style={styles.amenitiesGotItBtn}
-              onPress={() => setShowAmenitiesModal(false)}
-              activeOpacity={0.88}
-            >
-              <Text style={styles.amenitiesGotItBtnText}>Got it</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
       {/* Floating Bottom Booking Action Bar — Hidden when 0 services, slides up smoothly when >= 1 service selected */}
       <Animated.View
@@ -1132,7 +867,7 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
               </Text>
               <View style={styles.totalDurationRow}>
                 <Ionicons name="time-outline" size={12} color="#666666" />
-                <Text style={styles.totalDurationText}>1 hr 15 mins</Text>
+                <Text style={styles.totalDurationText}>{formatDuration(totalDuration)}</Text>
               </View>
             </View>
 

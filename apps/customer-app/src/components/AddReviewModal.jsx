@@ -178,6 +178,7 @@ export default function AddReviewModal({
               numberOfLines={4}
               value={comment}
               onChangeText={setComment}
+              maxLength={500} // server rejects longer reviews
               textAlignVertical="top"
             />
 

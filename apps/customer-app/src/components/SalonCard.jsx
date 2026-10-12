@@ -17,12 +17,12 @@ const DEMO_IMAGES = [
   "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?q=80&w=800&auto=format&fit=crop",
 ];
 
-function formatAddress(address, fallback) {
-  if (typeof address === "string" && address.trim()) return address;
-  if (address && typeof address === "object") {
-    return [address.street, address.city, address.state].filter(Boolean).join(", ") || fallback;
-  }
-  return fallback;
+// Area/locality is the last segment of the street, e.g. "Plot 12, KIIT Square, Patia" -> "Patia"
+function getArea(address) {
+  const street = address?.street;
+  if (typeof street !== "string") return null;
+  const parts = street.split(",").map((p) => p.trim()).filter(Boolean);
+  return parts.length > 0 ? parts[parts.length - 1] : null;
 }
 
 function getLowestServicePrice(salon) {
@@ -106,13 +106,19 @@ function SalonCard({ salon, onPress, isHorizontal = false, index = 0, variant = 
   const numericRating = typeof rawAvg === "number" && !isNaN(rawAvg) && rawAvg > 0 ? rawAvg : 5.0;
   const ratingStr = numericRating.toFixed(1);
   const reviewsCount = typeof rawReviews === "number" ? rawReviews : 0;
-  const isTopRated = numericRating >= 4.5;
+  // No reviews yet → the 5.0 above is only a placeholder, so don't present it as a rating
+  const isNew = reviewsCount === 0;
+  const isTopRated = !isNew && numericRating >= 4.5;
   const coverImage = salon.coverImage || salon.image || DEMO_IMAGES[index % DEMO_IMAGES.length];
   const isFav = isFavorite(salon._id || salon.id);
   const isCompact = variant === "compact";
 
-  const rawAddress = salon.address?.formattedAddress || salon.address?.street || formatAddress(salon.address, "Brahmapur");
-  const distance = salon.distance || salon.distanceKm || (index === 0 ? "1.2 km" : index === 1 ? "1.8 km" : "2.1 km");
+  // Salons don't carry an address themselves — it lives on their branches.
+  const address = (salon.address && typeof salon.address === "object" ? salon.address : null) || salon.branches?.[0]?.address;
+  const rawAddress = getArea(address) || address?.city || salon.city || "";
+  // Only show a distance when one was actually calculated
+  const rawDistance = salon.distance ?? salon.distanceKm ?? null;
+  const distance = rawDistance == null ? null : typeof rawDistance === "number" ? `${rawDistance} km` : rawDistance;
   const lowestServicePrice = getLowestServicePrice(salon);
 
   const categories = salon.categories && salon.categories.length > 0
@@ -158,20 +164,26 @@ function SalonCard({ salon, onPress, isHorizontal = false, index = 0, variant = 
           <Text style={styles.compactName} numberOfLines={1}>{salon.name}</Text>
           <Text style={styles.compactAddress} numberOfLines={1}>{rawAddress}</Text>
           <View style={styles.compactMeta}>
-            <View style={styles.stars}>
-              {[0, 1, 2, 3, 4].map((star) => (
-                <Ionicons
-                  key={star}
-                  name={star < Math.round(numericRating) ? "star" : "star-outline"}
-                  size={10}
-                  color="#7A0026"
-                />
-              ))}
-            </View>
-            <View style={styles.distance}>
-              <Ionicons name="location-outline" size={11} color={isDark ? "#A1A1AA" : "#71717A"} />
-              <Text style={styles.distanceText}>{typeof distance === "number" ? `${distance} km` : distance}</Text>
-            </View>
+            {isNew ? (
+              <Text style={styles.distanceText}>New</Text>
+            ) : (
+              <View style={styles.stars}>
+                {[0, 1, 2, 3, 4].map((star) => (
+                  <Ionicons
+                    key={star}
+                    name={star < Math.round(numericRating) ? "star" : "star-outline"}
+                    size={10}
+                    color="#7A0026"
+                  />
+                ))}
+              </View>
+            )}
+            {distance ? (
+              <View style={styles.distance}>
+                <Ionicons name="location-outline" size={11} color={isDark ? "#A1A1AA" : "#71717A"} />
+                <Text style={styles.distanceText}>{distance}</Text>
+              </View>
+            ) : null}
           </View>
         </View>
       </BouncyButton>
@@ -192,7 +204,7 @@ function SalonCard({ salon, onPress, isHorizontal = false, index = 0, variant = 
         <View style={styles.ratingBadge}>
           <Ionicons name="star" size={12} color="#FFD700" style={{ marginRight: 4 }} />
           <Text style={styles.ratingBadgeText}>
-            {ratingStr} <Text style={styles.reviewsText}>({reviewsCount})</Text>
+            {isNew ? "New" : <>{ratingStr} <Text style={styles.reviewsText}>({reviewsCount})</Text></>}
           </Text>
         </View>
 
@@ -219,11 +231,13 @@ function SalonCard({ salon, onPress, isHorizontal = false, index = 0, variant = 
         {/* Title & Distance Row */}
         <View style={styles.titleRow}>
           <Text style={styles.name} numberOfLines={1}>{salon.name}</Text>
-          <View style={styles.distanceBadge}>
-            <Ionicons name="location-sharp" size={12} color={isDark ? "#A1A1AA" : "#71717A"} style={{ marginRight: 2 }} />
-            <Text style={styles.distanceText}>{typeof distance === "number" ? `${distance} km` : distance}</Text>
-            <Ionicons name="navigate-outline" size={11} color={isDark ? "#A1A1AA" : "#71717A"} style={{ marginLeft: 3 }} />
-          </View>
+          {distance ? (
+            <View style={styles.distanceBadge}>
+              <Ionicons name="location-sharp" size={12} color={isDark ? "#A1A1AA" : "#71717A"} style={{ marginRight: 2 }} />
+              <Text style={styles.distanceText}>{distance}</Text>
+              <Ionicons name="navigate-outline" size={11} color={isDark ? "#A1A1AA" : "#71717A"} style={{ marginLeft: 3 }} />
+            </View>
+          ) : null}
         </View>
 
         {/* Location & Status Single Row Side-by-Side */}

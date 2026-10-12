@@ -38,7 +38,7 @@ export default function AboutScreen({ goBack, navigate }) {
           <View style={styles.logoContainer}>
             <Ionicons name="scissors" size={38} color="#FFFFFF" />
           </View>
-          <Text style={styles.appNameText}>ST CUT</Text>
+          <Text style={styles.appNameText}>HairX</Text>
           <View style={styles.versionBadge}>
             <Text style={styles.versionText}>Version 1.0.1 (Build 104)</Text>
           </View>
@@ -51,13 +51,13 @@ export default function AboutScreen({ goBack, navigate }) {
         <View style={styles.sectionCard}>
           <Text style={styles.sectionHeader}>OUR MISSION</Text>
           <Text style={styles.bodyText}>
-            ST CUT is designed to revolutionize the salon booking experience. We connect clients with certified hair stylists, top-rated beauty salons, and luxury spa professionals with transparent pricing and real-time scheduling.
+            HairX is designed to revolutionize the salon booking experience. We connect clients with certified hair stylists, top-rated beauty salons, and luxury spa professionals with transparent pricing and real-time scheduling.
           </Text>
         </View>
 
         {/* Feature Highlights Grid */}
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>WHY CHOOSE ST CUT</Text>
+          <Text style={styles.sectionHeader}>WHY CHOOSE HAIRX</Text>
 
           <View style={styles.featureRow}>
             <View style={styles.featureIconBox}>
@@ -143,7 +143,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
         {/* Copyright Footer */}
         <View style={styles.footerContainer}>
-          <Text style={styles.copyrightText}>© 2026 ST CUT Platform Inc.</Text>
+          <Text style={styles.copyrightText}>© 2026 HairX. All rights reserved.</Text>
           <Text style={styles.allRightsText}>All Rights Reserved.</Text>
         </View>
       </ScrollView>

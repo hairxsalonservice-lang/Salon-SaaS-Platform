@@ -1,5 +1,5 @@
 // src/screen/RegisterScreen.jsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ScrollView,
   Platform,
   StatusBar,
+  KeyboardAvoidingView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -21,6 +22,15 @@ import GoogleSignInModal from "../components/GoogleSignInModal";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import AppleSignInButton from "../components/AppleSignInButton";
 import SpringTouchable from "../components/SpringTouchable";
+
+// Mirrors the server's register validator (salon-api/src/validators/auth.validator.js)
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PASSWORD_RULES = [
+  { id: "len", label: "8+ characters", test: (p) => p.length >= 8 },
+  { id: "upper", label: "An uppercase letter", test: (p) => /[A-Z]/.test(p) },
+  { id: "number", label: "A number", test: (p) => /[0-9]/.test(p) },
+  { id: "special", label: "One of ! @ # $ % ^ & *", test: (p) => /[!@#$%^&*]/.test(p) },
+];
 
 export default function RegisterScreen({ navigate, goBack, routeParams }) {
   const { theme, isDark } = useTheme();
@@ -41,22 +51,58 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
   const [error, setError] = useState("");
   const [showGoogleModal, setShowGoogleModal] = useState(false);
 
+  const emailRef = useRef(null);
+  const phoneRef = useRef(null);
+  const passwordRef = useRef(null);
+
+  const passwordChecks = PASSWORD_RULES.map((r) => ({ ...r, ok: r.test(password) }));
+  const passwordValid = passwordChecks.every((r) => r.ok);
+
+  // After any successful sign-up/sign-in, continue to where the user was headed
+  const goAfterSignIn = () => {
+    if (!navigate) return;
+    if (routeParams?.redirectTo) navigate(routeParams.redirectTo, routeParams.redirectData);
+    else navigate("Home");
+  };
+
   const handleRegister = async () => {
-    if (!name || !email || !password || !gender) {
-      setError("Please fill in all required fields, including selecting your gender.");
+    if (loading) return;
+    const cleanName = name.trim();
+    const cleanEmail = email.trim().toLowerCase();
+    const phoneDigits = phone.replace(/\D/g, "");
+
+    if (!cleanName || !cleanEmail || !phoneDigits || !password || !gender) {
+      setError("Please fill in all fields, including your phone number and gender.");
       return;
     }
+    if (cleanName.length < 2 || cleanName.length > 50) {
+      setError("Name must be 2–50 characters.");
+      return;
+    }
+    if (!EMAIL_PATTERN.test(cleanEmail)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    if (phoneDigits.length < 10 || phoneDigits.length > 13) {
+      setError("Please enter a valid phone number.");
+      return;
+    }
+    if (!passwordValid) {
+      setError(
+        "Your password needs: " +
+          passwordChecks.filter((r) => !r.ok).map((r) => r.label.toLowerCase()).join(", ") +
+          "."
+      );
+      return;
+    }
+
     setError("");
     setLoading(true);
-    const res = await register(name.trim(), email.trim().toLowerCase(), password, phone.trim(), gender);
+    const res = await register(cleanName, cleanEmail, password, phone.trim(), gender);
     setLoading(false);
 
     if (res.success) {
-      if (routeParams?.redirectTo && navigate) {
-        navigate(routeParams.redirectTo, routeParams.redirectData);
-      } else if (navigate) {
-        navigate("Home");
-      }
+      goAfterSignIn();
     } else {
       setError(res.error || "Registration failed");
     }
@@ -68,6 +114,10 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
   };
 
   return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
     <ScrollView
       style={styles.container}
       contentContainerStyle={[styles.content, { paddingTop: topInset, paddingBottom: bottomInset }]}
@@ -105,6 +155,13 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
             style={styles.input}
             placeholder="Full Name"
             placeholderTextColor={styles.placeholderColor.color}
+            autoCapitalize="words"
+            autoComplete="name"
+            textContentType="name"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => emailRef.current?.focus()}
+            maxLength={50}
             value={name}
             onChangeText={setName}
           />
@@ -115,10 +172,17 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
           <Ionicons name="mail-outline" size={20} color={styles.placeholderColor.color} style={styles.inputIcon} />
           <TextInput
             style={styles.input}
+            ref={emailRef}
             placeholder="Email"
             placeholderTextColor={styles.placeholderColor.color}
             keyboardType="email-address"
             autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+            returnKeyType="next"
+            blurOnSubmit={false}
+            onSubmitEditing={() => phoneRef.current?.focus()}
             value={email}
             onChangeText={setEmail}
           />
@@ -129,9 +193,13 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
           <Ionicons name="call-outline" size={20} color={styles.placeholderColor.color} style={styles.inputIcon} />
           <TextInput
             style={styles.input}
-            placeholder="Phone Number (Optional)"
+            ref={phoneRef}
+            placeholder="Phone Number"
             placeholderTextColor={styles.placeholderColor.color}
             keyboardType="phone-pad"
+            autoComplete="tel"
+            textContentType="telephoneNumber"
+            maxLength={16}
             value={phone}
             onChangeText={setPhone}
           />
@@ -184,9 +252,16 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
           <Ionicons name="lock-closed-outline" size={20} color={styles.placeholderColor.color} style={styles.inputIcon} />
           <TextInput
             style={[styles.input, { flex: 1 }]}
+            ref={passwordRef}
             placeholder="Password"
             placeholderTextColor={styles.placeholderColor.color}
             secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="password-new"
+            textContentType="newPassword"
+            returnKeyType="go"
+            onSubmitEditing={handleRegister}
             value={password}
             onChangeText={setPassword}
           />
@@ -202,6 +277,21 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
             />
           </TouchableOpacity>
         </View>
+
+        {password.length > 0 && !passwordValid ? (
+          <View style={styles.pwRules}>
+            {passwordChecks.map((r) => (
+              <View key={r.id} style={styles.pwRuleRow}>
+                <Ionicons
+                  name={r.ok ? "checkmark-circle" : "ellipse-outline"}
+                  size={14}
+                  color={r.ok ? "#10B981" : styles.placeholderColor.color}
+                />
+                <Text style={[styles.pwRuleText, r.ok && styles.pwRuleTextOk]}>{r.label}</Text>
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         {/* Primary Action Button: Sign Up */}
         <SpringTouchable
@@ -231,14 +321,8 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
 
         {/* Full-width Continue with Apple Button */}
         <AppleSignInButton
-          onSuccess={() => {
-            if (routeParams?.redirectTo && navigate) {
-              navigate(routeParams.redirectTo, routeParams.redirectData);
-            } else if (navigate) {
-              navigate("Profile");
-            }
-          }}
-          onError={(err) => setError(err)}
+          onSuccess={goAfterSignIn}
+          onError={(err) => setError(typeof err === "string" ? err : err?.message || "Apple sign-in failed")}
         />
 
         {/* Footer Link */}
@@ -254,16 +338,11 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
         <GoogleSignInModal
           visible={showGoogleModal}
           onClose={() => setShowGoogleModal(false)}
-          onSuccess={() => {
-            if (routeParams?.redirectTo && navigate) {
-              navigate(routeParams.redirectTo, routeParams.redirectData);
-            } else if (navigate) {
-              navigate("Profile");
-            }
-          }}
+          onSuccess={goAfterSignIn}
         />
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -326,6 +405,24 @@ function getStyles(theme, isDark) {
     },
     inputIcon: {
       marginRight: 14,
+    },
+    pwRules: {
+      marginTop: -4,
+      marginBottom: 14,
+      paddingHorizontal: 6,
+      gap: 4,
+    },
+    pwRuleRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    pwRuleText: {
+      marginLeft: 6,
+      fontSize: 12.5,
+      color: isDark ? "#94A3B8" : "#6B7280",
+    },
+    pwRuleTextOk: {
+      color: "#10B981",
     },
     genderBlock: {
       marginBottom: 16,

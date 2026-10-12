@@ -35,10 +35,18 @@ const connectDB = async (retryCount = 0) => {
     logger.info(`MongoDB connected: ${conn.connection.host}`)
 
     // Trigger cache warming asynchronously so public endpoints are pre-cached immediately
-    setTimeout(() => {
-      const warmCacheOnBoot = require('../utils/cacheWarmer');
-      warmCacheOnBoot();
-    }, 500);
+    if (process.env.NODE_ENV !== 'test') {
+      setTimeout(() => {
+        try {
+          const warmCacheOnBoot = require('../utils/cacheWarmer');
+          if (typeof warmCacheOnBoot === 'function') {
+            warmCacheOnBoot();
+          }
+        } catch (e) {
+          // Ignore cache warming error in non-standard environments
+        }
+      }, 500);
+    }
 
     // Backfill citySlug on branches created before the field existed.
     try {
@@ -74,7 +82,7 @@ const connectDB = async (retryCount = 0) => {
   } catch (error) {
     console.error(`❌ MongoDB Connection Error (${error.message}). Retrying in 3s...`)
     logger.error(`MongoDB connection error: ${error.message}`)
-    if (retryCount < 5) {
+    if (retryCount < 5 && process.env.NODE_ENV !== 'test') {
       setTimeout(() => connectDB(retryCount + 1), 3000)
     }
   }

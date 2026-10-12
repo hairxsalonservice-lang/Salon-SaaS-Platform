@@ -5,6 +5,7 @@ import { C, S, FS, FW, R, TYPO, FF } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import FloatingSearchCapsule from "./FloatingSearchCapsule";
 import AppleTouchable from "./AppleTouchable";
+import { customerService } from "../services/customerService";
 import { useLocationStore } from "../store/useLocationStore";
 
 export default function Ios26HomeHero({ onSearchClick, onLocationClick, onNotificationClick, onFilterPress, userName, selectedCity: propSelectedCity, onSearchSubmit }) {

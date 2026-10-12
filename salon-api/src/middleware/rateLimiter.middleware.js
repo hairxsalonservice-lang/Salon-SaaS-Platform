@@ -23,7 +23,7 @@ const createRedisStore = (prefix) => {
 
 const userKeyGenerator = (req) => req.user?.userId || req.ip || req.headers['x-forwarded-for'];
 
-const isDev = process.env.NODE_ENV === "development" || !process.env.NODE_ENV;
+const isDev = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test" || !process.env.NODE_ENV;
 
 // General API rate limiter (200 requests per 15 mins in prod, 10000 in dev)
 const apiLimiter = rateLimit({

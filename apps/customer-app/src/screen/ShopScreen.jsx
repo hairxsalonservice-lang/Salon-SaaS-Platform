@@ -33,7 +33,7 @@ export default function ShopScreen({ navigate, onScroll }) {
     setNotified(true);
     Alert.alert(
       "Notification Set! 🎉",
-      "We'll notify you as soon as the ST CUT Shop opens."
+      "We'll notify you as soon as the HairX Shop opens."
     );
   };
 
@@ -89,7 +89,7 @@ export default function ShopScreen({ navigate, onScroll }) {
           <Text style={styles.badgeText}>COMING SOON</Text>
         </View>
 
-        <Text style={styles.title}>ST CUT Store</Text>
+        <Text style={styles.title}>HairX Store</Text>
         <Text style={styles.subtitle}>
           Our exclusive collection of salon-grade products &amp; beauty essentials is on its way.
         </Text>

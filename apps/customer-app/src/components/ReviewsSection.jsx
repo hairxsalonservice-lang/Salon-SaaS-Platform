@@ -56,25 +56,29 @@ export default function ReviewsSection({
   };
 
   const displayCount = reviews.length > 0 ? reviews.length : totalReviews;
-  const reviewListToRender = reviews.length > 0 ? reviews : MOCK_REVIEWS;
+  const hasReviews = displayCount > 0;
 
   return (
     <View style={styles.container}>
       {/* 1. Overall Rating Summary Banner */}
       <View style={styles.summaryCard}>
-        <Text style={styles.summaryScoreNum}>{overallRating}</Text>
-        <View style={styles.summaryStarsRow}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Ionicons
-              key={star}
-              name={star <= Math.round(parseFloat(overallRating)) ? "star" : "star-half"}
-              size={16}
-              color="#F59E0B"
-              style={{ marginRight: 3 }}
-            />
-          ))}
-        </View>
-        <Text style={styles.summarySubtext}>{displayCount} Verified Reviews</Text>
+        <Text style={styles.summaryScoreNum}>{hasReviews ? overallRating : "New"}</Text>
+        {hasReviews ? (
+          <View style={styles.summaryStarsRow}>
+            {[1, 2, 3, 4, 5].map((star) => (
+              <Ionicons
+                key={star}
+                name={star <= Math.round(parseFloat(overallRating)) ? "star" : "star-half"}
+                size={16}
+                color="#F59E0B"
+                style={{ marginRight: 3 }}
+              />
+            ))}
+          </View>
+        ) : null}
+        <Text style={styles.summarySubtext}>
+          {hasReviews ? `${displayCount} Verified ${displayCount === 1 ? "Review" : "Reviews"}` : "No reviews yet"}
+        </Text>
       </View>
 
       {/* 2. Write Your Review Card */}
@@ -114,6 +118,7 @@ export default function ReviewsSection({
           placeholderTextColor={isDark ? "#64748B" : "#94A3B8"}
           value={commentText}
           onChangeText={setCommentText}
+          maxLength={500} // server rejects longer reviews
           multiline={true}
           numberOfLines={3}
           textAlignVertical="top"
@@ -148,7 +153,10 @@ export default function ReviewsSection({
         style={styles.reviewsScrollBox}
         contentContainerStyle={styles.reviewsListContainer}
       >
-        {reviewListToRender.map((rev, index) => {
+        {reviews.length === 0 ? (
+          <Text style={styles.summarySubtext}>Be the first to review this salon.</Text>
+        ) : null}
+        {reviews.map((rev, index) => {
           const revId = rev._id || rev.id || index;
           const ratingNum = rev.rating || rev.score || 5;
           const dateStr = rev.date || rev.createdAt || rev.time || "Recently";
@@ -204,33 +212,6 @@ export default function ReviewsSection({
     </View>
   );
 }
-
-const MOCK_REVIEWS = [
-  {
-    id: "m1",
-    name: "Pooja Das",
-    time: "Recently",
-    rating: 5,
-    comment: "Loved the hair spa & keratine treatment! Clean ambiance and polite staff.",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=120&auto=format&fit=crop",
-  },
-  {
-    id: "m2",
-    name: "Rahul Patnaik",
-    time: "Recently",
-    rating: 5,
-    comment: "Top-notch haircut at Royal Cut! Stylist Amit was very attentive to detail. Highly recommend!",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=120&auto=format&fit=crop",
-  },
-  {
-    id: "m3",
-    name: "Rina Baldwin",
-    time: "1 month ago",
-    rating: 4,
-    comment: "The place is very clean and beautiful. Amazing staff, very welcoming experience.",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=120&auto=format&fit=crop",
-  },
-];
 
 function getStyles(theme, isDark) {
   const accentColor = C.purple || "#6C5CE7";

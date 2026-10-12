@@ -44,9 +44,9 @@ export default function Sidebar({ currentPath, name, email, onNavigate, onLogout
       {/* Brand */}
       <div className="px-5 pt-6 pb-5">
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="ST CUT Logo" className="w-8 h-8 rounded-lg object-contain bg-black p-0.5 shrink-0" />
+          <img src="/logo.png" alt="HairX Logo" className="w-8 h-8 rounded-lg object-contain bg-black p-0.5 shrink-0" />
           <div>
-            <p className="text-xs font-bold text-white tracking-wide">ST CUT HQ</p>
+            <p className="text-xs font-bold text-white tracking-wide">HAIRX HQ</p>
             <p className="text-[9px] text-amber-500 uppercase tracking-wider font-semibold">SuperAdmin Panel</p>
           </div>
         </div>

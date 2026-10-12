@@ -112,7 +112,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
 
         {/* Footer info */}
         <div className="text-xs text-slate-500">
-          Protected Administrative Portal · ST CUT Platform
+          Protected Administrative Portal · HairX Platform
         </div>
 
       </div>

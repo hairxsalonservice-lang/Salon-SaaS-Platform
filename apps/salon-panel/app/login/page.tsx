@@ -112,12 +112,12 @@ export default function LoginPage() {
           <div className="flex items-center gap-3">
             <img
               src="/logo.png"
-              alt="ST CUT Logo"
+              alt="HairX Logo"
               className="w-10 h-10 rounded-xl object-contain bg-black p-1 shrink-0 shadow-lg border border-white/20 backdrop-blur-md"
             />
             <div>
               <p className="text-[10px] font-black tracking-[0.2em] uppercase text-amber-400">
-                ST CUT PARTNER
+                HAIRX PARTNER
               </p>
               <p className="text-xs font-bold text-white tracking-wide">
                 Salon Management Studio
@@ -199,7 +199,7 @@ export default function LoginPage() {
           </div>
           <div>
             <p className="text-[10px] font-extrabold tracking-widest uppercase text-slate-400">
-              ST CUT PARTNER
+              HAIRX PARTNER
             </p>
             <h2 className="text-sm font-black text-slate-900">
               Salon Management Studio
@@ -214,7 +214,7 @@ export default function LoginPage() {
               Sign In
             </h2>
             <p className="text-xs sm:text-sm font-medium text-slate-500 mt-1">
-              Enter your credentials to access your ST CUT partner dashboard.
+              Enter your credentials to access your HairX partner dashboard.
             </p>
           </div>
 
@@ -299,7 +299,7 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="pt-6 text-center">
           <p className="text-[11px] font-medium text-slate-400">
-            © 2026 ST CUT PARTNER PLATFORM. ALL RIGHTS RESERVED.
+            © 2026 HAIRX PARTNER PLATFORM. ALL RIGHTS RESERVED.
           </p>
         </div>
       </div>

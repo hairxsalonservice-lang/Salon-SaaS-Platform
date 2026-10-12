@@ -108,7 +108,15 @@ async function executeRequest(endpoint, options = {}, retries = 1, isAuthRetry =
     }
 
     if (!response.ok) {
-      const msg = data?.message || data?.error || `Request failed with status ${response.status}`;
+      // Validation failures carry the real reasons in `errors`; "Validation failed" alone tells the user nothing
+      const fieldMessages = Array.isArray(data?.errors)
+        ? data.errors.map((e) => (typeof e === "string" ? e : e?.message)).filter(Boolean)
+        : [];
+      const msg =
+        (fieldMessages.length ? fieldMessages.join("\n") : null) ||
+        data?.message ||
+        data?.error ||
+        `Request failed with status ${response.status}`;
       const err = new Error(msg);
       err.data = data;
       err.status = response.status;

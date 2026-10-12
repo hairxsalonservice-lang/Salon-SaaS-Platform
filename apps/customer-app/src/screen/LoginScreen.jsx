@@ -1,5 +1,5 @@
 // src/screen/LoginScreen.jsx
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -24,6 +24,9 @@ import AppleSignInButton from "../components/AppleSignInButton";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import SpringTouchable from "../components/SpringTouchable";
 
+// Deliberately loose: catches typos like a missing "@" or domain; the server does the real check
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function LoginScreen({ navigate, goBack, routeParams }) {
   const { theme, isDark } = useTheme();
   const styles = getStyles(theme, isDark);
@@ -38,27 +41,37 @@ export default function LoginScreen({ navigate, goBack, routeParams }) {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [showForgotModal, setShowForgotModal] = useState(false);
 
+  const passwordRef = useRef(null);
+
+  // After any successful sign-in, continue to where the user was headed
+  const goAfterSignIn = () => {
+    if (!navigate) return;
+    if (routeParams?.redirectTo) navigate(routeParams.redirectTo, routeParams.redirectData);
+    else navigate("Home");
+  };
+
   const handleLogin = async () => {
-    if (!email || !password) {
+    if (loading) return;
+    const cleanEmail = email.trim().toLowerCase();
+    if (!cleanEmail || !password) {
       setError("Please enter both email and password.");
+      return;
+    }
+    if (!EMAIL_PATTERN.test(cleanEmail)) {
+      setError("Please enter a valid email address.");
       return;
     }
     setError("");
     setLoading(true);
-    const res = await login(email.trim().toLowerCase(), password);
+    const res = await login(cleanEmail, password, { remember: rememberMe });
     setLoading(false);
 
     if (res.success) {
-      if (routeParams?.redirectTo && navigate) {
-        navigate(routeParams.redirectTo, routeParams.redirectData);
-      } else if (navigate) {
-        navigate("Home");
-      }
+      goAfterSignIn();
     } else {
       setError(res.error || "Login failed");
     }
@@ -130,6 +143,12 @@ export default function LoginScreen({ navigate, goBack, routeParams }) {
               placeholderTextColor={styles.placeholderColor.color}
               keyboardType="email-address"
               autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={() => passwordRef.current?.focus()}
               value={email}
               onChangeText={setEmail}
             />
@@ -142,7 +161,14 @@ export default function LoginScreen({ navigate, goBack, routeParams }) {
               style={[styles.input, { flex: 1 }]}
               placeholder="Password"
               placeholderTextColor={styles.placeholderColor.color}
+              ref={passwordRef}
               secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              autoComplete="password"
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={handleLogin}
               value={password}
               onChangeText={setPassword}
             />
@@ -195,19 +221,12 @@ export default function LoginScreen({ navigate, goBack, routeParams }) {
           <View style={styles.socialRow}>
             <GoogleSignInButton
               onPress={handleGoogleLogin}
-              loading={googleLoading}
               disabled={loading}
               variant="circle"
             />
             <AppleSignInButton
-              onSuccess={() => {
-                if (routeParams?.redirectTo && navigate) {
-                  navigate(routeParams.redirectTo, routeParams.redirectData);
-                } else if (navigate) {
-                  navigate("Home");
-                }
-              }}
-              onError={(err) => setError(err)}
+              onSuccess={goAfterSignIn}
+              onError={(err) => setError(typeof err === "string" ? err : err?.message || "Apple sign-in failed")}
               variant="circle"
             />
           </View>
@@ -233,13 +252,7 @@ export default function LoginScreen({ navigate, goBack, routeParams }) {
           <GoogleSignInModal
             visible={showGoogleModal}
             onClose={() => setShowGoogleModal(false)}
-            onSuccess={() => {
-              if (routeParams?.redirectTo && navigate) {
-                navigate(routeParams.redirectTo, routeParams.redirectData);
-              } else if (navigate) {
-                navigate("Home");
-              }
-            }}
+            onSuccess={goAfterSignIn}
           />
 
           <ForgotPasswordModal
