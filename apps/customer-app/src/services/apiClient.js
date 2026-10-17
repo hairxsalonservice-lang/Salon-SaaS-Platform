@@ -2,9 +2,17 @@
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 
-// Dynamically determine API base URL (supports Android device/emulator, Web, iOS)
+// Dynamically determine API base URL
 const getBaseUrl = () => {
-  // 1. Try Expo host URI (automatically gets your PC's IP address on Wi-Fi/Expo Go)
+  const useLocal = process.env.EXPO_PUBLIC_USE_LOCAL_API === "true";
+
+  // ── Production mode: use the deployed Railway API ──────────────────────────
+  if (!useLocal) {
+    const productionUrl = process.env.EXPO_PUBLIC_API_URL;
+    if (productionUrl) return productionUrl;
+  }
+
+  // ── Local development: auto-detect the host machine IP via Expo ────────────
   try {
     const hostUri =
       Constants?.expoConfig?.hostUri ||
@@ -19,12 +27,12 @@ const getBaseUrl = () => {
     }
   } catch (e) {}
 
-  // 2. Android Emulator fallback (10.0.2.2 reaches the host PC)
+  // Android Emulator: 10.0.2.2 routes to the host PC
   if (Platform.OS === "android") {
-    return "http://10.0.2.2:6969/api/v1";
+    return process.env.EXPO_PUBLIC_DEV_API_URL || "http://10.0.2.2:6969/api/v1";
   }
 
-  // 3. Web & iOS fallback
+  // Web & iOS fallback
   return "http://localhost:6969/api/v1";
 };
 
