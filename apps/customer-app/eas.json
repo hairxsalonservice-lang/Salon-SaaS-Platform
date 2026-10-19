@@ -14,7 +14,9 @@
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://optimistic-ambition-production-32e7.up.railway.app/api/v1",
+        "EXPO_PUBLIC_API_URL": "https://api.hairxsalon.com/api/v1",
+        "EXPO_PUBLIC_USE_LOCAL_API": "false",
+        "EXPO_PUBLIC_OLA_MAPS_API_KEY": "ql4HL59uBPKj33DjL9E31oUmtqYZNHsh9T5KW9a4",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "28934218761-ra05pqc1gar8qqm9gfdn09odo02fi7ls.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "28934218761-7uq3vob89c3i684f2ef2fa7ddukp8nhj.apps.googleusercontent.com"
       }
@@ -22,7 +24,9 @@
     "production": {
       "autoIncrement": true,
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://optimistic-ambition-production-32e7.up.railway.app/api/v1",
+        "EXPO_PUBLIC_API_URL": "https://api.hairxsalon.com/api/v1",
+        "EXPO_PUBLIC_USE_LOCAL_API": "false",
+        "EXPO_PUBLIC_OLA_MAPS_API_KEY": "ql4HL59uBPKj33DjL9E31oUmtqYZNHsh9T5KW9a4",
         "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "28934218761-ra05pqc1gar8qqm9gfdn09odo02fi7ls.apps.googleusercontent.com",
         "EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID": "28934218761-7uq3vob89c3i684f2ef2fa7ddukp8nhj.apps.googleusercontent.com"
       }

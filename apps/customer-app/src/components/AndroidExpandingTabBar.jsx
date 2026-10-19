@@ -38,30 +38,30 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
           const isCenter = tab.id === "Map";
 
           if (isCenter) {
-             return (
-               <TouchableOpacity
-                 key={tab.id}
-                 activeOpacity={0.85}
-                 onPress={() => onSelectTab(tab.id)}
-                 style={styles.centerTabItem}
-               >
-                 <View style={[styles.centerButtonOuter, { backgroundColor: barBg }]}>
-                   <View style={[styles.centerButtonInner, { backgroundColor: tabCenterBtn, shadowColor: tabCenterBtn }]}>
-                     <Ionicons name="location" size={28} color="#FFFFFF" />
-                   </View>
-                 </View>
-                 <View style={styles.centerLabelContainer}>
-                   <Text style={[styles.tabLabel, { color: isSelected ? tabCenterBtn : inactiveColor, fontWeight: isSelected ? "700" : "500" }]}>
-                     {tab.label}
-                   </Text>
-                   {isSelected && <View style={[styles.activeDot, { backgroundColor: tabCenterBtn }]} />}
-                 </View>
-               </TouchableOpacity>
-             );
+            return (
+              <TouchableOpacity
+                key={tab.id}
+                activeOpacity={0.85}
+                onPress={() => onSelectTab(tab.id)}
+                style={styles.centerTabItem}
+              >
+                <View style={[styles.centerButtonOuter, { backgroundColor: barBg }]}>
+                  <View style={[styles.centerButtonInner, { backgroundColor: tabCenterBtn, shadowColor: tabCenterBtn }]}>
+                    <Ionicons name="location" size={28} color="#FFFFFF" />
+                  </View>
+                </View>
+                <View style={styles.centerLabelContainer}>
+                  <Text style={[styles.tabLabel, { color: isSelected ? tabCenterBtn : inactiveColor, fontWeight: isSelected ? "700" : "500" }]}>
+                    {tab.label}
+                  </Text>
+                  {isSelected && <View style={[styles.activeDot, { backgroundColor: tabCenterBtn }]} />}
+                </View>
+              </TouchableOpacity>
+            );
           }
 
           const iconColor = isSelected ? tabActiveColor : inactiveColor;
-          
+
           return (
             <TouchableOpacity
               key={tab.id}

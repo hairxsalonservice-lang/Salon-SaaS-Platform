@@ -43,7 +43,7 @@ const DEFAULT_BANNERS = [
 
 export default function TopPromoBanner({ onPressBanner, refreshTrigger }) {
   const styles = getStyles();
-  const [banners, setBanners] = useState(DEFAULT_BANNERS);
+  const [banners, setBanners] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
   const scrollViewRef = useRef(null);
@@ -61,15 +61,17 @@ export default function TopPromoBanner({ onPressBanner, refreshTrigger }) {
           title: b.title,
           subtitle: b.subtitle || "",
           cta: b.ctaText || "Claim discount",
-          image: b.imageUrl || DEFAULT_BANNERS[0].image,
+          image: b.imageUrl || "",
           promoCode: b.promoCode,
           targetType: b.targetType,
           targetId: b.targetId,
         }));
         setBanners(mapped);
+      } else {
+        setBanners([]);
       }
     } catch (err) {
-      // Keep fallback banners on error
+      setBanners([]);
     }
   }, []);
 
@@ -140,6 +142,10 @@ export default function TopPromoBanner({ onPressBanner, refreshTrigger }) {
     }
     if (onPressBanner) onPressBanner(banner);
   };
+
+  if (!banners || banners.length === 0) {
+    return null;
+  }
 
   return (
     <View style={styles.container}>

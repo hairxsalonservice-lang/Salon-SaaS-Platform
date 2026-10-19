@@ -47,10 +47,12 @@ export default function BannersPage() {
     subtitle: "",
     details: "",
     tag: "SPECIAL OFFER",
-    ctaText: "Claim discount",
+    ctaText: "Book Now",
     imageUrl: "",
     promoCode: "",
+    discountPercentage: "",
     targetType: "EXPLORE",
+    city: "",
   });
 
   const fetchBanners = async () => {
@@ -76,10 +78,12 @@ export default function BannersPage() {
       subtitle: "",
       details: "",
       tag: "SPECIAL OFFER",
-      ctaText: "Claim discount",
+      ctaText: "Book Now",
       imageUrl: "",
       promoCode: "",
+      discountPercentage: "",
       targetType: "EXPLORE",
+      city: "",
     });
     setShowModal(true);
   };
@@ -91,10 +95,12 @@ export default function BannersPage() {
       subtitle: banner.subtitle || "",
       details: banner.details || "",
       tag: banner.tag || "SPECIAL OFFER",
-      ctaText: banner.ctaText || "Claim discount",
+      ctaText: banner.ctaText || "Book Now",
       imageUrl: banner.imageUrl || "",
       promoCode: banner.promoCode || "",
+      discountPercentage: (banner as any).discountPercentage != null ? String((banner as any).discountPercentage) : "",
       targetType: banner.targetType || "EXPLORE",
+      city: (banner as any).city || "",
     });
     setShowModal(true);
   };
@@ -105,16 +111,16 @@ export default function BannersPage() {
 
     setSubmitting(true);
     try {
+      const payload = {
+        ...formData,
+        imageUrl: formData.imageUrl.trim() || DEFAULT_BANNER_IMAGE,
+        discountPercentage: formData.discountPercentage !== "" ? Number(formData.discountPercentage) : undefined,
+        city: formData.city.trim() || undefined,
+      };
       if (editingBanner) {
-        await apiClient.put(`/admin/banners/${editingBanner._id}`, {
-          ...formData,
-          imageUrl: formData.imageUrl.trim() || DEFAULT_BANNER_IMAGE,
-        });
+        await apiClient.put(`/admin/banners/${editingBanner._id}`, payload);
       } else {
-        await apiClient.post("/admin/banners", {
-          ...formData,
-          imageUrl: formData.imageUrl.trim() || DEFAULT_BANNER_IMAGE,
-        });
+        await apiClient.post("/admin/banners", payload);
       }
       setShowModal(false);
       setEditingBanner(null);
@@ -333,6 +339,20 @@ export default function BannersPage() {
                 />
               </div>
 
+              {/* CTA Button Text — was missing! */}
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1">
+                  CTA Button Text
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Book Now, Explore Offers, Claim Discount"
+                  value={formData.ctaText}
+                  onChange={(e) => setFormData({ ...formData, ctaText: e.target.value })}
+                  className="w-full px-3.5 py-2 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-accent/20"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-ink mb-1">Tag Label</label>
@@ -356,6 +376,50 @@ export default function BannersPage() {
                     className="w-full px-3.5 py-2 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-accent/20"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-ink mb-1">Discount %</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="e.g. 20"
+                    value={formData.discountPercentage}
+                    onChange={(e) => setFormData({ ...formData, discountPercentage: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-ink mb-1">
+                    Target / Action
+                  </label>
+                  <select
+                    value={formData.targetType}
+                    onChange={(e) => setFormData({ ...formData, targetType: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 bg-white"
+                  >
+                    <option value="EXPLORE">Explore (Browse All)</option>
+                    <option value="CATEGORY">Category Page</option>
+                    <option value="SALON">Specific Salon</option>
+                    <option value="DISCOUNT">Discount / Offer</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-ink mb-1">
+                  City Filter{" "}
+                  <span className="font-normal text-muted">(leave blank to show in all cities)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Brahmapur or Bhubaneswar"
+                  value={formData.city}
+                  onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                  className="w-full px-3.5 py-2 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-accent/20"
+                />
               </div>
 
               <div>

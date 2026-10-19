@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   RefreshControl,
-  Image,
+  ImageBackground,
   Dimensions,
 } from "react-native";
 import { C, S, FS, FW, R, TYPO } from "../theme";
@@ -37,39 +37,6 @@ if (!isExpoGo) {
   } catch (e) { }
 }
 
-const DEFAULT_HERO_BANNERS = [
-  {
-    _id: "b-1",
-    tag: "B E A U T Y · C A R E · Y O U",
-    title: "Self Care\nFeels Better",
-    subtitle: null, // resolved dynamically using selectedCity in the render
-    ctaText: "Book Now",
-    imageUrl: "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    _id: "b-2",
-    tag: "S P E C I A L  S P A  &  G L O W",
-    title: "Radiant Skin\nPure Bliss",
-    subtitle: null, // resolved dynamically
-    ctaText: "Explore Offers",
-    imageUrl: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=1000&auto=format&fit=crop",
-  },
-  {
-    _id: "b-3",
-    tag: "E X P E R T  H A I R  C A R E",
-    title: "Fresh Look\nNew Confidence",
-    subtitle: null, // resolved dynamically
-    ctaText: "View Salons",
-    imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1000&auto=format&fit=crop",
-  },
-];
-
-// Subtitle templates for DEFAULT_HERO_BANNERS (kept as data, not functions, to avoid non-serializable nav params)
-const DEFAULT_BANNER_SUBTITLES = [
-  (city) => `Book trusted salons & beauty experts in ${city}`,
-  (city) => `Discover rejuvenating facial & spa treatments in ${city}`,
-  (city) => `Top hair stylists and coloring specialists in ${city}`,
-];
 
 const SalonCarousel = memo(({ salons, onSalonPress, styles }) => (
   <ScrollView
@@ -150,7 +117,7 @@ function HomeScreen({ navigate, onScroll }) {
   const bannerScrollRef = React.useRef(null);
 
   const displayBanners = React.useMemo(() => {
-    return banners && banners.length > 0 ? banners : DEFAULT_HERO_BANNERS;
+    return Array.isArray(banners) ? banners : [];
   }, [banners]);
 
   useEffect(() => {
@@ -371,20 +338,16 @@ function HomeScreen({ navigate, onScroll }) {
     if (bannerId && IS_OBJECT_ID.test(bannerId)) {
       browseService.trackBannerClick(bannerId);
     }
-    // Resolve subtitle to a plain string BEFORE passing to navigation.
-    // Passing a function as a route param causes a non-serializable warning
-    // and a 'Functions are not valid as a React child' crash in BannerDetail.
-    const bannerIdx = displayBanners.indexOf(banner);
     const resolvedSubtitle =
       typeof banner.subtitle === "function"
         ? banner.subtitle(selectedCity)
-        : typeof banner.subtitle === "string" && banner.subtitle
+        : typeof banner.subtitle === "string"
         ? banner.subtitle
-        : (DEFAULT_BANNER_SUBTITLES[bannerIdx] || DEFAULT_BANNER_SUBTITLES[0])(selectedCity);
+        : "";
     navigate("BannerDetail", {
       banner: { ...banner, subtitle: resolvedSubtitle },
     });
-  }, [navigate, displayBanners, selectedCity]);
+  }, [navigate, selectedCity]);
   const handleExplore = useCallback(() => { if (navigate) navigate("Explore"); }, [navigate]);
   const handleCitySelect = useCallback((city) => { setSelectedCity(city); storage.setItem("@user_selected_city", city); }, []);
   const handleLocationClose = useCallback(() => setLocationModalVisible(false), []);
@@ -422,89 +385,80 @@ function HomeScreen({ navigate, onScroll }) {
         {/* HERO BANNER & CATEGORIES — Only shown when salons are available */}
         {!loading && (salons.length === 0 || loadError) ? null : (
           <>
-            {/* HERO BANNER - AUTOMATIC SLIDE */}
-            <View style={{ marginBottom: 24 }}>
-              <ScrollView
-                ref={bannerScrollRef}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                onScroll={handleBannerScroll}
-                scrollEventThrottle={16}
-                decelerationRate="fast"
-              >
-                {displayBanners.map((banner, idx) => {
-                  const screenWidth = Dimensions.get("window").width;
-                  const cardWidth = screenWidth - 32;
-                  const titleText = banner.title || "Self Care\nFeels Better";
-                  // Resolve subtitle: DB banners have a plain string; default banners have null
-                  // with a companion template in DEFAULT_BANNER_SUBTITLES keyed by banner index.
-                  let subText;
-                  if (typeof banner.subtitle === "string" && banner.subtitle) {
-                    subText = banner.subtitle;
-                  } else if (typeof banner.subtitle === "function") {
-                    // Safety fallback: DB banners should never have function subtitles,
-                    // but guard here just in case.
-                    subText = banner.subtitle(selectedCity);
-                  } else {
-                    // Default banner: look up the template by index
-                    const templateFn = DEFAULT_BANNER_SUBTITLES[idx];
-                    subText = templateFn
-                      ? templateFn(selectedCity)
-                      : `Book trusted salons & beauty experts in ${selectedCity}`;
-                  }
-                  const tagText = banner.tag || banner.eyebrow || "B E A U T Y · C A R E · Y O U";
-                  const ctaText = banner.ctaText || "Book Now";
+            {/* HERO BANNER - AUTOMATIC SLIDE (Only shown if banners exist) */}
+            {displayBanners.length > 0 ? (
+              <View style={{ marginBottom: 24 }}>
+                <ScrollView
+                  ref={bannerScrollRef}
+                  horizontal
+                  pagingEnabled
+                  showsHorizontalScrollIndicator={false}
+                  onScroll={handleBannerScroll}
+                  scrollEventThrottle={16}
+                  decelerationRate="fast"
+                >
+                  {displayBanners.map((banner, idx) => {
+                    const screenWidth = Dimensions.get("window").width;
+                    const cardWidth = screenWidth - 32;
+                    const titleText = banner.title || "";
+                    let subText =
+                      typeof banner.subtitle === "string"
+                        ? banner.subtitle
+                        : typeof banner.subtitle === "function"
+                        ? banner.subtitle(selectedCity)
+                        : "";
+                    const tagText = banner.tag || banner.eyebrow || "";
+                    const ctaText = banner.ctaText || "Book Now";
 
-                  const rawImg = banner.imageUrl || banner.image || banner.photoUrl;
-                  const bannerImgUri = sanitizeImageUrl(rawImg) || "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=1000&fit=crop&fm=jpg";
+                    const rawImg = banner.imageUrl || banner.image || banner.photoUrl;
+                    const bannerImgUri = sanitizeImageUrl(rawImg) || "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?q=80&w=1000&fit=crop&fm=jpg";
 
-                  return (
-                    <View key={banner._id || idx} style={{ width: screenWidth, alignItems: "center" }}>
-                      <TouchableOpacity
-                        activeOpacity={0.92}
-                        onPress={() => handleBannerPress(banner)}
-                        style={[
-                          styles.heroBannerContainer,
-                          { width: cardWidth, marginBottom: 0, marginHorizontal: 0 },
-                        ]}
-                      >
-                        <Image source={{ uri: bannerImgUri }} style={styles.heroBannerImage} resizeMode="cover" />
-                        <View style={styles.heroBannerOverlay} pointerEvents="none" />
+                    return (
+                      <View key={banner._id || idx} style={{ width: screenWidth, alignItems: "center" }}>
+                        <TouchableOpacity
+                          activeOpacity={0.92}
+                          onPress={() => handleBannerPress(banner)}
+                          style={[
+                            styles.heroBannerContainer,
+                            { width: cardWidth, marginBottom: 0, marginHorizontal: 0 },
+                          ]}
+                        >
+                          <ImageBackground
+                            source={{ uri: bannerImgUri }}
+                            style={styles.heroBannerImage}
+                            imageStyle={{ borderRadius: 16 }}
+                            resizeMode="cover"
+                          >
+                            {/* Dark gradient scrim so text is always legible */}
+                            <View style={styles.heroBannerOverlay}>
+                              <View style={styles.heroBannerContent}>
+                                <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", marginBottom: 4 }}>
+                                  {tagText ? <Text style={styles.heroEyebrow}>{tagText}</Text> : null}
+                                  {banner.promoCode ? (
+                                    <View style={styles.promoCodeBadge}>
+                                      <Ionicons name="pricetag" size={10} color="#FFFFFF" style={{ marginRight: 3 }} />
+                                      <Text style={styles.promoCodeBadgeText}>Code: {banner.promoCode}</Text>
+                                    </View>
+                                  ) : null}
+                                </View>
+                                {titleText ? <Text style={styles.heroTitle}>{titleText}</Text> : null}
+                                {subText ? <Text style={styles.heroSubtitle}>{subText}</Text> : null}
 
-                        <View style={styles.heroBannerContent}>
-                          <View style={{ flexDirection: "row", alignItems: "center", flexWrap: "wrap", marginBottom: 4 }}>
-                            <Text style={styles.heroEyebrow}>{tagText}</Text>
-                            {banner.promoCode ? (
-                              <View style={styles.promoCodeBadge}>
-                                <Ionicons name="pricetag" size={10} color="#FFFFFF" style={{ marginRight: 3 }} />
-                                <Text style={styles.promoCodeBadgeText}>Code: {banner.promoCode}</Text>
+                                <View style={styles.heroBookBtn}>
+                                  <Text style={styles.heroBookBtnText}>{ctaText}</Text>
+                                  <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                                </View>
                               </View>
-                            ) : null}
-                          </View>
-                          <Text style={styles.heroTitle}>{titleText}</Text>
-                          <Text style={styles.heroSubtitle}>{subText}</Text>
 
-                          <View style={styles.heroBookBtn}>
-                            <Text style={styles.heroBookBtnText}>{ctaText}</Text>
-                            <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
-                          </View>
-                        </View>
-
-                        <View style={styles.heroDotsRow}>
-                          {displayBanners.map((_, dotIdx) => (
-                            <View
-                              key={dotIdx}
-                              style={[styles.heroDot, dotIdx === activeBannerIndex && styles.heroDotActive]}
-                            />
-                          ))}
-                        </View>
-                      </TouchableOpacity>
-                    </View>
-                  );
-                })}
-              </ScrollView>
-            </View>
+                            </View>
+                          </ImageBackground>
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            ) : null}
 
             {/* CATEGORIES */}
             <View style={styles.categoriesContainer}>
@@ -721,7 +675,7 @@ function buildStyles(theme, isDark) {
       backgroundColor: "#FF3B30",
     },
 
-    // Hero banner — a cream wash on light, a dark scrim on dark, so text contrast holds either way
+    // Hero banner — ImageBackground handles cross-platform image + content stacking
     heroBannerContainer: {
       marginHorizontal: 16,
       borderRadius: 16,
@@ -731,29 +685,30 @@ function buildStyles(theme, isDark) {
       marginBottom: 24,
     },
     heroBannerImage: {
-      ...StyleSheet.absoluteFillObject,
       width: "100%",
       height: "100%",
-      zIndex: 0,
     },
+    // Overlay is now a normal flex child inside ImageBackground — no z-index needed
     heroBannerOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: isDark ? "rgba(10, 10, 12, 0.66)" : "rgba(245, 239, 230, 0.72)",
-      zIndex: 1,
+      flex: 1,
+      backgroundColor: isDark ? "rgba(10, 10, 12, 0.72)" : "rgba(10, 8, 6, 0.52)",
+      justifyContent: "space-between",
+      padding: 20,
+      paddingBottom: 16,
     },
     heroBannerContent: {
-      ...StyleSheet.absoluteFillObject,
-      padding: 20,
+      flex: 1,
       justifyContent: "center",
-      zIndex: 10,
-      elevation: 10,
     },
     heroEyebrow: {
       fontSize: 10,
       fontWeight: "700",
-      color: isDark ? "#E5B05D" : "#6D554D",
+      color: "rgba(255, 255, 255, 0.85)",
       letterSpacing: 1.5,
       marginBottom: 0,
+      textShadowColor: "rgba(0,0,0,0.6)",
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 3,
     },
     promoCodeBadge: {
       backgroundColor: "rgba(179, 38, 30, 0.90)",
@@ -773,18 +728,26 @@ function buildStyles(theme, isDark) {
     heroTitle: {
       fontSize: 26,
       fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1E1E1E",
+      color: "#FFFFFF",
       lineHeight: 32,
       marginBottom: 8,
+      textShadowColor: "rgba(0,0,0,0.5)",
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 4,
     },
     heroSubtitle: {
       fontSize: 12,
-      color: isDark ? "rgba(255, 255, 255, 0.82)" : "#333333",
+      color: "rgba(255, 255, 255, 0.88)",
       lineHeight: 18,
       marginBottom: 16,
+      textShadowColor: "rgba(0,0,0,0.5)",
+      textShadowOffset: { width: 0, height: 1 },
+      textShadowRadius: 3,
     },
     heroBookBtn: {
-      backgroundColor: isDark ? p.primary : "#1E1E1E",
+      backgroundColor: "rgba(255, 255, 255, 0.22)",
+      borderWidth: 1,
+      borderColor: "rgba(255, 255, 255, 0.60)",
       paddingHorizontal: 16,
       paddingVertical: 10,
       borderRadius: 24,
@@ -797,23 +760,7 @@ function buildStyles(theme, isDark) {
       fontSize: 13,
       fontWeight: "600",
     },
-    heroDotsRow: {
-      flexDirection: "row",
-      position: "absolute",
-      bottom: 16,
-      left: 20,
-      gap: 6,
-    },
-    heroDot: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.2)",
-    },
-    heroDotActive: {
-      width: 16,
-      backgroundColor: isDark ? "#FFFFFF" : "#5D3B3E",
-    },
+
 
     // Categories
     categoriesContainer: {
