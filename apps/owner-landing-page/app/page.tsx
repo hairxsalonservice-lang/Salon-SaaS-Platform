@@ -30,7 +30,7 @@ import apiClient, { parseApiError } from "@/lib/api-client";
 
 const EMAIL_RE = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
 const SALON_PANEL_URL =
-  process.env.NEXT_PUBLIC_SALON_PANEL_URL || "https://salon.hairxsalon.com/login";
+  process.env.NEXT_PUBLIC_SALON_PANEL_URL || "https://app.hairxsalon.com";
 
 export default function LandingPage() {
   // ── Registration Form State ──────────────────────────────
