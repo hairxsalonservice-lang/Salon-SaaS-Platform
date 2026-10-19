@@ -20,13 +20,21 @@ const uploadSingle = async (req, res, next) => {
     }
 
     const folder = sanitizeFolder(req.query.folder || req.body.folder);
-    const { userId, role, salonId, branchId } = req.user;
+    const { userId, role, salonId, branchId } = req.user || {};
+
+    let customName = req.body.customName || req.query.customName;
+    const title = req.body.title || req.query.title;
+    const promoCode = req.body.promoCode || req.query.promoCode;
+    if (!customName && (title || promoCode)) {
+      customName = [title, promoCode].filter(Boolean).join("-");
+    }
 
     const result = await StorageService.uploadBuffer({
       buffer: req.file.buffer,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
       folder,
+      customName,
       uploadedBy: userId,
       salonId,
       branchId,
@@ -57,14 +65,22 @@ const uploadMultiple = async (req, res, next) => {
     }
 
     const folder = sanitizeFolder(req.query.folder || req.body.folder);
-    const { userId, role, salonId, branchId } = req.user;
+    const { userId, role, salonId, branchId } = req.user || {};
 
-    const uploadPromises = req.files.map((file) =>
+    let customName = req.body.customName || req.query.customName;
+    const title = req.body.title || req.query.title;
+    const promoCode = req.body.promoCode || req.query.promoCode;
+    if (!customName && (title || promoCode)) {
+      customName = [title, promoCode].filter(Boolean).join("-");
+    }
+
+    const uploadPromises = req.files.map((file, idx) =>
       StorageService.uploadBuffer({
         buffer: file.buffer,
         originalName: file.originalname,
         mimeType: file.mimetype,
         folder,
+        customName: customName ? `${customName}-${idx + 1}` : undefined,
         uploadedBy: userId,
         salonId,
         branchId,

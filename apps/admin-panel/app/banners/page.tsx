@@ -12,6 +12,10 @@ import {
   Sparkles,
   RotateCw,
   Pencil,
+  Upload,
+  Loader2,
+  X,
+  CheckCircle2,
 } from "lucide-react";
 
 interface BannerItem {
@@ -40,6 +44,8 @@ export default function BannersPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingBanner, setEditingBanner] = useState<BannerItem | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -103,6 +109,52 @@ export default function BannersPage() {
       city: (banner as any).city || "",
     });
     setShowModal(true);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please select a valid image file (PNG, JPG, WEBP).");
+      return;
+    }
+
+    setUploadingImage(true);
+    setUploadError(null);
+
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("folder", "banners");
+      if (formData.title.trim()) {
+        data.append("title", formData.title.trim());
+      }
+      if (formData.promoCode.trim()) {
+        data.append("promoCode", formData.promoCode.trim());
+      }
+
+      const res = await apiClient.post("/upload/single", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const uploadedUrl = res.data?.data?.url;
+      if (uploadedUrl) {
+        setFormData((prev) => ({ ...prev, imageUrl: uploadedUrl }));
+      } else {
+        throw new Error("No URL returned from upload");
+      }
+    } catch (err: any) {
+      console.error("Banner image upload failed:", err);
+      const msg =
+        err?.response?.data?.message || err?.message || "Failed to upload image to Cloudflare R2";
+      setUploadError(msg);
+    } finally {
+      setUploadingImage(false);
+      e.target.value = "";
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -423,14 +475,100 @@ export default function BannersPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-ink mb-1">Image URL</label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/photo-..."
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  className="w-full px-3.5 py-2 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-accent/20"
-                />
+                <label className="block text-xs font-semibold text-ink mb-1.5 flex items-center justify-between">
+                  <span>
+                    Banner Image (Saved in Cloudflare R2:{" "}
+                    <code className="text-[10px] text-accent bg-accent/10 px-1.5 py-0.5 rounded">
+                      banners/
+                    </code>
+                    )
+                  </span>
+                  {formData.imageUrl && (
+                    <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
+                      <CheckCircle2 size={12} /> Image Ready
+                    </span>
+                  )}
+                </label>
+
+                {/* Live Preview if image exists */}
+                {formData.imageUrl && (
+                  <div className="relative mb-2 rounded-xl overflow-hidden border border-border group h-32 bg-slate-900">
+                    <img
+                      src={formData.imageUrl}
+                      alt="Banner Preview"
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: "" })}
+                        className="px-3 py-1.5 bg-rose-600/90 hover:bg-rose-600 text-white text-xs font-semibold rounded-lg flex items-center gap-1 shadow-sm"
+                      >
+                        <Trash2 size={13} /> Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Upload to Cloudflare R2 */}
+                <div className="space-y-2">
+                  <label
+                    className={`flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-3 cursor-pointer transition-all ${
+                      uploadingImage
+                        ? "border-accent bg-accent/5 opacity-75 cursor-not-allowed"
+                        : "border-border hover:border-accent/60 hover:bg-accent/5"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-xs font-semibold text-ink">
+                      {uploadingImage ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin text-accent" />
+                          <span className="text-accent">Uploading to Cloudflare R2...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={16} className="text-accent" />
+                          <span>Click to Upload Banner Image</span>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-muted mt-0.5">
+                      Auto-names as:{" "}
+                      <code className="text-slate-600">
+                        banners/
+                        {formData.title
+                          ? formData.title.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+                          : "banner"}
+                        {formData.promoCode
+                          ? "-" + formData.promoCode.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+                          : ""}
+                        -[hash].webp
+                      </code>
+                    </p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploadingImage}
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+
+                  {uploadError && (
+                    <p className="text-xs text-rose-600 font-medium">{uploadError}</p>
+                  )}
+
+                  {/* Optional Direct URL Fallback */}
+                  <div className="relative">
+                    <input
+                      type="url"
+                      placeholder="Or paste direct image URL (https://...)"
+                      value={formData.imageUrl}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      className="w-full px-3.5 py-1.5 rounded-xl border border-border text-xs focus:outline-none focus:ring-2 focus:ring-accent/20 text-muted focus:text-ink"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>

@@ -24,6 +24,8 @@ import {
   LayoutGrid,
   ArrowUpDown,
   Check,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { useBranch } from "@/hooks/useBranch";
 import { getCached, setCache, invalidateCache } from "@/lib/cache";
@@ -533,6 +535,51 @@ function ServiceFormModal({
   const [fieldErrors, setFieldErrors] = useState<{ field: string; message: string }[]>([]);
   const [serverError, setServerError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please select a valid image file (PNG, JPG, WEBP).");
+      return;
+    }
+
+    setUploadingImage(true);
+    setUploadError(null);
+
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("folder", "services");
+      if (form.name.trim()) {
+        data.append("title", form.name.trim());
+      }
+
+      const res = await apiClient.post("/upload/single", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const uploadedUrl = res.data?.data?.url;
+      if (uploadedUrl) {
+        set("imageUrl", uploadedUrl);
+      } else {
+        throw new Error("No URL returned from upload");
+      }
+    } catch (err: any) {
+      console.error("Service image upload failed:", err);
+      const msg =
+        err?.response?.data?.message || err?.message || "Failed to upload image to Cloudflare R2";
+      setUploadError(msg);
+    } finally {
+      setUploadingImage(false);
+      e.target.value = "";
+    }
+  };
 
   function set(key: string, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -736,6 +783,86 @@ function ServiceFormModal({
             </div>
           </div>
         )}
+
+        {/* Service Image (Cloudflare R2) */}
+        <div>
+          <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+            <span>
+              Service Image (Cloudflare R2:{" "}
+              <code className="text-[10px] text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded">
+                services/
+              </code>
+              )
+            </span>
+            {form.imageUrl && (
+              <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
+                <Check size={12} /> Image Ready
+              </span>
+            )}
+          </label>
+
+          {form.imageUrl && (
+            <div className="relative mb-2 rounded-xl overflow-hidden border border-slate-200 group h-28 bg-slate-900">
+              <img
+                src={form.imageUrl}
+                alt="Service Preview"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => set("imageUrl", "")}
+                  className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg flex items-center gap-1 shadow-sm"
+                >
+                  <Trash2 size={12} /> Remove
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <label
+              className={`flex flex-col items-center justify-center w-full border-2 border-dashed rounded-xl p-2.5 cursor-pointer transition-all ${
+                uploadingImage
+                  ? "border-indigo-400 bg-indigo-50/50 opacity-75 cursor-not-allowed"
+                  : "border-slate-200 hover:border-indigo-400 hover:bg-slate-50"
+              }`}
+            >
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+                {uploadingImage ? (
+                  <>
+                    <Loader2 size={15} className="animate-spin text-indigo-600" />
+                    <span className="text-indigo-600">Uploading to Cloudflare R2...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={15} className="text-indigo-600" />
+                    <span>Upload Service Image</span>
+                  </>
+                )}
+              </div>
+              <p className="text-[10px] text-slate-400 mt-0.5">
+                Saved as:{" "}
+                <code className="text-slate-500">
+                  services/
+                  {form.name ? form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "service"}
+                  -[hash].webp
+                </code>
+              </p>
+              <input
+                type="file"
+                accept="image/*"
+                disabled={uploadingImage}
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+            </label>
+
+            {uploadError && (
+              <p className="text-xs text-rose-600 font-medium">{uploadError}</p>
+            )}
+          </div>
+        </div>
 
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1">Description (optional)</label>

@@ -42,9 +42,22 @@ class StorageService {
   }
 
   /**
+   * Helper to slugify filenames cleanly
+   */
+  static _slugify(text) {
+    if (!text || typeof text !== "string") return "";
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .substring(0, 80);
+  }
+
+  /**
    * Upload a raw file Buffer to Cloudflare R2
    */
-  static async uploadBuffer({ buffer, originalName, mimeType, folder = "uploads", uploadedBy, salonId, branchId }) {
+  static async uploadBuffer({ buffer, originalName, mimeType, folder = "uploads", customName, uploadedBy, salonId, branchId }) {
     let finalBuffer = buffer;
     let finalExt = this._getExtension(originalName, mimeType);
     let finalMimeType = mimeType;
@@ -63,8 +76,16 @@ class StorageService {
       }
     }
 
-    const uniqueHash = crypto.randomBytes(8).toString("hex");
-    const key = `${folder}/${Date.now()}-${uniqueHash}.${finalExt}`;
+    const uniqueHash = crypto.randomBytes(4).toString("hex");
+    let key;
+    if (customName) {
+      const slug = this._slugify(customName);
+      key = slug
+        ? `${folder}/${slug}-${uniqueHash}.${finalExt}`
+        : `${folder}/${Date.now()}-${uniqueHash}.${finalExt}`;
+    } else {
+      key = `${folder}/${Date.now()}-${uniqueHash}.${finalExt}`;
+    }
 
     if (!isConfigured || !s3Client) {
       logger.warn(
