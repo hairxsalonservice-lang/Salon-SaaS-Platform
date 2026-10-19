@@ -99,7 +99,7 @@ export default function LegalScreen({ goBack, routeParams, onScroll }) {
         <View style={[styles.infoBanner, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
           <Ionicons name="information-circle-outline" size={18} color={theme.primary} />
           <Text style={[styles.infoBannerText, { color: theme.body }]}>
-            Last updated: <Text style={{ color: theme.ink, fontWeight: FW.bold }}>August 12, 2026</Text> • Applies to all Luxe Salon Platform services.
+            Last updated: <Text style={{ color: theme.ink, fontWeight: FW.bold }}>August 12, 2026</Text> • Applies to all HairX Salon Platform services.
           </Text>
         </View>
 
@@ -109,7 +109,7 @@ export default function LegalScreen({ goBack, routeParams, onScroll }) {
             <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
               <Text style={[styles.cardTitle, { color: theme.ink }]}>1. Overview &amp; Data Collection</Text>
               <Text style={[styles.paragraph, { color: theme.body }]}>
-                Luxe Salon SaaS Platform (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) respects your privacy and is committed to protecting the personal information you share with us when using our mobile applications and websites.
+                HairX Salon SaaS Platform (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;) respects your privacy and is committed to protecting the personal information you share with us when using our mobile applications and websites.
               </Text>
               <Text style={[styles.paragraph, { color: theme.body }]}>
                 We collect information you provide directly during account registration, profile setup, and appointment bookings, including:
@@ -151,7 +151,7 @@ export default function LegalScreen({ goBack, routeParams, onScroll }) {
             <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
               <Text style={[styles.cardTitle, { color: theme.ink }]}>1. Acceptance of Terms</Text>
               <Text style={[styles.paragraph, { color: theme.body }]}>
-                By downloading, registering, or using the Luxe Salon Platform application, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our app.
+                By downloading, registering, or using the HairX Salon Platform application, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our app.
               </Text>
             </View>
 

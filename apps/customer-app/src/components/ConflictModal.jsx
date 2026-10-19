@@ -20,7 +20,7 @@ export default function ConflictModal({
   const styles = getStyles();
   if (!visible) return null;
 
-  const salonName = conflictData?.salonName || "Salon Luxe";
+  const salonName = conflictData?.salonName || "HairX Salon";
   const serviceName = conflictData?.serviceName || "Existing Service";
   const staffName = conflictData?.staffName || "Specialist";
   const dateStr = conflictData?.date || "Today";

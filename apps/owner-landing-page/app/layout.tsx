@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Luxe Salon SaaS — Partner Platform for Salon Owners",
+  title: "HairX Salon SaaS — Partner Platform for Salon Owners",
   description:
     "Grow your salon business with multi-branch management, smart appointment scheduling, staff commission tracking, real-time analytics, and customer CRM.",
   keywords: [

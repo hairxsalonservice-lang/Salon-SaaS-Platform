@@ -29,6 +29,8 @@ import {
 import apiClient, { parseApiError } from "@/lib/api-client";
 
 const EMAIL_RE = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+const SALON_PANEL_URL =
+  process.env.NEXT_PUBLIC_SALON_PANEL_URL || "https://salon.hairxsalon.com/login";
 
 export default function LandingPage() {
   // ── Registration Form State ──────────────────────────────
@@ -144,7 +146,7 @@ export default function LandingPage() {
             </div>
             <div>
               <span className="font-display font-bold text-xl text-white tracking-tight">
-                LUXE<span className="text-indigo-400">SALON</span>
+                HAIR<span className="text-indigo-400">X</span>
               </span>
               <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-semibold px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
                 SaaS Partner Portal
@@ -169,7 +171,7 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-3">
             <a
-              href="http://localhost:3001/login"
+              href={SALON_PANEL_URL}
               target="_blank"
               rel="noreferrer"
               className="text-xs font-semibold text-slate-300 hover:text-white px-4 py-2.5 rounded-lg border border-slate-700 hover:border-slate-600 transition-all flex items-center gap-1.5"
@@ -200,7 +202,7 @@ export default function LandingPage() {
           </div>
 
           <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.15] max-w-4xl mx-auto">
-            Scale & Automate Your Salon Business with <span className="gradient-accent-text">Luxe SaaS</span>
+            Scale & Automate Your Salon Business with <span className="gradient-accent-text">HairX SaaS</span>
           </h1>
 
           <p className="mt-6 text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
@@ -597,7 +599,7 @@ export default function LandingPage() {
               Calculate Your Salon Revenue Growth
             </p>
             <p className="text-slate-400 text-sm mt-2">
-              See how much time and money Luxe Salon SaaS saves your business each month.
+              See how much time and money HairX Salon SaaS saves your business each month.
             </p>
           </div>
 
@@ -682,7 +684,7 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-              Join Luxe Salon Platform
+              Join HairX Salon Platform
             </span>
             <h2 className="font-display text-3xl sm:text-5xl font-extrabold text-white mt-2">
               Register Your Salon
@@ -726,7 +728,7 @@ export default function LandingPage() {
 
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a
-                  href="http://localhost:3001/login"
+                  href={SALON_PANEL_URL}
                   target="_blank"
                   rel="noreferrer"
                   className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all"
@@ -770,7 +772,7 @@ export default function LandingPage() {
                     <Building2 className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
                     <input
                       type="text"
-                      placeholder="e.g. Luxe Hair & Beauty Studio"
+                      placeholder="e.g. HairX Salon & Beauty Studio"
                       value={salonName}
                       onChange={(e) => {
                         setSalonName(e.target.value);
@@ -949,7 +951,7 @@ export default function LandingPage() {
               },
               {
                 q: "Can I manage multiple salon branches under one owner account?",
-                a: "Yes! Luxe Salon SaaS natively supports multi-branch management. Once approved, you can create and manage unlimited branch locations from your single owner panel.",
+                a: "Yes! HairX Salon SaaS natively supports multi-branch management. Once approved, you can create and manage unlimited branch locations from your single owner panel.",
               },
               {
                 q: "How do customer appointments work?",
@@ -993,7 +995,7 @@ export default function LandingPage() {
               <Sparkles className="w-4 h-4" />
             </div>
             <span className="font-display font-bold text-white text-base tracking-tight">
-              LUXE<span className="text-indigo-400">SALON</span>
+              HAIR<span className="text-indigo-400">X</span>
             </span>
           </div>
 
@@ -1002,10 +1004,10 @@ export default function LandingPage() {
             <a href="#guide" className="hover:text-white transition-colors">Panel Guide</a>
             <a href="#roi" className="hover:text-white transition-colors">ROI Calculator</a>
             <a href="#register" className="hover:text-white transition-colors">Register Salon</a>
-            <a href="http://localhost:3001/login" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Salon Panel Login</a>
+            <a href={SALON_PANEL_URL} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Salon Panel Login</a>
           </div>
 
-          <p className="text-slate-500">© 2026 LUXE SALON PLATFORM. ALL RIGHTS RESERVED.</p>
+          <p className="text-slate-500">© 2026 HAIRX SALON PLATFORM. ALL RIGHTS RESERVED.</p>
         </div>
       </footer>
     </div>

@@ -147,7 +147,7 @@ export const notificationService = {
 
       await Notifications.scheduleNotificationAsync({
         content: {
-          title: title || "Salon Luxe Update",
+          title: title || "HairX Salon Update",
           body: body || "Your appointment status was updated.",
           sound: "default",
           data,
@@ -159,7 +159,7 @@ export const notificationService = {
     }
   },
 
-  notifyStatusChange: async (status, salonName = "Salon Luxe", serviceName = "Appointment") => {
+  notifyStatusChange: async (status, salonName = "HairX Salon", serviceName = "Appointment") => {
     let title = "Appointment Status Updated";
     let body = `Your booking for ${serviceName} at ${salonName} was updated.`;
 
