@@ -58,7 +58,7 @@
   },
   "private": true,
   "devDependencies": {
-    "@react-native/jest-preset": "^0.87.1",
+    "@react-native/jest-preset": "^0.86.3",
     "@testing-library/react-native": "^13.2.0",
     "hermes-engine": "^0.11.0",
     "jest": "^30.5.2",
