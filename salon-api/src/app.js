@@ -92,8 +92,12 @@ const corsOptions = {
       }
     }
 
-    // Production & Staging: Strict whitelist match ONLY (wildcards explicitly forbidden)
-    if (allowedOriginsList.includes(origin)) {
+    // Production & Staging: Allow explicit whitelist or hairxsalon.com domains
+    if (
+      allowedOriginsList.includes(origin) ||
+      /^https:\/\/([a-zA-Z0-9-]+\.)*hairxsalon\.com$/.test(origin) ||
+      /^https:\/\/([a-zA-Z0-9-]+\.)*up\.railway\.app$/.test(origin)
+    ) {
       return callback(null, true);
     }
 
