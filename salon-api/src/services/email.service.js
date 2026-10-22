@@ -230,7 +230,7 @@ const wrapTemplate = (title, content) => `
 <body>
   <div class="container">
     <div class="header" style="background: linear-gradient(135deg, #090d16 0%, #1e1b4b 100%); padding: 30px 28px; text-align: center; border-bottom: 1px solid #1e293b;">
-      <h1 style="margin:0; font-size: 26px; font-weight: 800; color: #ffffff; letter-spacing: 2px; text-transform: uppercase;">ST <span style="color: #d49b45;">CUT</span></h1>
+      <h1 style="margin:0; font-size: 26px; font-weight: 800; color: #ffffff; letter-spacing: 2px; text-transform: uppercase;">Hair<span style="color: #d49b45;">X</span></h1>
       <p style="margin: 4px 0 0 0; font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 3px; text-transform: uppercase;">BOOK YOUR STYLE</p>
     </div>
     <div class="content">
