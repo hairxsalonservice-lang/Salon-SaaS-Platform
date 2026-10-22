@@ -277,6 +277,24 @@ app.use((err, req, res, next) => {
     err.statusCode = 400;
   }
 
+  // Handle MongoDB Duplicate Key Error (E11000)
+  if (err.code === 11000 || (err.message && err.message.includes("E11000"))) {
+    err.statusCode = 400;
+    const field = Object.keys(err.keyPattern || err.keyValue || {})[0] || "field";
+    const value = err.keyValue ? err.keyValue[field] : "";
+    if (field === "phone") {
+      err.message = value
+        ? `The phone number '${value}' is already registered. Please log in instead.`
+        : "This phone number is already registered. Please log in instead.";
+    } else if (field === "email") {
+      err.message = value
+        ? `The email '${value}' is already registered. Please log in instead.`
+        : "This email is already registered. Please log in instead.";
+    } else {
+      err.message = `${field.charAt(0).toUpperCase() + field.slice(1)} already exists. Please log in or use different details.`;
+    }
+  }
+
   const statusCode = err.statusCode || err.status || 500;
 
   if (statusCode === 503 || err.retryAfter) {

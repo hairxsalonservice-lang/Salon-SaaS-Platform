@@ -69,7 +69,21 @@ const register = async (req, res, next) => {
     // check if email already exists
     const existing = await User.findOne({ email: cleanEmail });
     if (existing) {
-      return next(new AppError("Email already registered", 400));
+      return next(new AppError("Email already registered. Please log in instead.", 400));
+    }
+
+    // check if phone already exists
+    if (phone) {
+      const cleanPhone = phone.trim();
+      const existingPhone = await User.findOne({ phone: cleanPhone });
+      if (existingPhone) {
+        return next(
+          new AppError(
+            "This phone number is already registered. Please log in instead.",
+            400
+          )
+        );
+      }
     }
 
     // get customer role

@@ -104,7 +104,20 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
     if (res.success) {
       goAfterSignIn();
     } else {
-      setError(res.error || "Registration failed");
+      let errorMsg = res.error || "Registration failed";
+      if (
+        errorMsg.includes("E11000") ||
+        errorMsg.includes("phone_1") ||
+        errorMsg.toLowerCase().includes("phone number is already")
+      ) {
+        errorMsg = "An account with this phone number already exists. Please sign in instead.";
+      } else if (
+        errorMsg.includes("email_1") ||
+        errorMsg.toLowerCase().includes("email already")
+      ) {
+        errorMsg = "An account with this email already exists. Please sign in instead.";
+      }
+      setError(errorMsg);
     }
   };
 
