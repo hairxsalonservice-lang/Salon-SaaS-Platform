@@ -494,6 +494,8 @@ const googleClientIds = (
   [
     process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
     process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+    "28934218761-ra05pqc1gar8qqm9gfdn09odo02fi7ls.apps.googleusercontent.com",
+    "28934218761-7uq3vob89c3i684f2ef2fa7ddukp8nhj.apps.googleusercontent.com",
     "23232568516-arksroglu4uhc0ogqm94uh3e6cbln9lv.apps.googleusercontent.com",
     "23232568516-744mk3m6va3up35md674td07vdqseqnh.apps.googleusercontent.com",
   ]
