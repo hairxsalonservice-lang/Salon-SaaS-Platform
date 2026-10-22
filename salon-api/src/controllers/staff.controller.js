@@ -50,6 +50,14 @@ const createStaff = async (req, res, next) => {
       return next(new AppError("Email already registered", 400));
     }
 
+    // check phone not already taken
+    if (phone) {
+      const existingPhone = await User.findOne({ phone });
+      if (existingPhone) {
+        return next(new AppError("Phone number already registered", 400));
+      }
+    }
+
     // prevent privilege escalation
     if (roleName === "owner" || roleName === "superadmin") {
       return next(new AppError("Cannot create user with owner or superadmin role", 403));
