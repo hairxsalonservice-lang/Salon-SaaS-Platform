@@ -35,7 +35,8 @@ const createStaff = async (req, res, next) => {
     }
 
     // verify branch belongs to this salon
-    if (branch.salonId.toString() !== salonId.toString()) {
+    const targetSalonId = salonId || req.scopedSalonId;
+    if (targetSalonId && branch.salonId.toString() !== targetSalonId.toString()) {
       return next(
         new AppError(
           "Access denied. This branch does not belong to your salon.",
@@ -129,11 +130,16 @@ const getStaff = async (req, res, next) => {
 
     const roleIds = staffRoles.map((r) => r._id);
 
-    const staff = await User.find({
+    const targetSalonId = salonId || req.scopedSalonId;
+    const query = {
       branchId,
-      salonId,
       role: { $in: roleIds },
-    })
+    };
+    if (targetSalonId) {
+      query.salonId = targetSalonId;
+    }
+
+    const staff = await User.find(query)
       .populate("role", "name")
       .select("-password -refreshToken -tokenVersion")
       .lean();
@@ -154,8 +160,12 @@ const getStaffMember = async (req, res, next) => {
   try {
     const { branchId, staffId } = req.params;
     const { salonId } = req.user;
+    const targetSalonId = salonId || req.scopedSalonId;
 
-    const user = await User.findOne({ _id: staffId, branchId, salonId })
+    const query = { _id: staffId, branchId };
+    if (targetSalonId) query.salonId = targetSalonId;
+
+    const user = await User.findOne(query)
       .populate("role", "name")
       .select("-password -refreshToken -tokenVersion")
       .lean();
@@ -188,7 +198,11 @@ const updateStaff = async (req, res, next) => {
       );
     }
 
-    const user = await User.findOne({ _id: staffId, branchId, salonId });
+    const targetSalonId = salonId || req.scopedSalonId;
+    const query = { _id: staffId, branchId };
+    if (targetSalonId) query.salonId = targetSalonId;
+
+    const user = await User.findOne(query);
     if (!user) {
       return next(new AppError("Staff member not found", 404));
     }

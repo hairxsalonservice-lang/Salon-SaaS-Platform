@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AddStaffModal from "@/components/staff/AddStaffModal";
 import apiClient from "@/lib/api-client";
@@ -56,7 +57,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function StaffPage() {
-  const { branchId, canManage } = useBranch();
+  const { branchId, canManage, branchesLoading } = useBranch();
 
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +70,10 @@ export default function StaffPage() {
   const [deactivatingId, setDeactivatingId] = useState<string | null>(null);
 
   const fetchStaff = useCallback(async () => {
-    if (!branchId) return;
+    if (!branchId) {
+      setLoading(false);
+      return;
+    }
 
     const cacheKey = `staff_${branchId}`;
     const cached = getCached<StaffMember[]>(cacheKey);
@@ -101,9 +105,13 @@ export default function StaffPage() {
   }, [branchId]);
 
   useEffect(() => {
-    setStaffList([]);
-    fetchStaff();
-  }, [fetchStaff]);
+    if (branchId) {
+      setStaffList([]);
+      fetchStaff();
+    } else if (!branchesLoading) {
+      setLoading(false);
+    }
+  }, [branchId, branchesLoading, fetchStaff]);
 
   const filtered = staffList
     .filter((s) => {
@@ -152,7 +160,7 @@ export default function StaffPage() {
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <button
               onClick={fetchStaff}
-              disabled={loading}
+              disabled={loading || branchesLoading || !branchId}
               className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-50 rounded-2xl transition-all shadow-xs disabled:opacity-50"
             >
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -160,13 +168,23 @@ export default function StaffPage() {
             </button>
 
             {canManage && (
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
-              >
-                <Plus size={15} strokeWidth={2.5} />
-                <span>Add Staff</span>
-              </button>
+              branchId ? (
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                >
+                  <Plus size={15} strokeWidth={2.5} />
+                  <span>Add Staff</span>
+                </button>
+              ) : (
+                <Link
+                  href="/branches"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                >
+                  <Plus size={15} strokeWidth={2.5} />
+                  <span>Create Branch First</span>
+                </Link>
+              )
             )}
           </div>
         </div>
@@ -181,7 +199,8 @@ export default function StaffPage() {
               placeholder="Search by name, email, or phone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-slate-200/90 rounded-2xl pl-11 pr-4 py-3 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#5542f6] shadow-2xs transition-all"
+              disabled={!branchId}
+              className="w-full bg-white border border-slate-200/90 rounded-2xl pl-11 pr-4 py-3 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#5542f6] shadow-2xs transition-all disabled:opacity-50"
             />
             {search && (
               <button
@@ -201,7 +220,8 @@ export default function StaffPage() {
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#5542f6] shadow-2xs cursor-pointer"
+                disabled={!branchId}
+                className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#5542f6] shadow-2xs cursor-pointer disabled:opacity-50"
               >
                 <option value="all">All Roles</option>
                 <option value="manager">Manager</option>
@@ -215,7 +235,8 @@ export default function StaffPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#5542f6] shadow-2xs cursor-pointer"
+                disabled={!branchId}
+                className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#5542f6] shadow-2xs cursor-pointer disabled:opacity-50"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -227,7 +248,11 @@ export default function StaffPage() {
 
         {/* Count Header */}
         <div className="text-xs font-bold text-slate-500 pl-0.5">
-          {loading ? "Loading staff..." : `${filtered.length} staff members`}
+          {loading || branchesLoading
+            ? "Loading staff..."
+            : !branchId
+            ? "No branch selected"
+            : `${filtered.length} staff member${filtered.length === 1 ? "" : "s"}`}
         </div>
 
         {/* Error Alert */}
@@ -242,7 +267,7 @@ export default function StaffPage() {
         )}
 
         {/* Staff Cards Grid */}
-        {loading ? (
+        {loading || branchesLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-4">
@@ -257,6 +282,25 @@ export default function StaffPage() {
               </div>
             ))}
           </div>
+        ) : !branchId ? (
+          <div className="text-center py-16 px-4 bg-white border border-slate-200/80 rounded-2xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-3">
+              <AlertCircle size={24} />
+            </div>
+            <h3 className="text-base font-bold text-slate-800">No Branch Available</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              Staff members are assigned to branches. Please create a branch in the Branches section before adding and managing staff.
+            </p>
+            {canManage && (
+              <Link
+                href="/branches"
+                className="inline-flex items-center gap-1.5 mt-5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+              >
+                <Plus size={15} strokeWidth={2.5} />
+                <span>Go to Branches</span>
+              </Link>
+            )}
+          </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 px-4 bg-white border border-slate-200/80 rounded-2xl shadow-xs">
             <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
@@ -268,6 +312,15 @@ export default function StaffPage() {
                 ? "No team members match your filter criteria."
                 : "Click '+ Add Staff' to invite team members to your branch."}
             </p>
+            {!search && roleFilter === "all" && canManage && (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-xl transition-all shadow-xs"
+              >
+                <Plus size={14} strokeWidth={2.5} />
+                <span>Add Staff Member</span>
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">

@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RootState } from "@/store";
 import { selectBranch } from "@/store/slices/authSlice";
 import apiClient, { tokenStorage } from "@/lib/api-client";
@@ -13,9 +13,12 @@ function isValidObjectId(id: any): boolean {
 
 export function useBranch() {
   const dispatch = useDispatch();
-  const { user, selectedBranch } = useSelector((state: RootState) => state.auth);
+  const { user, selectedBranch, salon } = useSelector((state: RootState) => state.auth);
   const role = (user?.role || "staff") as UserRole;
   const canManage = role === "owner" || role === "manager";
+
+  const [branchesLoading, setBranchesLoading] = useState(false);
+  const [branches, setBranches] = useState<any[]>([]);
 
   const token = tokenStorage.getAccessToken();
   let decoded: any = null;
@@ -37,6 +40,8 @@ export function useBranch() {
   }
 
   const rawSalonId =
+    salon?._id ||
+    (typeof salon === "string" ? salon : null) ||
     decoded?.salonId ||
     (typeof user?.salonId === "object" ? (user?.salonId as any)?._id : user?.salonId) ||
     "";
@@ -59,20 +64,34 @@ export function useBranch() {
     // If owner/manager has no selected branch in Redux state, auto-fetch the first branch for their salon
     if (!selectedBranchId && salonId) {
       async function autoSelectBranch() {
+        setBranchesLoading(true);
         try {
           const { data } = await apiClient.get(`/salons/${salonId}/branches`);
-          const branches = data.data?.branches || [];
-          if (branches.length > 0) {
+          const branchList = data.data?.branches || [];
+          setBranches(branchList);
+          if (branchList.length > 0) {
             const targetBranch = userBranchId
-              ? branches.find((b: any) => b._id === userBranchId) || branches[0]
-              : branches[0];
+              ? branchList.find((b: any) => b._id === userBranchId) || branchList[0]
+              : branchList[0];
             dispatch(selectBranch(targetBranch));
           }
-        } catch (e) {}
+        } catch (e) {
+        } finally {
+          setBranchesLoading(false);
+        }
       }
       autoSelectBranch();
     }
   }, [selectedBranchId, salonId, userBranchId, dispatch]);
 
-  return { salonId, branchId, role, canManage };
+  return {
+    salonId,
+    branchId,
+    selectedBranch,
+    role,
+    canManage,
+    branchesLoading,
+    branches,
+    hasBranches: branches.length > 0 || !!branchId,
+  };
 }

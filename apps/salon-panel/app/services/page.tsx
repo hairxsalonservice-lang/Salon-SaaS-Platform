@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Modal from "@/components/ui/Modal";
 import apiClient from "@/lib/api-client";
@@ -133,7 +134,7 @@ function formatDuration(mins: number): string {
 // ── Page ──
 
 export default function ServicesPage() {
-  const { branchId, canManage } = useBranch();
+  const { branchId, canManage, branchesLoading } = useBranch();
   const [services, setServices] = useState<ServiceItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -145,7 +146,10 @@ export default function ServicesPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchServices = useCallback(async () => {
-    if (!branchId) return;
+    if (!branchId) {
+      setLoading(false);
+      return;
+    }
 
     const cacheKey = `services_${branchId}`;
     const cached = getCached<ServiceItem[]>(cacheKey);
@@ -177,9 +181,13 @@ export default function ServicesPage() {
   }, [branchId]);
 
   useEffect(() => {
-    setServices([]);
-    fetchServices();
-  }, [fetchServices]);
+    if (branchId) {
+      setServices([]);
+      fetchServices();
+    } else if (!branchesLoading) {
+      setLoading(false);
+    }
+  }, [branchId, branchesLoading, fetchServices]);
 
   // Filter & Sort
   const filtered = services
@@ -229,7 +237,7 @@ export default function ServicesPage() {
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
             <button
               onClick={fetchServices}
-              disabled={loading}
+              disabled={loading || branchesLoading || !branchId}
               className="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-white text-slate-700 border border-slate-200/90 hover:bg-slate-50 rounded-2xl transition-all shadow-xs disabled:opacity-50"
             >
               <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -237,13 +245,23 @@ export default function ServicesPage() {
             </button>
 
             {canManage && (
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all shadow-xs"
-              >
-                <Plus size={15} strokeWidth={2.5} />
-                <span>Add Service</span>
-              </button>
+              branchId ? (
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-2xl transition-all shadow-xs"
+                >
+                  <Plus size={15} strokeWidth={2.5} />
+                  <span>Add Service</span>
+                </button>
+              ) : (
+                <Link
+                  href="/branches"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                >
+                  <Plus size={15} strokeWidth={2.5} />
+                  <span>Create Branch First</span>
+                </Link>
+              )
             )}
           </div>
         </div>
@@ -308,7 +326,11 @@ export default function ServicesPage() {
 
         {/* Count Header */}
         <div className="text-xs font-bold text-slate-500 pl-0.5">
-          {loading ? "Loading services..." : `${filtered.length} services`}
+          {loading || branchesLoading
+            ? "Loading services..."
+            : !branchId
+            ? "No branch selected"
+            : `${filtered.length} services`}
         </div>
 
         {/* Error Alert */}
@@ -323,7 +345,7 @@ export default function ServicesPage() {
         )}
 
         {/* Services Cards Grid */}
-        {loading ? (
+        {loading || branchesLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-4">
@@ -335,6 +357,25 @@ export default function ServicesPage() {
                 <div className="h-4 bg-slate-100 rounded-lg w-full animate-pulse" />
               </div>
             ))}
+          </div>
+        ) : !branchId ? (
+          <div className="text-center py-16 px-4 bg-white border border-slate-200/80 rounded-2xl shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto mb-3">
+              <AlertCircle size={24} />
+            </div>
+            <h3 className="text-base font-bold text-slate-800">No Branch Available</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              Services are configured per branch. Please create a branch in the Branches section before configuring services.
+            </p>
+            {canManage && (
+              <Link
+                href="/branches"
+                className="inline-flex items-center gap-1.5 mt-5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+              >
+                <Plus size={15} strokeWidth={2.5} />
+                <span>Go to Branches</span>
+              </Link>
+            )}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16 px-4 bg-white border border-slate-200/80 rounded-2xl shadow-xs">
