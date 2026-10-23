@@ -76,8 +76,8 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
   const [salonData, setSalonData] = useState(salon);
-  const MAIN_TABS = useMemo(() => ["About", "Services", "Reviews"], []);
-  const [activeMainTab, setActiveMainTab] = useState("About");
+  const MAIN_TABS = useMemo(() => ["Services", "About", "Reviews"], []);
+  const [activeMainTab, setActiveMainTab] = useState("Services");
   const [tabRowWidth, setTabRowWidth] = useState(0);
   const [containerWidth, setContainerWidth] = useState(SCREEN_WIDTH);
   const tabIndicatorAnim = useRef(new Animated.Value(0)).current;
@@ -722,48 +722,7 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
                   transform: [{ translateX: contentTranslateX }],
                 }}
               >
-                {/* Page 0: About */}
-                <View style={{ width: cWidth, height: activeMainTab === "About" ? undefined : 0, overflow: "hidden" }}>
-                  {/* About Description */}
-                  <View style={styles.sectionBlock}>
-                    <Text style={styles.aboutText}>
-                      {selectedBranch?.description || salonData?.description ||
-                        "This salon hasn't added a description yet."}
-                    </Text>
-                  </View>
-
-                  {/* Opening Hours Schedule */}
-                  <View style={[styles.sectionBlock, { marginTop: 20 }]}>
-                    <Text style={styles.sectionLabel}>Opening Hours</Text>
-                    <View style={styles.workingHoursCard}>
-                      {!weeklySchedule ? (
-                        <Text style={[styles.timeText, { paddingVertical: 12, textAlign: "center" }]}>
-                          Hours not available
-                        </Text>
-                      ) : null}
-                      {(weeklySchedule || []).map((item, idx) => (
-                        <View key={idx} style={[styles.hoursRow, item.isToday && styles.hoursRowToday]}>
-                          <View style={styles.dayCol}>
-                            <Text style={[styles.dayText, item.isToday && styles.dayTextToday]}>
-                              {item.dayName}
-                            </Text>
-                            {item.isToday && (
-                              <View style={styles.todayBadge}>
-                                <Text style={styles.todayBadgeText}>Today</Text>
-                              </View>
-                            )}
-                          </View>
-                          <Text style={[styles.timeText, !item.isOpen && styles.timeClosedText]}>
-                            {item.isOpen ? `${item.openTime} - ${item.closeTime}` : "Closed"}
-                          </Text>
-                        </View>
-                      ))}
-                    </View>
-                  </View>
-
-                </View>
-
-                {/* Page 1: Services */}
+                {/* Page 0: Services */}
                 <View style={{ width: cWidth, height: activeMainTab === "Services" ? undefined : 0, overflow: "hidden" }}>
                   {/* Category Pills */}
                   <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryPillsScroll} contentContainerStyle={{ paddingHorizontal: 16, alignItems: "center" }}>
@@ -818,6 +777,47 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
                       </>
                     )}
                   </ScrollView>
+                </View>
+
+                {/* Page 1: About */}
+                <View style={{ width: cWidth, height: activeMainTab === "About" ? undefined : 0, overflow: "hidden" }}>
+                  {/* About Description */}
+                  <View style={styles.sectionBlock}>
+                    <Text style={styles.aboutText}>
+                      {selectedBranch?.description || salonData?.description ||
+                        "This salon hasn't added a description yet."}
+                    </Text>
+                  </View>
+
+                  {/* Opening Hours Schedule */}
+                  <View style={[styles.sectionBlock, { marginTop: 20 }]}>
+                    <Text style={styles.sectionLabel}>Opening Hours</Text>
+                    <View style={styles.workingHoursCard}>
+                      {!weeklySchedule ? (
+                        <Text style={[styles.timeText, { paddingVertical: 12, textAlign: "center" }]}>
+                          Hours not available
+                        </Text>
+                      ) : null}
+                      {(weeklySchedule || []).map((item, idx) => (
+                        <View key={idx} style={[styles.hoursRow, item.isToday && styles.hoursRowToday]}>
+                          <View style={styles.dayCol}>
+                            <Text style={[styles.dayText, item.isToday && styles.dayTextToday]}>
+                              {item.dayName}
+                            </Text>
+                            {item.isToday && (
+                              <View style={styles.todayBadge}>
+                                <Text style={styles.todayBadgeText}>Today</Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text style={[styles.timeText, !item.isOpen && styles.timeClosedText]}>
+                            {item.isOpen ? `${item.openTime} - ${item.closeTime}` : "Closed"}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+
                 </View>
 
                 {/* Page 2: Reviews */}
