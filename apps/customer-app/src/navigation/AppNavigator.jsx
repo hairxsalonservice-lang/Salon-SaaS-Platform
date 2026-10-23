@@ -339,8 +339,9 @@ export default function AppNavigator() {
             <Stack.Screen name="Onboarding">
               {({ navigation }) => (
                 <OnboardingScreen
-                  onFinish={() => {
+                  onFinish={async () => {
                     setHasOnboarded(true);
+                    await storage.setItem("@salon_app_has_onboarded", "true");
                     setCurrentTab("Home");
                     navigation.reset({
                       index: 0,

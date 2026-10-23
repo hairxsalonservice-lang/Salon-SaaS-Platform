@@ -1,7 +1,8 @@
 // src/components/ForgotPasswordModal.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ActivityIndicator,
+  Keyboard,
   Modal,
   Platform,
   StyleSheet,
@@ -103,6 +104,16 @@ export default function ForgotPasswordModal({ visible, onClose }) {
     onClose?.();
   };
 
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showSub = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
+    return () => { showSub.remove(); hideSub.remove(); };
+  }, []);
+
   const insets = useSafeAreaInsets();
   const bottomPadding = Math.max(insets.bottom, 24);
 
@@ -114,7 +125,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
         style={styles.modalOverlay}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={styles.sheetCard}>
+        <View style={[styles.sheetCard, keyboardVisible && styles.sheetCardFullScreen]}>
           {/* Top Bar with Back Arrow / Close */}
           {subStep === 1 || subStep === 3 ? (
             <View style={styles.topNav}>
@@ -308,6 +319,11 @@ function getStyles(theme, isDark) {
       paddingTop: 20,
       paddingBottom: Platform.OS === "ios" ? 44 : 28,
       minHeight: 420,
+    },
+    sheetCardFullScreen: {
+      flex: 1,
+      borderTopLeftRadius: 0,
+      borderTopRightRadius: 0,
     },
     topNav: {
       flexDirection: "row",
