@@ -21,7 +21,7 @@ import {
   Building2,
 } from "lucide-react";
 import { loginSalon } from "@/api/services/authService";
-import { tokenStorage } from "@/lib/api-client";
+import { tokenStorage, parseApiError } from "@/lib/api-client";
 import { mapUser } from "@/lib/mapUser";
 import { useRouter } from "next/navigation";
 import { useDispatch } from "react-redux";
@@ -73,13 +73,8 @@ export default function LoginPage() {
 
       router.push("/dashboard");
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else if (err && typeof err === "object" && "message" in err) {
-        setError((err as { message: string }).message);
-      } else {
-        setError("Login failed. Please verify your credentials.");
-      }
+      const parsed = parseApiError(err);
+      setError(parsed.message);
     } finally {
       setLoading(false);
     }
