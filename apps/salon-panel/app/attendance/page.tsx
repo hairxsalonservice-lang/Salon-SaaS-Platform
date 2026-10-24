@@ -85,7 +85,7 @@ export default function AttendancePage() {
   const avgHours = totalDays > 0 ? Math.round((totalHours / totalDays) * 10) / 10 : 0;
 
   return (
-    <ProtectedRoute requiredPage="attendance">
+    <ProtectedRoute page="attendance">
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
