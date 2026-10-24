@@ -16,7 +16,7 @@ function formatElapsed(minutes: number): string {
   return `${h}h ${m}m`;
 }
 
-export default function PunchButton() {
+export default function PunchButton({ onStatusChange }: { onStatusChange?: () => void } = {}) {
   const [status, setStatus] = useState<Attendance | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
@@ -50,6 +50,7 @@ export default function PunchButton() {
     try {
       const res = await punchIn();
       setStatus(res.data ?? null);
+      onStatusChange?.();
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to punch in. Please try again.");
     } finally {
@@ -63,6 +64,7 @@ export default function PunchButton() {
     try {
       const res = await punchOut();
       setStatus(res.data ?? null);
+      onStatusChange?.();
     } catch (err: any) {
       setError(err?.response?.data?.message || "Failed to punch out. Please try again.");
     } finally {

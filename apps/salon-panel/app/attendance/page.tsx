@@ -107,7 +107,7 @@ export default function AttendancePage() {
         </div>
 
         {/* Punch Button for staff/manager */}
-        {(role === "staff" || role === "manager") && <PunchButton />}
+        {(role === "staff" || role === "manager") && <PunchButton onStatusChange={fetchData} />}
 
         {/* Summary Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
