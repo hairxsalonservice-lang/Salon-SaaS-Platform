@@ -57,7 +57,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function StaffPage() {
-  const { branchId, canManage, branchesLoading } = useBranch();
+  const { branchId, canManage, branchesLoading, branches } = useBranch();
 
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
