@@ -245,6 +245,36 @@ export interface CreateLeavePayload {
 
 export type UpdateLeavePayload = Partial<CreateLeavePayload>;
 
+// ── Attendance ──────────────────────────────
+
+export interface Attendance {
+  _id: string;
+  staffId: string | { _id: string; name: string; email?: string };
+  branchId: string;
+  salonId: string;
+  date: string;
+  punchInTime: string;
+  punchOutTime?: string | null;
+  status: "ACTIVE" | "COMPLETED" | "AUTO_CLOSED";
+  totalMinutes: number;
+  isLate: boolean;
+  lateByMinutes: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AttendanceSummary {
+  staffId: string;
+  staffName: string;
+  staffEmail?: string;
+  totalDays: number;
+  totalHours: number;
+  avgHoursPerDay: number;
+  lateDays: number;
+  latePercentage: number;
+}
+
 // ── Slot ─────────────────────────────────
 
 export type SlotStatus = "available" | "booked" | "blocked" | "completed";

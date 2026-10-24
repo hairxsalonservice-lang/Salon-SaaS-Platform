@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PunchButton from "@/components/attendance/PunchButton";
 import apiClient from "@/lib/api-client";
 import { useRouter } from "next/navigation";
 import {
@@ -360,8 +361,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Right Column (1 Col wide): Quick Actions + Recent Bookings */}
+          {/* Right Column (1 Col wide): Punch + Quick Actions + Recent Bookings */}
           <div className="space-y-4">
+
+            {/* Punch In/Out Widget (staff & manager) */}
+            {(role === "staff" || role === "manager") && <PunchButton />}
 
             {/* Quick Actions Card */}
             <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-2xs">

@@ -13,7 +13,8 @@ export type AppPage =
   | "branch"
   | "staff"
   | "leaves"
-  | "gallery";
+  | "gallery"
+  | "attendance";
 
 // Which roles can access which pages
 // Maps directly to backend RBAC permissions
@@ -30,6 +31,7 @@ export const PAGE_ACCESS: Record<AppPage, UserRole[]> = {
   staff:         ["owner", "manager"],
   leaves:        ["owner", "manager", "staff"],
   gallery:       ["owner", "manager"],
+  attendance:    ["owner", "manager", "staff"],
 };
 
 // Check if a role can access a page

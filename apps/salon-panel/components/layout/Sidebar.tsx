@@ -16,6 +16,7 @@ import {
   ChevronsRight,
   KeyRound,
   Image as ImageIcon,
+  Fingerprint,
 } from "lucide-react";
 import type { UserRole } from "@/lib/api";
 import { type AppPage, PAGE_ACCESS } from "@/lib/rbac";
@@ -41,6 +42,7 @@ const NAV_ITEMS: NavItem[] = [
   { page: "customers",     label: "Customers",      icon: Users,           group: "main" },
   { page: "services",      label: "Services",       icon: Scissors,        group: "manage" },
   { page: "staff",         label: "Staff",          icon: UserCog,         group: "manage" },
+  { page: "attendance",    label: "Attendance",     icon: Fingerprint,     group: "manage" },
   { page: "leaves",        label: "Leaves",         icon: CalendarOff,     group: "manage" },
   { page: "branches",      label: "Branches",       icon: GitBranch,       group: "manage" },
   { page: "gallery",       label: "Gallery",        icon: ImageIcon,       group: "manage" },
