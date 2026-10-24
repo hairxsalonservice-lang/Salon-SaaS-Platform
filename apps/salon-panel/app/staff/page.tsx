@@ -465,21 +465,24 @@ function StaffDrawer({
     ? "bg-blue-50 text-blue-700 border-blue-200/80"
     : "bg-emerald-50 text-emerald-700 border-emerald-200/80";
 
-  const currentBranch = branches.find((b) => b._id === (s.branchId || currentBranchId));
-  const branchChanged = selectedBranch !== (s.branchId || currentBranchId);
+  const staffBranchId = s.branchId || "";
+  const currentBranch = branches.find((b) => b._id === staffBranchId);
+  const branchChanged = selectedBranch !== staffBranchId;
+  const needsAssignment = !staffBranchId;
 
   async function handleReassign() {
-    if (!branchChanged) return;
+    if (!branchChanged && !needsAssignment) return;
     setReassigning(true);
     setReassignError("");
     try {
-      await apiClient.patch(`/branches/${s.branchId || currentBranchId}/staff/${s._id}`, {
+      const fromBranch = staffBranchId || currentBranchId;
+      await apiClient.patch(`/branches/${fromBranch}/staff/${s._id}`, {
         newBranchId: selectedBranch,
       });
       onUpdated();
       onClose();
     } catch (err: any) {
-      setReassignError(err?.response?.data?.message || "Failed to reassign branch");
+      setReassignError(err?.response?.data?.message || "Failed to assign branch");
     } finally {
       setReassigning(false);
     }
@@ -553,7 +556,7 @@ function StaffDrawer({
         </div>
 
         {/* Branch Assignment */}
-        {canManage && branches.length > 1 && s.isActive && (
+        {canManage && branches.length > 0 && s.isActive && (
           <div className="mb-6">
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
               Assign to Branch
@@ -572,13 +575,13 @@ function StaffDrawer({
             {reassignError && (
               <p className="text-[11px] text-rose-500 font-medium mt-1.5">{reassignError}</p>
             )}
-            {branchChanged && (
+            {(branchChanged || needsAssignment) && (
               <button
                 onClick={handleReassign}
                 disabled={reassigning}
                 className="mt-2.5 w-full bg-[#5542f6] hover:bg-[#4435d4] text-white font-extrabold text-xs py-2.5 rounded-2xl transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2"
               >
-                {reassigning ? "Reassigning..." : "Reassign Branch"}
+                {reassigning ? "Saving..." : needsAssignment ? "Assign Branch" : "Reassign Branch"}
               </button>
             )}
           </div>
