@@ -412,6 +412,7 @@ export default function StaffPage() {
         {showAddModal && (
           <AddStaffModal
             branchId={branchId}
+            branches={branches}
             onSuccess={() => {
               setShowAddModal(false);
               invalidateCache("staff_");

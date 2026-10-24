@@ -20,9 +20,15 @@ interface FieldError {
   message: string;
 }
 
+interface BranchOption {
+  _id: string;
+  name: string;
+}
+
 interface AddStaffModalProps {
   branchId: string;
   branchName?: string;
+  branches?: BranchOption[];
   allowedRoles?: ("staff" | "manager")[];
   onSuccess: (newStaff: any) => void;
   onClose: () => void;
@@ -74,10 +80,12 @@ function validateForm(form: AddStaffForm): FieldError[] {
 export default function AddStaffModal({
   branchId,
   branchName,
+  branches = [],
   allowedRoles = ["staff", "manager"],
   onSuccess,
   onClose,
 }: AddStaffModalProps) {
+  const [selectedBranchId, setSelectedBranchId] = useState(branchId);
   const [form, setForm] = useState<AddStaffForm>({
     name: "",
     email: "",
@@ -113,7 +121,7 @@ export default function AddStaffModal({
     setFieldErrors([]);
 
     try {
-      const { data } = await apiClient.post(`/branches/${branchId}/staff`, {
+      const { data } = await apiClient.post(`/branches/${selectedBranchId}/staff`, {
         name: form.name.trim(),
         email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
@@ -140,6 +148,22 @@ export default function AddStaffModal({
       onClose={onClose}
     >
       <div className="space-y-4 pt-1">
+        {/* Branch Selector (shown when multiple branches exist) */}
+        {branches.length > 1 && (
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Branch</label>
+            <select
+              value={selectedBranchId}
+              onChange={(e) => { setSelectedBranchId(e.target.value); setServerError(null); }}
+              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs cursor-pointer"
+            >
+              {branches.map((b) => (
+                <option key={b._id} value={b._id}>{b.name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Name */}
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>

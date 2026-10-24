@@ -28,10 +28,14 @@ const createStaff = async (req, res, next) => {
       return next(new AppError("Managers cannot create other managers.", 403));
     }
 
-    // verify branch exists
+    // verify branch exists and is active
     const branch = await Branch.findById(branchId);
     if (!branch) {
-      return next(new AppError("Branch not found", 404));
+      return next(new AppError("Branch not found. Please create a branch before adding staff.", 404));
+    }
+
+    if (!branch.isActive) {
+      return next(new AppError("Cannot add staff to an inactive branch.", 400));
     }
 
     // verify branch belongs to this salon
