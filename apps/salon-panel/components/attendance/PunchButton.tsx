@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { LogIn, LogOut, CheckCircle2, Clock } from "lucide-react";
+import { LogIn, LogOut, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { getTodayStatus, punchIn, punchOut } from "@/api/services/attendanceService";
 import type { Attendance } from "@/lib/api";
 
@@ -20,6 +20,7 @@ export default function PunchButton() {
   const [status, setStatus] = useState<Attendance | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
+  const [error, setError] = useState("");
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -45,10 +46,12 @@ export default function PunchButton() {
 
   async function handlePunchIn() {
     setActing(true);
+    setError("");
     try {
       const res = await punchIn();
       setStatus(res.data ?? null);
-    } catch {
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to punch in. Please try again.");
     } finally {
       setActing(false);
     }
@@ -56,10 +59,12 @@ export default function PunchButton() {
 
   async function handlePunchOut() {
     setActing(true);
+    setError("");
     try {
       const res = await punchOut();
       setStatus(res.data ?? null);
-    } catch {
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to punch out. Please try again.");
     } finally {
       setActing(false);
     }
@@ -121,6 +126,12 @@ export default function PunchButton() {
             {acting ? "..." : "Punch Out"}
           </button>
         </div>
+        {error && (
+          <div className="flex items-center gap-1.5 mt-2 text-[11px] text-rose-500 font-medium">
+            <AlertCircle size={12} />
+            <span>{error}</span>
+          </div>
+        )}
       </div>
     );
   }
@@ -140,6 +151,12 @@ export default function PunchButton() {
         <LogIn size={15} />
         {acting ? "Punching in..." : "Punch In"}
       </button>
+      {error && (
+        <div className="flex items-center gap-1.5 mt-2 text-[11px] text-rose-500 font-medium">
+          <AlertCircle size={12} />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
   );
 }
