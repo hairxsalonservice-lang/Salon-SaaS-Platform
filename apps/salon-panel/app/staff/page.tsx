@@ -456,6 +456,7 @@ function StaffDrawer({
   const [selectedBranch, setSelectedBranch] = useState(s.branchId || currentBranchId);
   const [reassigning, setReassigning] = useState(false);
   const [reassignError, setReassignError] = useState("");
+  const [activating, setActivating] = useState(false);
 
   const isManager = s.role.name.toLowerCase() === "manager";
   const avatarStyle = isManager
@@ -485,6 +486,21 @@ function StaffDrawer({
       setReassignError(err?.response?.data?.message || "Failed to assign branch");
     } finally {
       setReassigning(false);
+    }
+  }
+
+  async function handleActivate() {
+    setActivating(true);
+    try {
+      const fromBranch = staffBranchId || currentBranchId;
+      await apiClient.patch(`/branches/${fromBranch}/staff/${s._id}`, {
+        isActive: true,
+      });
+      onUpdated();
+      onClose();
+    } catch {
+    } finally {
+      setActivating(false);
     }
   }
 
@@ -556,7 +572,7 @@ function StaffDrawer({
         </div>
 
         {/* Branch Assignment */}
-        {canManage && branches.length > 0 && s.isActive && (
+        {canManage && branches.length > 0 && (
           <div className="mb-6">
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
               Assign to Branch
@@ -587,17 +603,28 @@ function StaffDrawer({
           </div>
         )}
 
-        {/* Deactivate Button */}
-        {canManage && s.isActive && (
+        {/* Activate / Deactivate Button */}
+        {canManage && (
           <div className="pt-2 border-t border-slate-100">
-            <button
-              onClick={() => onDeactivate(s._id)}
-              disabled={deactivatingId === s._id}
-              className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-xs py-3 rounded-2xl transition-all border border-rose-200/80 disabled:opacity-50 inline-flex items-center justify-center gap-2"
-            >
-              <UserX size={15} />
-              <span>{deactivatingId === s._id ? "Deactivating..." : "Deactivate Staff Member"}</span>
-            </button>
+            {s.isActive ? (
+              <button
+                onClick={() => onDeactivate(s._id)}
+                disabled={deactivatingId === s._id}
+                className="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-xs py-3 rounded-2xl transition-all border border-rose-200/80 disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              >
+                <UserX size={15} />
+                <span>{deactivatingId === s._id ? "Deactivating..." : "Deactivate Staff Member"}</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleActivate}
+                disabled={activating}
+                className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-600 font-extrabold text-xs py-3 rounded-2xl transition-all border border-emerald-200/80 disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              >
+                <UserCheck size={15} />
+                <span>{activating ? "Activating..." : "Activate Staff Member"}</span>
+              </button>
+            )}
           </div>
         )}
       </div>
