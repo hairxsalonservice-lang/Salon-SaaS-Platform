@@ -61,28 +61,26 @@ export function useBranch() {
   const branchId = selectedBranchId || userBranchId || "";
 
   useEffect(() => {
-    // If owner/manager has no selected branch in Redux state, auto-fetch the first branch for their salon
-    if (!selectedBranchId && salonId) {
-      async function autoSelectBranch() {
-        setBranchesLoading(true);
-        try {
-          const { data } = await apiClient.get(`/salons/${salonId}/branches`);
-          const branchList = data.data?.branches || [];
-          setBranches(branchList);
-          if (branchList.length > 0) {
-            const targetBranch = userBranchId
-              ? branchList.find((b: any) => b._id === userBranchId) || branchList[0]
-              : branchList[0];
-            dispatch(selectBranch(targetBranch));
-          }
-        } catch (e) {
-        } finally {
-          setBranchesLoading(false);
+    if (!salonId) return;
+    async function fetchBranches() {
+      setBranchesLoading(true);
+      try {
+        const { data } = await apiClient.get(`/salons/${salonId}/branches`);
+        const branchList = data.data?.branches || [];
+        setBranches(branchList);
+        if (!selectedBranchId && branchList.length > 0) {
+          const targetBranch = userBranchId
+            ? branchList.find((b: any) => b._id === userBranchId) || branchList[0]
+            : branchList[0];
+          dispatch(selectBranch(targetBranch));
         }
+      } catch (e) {
+      } finally {
+        setBranchesLoading(false);
       }
-      autoSelectBranch();
     }
-  }, [selectedBranchId, salonId, userBranchId, dispatch]);
+    fetchBranches();
+  }, [salonId, userBranchId, dispatch, selectedBranchId]);
 
   return {
     salonId,
