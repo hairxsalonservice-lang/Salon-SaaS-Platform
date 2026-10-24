@@ -402,9 +402,15 @@ export default function StaffPage() {
           <StaffDrawer
             staff={selectedStaff}
             canManage={canManage}
+            branches={branches}
+            currentBranchId={branchId}
             onDeactivate={handleDeactivate}
             deactivatingId={deactivatingId}
             onClose={() => setSelectedStaff(null)}
+            onUpdated={() => {
+              invalidateCache("staff_");
+              fetchStaff();
+            }}
           />
         )}
 
@@ -431,16 +437,26 @@ export default function StaffPage() {
 function StaffDrawer({
   staff: s,
   canManage,
+  branches,
+  currentBranchId,
   onDeactivate,
   deactivatingId,
   onClose,
+  onUpdated,
 }: {
   staff: StaffMember;
   canManage: boolean;
+  branches: { _id: string; name: string }[];
+  currentBranchId: string;
   onDeactivate: (id: string) => void;
   deactivatingId: string | null;
   onClose: () => void;
+  onUpdated: () => void;
 }) {
+  const [selectedBranch, setSelectedBranch] = useState(s.branchId || currentBranchId);
+  const [reassigning, setReassigning] = useState(false);
+  const [reassignError, setReassignError] = useState("");
+
   const isManager = s.role.name.toLowerCase() === "manager";
   const avatarStyle = isManager
     ? "bg-[#efeefd] text-[#5542f6]"
@@ -448,6 +464,26 @@ function StaffDrawer({
   const badgeStyle = isManager
     ? "bg-blue-50 text-blue-700 border-blue-200/80"
     : "bg-emerald-50 text-emerald-700 border-emerald-200/80";
+
+  const currentBranch = branches.find((b) => b._id === (s.branchId || currentBranchId));
+  const branchChanged = selectedBranch !== (s.branchId || currentBranchId);
+
+  async function handleReassign() {
+    if (!branchChanged) return;
+    setReassigning(true);
+    setReassignError("");
+    try {
+      await apiClient.patch(`/branches/${s.branchId || currentBranchId}/staff/${s._id}`, {
+        newBranchId: selectedBranch,
+      });
+      onUpdated();
+      onClose();
+    } catch (err: any) {
+      setReassignError(err?.response?.data?.message || "Failed to reassign branch");
+    } finally {
+      setReassigning(false);
+    }
+  }
 
   return (
     <div
@@ -501,6 +537,11 @@ function StaffDrawer({
           </div>
 
           <div className="flex items-center justify-between border-t border-slate-200/50 pt-2.5">
+            <span className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Branch</span>
+            <span className="font-bold text-slate-800">{currentBranch?.name || "Not assigned"}</span>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-slate-200/50 pt-2.5">
             <span className="font-bold text-slate-400 uppercase tracking-wider text-[10px]">Joined Date</span>
             <span className="font-bold text-slate-800">{formatDate(s.createdAt)}</span>
           </div>
@@ -510,6 +551,38 @@ function StaffDrawer({
             <span className="font-bold text-slate-800">{s.lastLoginAt ? formatDate(s.lastLoginAt) : "Never"}</span>
           </div>
         </div>
+
+        {/* Branch Assignment */}
+        {canManage && branches.length > 1 && s.isActive && (
+          <div className="mb-6">
+            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              Assign to Branch
+            </label>
+            <select
+              value={selectedBranch}
+              onChange={(e) => setSelectedBranch(e.target.value)}
+              className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200/60 rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5542f6]/20 focus:border-[#5542f6]"
+            >
+              {branches.map((b) => (
+                <option key={b._id} value={b._id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+            {reassignError && (
+              <p className="text-[11px] text-rose-500 font-medium mt-1.5">{reassignError}</p>
+            )}
+            {branchChanged && (
+              <button
+                onClick={handleReassign}
+                disabled={reassigning}
+                className="mt-2.5 w-full bg-[#5542f6] hover:bg-[#4435d4] text-white font-extrabold text-xs py-2.5 rounded-2xl transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2"
+              >
+                {reassigning ? "Reassigning..." : "Reassign Branch"}
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Deactivate Button */}
         {canManage && s.isActive && (
