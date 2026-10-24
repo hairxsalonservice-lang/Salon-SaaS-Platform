@@ -13,7 +13,7 @@ function todayStr() {
 // POST /api/v1/attendance/punch-in
 const punchIn = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.userId;
     const { salonId, branchId } = req.user;
     const { notes } = req.body;
     const date = todayStr();
@@ -75,7 +75,7 @@ const punchIn = async (req, res, next) => {
 // POST /api/v1/attendance/punch-out
 const punchOut = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.userId;
     const date = todayStr();
     const { notes } = req.body;
 
@@ -104,7 +104,7 @@ const punchOut = async (req, res, next) => {
 // GET /api/v1/attendance/me/today
 const getTodayStatus = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.userId;
     const date = todayStr();
     const attendance = await Attendance.findOne({ staffId: userId, date });
 
@@ -120,7 +120,7 @@ const getTodayStatus = async (req, res, next) => {
 // GET /api/v1/attendance/me
 const getMyAttendance = async (req, res, next) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.userId;
     const { startDate, endDate } = req.query;
     const filter = { staffId: userId };
 
