@@ -1,6 +1,7 @@
 // src/theme/appleMotion.js
 import { Platform } from "react-native";
 import * as Haptics from "expo-haptics";
+import { FONT_FAMILY } from "./index";
 
 /**
  * 🍎 Apple Motion & Materials Design Tokens
@@ -38,34 +39,34 @@ export const APPLE_SPRINGS = {
 // 2. Apple Typography System (§6)
 export const APPLE_TYPO = {
   heroTitle: {
+    fontFamily: FONT_FAMILY.displayBold,
     fontSize: 30,
-    fontWeight: "700",
-    letterSpacing: -0.6,
-    lineHeight: 34,
+    letterSpacing: 0.3,
+    lineHeight: 38,
   },
   sectionHeader: {
+    fontFamily: FONT_FAMILY.display,
     fontSize: 20,
-    fontWeight: "600",
-    letterSpacing: -0.3,
-    lineHeight: 24,
+    letterSpacing: 0.2,
+    lineHeight: 26,
   },
   bodyText: {
+    fontFamily: FONT_FAMILY.body,
     fontSize: 16,
-    fontWeight: "400",
-    letterSpacing: 0,
-    lineHeight: 22,
+    letterSpacing: 0.1,
+    lineHeight: 23,
   },
   metadata: {
+    fontFamily: FONT_FAMILY.body,
     fontSize: 13,
-    fontWeight: "400",
     letterSpacing: 0.15,
     lineHeight: 18,
   },
   price: {
+    fontFamily: FONT_FAMILY.displayBold,
     fontSize: 22,
-    fontWeight: "700",
-    letterSpacing: -0.3,
-    lineHeight: 26,
+    letterSpacing: 0.1,
+    lineHeight: 28,
   },
 };
 

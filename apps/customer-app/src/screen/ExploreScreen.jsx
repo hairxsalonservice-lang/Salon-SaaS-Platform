@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { C, FF } from "../theme";
 import { storage } from "../services/storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import FilterModal from "../components/FilterModal";
@@ -95,11 +96,11 @@ export default function ExploreScreen({ goBack, navigate }) {
         {/* Header Bar */}
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={goBack} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="arrow-back" size={24} color={isDark ? "#FFFFFF" : "#18181B"} />
+            <Ionicons name="arrow-back" size={24} color={C.ink} />
           </TouchableOpacity>
           <View style={styles.titleContainer}>
-            <Text style={[styles.headerTitle, { color: isDark ? "#FFFFFF" : "#18181B" }]}>Search Salons</Text>
-            <Text style={[styles.headerSubtitle, { color: isDark ? "#A1A1AA" : "#71717A" }]}>
+            <Text style={[styles.headerTitle, { color: C.ink }]}>Search Salons</Text>
+            <Text style={[styles.headerSubtitle, { color: C.muted }]}>
               Find your favorite salons and services
             </Text>
           </View>
@@ -114,12 +115,12 @@ export default function ExploreScreen({ goBack, navigate }) {
         ) : (
           <>
             {/* Search Bar Input */}
-            <View style={[styles.searchPill, { backgroundColor: isDark ? "#1E1E24" : "#F4F4F6" }]}>
-              <Ionicons name="search-outline" size={20} color="#9999A0" style={{ marginRight: 10 }} />
+            <View style={[styles.searchPill, { backgroundColor: C.lifted }]}>
+              <Ionicons name="search-outline" size={20} color={C.muted} style={{ marginRight: 10 }} />
               <TextInput
-                style={[styles.searchInput, { color: isDark ? "#FFFFFF" : "#18181B" }]}
+                style={[styles.searchInput, { color: C.ink }]}
                 placeholder="Search by salon name, area or service..."
-                placeholderTextColor="#9999A0"
+                placeholderTextcolor={C.muted}
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 onSubmitEditing={() => handleExecuteSearch(searchQuery)}
@@ -128,15 +129,15 @@ export default function ExploreScreen({ goBack, navigate }) {
               />
               {searchQuery.length > 0 ? (
                 <TouchableOpacity onPress={() => setSearchQuery("")} style={{ padding: 4, marginRight: 6 }}>
-                  <Ionicons name="close-circle" size={18} color="#9999A0" />
+                  <Ionicons name="close-circle" size={18} color={C.muted} />
                 </TouchableOpacity>
               ) : null}
               <TouchableOpacity 
-                style={[styles.filterButton, { backgroundColor: isDark ? "#2D2D35" : "#FFFFFF" }]}
+                style={[styles.filterButton, { backgroundColor: C.surface }]}
                 activeOpacity={0.8}
                 onPress={() => setIsFilterOpen(true)}
               >
-                <Ionicons name="options-outline" size={18} color={isDark ? "#D4D4D8" : "#3F3F46"} />
+                <Ionicons name="options-outline" size={18} color={C.textSecondary} />
               </TouchableOpacity>
             </View>
 
@@ -144,13 +145,13 @@ export default function ExploreScreen({ goBack, navigate }) {
             {history.length > 0 && (
               <View style={styles.sectionContainer}>
                 <View style={styles.historyHeader}>
-                  <Text style={[styles.sectionTitle, { color: isDark ? "#FFFFFF" : "#18181B" }]}>Recent Searches</Text>
+                  <Text style={[styles.sectionTitle, { color: C.ink }]}>Recent Searches</Text>
                   <TouchableOpacity onPress={handleClearAll} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                     <Text style={styles.clearText}>Clear All</Text>
                   </TouchableOpacity>
                 </View>
 
-                <View style={[styles.historyCard, { backgroundColor: isDark ? "#18181B" : "#FFFFFF", borderColor: isDark ? "#38383A" : "#F4F4F6" }]}>
+                <View style={[styles.historyCard, { backgroundColor: C.surface, borderColor: C.border }]}>
                   {history.map((item, index) => (
                     <TouchableOpacity
                       key={`${item}-${index}`}
@@ -158,17 +159,17 @@ export default function ExploreScreen({ goBack, navigate }) {
                         styles.historyItem,
                         index < history.length - 1 && {
                           borderBottomWidth: 1,
-                          borderBottomColor: isDark ? "#38383A" : "#F4F4F6"
+                          borderBottomColor: C.border
                         }
                       ]}
                       onPress={() => handleExecuteSearch(item)}
                       activeOpacity={0.6}
                     >
-                      <Ionicons name="time-outline" size={19} color={isDark ? "#A1A1AA" : "#52525B"} style={{ marginRight: 12 }} />
-                      <Text style={[styles.historyText, { color: isDark ? "#FFFFFF" : "#18181B" }]} numberOfLines={1}>
+                      <Ionicons name="time-outline" size={19} color={C.muted} style={{ marginRight: 12 }} />
+                      <Text style={[styles.historyText, { color: C.ink }]} numberOfLines={1}>
                         {item}
                       </Text>
-                      <Ionicons name="chevron-forward" size={18} color={isDark ? "#52525B" : "#A1A1AA"} />
+                      <Ionicons name="chevron-forward" size={18} color={C.muted} />
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -181,11 +182,11 @@ export default function ExploreScreen({ goBack, navigate }) {
                 <View style={styles.blobBackgroundLarge} />
                 <View style={styles.blobBackgroundSmall} />
                 <View style={styles.magnifierCircle}>
-                  <Ionicons name="search-outline" size={44} color="#9E7779" />
+                  <Ionicons name="search-outline" size={44} color={C.muted} />
                 </View>
               </View>
-              <Text style={[styles.illustrationTitle, { color: isDark ? "#FFFFFF" : "#18181B" }]}>Search for Salons</Text>
-              <Text style={[styles.illustrationSubtitle, { color: isDark ? "#A1A1AA" : "#71717A" }]}>
+              <Text style={[styles.illustrationTitle, { color: C.ink }]}>Search for Salons</Text>
+              <Text style={[styles.illustrationSubtitle, { color: C.muted }]}>
                 Type a salon name, service or area{"\n"}to find the best results
               </Text>
             </View>
@@ -242,13 +243,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
+    fontFamily: FF.displayBold,
     fontSize: 22,
-    fontWeight: "700",
-    letterSpacing: -0.3,
+    letterSpacing: 0.2,
   },
   headerSubtitle: {
     fontSize: 13,
-    fontWeight: "400",
+    fontFamily: "Oswald_400Regular",
     marginTop: 2,
   },
   searchPill: {
@@ -263,7 +264,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    fontWeight: "400",
+    fontFamily: "Oswald_400Regular",
     paddingVertical: 0,
   },
   filterButton: {
@@ -272,7 +273,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: C.ink,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 2,
@@ -283,7 +284,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     marginBottom: 12,
   },
   popularRow: {
@@ -308,7 +309,7 @@ const styles = StyleSheet.create({
   },
   popularText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Oswald_500Medium",
   },
   historyHeader: {
     flexDirection: "row",
@@ -318,8 +319,8 @@ const styles = StyleSheet.create({
   },
   clearText: {
     fontSize: 13,
-    color: "#C56B5D",
-    fontWeight: "600",
+    color: C.main,
+    fontFamily: "Oswald_600SemiBold",
   },
   historyCard: {
     borderRadius: 16,
@@ -334,7 +335,7 @@ const styles = StyleSheet.create({
   },
   historyText: {
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Oswald_500Medium",
     flex: 1,
   },
   illustrationContainer: {
@@ -355,7 +356,7 @@ const styles = StyleSheet.create({
     width: 100,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#FAF0ED",
+    backgroundColor: C.crimsonTint,
     transform: [{ rotate: "-15deg" }],
     top: 10,
     right: 10,
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: "#F5E8E4",
+    backgroundColor: C.crimsonTint,
     bottom: 5,
     left: 15,
   },
@@ -374,7 +375,7 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 36,
     borderWidth: 5,
-    borderColor: "#9E7779",
+    borderColor: C.muted,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "transparent",
@@ -382,7 +383,7 @@ const styles = StyleSheet.create({
   },
   illustrationTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     marginBottom: 6,
   },
   illustrationSubtitle: {

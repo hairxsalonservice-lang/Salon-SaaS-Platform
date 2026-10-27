@@ -75,17 +75,17 @@ export default function CategoryAccordionList({
       {/* Search Bar */}
       {services.length > 0 && (
         <View style={styles.searchContainer}>
-          <Ionicons name="search" size={18} color={isDark ? "#9BA1A6" : "#8E8E93"} />
+          <Ionicons name="search" size={18} color={isDark ? C.muted : C.muted} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search for a service..."
-            placeholderTextColor={isDark ? "#687076" : "#A1A1AA"}
+            placeholderTextColor={isDark ? C.muted : C.muted}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           {searchQuery.length > 0 && (
             <TouchableOpacity onPress={() => setSearchQuery("")} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              <Ionicons name="close-circle" size={16} color={isDark ? "#9BA1A6" : "#8E8E93"} />
+              <Ionicons name="close-circle" size={16} color={isDark ? C.muted : C.muted} />
             </TouchableOpacity>
           )}
         </View>
@@ -166,10 +166,8 @@ export default function CategoryAccordionList({
                   size={18}
                   color={
                     isExpanded || selectedInGroup
-                      ? isDark ? "#0A84FF" : "#0071e3"
-                      : isDark
-                        ? "#8E8E93"
-                        : "#8E8E93"
+                      ? C.main
+                      : C.muted
                   }
                   style={{ marginLeft: 6 }}
                 />
@@ -243,7 +241,7 @@ export default function CategoryAccordionList({
                           <Ionicons
                             name={isSelected ? "checkmark" : "add"}
                             size={16}
-                            color={isSelected ? "#FFFFFF" : isDark ? "#0A84FF" : "#0071e3"}
+                            color={isSelected ? C.textLight : C.main}
                           />
                         </SpringTouchable>
                       </View>
@@ -261,7 +259,7 @@ export default function CategoryAccordionList({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = isDark ? "#0A84FF" : "#0071e3";
+  const accentColor = C.main;
 
   return StyleSheet.create({
     container: {
@@ -270,7 +268,7 @@ function getStyles(theme, isDark) {
     searchContainer: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderRadius: 16,
       paddingHorizontal: 16,
       height: 48,
@@ -280,17 +278,17 @@ function getStyles(theme, isDark) {
       flex: 1,
       marginLeft: 10,
       fontSize: 15,
-      color: isDark ? "#FFFFFF" : "#1C1C1E",
+      color: isDark ? C.textLight : C.surface,
     },
     groupCardWrapper: {
       borderRadius: 20,
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderWidth: 1.5,
       borderColor: "transparent",
       overflow: "hidden",
     },
     groupCardWrapperActive: {
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderColor: accentColor,
       shadowColor: accentColor,
       shadowOffset: { width: 0, height: 4 },
@@ -307,16 +305,16 @@ function getStyles(theme, isDark) {
     },
     accordionHeaderExpanded: {
       borderBottomWidth: 1,
-      borderBottomColor: isDark ? "#2C2C2E" : "#E5E5EA",
+      borderBottomColor: isDark ? C.lifted : C.border,
     },
     categoryTitle: {
       fontSize: 16,
-      fontWeight: "600",
-      color: isDark ? "#8E8E93" : "#8E8E93",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.muted,
     },
     categoryTitleActive: {
       color: accentColor,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
     headerRightRow: {
       flexDirection: "row",
@@ -324,26 +322,26 @@ function getStyles(theme, isDark) {
     },
     countText: {
       fontSize: 14,
-      fontWeight: "700",
-      color: isDark ? "#E2E8F0" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.border : C.ink,
     },
     selectedMetaCol: {
       alignItems: "flex-end",
     },
     selectedSubName: {
       fontSize: 13,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       maxWidth: 140,
     },
     selectedPriceText: {
       fontSize: 12,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: accentColor,
       marginTop: 1,
     },
     expandedContent: {
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       paddingHorizontal: 18,
       paddingVertical: 8,
     },
@@ -353,7 +351,7 @@ function getStyles(theme, isDark) {
       justifyContent: "space-between",
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: isDark ? "#2C2C2E" : "#F0F0F5",
+      borderBottomColor: isDark ? C.lifted : C.lifted,
     },
     serviceRowLast: {
       borderBottomWidth: 0,
@@ -364,13 +362,13 @@ function getStyles(theme, isDark) {
     },
     serviceName: {
       fontSize: 15,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       marginBottom: 2,
     },
     serviceMeta: {
       fontSize: 12,
-      color: isDark ? "#8E8E93" : "#8E8E93",
+      color: C.muted,
     },
     serviceRight: {
       flexDirection: "row",
@@ -379,21 +377,21 @@ function getStyles(theme, isDark) {
     },
     servicePrice: {
       fontSize: 15,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     comboHeaderPill: {
-      backgroundColor: isDark ? "rgba(245, 158, 11, 0.2)" : "#FEF3C7",
+      backgroundColor: isDark ? "rgba(245, 158, 11, 0.2)" : C.goldTint,
       paddingHorizontal: 8,
       paddingVertical: 2,
       borderRadius: 10,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(245, 158, 11, 0.4)" : "#FDE68A",
+      borderColor: isDark ? "rgba(245, 158, 11, 0.4)" : C.goldTint,
     },
     comboHeaderPillText: {
       fontSize: 10.5,
-      fontWeight: "700",
-      color: isDark ? "#FBBF24" : "#B45309",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.warning : C.warning,
       letterSpacing: 0.2,
     },
     comboServiceRow: {
@@ -403,17 +401,17 @@ function getStyles(theme, isDark) {
       marginVertical: 2,
     },
     comboItemTag: {
-      backgroundColor: isDark ? "rgba(59, 130, 246, 0.2)" : "#EFF6FF",
+      backgroundColor: isDark ? "rgba(59, 130, 246, 0.2)" : C.infoBg,
       paddingHorizontal: 6,
       paddingVertical: 2,
       borderRadius: 6,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(59, 130, 246, 0.4)" : "#DBEAFE",
+      borderColor: isDark ? "rgba(59, 130, 246, 0.4)" : C.infoBg,
     },
     comboItemTagText: {
       fontSize: 9.5,
-      fontWeight: "700",
-      color: isDark ? "#60A5FA" : "#2563EB",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.info : C.info,
     },
     selectBtn: {
       width: 32,
@@ -431,11 +429,11 @@ function getStyles(theme, isDark) {
     emptyCard: {
       padding: 24,
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderRadius: 20,
     },
     emptyText: {
-      color: isDark ? "#8E8E93" : "#8E8E93",
+      color: C.muted,
       fontSize: 14,
     },
   });

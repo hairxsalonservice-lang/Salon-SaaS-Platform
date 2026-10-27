@@ -10,10 +10,11 @@ import {
   Dimensions,
   LogBox,
 } from "react-native";
-import { NavigationContainer, createNavigationContainerRef } from "@react-navigation/native";
+import { NavigationContainer, createNavigationContainerRef, getPathFromState } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { C, S, FS, FW, R } from "../theme";
+import { PLATFORM_ANIMATION, isIOS } from "../theme/platform";
 import { useTheme } from "../context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -53,6 +54,38 @@ LogBox.ignoreLogs([
 
 const Stack = createNativeStackNavigator();
 const navigationRef = createNavigationContainerRef();
+
+// The salon object is passed between screens for an instant first paint, but it
+// shouldn't be serialized into the browser URL. Only its id belongs in the link.
+const stripSalonParams = (state) => {
+  if (!state?.routes) return state;
+  return {
+    ...state,
+    routes: state.routes.map((route) => {
+      const nextRoute = route.state
+        ? { ...route, state: stripSalonParams(route.state) }
+        : route;
+      if (route.name !== "SalonDetail" || !route.params) return nextRoute;
+
+      const { salon, ...params } = route.params;
+      const salonId = params.salonId || salon?._id || salon?.id;
+      return { ...nextRoute, params: salonId ? { ...params, salonId } : params };
+    }),
+  };
+};
+
+// Opening a shared salon link lands directly on that salon, with an optional branch preselected.
+const linking = {
+  prefixes: ["stcut://", "https://stcut.app"],
+  config: {
+    initialRouteName: "MainTabs",
+    screens: {
+      MainTabs: "",
+      SalonDetail: "salon/:salonId?",
+    },
+  },
+  getPathFromState: (state, config) => getPathFromState(stripSalonParams(state), config),
+};
 
 const TABS = [
   { id: "Home", label: "Home", iconActive: "home", iconInactive: "home-outline" },
@@ -171,8 +204,7 @@ export default function AppNavigator() {
     Animated.spring(slideAnim, {
       toValue: -index * SCREEN_WIDTH,
       useNativeDriver: true,
-      speed: 22,
-      bounciness: 0,
+      ...PLATFORM_ANIMATION.tabSpring,
     }).start();
   }, [currentTab]);
 
@@ -314,15 +346,15 @@ export default function AppNavigator() {
     <FavoritesProvider>
       <View style={[styles.container, { backgroundColor: theme.canvas }]}>
         <StatusBar barStyle={theme.statusBar} backgroundColor={theme.canvas} />
-        <NavigationContainer ref={navigationRef}>
+        <NavigationContainer ref={navigationRef} linking={linking}>
           <Stack.Navigator
             initialRouteName={initialRouteName}
             screenOptions={{
               headerShown: false,
-              animation: "ios_from_right",
+              animation: PLATFORM_ANIMATION.screenPush,
               gestureEnabled: true,
-              fullScreenGestureEnabled: true,
-              animationDuration: 350,
+              fullScreenGestureEnabled: isIOS,
+              animationDuration: PLATFORM_ANIMATION.duration,
               contentStyle: { backgroundColor: theme.canvas },
             }}
           >
@@ -366,6 +398,8 @@ export default function AppNavigator() {
               {({ route }) => (
                 <SalonDetailScreen
                   salon={route.params?.salon}
+                  initialSalonId={route.params?.salonId}
+                  initialBranchId={route.params?.branchId}
                   goBack={goBack}
                   navigate={navigate}
                   onScroll={handleScroll}
@@ -505,13 +539,13 @@ function getStyles() {
     },
     iosTabLabel: {
       fontSize: 10,
-      fontWeight: FW.medium,
+      fontFamily: "Oswald_500Medium",
       color: C.muted,
       marginTop: 2,
     },
     iosTabLabelSelected: {
       color: C.main,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
     },
   });
 }

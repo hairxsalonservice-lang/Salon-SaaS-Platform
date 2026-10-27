@@ -226,7 +226,7 @@ export default function InteractiveMapModal({ visible, onClose, salons = [], onS
                     <Ionicons
                       name="location-sharp"
                       size={isSelected ? 26 : 20}
-                      color={isSelected ? C.main : "#FFFFFF"}
+                      color={isSelected ? C.main : C.textLight}
                     />
                     <View style={[styles.pinBadge, isSelected && styles.pinBadgeSelected]}>
                       <Text style={[styles.pinBadgeText, isSelected && styles.pinBadgeTextSelected]}>
@@ -315,13 +315,13 @@ function getStyles() {
   },
   headerSub: {
     fontSize: 9,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.muted,
     letterSpacing: 1.2,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
     marginTop: 2,
   },
@@ -354,7 +354,7 @@ function getStyles() {
   },
   filterText: {
     fontSize: 11,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
   },
   filterTextActive: {
@@ -374,7 +374,7 @@ function getStyles() {
   loadingText: {
     color: C.bg,
     fontSize: 12,
-    fontWeight: "500",
+    fontFamily: "Oswald_500Medium",
   },
   mapGraphicContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -428,9 +428,9 @@ function getStyles() {
     backgroundColor: C.main,
   },
   pinBadgeText: {
-    color: "#FFFFFF",
+    color: C.textLight,
     fontSize: 10,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
   },
   pinBadgeTextSelected: {
     color: C.bg,
@@ -464,20 +464,20 @@ function getStyles() {
   },
   distTagText: {
     fontSize: 10,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.main,
     letterSpacing: 0.8,
   },
   popupTitle: {
     fontSize: 18,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
   },
   popupAddr: {
     fontSize: 12,
     color: C.muted,
     marginTop: 2,
-    fontWeight: "500",
+    fontFamily: "Oswald_500Medium",
   },
   ratingBox: {
     flexDirection: "row",
@@ -493,11 +493,11 @@ function getStyles() {
   ratingStar: {
     color: C.main,
     fontSize: 12,
-    fontWeight: "900",
+    fontFamily: "Oswald_700Bold",
   },
   ratingVal: {
     fontSize: 12,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
   },
   popupActionRow: {
@@ -518,7 +518,7 @@ function getStyles() {
   },
   dirBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
   },
   bookBtn: {
@@ -531,7 +531,7 @@ function getStyles() {
   },
   bookBtnText: {
     fontSize: 12,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.main,
   },
   });

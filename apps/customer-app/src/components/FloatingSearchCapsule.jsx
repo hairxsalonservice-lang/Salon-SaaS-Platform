@@ -108,14 +108,14 @@ export default function FloatingSearchCapsule({
             activeOpacity={0.85}
           >
             <View style={styles.locationIconBox}>
-              <Ionicons name="location" size={17} color={isDark ? "#FFFFFF" : "#0071e3"} />
+              <Ionicons name="location" size={17} color={isDark ? C.textLight : C.main} />
             </View>
             <View style={styles.locationTextStack}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <Text style={styles.locationTitleText}>
                   {activeCity}{selectedState ? `, ${selectedState}` : ""}
                 </Text>
-                <Ionicons name="chevron-down" size={13} color={isDark ? "#8E8E93" : "#71717A"} style={{ marginTop: 1 }} />
+                <Ionicons name="chevron-down" size={13} color={C.muted} style={{ marginTop: 1 }} />
               </View>
               <Text style={styles.locationSubText}>Find the perfect salon for you</Text>
             </View>
@@ -127,20 +127,20 @@ export default function FloatingSearchCapsule({
           {/* Search Bar Input + Filter Button */}
           <View style={styles.searchRow}>
             <View style={styles.inputPillContainer}>
-              <Ionicons name="search-outline" size={18} color={isDark ? "#8E8E93" : "#8E8E93"} style={{ marginRight: 8 }} />
+              <Ionicons name="search-outline" size={18} color={C.muted} style={{ marginRight: 8 }} />
               <TextInput
                 style={styles.searchInput}
                 value={query}
                 onChangeText={handleTextChange}
                 placeholder={placeholder}
-                placeholderTextColor={isDark ? "#8E8E93" : "#8E8E93"}
+                placeholderTextColor={C.muted}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 onSubmitEditing={() => onSearchSubmit && onSearchSubmit(query)}
               />
               {query ? (
                 <TouchableOpacity onPress={() => handleTextChange("")} style={{ padding: 4 }}>
-                  <Ionicons name="close-circle" size={16} color="#8E8E93" />
+                  <Ionicons name="close-circle" size={16} color={C.muted} />
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -151,7 +151,7 @@ export default function FloatingSearchCapsule({
               onPress={onFilterPress}
               activeOpacity={0.85}
             >
-              <Ionicons name="funnel" size={16} color="#fff" />
+              <Ionicons name="funnel" size={16} color={C.textLight} />
             </TouchableOpacity>
           </View>
         </View>
@@ -192,16 +192,16 @@ function getStyles(isDark) {
       marginVertical: 4,
     },
     cardContainer: {
-      backgroundColor: isDark ? "#121216" : "#FFFFFF",
+      backgroundColor: C.bg,
       borderRadius: 28,
       padding: 6,
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: isDark ? 0.44 : 0.08,
       shadowRadius: 16,
       elevation: isDark ? 10 : 4,
       borderWidth: 1,
-      borderColor: isDark ? "#3a3a3a6e" : "#E5E5EA",
+      borderColor: isDark ? "#3a3a3a6e" : C.border,
     },
     darkHeaderBlock: {
       flexDirection: "row",
@@ -221,7 +221,7 @@ function getStyles(isDark) {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: isDark ? "#030303" : "rgba(108, 92, 231, 0.12)",
+      backgroundColor: isDark ? C.ink : "rgba(108, 92, 231, 0.12)",
       alignItems: "center",
       justifyContent: "center",
     },
@@ -229,33 +229,33 @@ function getStyles(isDark) {
       justifyContent: "center",
     },
     locationTitleText: {
-      color: isDark ? "#FFFFFF" : "#000000",
+      color: C.ink,
       fontSize: 16,
-      fontWeight: "700",
-      letterSpacing: -0.2,
+      fontFamily: "Oswald_700Bold",
+      letterSpacing: 0.1,
     },
     locationSubText: {
-      color: isDark ? "#8E8E93" : "#636366",
+      color: C.mutedSoft,
       fontSize: 12,
-      fontWeight: "500",
-      letterSpacing: -0.1,
+      fontFamily: "Oswald_500Medium",
+      letterSpacing: 0.1,
       marginTop: 1,
     },
     sparkleBtn: {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: "#CCFF00",
+      backgroundColor: C.success,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#CCFF00",
+      shadowColor: C.success,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.3,
       shadowRadius: 6,
       elevation: 3,
     },
     whiteCardOverlay: {
-      backgroundColor: isDark ? "#1C1C22" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderRadius: 22,
       padding: 5,
     },
@@ -268,7 +268,7 @@ function getStyles(isDark) {
       flex: 1,
       height: 44,
       borderRadius: 18,
-      backgroundColor: isDark ? "#2C2C34" : "#F2F3F5",
+      backgroundColor: isDark ? C.surface : C.lifted,
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 14,
@@ -276,15 +276,15 @@ function getStyles(isDark) {
     searchInput: {
       flex: 1,
       fontSize: 13.5,
-      fontWeight: "500",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_500Medium",
+      color: C.ink,
       paddingVertical: 0,
     },
     darkFilterBtn: {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: isDark ? "#2C2C34" : "#16161B",
+      backgroundColor: isDark ? C.surface : C.bg,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -298,7 +298,7 @@ function getStyles(isDark) {
     categoryPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#2C2C34" : "#F5F6F8",
+      backgroundColor: isDark ? C.surface : C.lifted,
       borderRadius: 16,
       paddingHorizontal: 13,
       paddingVertical: 7,
@@ -309,18 +309,18 @@ function getStyles(isDark) {
     },
     categoryLabelText: {
       fontSize: 12.5,
-      fontWeight: "600",
-      color: isDark ? "#E5E5EA" : "#2C2C2E",
+      fontFamily: "Oswald_600SemiBold",
+      color: isDark ? C.border : C.lifted,
     },
     dropdown: {
-      backgroundColor: isDark ? "#1C1C22" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderRadius: 20,
       paddingVertical: 8,
       paddingHorizontal: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C34" : "#E5E5EA",
+      borderColor: isDark ? C.surface : C.border,
       overflow: "hidden",
-      shadowColor: "#000000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.12,
       shadowRadius: 14,
@@ -340,14 +340,14 @@ function getStyles(isDark) {
     },
     timelinePillText: {
       fontSize: 10,
-      fontWeight: "700",
-      color: isDark ? "#CCFF00" : "#16161B",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.success : C.bg,
       letterSpacing: 0.5,
     },
     rowQuery: {
       fontSize: 13.5,
-      fontWeight: "500",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_500Medium",
+      color: C.ink,
     },
   });
 }

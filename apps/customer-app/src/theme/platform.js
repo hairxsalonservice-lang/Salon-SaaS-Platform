@@ -2,27 +2,26 @@
 // Platform-aware design tokens: Apple HIG on iOS, Material You on Android
 import { Platform } from "react-native";
 
-const isIOS = Platform.OS === "ios";
+export const isIOS = Platform.OS === "ios";
+export const isAndroid = Platform.OS === "android";
 
 // ── Border Radii ────────────────────────────────────────────
-// iOS: tighter Apple radii. Android: Material You larger roundness.
 export const PLATFORM_RADIUS = {
-  xs: isIOS ? 4 : 6,
+  xs: isIOS ? 4 : 8,
   sm: isIOS ? 8 : 12,
   card: isIOS ? 14 : 16,
   button: isIOS ? 12 : 24,
   md: isIOS ? 12 : 16,
   lg: isIOS ? 16 : 20,
   xl: isIOS ? 20 : 28,
-  input: isIOS ? 12 : 28,
+  input: isIOS ? 12 : 16,
   sheet: isIOS ? 16 : 28,
   pill: 9999,
   circle: 9999,
 };
 
 // ── Shadows ─────────────────────────────────────────────────
-// iOS uses shadowColor/Offset/Opacity/Radius. Android uses elevation.
-// Material You: surface tonal elevation instead of drop shadows.
+// iOS: real shadows. Android: elevation with surface tint (no shadow props).
 export const PLATFORM_SHADOWS = {
   sm: isIOS
     ? { shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3, elevation: 1 }
@@ -36,7 +35,6 @@ export const PLATFORM_SHADOWS = {
 };
 
 // ── Spacing ─────────────────────────────────────────────────
-// Android: slightly more generous padding (Material density)
 export const PLATFORM_SPACING = {
   cardPadding: isIOS ? 16 : 16,
   cardGap: isIOS ? 14 : 12,
@@ -47,60 +45,98 @@ export const PLATFORM_SPACING = {
   tabBarPaddingBottom: isIOS ? 34 : 12,
 };
 
-// ── Typography tweaks ───────────────────────────────────────
-// Android renders fonts differently — slightly larger body, different weights
+// ── Typography ──────────────────────────────────────────────
 export const PLATFORM_TYPO = {
   titleSize: isIOS ? 28 : 24,
   titleWeight: isIOS ? "700" : "600",
+  titleFont: "Oswald_700Bold",
   sectionTitleSize: isIOS ? 20 : 18,
+  sectionTitleFont: "Oswald_600SemiBold",
   bodySize: isIOS ? 15 : 14,
+  bodyFont: "Oswald_400Regular",
   captionSize: isIOS ? 12 : 12,
-  letterSpacing: isIOS ? -0.4 : 0,
+  letterSpacing: isIOS ? -0.4 : 0.1,
 };
 
 // ── Press Feedback ──────────────────────────────────────────
-// iOS: scale + opacity. Android: ripple effect (handled in components).
 export const PLATFORM_PRESS = {
-  useRipple: !isIOS,
+  useRipple: isAndroid,
   scaleDown: isIOS ? 0.97 : 1.0,
-  opacityDown: isIOS ? 0.7 : 0.85,
+  opacityDown: isIOS ? 0.7 : 0.92,
+};
+
+// ── Android Material You Colors ─────────────────────────────
+// Material 3 uses surface tint overlays, not pure black/white backgrounds.
+export const MATERIAL_COLORS = {
+  light: {
+    canvas: "#FFFFFF",
+    surface: "#FFFFFF",
+    surfaceContainer: "#F7F3F4",
+    surfaceContainerLow: "#FAF8F8",
+    surfaceContainerHigh: "#F0ECEE",
+    ink: "#1A1A2E",
+    body: "#3D3D52",
+    muted: "#8A8A9A",
+    hairline: "#E8E0E2",
+    primary: "#FF6082",
+    primaryContainer: "#FFE0E8",
+    error: "#D32F2F",
+    success: "#2E7D32",
+    tabBg: "#FFFFFF",
+  },
+  dark: {
+    canvas: "#121218",
+    surface: "#1C1C26",
+    surfaceContainer: "#262630",
+    surfaceContainerLow: "#1C1C26",
+    surfaceContainerHigh: "#30303C",
+    ink: "#F0EDF0",
+    body: "#C8C4CC",
+    muted: "#908C96",
+    hairline: "#2E2E3A",
+    primary: "#FF7A9A",
+    primaryContainer: "#6E2040",
+    error: "#FF6B6B",
+    success: "#66BB6A",
+    tabBg: "#262630",
+  },
 };
 
 // ── Card Styles ─────────────────────────────────────────────
-// iOS: bordered cards with subtle shadow. Android: elevated surface tonal.
 export function getPlatformCardStyle(isDark) {
   if (isIOS) {
     return {
       borderRadius: PLATFORM_RADIUS.card,
       borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
+      borderColor: isDark ? "#2E2E3A" : "#E8E0E2",
       ...PLATFORM_SHADOWS.md,
     };
   }
+  const m = isDark ? MATERIAL_COLORS.dark : MATERIAL_COLORS.light;
   return {
     borderRadius: PLATFORM_RADIUS.card,
     borderWidth: 0,
-    elevation: 2,
-    backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+    elevation: 1,
+    backgroundColor: m.surfaceContainer,
   };
 }
 
 // ── Input Field Style ───────────────────────────────────────
-// iOS: rounded rect with border. Android: Material outlined/filled.
 export function getPlatformInputStyle(isDark) {
   if (isIOS) {
     return {
       borderRadius: PLATFORM_RADIUS.input,
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: isDark ? "#1C1C26" : "#FFFFFF",
       borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
+      borderColor: isDark ? "#2E2E3A" : "#E8E0E2",
       height: PLATFORM_SPACING.inputHeight,
       paddingHorizontal: 16,
     };
   }
+  const m = isDark ? MATERIAL_COLORS.dark : MATERIAL_COLORS.light;
   return {
     borderRadius: PLATFORM_RADIUS.input,
-    backgroundColor: isDark ? "#1C1C1E" : "#F2F2F7",
+    backgroundColor: m.surfaceContainerHigh,
     borderWidth: 0,
     height: PLATFORM_SPACING.inputHeight,
     paddingHorizontal: 20,
@@ -108,7 +144,6 @@ export function getPlatformInputStyle(isDark) {
 }
 
 // ── Button Style ────────────────────────────────────────────
-// iOS: compact rounded rect. Android: Material You full-round pill.
 export function getPlatformButtonStyle(isDark, variant = "filled") {
   const base = {
     height: PLATFORM_SPACING.buttonHeight,
@@ -121,6 +156,17 @@ export function getPlatformButtonStyle(isDark, variant = "filled") {
   }
   return {
     ...base,
-    elevation: variant === "filled" ? 2 : 0,
+    elevation: variant === "filled" ? 1 : 0,
   };
 }
+
+// ── Navigation Animation ────────────────────────────────────
+export const PLATFORM_ANIMATION = {
+  screenPush: isIOS ? "ios_from_right" : "fade_from_bottom",
+  modalPresent: isIOS ? "slide_from_bottom" : "fade_from_bottom",
+  screenPop: isIOS ? "ios_from_right" : "fade_from_bottom",
+  duration: isIOS ? 350 : 300,
+  tabSpring: isIOS
+    ? { speed: 22, bounciness: 0 }
+    : { speed: 28, bounciness: 0 },
+};

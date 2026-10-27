@@ -46,7 +46,7 @@ export default function QuickRebookWidget({ isAuthenticated = true, appointment,
     return (
       <BouncyButton style={styles.card} onPress={onLogin || onRebook}>
         <View style={styles.badgeCircle}>
-          <Ionicons name="calendar-outline" size={20} color={"#fff"} />
+          <Ionicons name="calendar-outline" size={20} color={C.textLight} />
         </View>
         <View style={styles.textBlock}>
           <Text style={styles.cardTitle}>Your bookings, all in one place</Text>
@@ -54,7 +54,7 @@ export default function QuickRebookWidget({ isAuthenticated = true, appointment,
         </View>
         <View style={styles.chip}>
           <Text style={styles.chipText}>Sign in</Text>
-          <Ionicons name="arrow-forward" size={13} color={"#000"} style={{ marginLeft: 4 }} />
+          <Ionicons name="arrow-forward" size={13} color={C.ink} style={{ marginLeft: 4 }} />
         </View>
       </BouncyButton>
     );
@@ -117,7 +117,7 @@ export default function QuickRebookWidget({ isAuthenticated = true, appointment,
   return (
     <BouncyButton style={styles.card} onPress={handlePress}>
       <View style={styles.badgeCircle}>
-        <Ionicons name="refresh-outline" size={18} color={"#fff"} />
+        <Ionicons name="refresh-outline" size={18} color={C.textLight} />
       </View>
 
       <View style={styles.textBlock}>
@@ -127,7 +127,7 @@ export default function QuickRebookWidget({ isAuthenticated = true, appointment,
 
       <View style={styles.chip}>
         <Text style={styles.chipText}>Rebook</Text>
-        <Ionicons name="arrow-forward" size={13} color={"#000"} style={{ marginLeft: 4 }} />
+        <Ionicons name="arrow-forward" size={13} color={C.ink} style={{ marginLeft: 4 }} />
       </View>
     </BouncyButton>
   );
@@ -182,13 +182,13 @@ function getStyles() {
     },
     dateBadgeWeekday: {
       fontSize: 9,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
       color: C.body,
       letterSpacing: 0.5,
     },
     dateBadgeDay: {
       fontSize: FS.bodySm + 5,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
       color: C.ink,
       lineHeight: FS.bodySm + 6,
     },
@@ -199,12 +199,12 @@ function getStyles() {
     },
     cardTitle: {
       fontSize: FS.bodySm,
-      fontWeight: FW.semiBold,
-      color: "#fff",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.textLight,
     },
     cardTitleDark: {
       fontSize: FS.bodySm,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
       color: C.ink,
     },
     cardSub: {
@@ -234,15 +234,15 @@ function getStyles() {
     chip: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "#fff",
+      backgroundColor: C.textLight,
       paddingHorizontal: S.md,
       paddingVertical: 7,
       borderRadius: R.pill,
     },
     chipText: {
-      color: "#000",
+      color: C.ink,
       fontSize: FS.bodySm - 1,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
     },
 
     // compact circular affordance on the upcoming-appointment card

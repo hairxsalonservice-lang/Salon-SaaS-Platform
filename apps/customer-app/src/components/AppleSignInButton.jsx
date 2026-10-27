@@ -75,12 +75,12 @@ export default function AppleSignInButton({ onSuccess, onError, variant = "full"
         hapticType="medium"
       >
         {loading ? (
-          <ActivityIndicator color={isDark ? "#000000" : "#FFFFFF"} size="small" />
+          <ActivityIndicator color={C.bg} size="small" />
         ) : (
           <Ionicons
             name="logo-apple"
             size={26}
-            color={isDark ? "#000000" : "#FFFFFF"}
+            color={C.bg}
           />
         )}
       </SpringTouchable>
@@ -99,16 +99,16 @@ export default function AppleSignInButton({ onSuccess, onError, variant = "full"
       hapticType="medium"
     >
       {loading ? (
-        <ActivityIndicator color={isDark ? "#000000" : "#FFFFFF"} size="small" />
+        <ActivityIndicator color={C.bg} size="small" />
       ) : (
         <View style={styles.appleBtnContent}>
           <Ionicons
             name="logo-apple"
             size={22}
-            color={isDark ? "#000000" : "#FFFFFF"}
+            color={C.bg}
             style={{ marginRight: 10 }}
           />
-          <Text style={[styles.appleBtnText, { color: isDark ? "#000000" : "#FFFFFF" }]}>
+          <Text style={[styles.appleBtnText, { color: C.bg }]}>
             Continue with Apple
           </Text>
         </View>
@@ -136,18 +136,18 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   appleBtnLight: {
-    backgroundColor: "#000000",
-    borderColor: "#000000",
-    shadowColor: "#000",
+    backgroundColor: C.ink,
+    borderColor: C.ink,
+    shadowColor: C.ink,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
   },
   appleBtnDark: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#FFFFFF",
-    shadowColor: "#000",
+    backgroundColor: C.textLight,
+    borderColor: C.textLight,
+    shadowColor: C.ink,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   },
   appleBtnText: {
     fontSize: 16,
-    fontWeight: "700",
-    letterSpacing: -0.2,
+    fontFamily: "Oswald_700Bold",
+    letterSpacing: 0.1,
   },
 });

@@ -12,6 +12,7 @@
   "dependencies": {
     "@expo-google-fonts/fraunces": "^0.4.1",
     "@expo-google-fonts/inter": "^0.4.2",
+    "@expo-google-fonts/oswald": "^0.4.2",
     "@expo/metro-runtime": "~58.0.15",
     "@expo/vector-icons": "^15.0.2",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -20,14 +21,14 @@
     "@react-navigation/native": "^7.3.18",
     "@react-navigation/native-stack": "^7.18.10",
     "date-fns": "^4.4.0",
-    "expo": "~58.0.19",
+    "expo": "~58.0.20",
     "expo-apple-authentication": "~58.0.2",
     "expo-asset": "~58.0.18",
-    "expo-auth-session": "~58.0.14",
+    "expo-auth-session": "~58.0.15",
     "expo-blur": "~58.0.5",
     "expo-build-properties": "~58.0.11",
     "expo-constants": "~58.0.13",
-    "expo-dev-client": "~58.0.15",
+    "expo-dev-client": "~58.0.16",
     "expo-file-system": "~58.0.11",
     "expo-font": "~58.0.10",
     "expo-haptics": "~58.0.7",
@@ -42,7 +43,7 @@
     "expo-splash-screen": "~58.0.11",
     "expo-status-bar": "~58.0.4",
     "expo-updates": "~58.0.18",
-    "expo-web-browser": "~58.0.6",
+    "expo-web-browser": "~58.0.7",
     "lottie-react-native": "~7.5.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -64,6 +65,6 @@
     "hermes-engine": "^0.11.0",
     "jest": "^30.5.2",
     "jest-expo": "~58.0.12",
-    "react-test-renderer": "^19.3.0"
+    "react-test-renderer": "19.3.0"
   }
 }

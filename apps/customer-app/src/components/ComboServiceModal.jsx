@@ -99,7 +99,7 @@ function ComboServiceModal({
             <Ionicons
               name="close"
               size={20}
-              color={isDark ? "#E2E8F0" : "#4A5568"}
+              color={isDark ? C.border : C.muted}
             />
           </TouchableOpacity>
 
@@ -144,7 +144,7 @@ function ComboServiceModal({
                         <Ionicons
                           name="checkmark"
                           size={15}
-                          color="#22C55E"
+                          color={C.success}
                           style={styles.checkIcon}
                         />
                       </View>
@@ -186,7 +186,7 @@ function ComboServiceModal({
               <Ionicons
                 name={isSelected ? "checkmark-circle" : "add-circle"}
                 size={18}
-                color="#FFFFFF"
+                color={C.textLight}
                 style={{ marginRight: 6 }}
               />
               <Text style={styles.actionBtnText}>
@@ -215,12 +215,12 @@ function getStyles(theme, isDark, insets) {
       flex: 1,
     },
     sheetContainer: {
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderTopLeftRadius: 28,
       borderTopRightRadius: 28,
       maxHeight: SCREEN_HEIGHT * 0.88,
       paddingTop: 10,
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: -6 },
       shadowOpacity: 0.25,
       shadowRadius: 16,
@@ -234,7 +234,7 @@ function getStyles(theme, isDark, insets) {
       width: 44,
       height: 4.5,
       borderRadius: 3,
-      backgroundColor: isDark ? "#3A3A3C" : "#D1D5DB",
+      backgroundColor: isDark ? C.borderDark : C.border,
     },
     closeBtn: {
       position: "absolute",
@@ -243,7 +243,7 @@ function getStyles(theme, isDark, insets) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#242426" : "#E5E5EA",
+      backgroundColor: isDark ? C.surface : C.border,
       alignItems: "center",
       justifyContent: "center",
       zIndex: 10,
@@ -258,7 +258,7 @@ function getStyles(theme, isDark, insets) {
       height: 185,
       borderRadius: 20,
       overflow: "hidden",
-      backgroundColor: isDark ? "#222" : "#F0F0F0",
+      backgroundColor: isDark ? "#222" : C.border,
       marginBottom: 16,
       position: "relative",
     },
@@ -278,9 +278,9 @@ function getStyles(theme, isDark, insets) {
       borderColor: "rgba(255, 255, 255, 0.22)",
     },
     comboBadgeText: {
-      color: "#FBBF24",
+      color: C.warning,
       fontSize: 10,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       letterSpacing: 0.6,
     },
     headerBlock: {
@@ -289,21 +289,21 @@ function getStyles(theme, isDark, insets) {
     titleText: {
       fontFamily: FONT_FAMILY.serif,
       fontSize: 21,
-      fontWeight: "700",
-      color: isDark ? "#F8FAFC" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.lifted : C.ink,
       lineHeight: 26,
       marginBottom: 4,
     },
     offerSubtitleText: {
       fontSize: 12,
-      fontWeight: "600",
-      color: isDark ? "#8E8E93" : "#8E8E93",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.muted,
       letterSpacing: 0.2,
     },
     descriptionText: {
       fontSize: 13,
       lineHeight: 20,
-      color: isDark ? "#EBEBF5" : "#4A5568",
+      color: isDark ? C.border : C.muted,
       marginBottom: 20,
     },
     servicesSection: {
@@ -311,8 +311,8 @@ function getStyles(theme, isDark, insets) {
     },
     servicesHeading: {
       fontSize: 16,
-      fontWeight: "700",
-      color: isDark ? "#F8FAFC" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.lifted : C.ink,
       marginBottom: 14,
     },
     checklistGrid: {
@@ -334,12 +334,12 @@ function getStyles(theme, isDark, insets) {
       marginRight: 8,
     },
     checkIcon: {
-      fontWeight: "bold",
+      fontFamily: "Oswald_700Bold",
     },
     checklistLabel: {
       fontSize: 13.5,
-      fontWeight: "600",
-      color: isDark ? "#E2E8F0" : "#2D3748",
+      fontFamily: "Oswald_600SemiBold",
+      color: isDark ? C.border : C.textSecondary,
       flex: 1,
     },
     bottomBar: {
@@ -350,16 +350,16 @@ function getStyles(theme, isDark, insets) {
       paddingTop: 14,
       paddingBottom: bottomPadding,
       borderTopWidth: 1,
-      borderTopColor: isDark ? "#242426" : "#F1F2F4",
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      borderTopColor: isDark ? C.surface : C.lifted,
+      backgroundColor: C.surface,
     },
     priceMetaCol: {
       flex: 1,
     },
     priceLabel: {
       fontSize: 9.5,
-      fontWeight: "700",
-      color: isDark ? "#8E8E93" : "#8E8E93",
+      fontFamily: "Oswald_700Bold",
+      color: C.muted,
       letterSpacing: 0.8,
       marginBottom: 2,
     },
@@ -370,36 +370,36 @@ function getStyles(theme, isDark, insets) {
     },
     priceValue: {
       fontSize: 18,
-      fontWeight: "900",
-      color: isDark ? "#FFFFFF" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     durationValue: {
       fontSize: 12,
-      fontWeight: "600",
-      color: isDark ? "#8E8E93" : "#718096",
+      fontFamily: "Oswald_600SemiBold",
+      color: isDark ? C.muted : C.muted,
     },
     actionBtn: {
-      backgroundColor: C.blue || "#3B82F6",
+      backgroundColor: C.blue || C.info,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 18,
       paddingVertical: 12,
       borderRadius: R.button,
-      shadowColor: C.blue || "#3B82F6",
+      shadowColor: C.blue || C.info,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.25,
       shadowRadius: 6,
       elevation: 3,
     },
     actionBtnSelected: {
-      backgroundColor: "#10B981",
-      shadowColor: "#10B981",
+      backgroundColor: C.success,
+      shadowColor: C.success,
     },
     actionBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 13.5,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
   });
 }

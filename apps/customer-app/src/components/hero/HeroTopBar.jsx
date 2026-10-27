@@ -17,7 +17,7 @@ export default function HeroTopBar({
                 <View>
                     <View style={styles.cityRow}>
                         <Text style={styles.city}>{city}</Text>
-                        <Entypo name="chevron-small-down" size={18} color="#fff" />
+                        <Entypo name="chevron-small-down" size={18} color={C.textLight} />
                     </View>
                     <Text style={styles.subCity}>{subCity}</Text>
                 </View>
@@ -25,11 +25,11 @@ export default function HeroTopBar({
 
             <View style={styles.actions}>
                 <Pressable style={styles.iconBtn} onPress={onNotif}>
-                    <Ionicons name="notifications-outline" size={20} color="#fff" />
+                    <Ionicons name="notifications-outline" size={20} color={C.textLight} />
                 </Pressable>
 
                 <Pressable style={[styles.iconBtn, styles.profileBtn]} onPress={onProfile}>
-                    <Feather name="user" size={18} color="#fff" />
+                    <Feather name="user" size={18} color={C.textLight} />
                 </Pressable>
             </View>
         </View>

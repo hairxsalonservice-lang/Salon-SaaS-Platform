@@ -1,27 +1,15 @@
 // src/components/ServiceCard.jsx
-import React, { memo } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import React, { memo, useMemo } from "react";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { C, S, FS, FW, R, TYPO, FONT_FAMILY } from "../theme";
+import { C, FF } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { paiseToINR } from "../services/apiClient";
 
-function getCategoryIcon(catName) {
-  const name = (catName || "").toLowerCase();
-  if (name.includes("hair")) return "cut-outline";
-  if (name.includes("combo") || name.includes("package")) return "gift-outline";
-  if (name.includes("makeup") || name.includes("bridal")) return "sparkles-outline";
-  if (name.includes("facial") || name.includes("skin") || name.includes("glow")) return "water-outline";
-  if (name.includes("nail")) return "color-palette-outline";
-  if (name.includes("spa") || name.includes("massage") || name.includes("body")) return "flower-outline";
-  return "cut-outline";
-}
-
 function ServiceCard({ service, selected, onSelect, onViewCombo }) {
   const { theme, isDark } = useTheme();
-  const styles = getStyles();
+  const styles = useMemo(() => getStyles(theme, isDark), [theme, isDark]);
   const duration = service.durationMinutes || service.duration || 30;
-  const imageUrl = service.image || "https://images.unsplash.com/photo-1599305090598-fe179d501227?q=80&w=200&auto=format&fit=crop";
   const isCombo =
     service.category?.toLowerCase() === "combo" ||
     Boolean(service.includedServices && service.includedServices.length > 0);
@@ -34,44 +22,50 @@ function ServiceCard({ service, selected, onSelect, onViewCombo }) {
     }
   };
 
+  const buttonLabel = isCombo ? (selected ? "Added" : "View") : selected ? "Added" : "Add";
+  const accessibilityAction = isCombo
+    ? "Opens combo details"
+    : selected
+      ? "Remove service"
+      : "Add service";
+
   return (
     <TouchableOpacity
-      style={[
-        styles.card,
-        { backgroundColor: theme.surface, borderColor: selected ? theme.primary : theme.hairline },
-      ]}
+      style={[styles.card, selected && styles.cardSelected]}
       onPress={handleCardPress}
-      activeOpacity={0.88}
+      activeOpacity={0.9}
+      accessibilityRole="button"
+      accessibilityLabel={`${service.name}, ${paiseToINR(service.price)}, ${duration} minutes. ${accessibilityAction}`}
     >
-      <View style={styles.cardInnerRow}>
-        <View style={styles.infoCol}>
-          <Text style={[styles.name, { color: theme.ink }]}>
-            {service.name}
-          </Text>
-          
-          <View style={styles.priceDurationRow}>
-            <Text style={[styles.price, { color: C.price }]}>
-              {paiseToINR(service.price)}
-            </Text>
-            <View style={styles.dotSeparator} />
-            <Ionicons name="time-outline" size={13} color="#888888" />
-            <Text style={styles.durationText}>{duration} mins</Text>
-          </View>
+      <View style={styles.infoCol}>
+        <Text style={styles.name} numberOfLines={2}>
+          {service.name}
+        </Text>
 
-          <Text style={[styles.description, { color: "#666666" }]} numberOfLines={2}>
-            {service.description || "Premium service tailored for you"}
-          </Text>
+        <View style={styles.metaRow}>
+          <Text style={styles.price}>{paiseToINR(service.price)}</Text>
+          <View style={styles.dotSeparator} />
+          <Ionicons name="time-outline" size={11} color={theme.muted} />
+          <Text style={styles.durationText}>{duration} mins</Text>
         </View>
 
-        <TouchableOpacity
-          style={[styles.addBtn, selected ? styles.addBtnSelected : styles.addBtnDefault]}
-          onPress={() => onSelect && onSelect(service)}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.addBtnText, selected ? styles.addBtnTextSelected : styles.addBtnTextDefault]}>
-            {selected ? "Added" : "Add"}
+        {service.description ? (
+          <Text style={styles.description} numberOfLines={2}>
+            {service.description}
           </Text>
-        </TouchableOpacity>
+        ) : null}
+      </View>
+
+      <View
+        style={[styles.addBtn, selected ? styles.addBtnSelected : styles.addBtnDefault]}
+        pointerEvents="none"
+      >
+        {selected ? (
+          <Ionicons name="checkmark" size={11} color={theme.primary} />
+        ) : null}
+        <Text style={[styles.addBtnText, selected ? styles.addBtnTextSelected : styles.addBtnTextDefault]}>
+          {buttonLabel}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -79,81 +73,96 @@ function ServiceCard({ service, selected, onSelect, onViewCombo }) {
 
 export default memo(ServiceCard);
 
-function getStyles() {
+function getStyles(theme, isDark) {
   return StyleSheet.create({
     card: {
-      paddingVertical: 18,
-      borderBottomWidth: 1,
-      borderBottomColor: "#F0F0F0",
-      backgroundColor: "#FFFFFF",
-    },
-    cardInnerRow: {
       flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 16,
+      alignItems: "flex-start",
+      gap: 10,
+      paddingTop: 13,
+      paddingHorizontal: 13,
+      paddingBottom: 13,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.hairline,
+      backgroundColor: theme.surface,
+    },
+    cardSelected: {
+      backgroundColor: isDark ? "rgba(255,122,154,0.06)" : "rgba(255,96,130,0.05)",
+      borderColor: isDark ? "rgba(255,122,154,0.35)" : "rgba(255,96,130,0.25)",
     },
     infoCol: {
       flex: 1,
-      justifyContent: "center",
+      minWidth: 0,
     },
     name: {
       fontSize: 15.5,
-      fontWeight: "700",
-      marginBottom: 6,
       lineHeight: 22,
-      letterSpacing: -0.2,
+      fontFamily: FF.display,
+      color: theme.ink,
+      letterSpacing: 0.1,
     },
-    priceDurationRow: {
+    metaRow: {
+      marginTop: 4,
       flexDirection: "row",
       alignItems: "center",
-      marginBottom: 8,
+      gap: 5,
     },
     price: {
       fontSize: 15,
-      fontWeight: "700",
-      letterSpacing: 0.2,
+      fontFamily: FF.display,
+      color: theme.primaryActive,
+      letterSpacing: 0.1,
     },
     dotSeparator: {
-      width: 4,
-      height: 4,
+      width: 3,
+      height: 3,
       borderRadius: 2,
-      backgroundColor: "#D1D5DB",
-      marginHorizontal: 8,
+      backgroundColor: isDark ? C.muted : C.border,
     },
     durationText: {
       fontSize: 12.5,
-      color: "#6B7280",
-      fontWeight: "500",
-      marginLeft: 4,
+      fontFamily: FF.body,
+      color: theme.muted,
     },
     description: {
+      marginTop: 5,
       fontSize: 12.5,
       lineHeight: 18,
+      fontFamily: FF.body,
+      color: theme.muted,
     },
     addBtn: {
-      paddingHorizontal: 18,
-      paddingVertical: 8,
-      borderRadius: 8,
-      justifyContent: "center",
+      flexGrow: 0,
+      flexShrink: 0,
+      flexDirection: "row",
       alignItems: "center",
-      minWidth: 72,
+      justifyContent: "center",
+      gap: 3,
+      height: 30,
+      minWidth: 58,
+      paddingHorizontal: 10,
+      marginTop: 1,
+      borderRadius: 8,
+      borderWidth: 1,
     },
     addBtnDefault: {
-      backgroundColor: C.crimsonTint || "#E8F0FE", // Light crimson tint
+      backgroundColor: "transparent",
+      borderColor: isDark ? "rgba(255,122,154,0.3)" : "rgba(255,96,130,0.3)",
     },
     addBtnSelected: {
-      backgroundColor: C.button, // Solid #0071e3
+      backgroundColor: isDark ? "rgba(255,122,154,0.15)" : "rgba(255,96,130,0.1)",
+      borderColor: isDark ? "rgba(255,122,154,0.4)" : "rgba(255,96,130,0.35)",
     },
     addBtnText: {
       fontSize: 13,
-      fontWeight: "700",
+      fontFamily: FF.display,
     },
     addBtnTextDefault: {
-      color: C.crimsonDark, // #0062c4 text
+      color: theme.primaryActive,
     },
     addBtnTextSelected: {
-      color: "#FFFFFF",
+      color: theme.primary,
     },
   });
 }

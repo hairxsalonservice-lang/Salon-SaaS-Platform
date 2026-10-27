@@ -4,7 +4,7 @@ import { View, StyleSheet, Text, ActivityIndicator } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import SpringTouchable from "./SpringTouchable";
-import { R } from "../theme";
+import { C, R } from "../theme";
 
 export default function GoogleSignInButton({ onPress, loading = false, disabled = false, variant = "full" }) {
   const { isDark } = useTheme();
@@ -23,9 +23,9 @@ export default function GoogleSignInButton({ onPress, loading = false, disabled 
         hapticType="medium"
       >
         {loading ? (
-          <ActivityIndicator color={isDark ? "#FFFFFF" : "#000000"} size="small" />
+          <ActivityIndicator color={C.ink} size="small" />
         ) : (
-          <Ionicons name="logo-google" size={24} color="#EA4335" />
+          <Ionicons name="logo-google" size={24} color={C.error} />
         )}
       </SpringTouchable>
     );
@@ -44,11 +44,11 @@ export default function GoogleSignInButton({ onPress, loading = false, disabled 
       hapticType="medium"
     >
       {loading ? (
-        <ActivityIndicator color={isDark ? "#FFFFFF" : "#000000"} size="small" />
+        <ActivityIndicator color={C.ink} size="small" />
       ) : (
         <View style={styles.contentRow}>
-          <Ionicons name="logo-google" size={20} color="#EA4335" style={{ marginRight: 12 }} />
-          <Text style={[styles.btnText, { color: isDark ? "#FFFFFF" : "#000000" }]}>
+          <Ionicons name="logo-google" size={20} color={C.error} style={{ marginRight: 12 }} />
+          <Text style={[styles.btnText, { color: C.ink }]}>
             Continue with Google
           </Text>
         </View>
@@ -76,18 +76,18 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   googleBtnLight: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#E2E8F0",
-    shadowColor: "#000",
+    backgroundColor: C.textLight,
+    borderColor: C.border,
+    shadowColor: C.ink,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
     elevation: 3,
   },
   googleBtnDark: {
-    backgroundColor: "#1C1C1E",
-    borderColor: "#2C2C2E",
-    shadowColor: "#000",
+    backgroundColor: C.surface,
+    borderColor: C.lifted,
+    shadowColor: C.ink,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   btnText: {
     fontSize: 16,
-    fontWeight: "700",
-    letterSpacing: -0.2,
+    fontFamily: "Oswald_700Bold",
+    letterSpacing: 0.1,
   },
 });

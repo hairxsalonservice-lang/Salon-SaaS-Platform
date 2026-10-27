@@ -132,9 +132,9 @@ export default function BannerDetailScreen({ routeParams, onBack, navigate }) {
               <Ionicons
                 name={copied ? "checkmark-circle" : "copy-outline"}
                 size={16}
-                color={copied ? "#FFFFFF" : C.ink}
+                color={copied ? C.textLight : C.ink}
               />
-              <Text style={[styles.copyBtnText, copied && { color: "#FFFFFF" }]}>
+              <Text style={[styles.copyBtnText, copied && { color: C.textLight }]}>
                 {copied ? "COPIED!" : "COPY CODE"}
               </Text>
             </TouchableOpacity>
@@ -195,7 +195,7 @@ export default function BannerDetailScreen({ routeParams, onBack, navigate }) {
             <Text style={styles.primaryCtaText}>
               {banner.promoCode ? `Book Now with ${banner.promoCode}` : "Explore Salons"}
             </Text>
-            <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+            <Ionicons name="arrow-forward" size={18} color={C.textLight} />
           </TouchableOpacity>
         </View>
       )}
@@ -275,7 +275,7 @@ function getStyles(theme, isDark) {
     },
     tagBadgeText: {
       fontSize: 10,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       color: C.main,
       letterSpacing: 0.8,
     },
@@ -285,7 +285,7 @@ function getStyles(theme, isDark) {
     bannerTitle: {
       fontFamily: FONT_FAMILY.serif,
       fontSize: 24,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       color: C.ink,
       lineHeight: 30,
       marginBottom: 6,
@@ -311,7 +311,7 @@ function getStyles(theme, isDark) {
     },
     voucherLabel: {
       fontSize: 10,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       color: C.muted,
       letterSpacing: 0.8,
       marginBottom: 2,
@@ -319,7 +319,7 @@ function getStyles(theme, isDark) {
     voucherCode: {
       fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
       fontSize: 20,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       color: C.main,
       letterSpacing: 1,
     },
@@ -335,12 +335,12 @@ function getStyles(theme, isDark) {
       gap: 6,
     },
     copyBtnSuccess: {
-      backgroundColor: "#10B981",
-      borderColor: "#10B981",
+      backgroundColor: C.success,
+      borderColor: C.success,
     },
     copyBtnText: {
       fontSize: FS.bodySm,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       color: C.ink,
     },
     detailsBlock: {
@@ -359,7 +359,7 @@ function getStyles(theme, isDark) {
     },
     detailsHeaderTitle: {
       fontSize: FS.body,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
       color: C.ink,
     },
     detailsBodyText: {
@@ -377,7 +377,7 @@ function getStyles(theme, isDark) {
     },
     stepsTitle: {
       fontSize: FS.body,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
       color: C.ink,
       marginBottom: 4,
     },
@@ -396,8 +396,8 @@ function getStyles(theme, isDark) {
     },
     stepNumText: {
       fontSize: 12,
-      fontWeight: FW.bold,
-      color: "#FFFFFF",
+      fontFamily: "Oswald_700Bold",
+      color: C.textLight,
     },
     stepText: {
       flex: 1,
@@ -427,8 +427,8 @@ function getStyles(theme, isDark) {
     },
     primaryCtaText: {
       fontSize: FS.body,
-      fontWeight: FW.bold,
-      color: "#FFFFFF",
+      fontFamily: "Oswald_700Bold",
+      color: C.textLight,
     },
   });
 }

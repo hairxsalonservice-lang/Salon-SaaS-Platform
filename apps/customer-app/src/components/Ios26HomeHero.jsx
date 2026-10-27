@@ -140,7 +140,7 @@ function getStyles() {
     },
     locationCity: {
       fontSize: FS.bodySm,
-      fontWeight: FW.medium,
+      fontFamily: "Oswald_500Medium",
       color: C.ink,
     },
     notifBtn: {
@@ -187,10 +187,11 @@ function getStyles() {
       color: C.main,
     },
     greeting: {
-      // fontFamily: FF.display,
+      fontFamily: FF.displayBold,
       fontSize: FS.headline,
       color: C.ink,
-      lineHeight: FS.headline * 1.08,
+      lineHeight: FS.headline * 1.2,
+      letterSpacing: 0.3,
     },
     subGreeting: {
       fontFamily: FF.body,

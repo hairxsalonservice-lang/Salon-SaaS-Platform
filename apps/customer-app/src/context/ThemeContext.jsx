@@ -4,80 +4,81 @@ import { Animated, Easing, Platform, useColorScheme, Appearance } from "react-na
 import * as NavigationBar from "expo-navigation-bar";
 import { storage } from "../services/storage";
 import { applyTheme } from "../theme";
+import { isAndroid, MATERIAL_COLORS } from "../theme/platform";
 
 const THEME_MODE_KEY = "@salon_app_theme_mode";
 
 export const LIGHT = {
   isDark: false,
-  canvas: "#F2F2F7",
-  canvasSoft: "#E5E5EA",
+  canvas: "#FFFFFF",
+  canvasSoft: "#F7F3F4",
   surface: "#FFFFFF",
-  ink: "#000000",
-  body: "#3C3C43",
-  muted: "#8E8E93",
-  mutedSoft: "#8E8E93",
-  primary: "#0071e3",
-  primaryActive: "#0062c4",
+  ink: "#1A1A2E",
+  body: "#3D3D52",
+  muted: "#8A8A9A",
+  mutedSoft: "#8A8A9A",
+  primary: "#FF6082",
+  primaryActive: "#E54D6D",
   onPrimary: "#FFFFFF",
-  price: "#0071e3",
-  button: "#0071e3",
-  crimson: "#0071e3",
-  highlight: "#0071e3",
-  hairline: "#C6C6C8",
-  hairlineSoft: "#E5E5EA",
-  hairlineStrong: "#AEAEB2",
-  surfaceStrong: "#E5E5EA",
-  thinking: "rgba(0, 113, 227, 0.15)",
-  grep: "#E5E5EA",
-  read: "#E5E5EA",
-  edit: "#E5E5EA",
-  done: "#0071e3",
-  error: "#FF3B30",
-  errorBg: "rgba(255, 59, 48, 0.08)",
-  success: "#34C759",
-  successBg: "rgba(52, 199, 89, 0.08)",
-  tabBg: "#F9F9F9",
-  tabBorder: "#C6C6C8",
-  tabActive: "#0071e3",
-  tabActiveTint: "#E8F0FE",
-  tabCenterBtn: "#0071e3",
+  price: "#FF6082",
+  button: "#FF6082",
+  crimson: "#FF6082",
+  highlight: "#FF6082",
+  hairline: "#E8E0E2",
+  hairlineSoft: "#F7F3F4",
+  hairlineStrong: "#D0C8CA",
+  surfaceStrong: "#F7F3F4",
+  thinking: "rgba(255, 96, 130, 0.12)",
+  grep: "#F7F3F4",
+  read: "#F7F3F4",
+  edit: "#F7F3F4",
+  done: "#FF6082",
+  error: "#D32F2F",
+  errorBg: "rgba(211, 47, 47, 0.08)",
+  success: "#2E7D32",
+  successBg: "rgba(46, 125, 50, 0.08)",
+  tabBg: "#FFFFFF",
+  tabBorder: "#E8E0E2",
+  tabActive: "#FF6082",
+  tabActiveTint: "rgba(255, 96, 130, 0.10)",
+  tabCenterBtn: "#FF6082",
   statusBar: "dark-content",
-  navBarColor: "#F2F2F7",
+  navBarColor: "#FFFFFF",
   navBarButtonStyle: "dark",
 };
 
 export const DARK = {
   isDark: true,
-  canvas: "#000000",
-  canvasSoft: "#1C1C1E",
-  surface: "#1C1C1E",
-  ink: "#FFFFFF",
-  body: "#EBEBF5",
-  muted: "#8E8E93",
-  mutedSoft: "#636366",
-  primary: "#0A84FF",
-  primaryActive: "#0070E0",
+  canvas: "#121218",
+  canvasSoft: "#1C1C26",
+  surface: "#1C1C26",
+  ink: "#F0EDF0",
+  body: "#C8C4CC",
+  muted: "#908C96",
+  mutedSoft: "#5A5662",
+  primary: "#FF7A9A",
+  primaryActive: "#FF6082",
   onPrimary: "#FFFFFF",
-  hairline: "#38383A",
-  hairlineSoft: "#2C2C2E",
-  hairlineStrong: "#48484A",
-  surfaceStrong: "#2C2C2E",
-  thinking: "rgba(10, 132, 255, 0.25)",
-  grep: "#2C2C2E",
-  read: "#2C2C2E",
-  edit: "#2C2C2E",
-  done: "#0A84FF",
-  error: "#FF453A",
-  errorBg: "rgba(255, 69, 58, 0.15)",
-  success: "#30D158",
-  successBg: "rgba(48, 209, 88, 0.15)",
-  tabBg: "#1C1C1E",
-  tabBorder: "#38383A",
-  tabActive: "#0A84FF",
-  tabActiveTint: "rgba(10, 132, 255, 0.18)",
-  tabCenterBtn: "#0A84FF",
+  hairline: "#2E2E3A",
+  hairlineSoft: "#262630",
+  hairlineStrong: "#3E3E4A",
+  surfaceStrong: "#262630",
+  thinking: "rgba(255, 122, 154, 0.20)",
+  grep: "#262630",
+  read: "#262630",
+  edit: "#262630",
+  done: "#FF7A9A",
+  error: "#FF6B6B",
+  errorBg: "rgba(255, 107, 107, 0.15)",
+  success: "#66BB6A",
+  successBg: "rgba(102, 187, 106, 0.15)",
+  tabBg: "#1C1C26",
+  tabBorder: "#2E2E3A",
+  tabActive: "#FF7A9A",
+  tabActiveTint: "rgba(255, 122, 154, 0.18)",
+  tabCenterBtn: "#FF7A9A",
   statusBar: "light-content",
-  navBarColor: "#000000",
+  navBarColor: "#121218",
   navBarButtonStyle: "light",
 };
 
@@ -122,12 +123,12 @@ export function ThemeProvider({ children }) {
     toggleAnim.setValue(activeIsDark ? 1 : 0);
 
     if (Platform.OS === "android") {
-      const activeTheme = activeIsDark ? DARK : LIGHT;
+      const mc = activeIsDark ? MATERIAL_COLORS.dark : MATERIAL_COLORS.light;
       if (NavigationBar && typeof NavigationBar.setBackgroundColorAsync === 'function') {
-        NavigationBar.setBackgroundColorAsync(activeTheme.navBarColor).catch(() => { });
+        NavigationBar.setBackgroundColorAsync(mc.canvas).catch(() => { });
       }
       if (NavigationBar && typeof NavigationBar.setButtonStyleAsync === 'function') {
-        NavigationBar.setButtonStyleAsync(activeTheme.navBarButtonStyle).catch(() => { });
+        NavigationBar.setButtonStyleAsync(activeIsDark ? "light" : "dark").catch(() => { });
       }
     }
   }, [themeMode, activeSystemDark]);
@@ -172,7 +173,10 @@ export function ThemeProvider({ children }) {
     await setThemeMode(nextMode);
   };
 
-  const theme = isDark ? DARK : LIGHT;
+  const baseTheme = isDark ? DARK : LIGHT;
+  const theme = isAndroid
+    ? { ...baseTheme, ...(isDark ? MATERIAL_COLORS.dark : MATERIAL_COLORS.light) }
+    : baseTheme;
 
   return (
     <ThemeContext.Provider

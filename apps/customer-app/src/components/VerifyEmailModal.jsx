@@ -74,27 +74,27 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={[styles.card, { backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF", borderColor: isDark ? "#2C2C2E" : "#C6C6C8" }]}>
+        <View style={[styles.card, { backgroundColor: C.surface, borderColor: isDark ? C.lifted : C.muted }]}>
           <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
-            <Ionicons name="close" size={20} color={isDark ? "#FFFFFF" : "#000000"} />
+            <Ionicons name="close" size={20} color={C.ink} />
           </TouchableOpacity>
 
           <View style={styles.iconContainer}>
             <Ionicons name="mail-unread" size={32} color={C.main} />
           </View>
 
-          <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#000000" }]}>
+          <Text style={[styles.title, { color: C.ink }]}>
             Check Your Inbox
           </Text>
 
-          <Text style={[styles.description, { color: isDark ? "#8E8E93" : "#8E8E93" }]}>
+          <Text style={[styles.description, { color: C.muted }]}>
             We've sent a verification link to{"\n"}
-            <Text style={{ color: C.main, fontWeight: "700" }}>{targetEmail || "your email"}</Text>.
+            <Text style={{ color: C.main, fontFamily: "Oswald_700Bold" }}>{targetEmail || "your email"}</Text>.
             Tap the link to activate your HairX account.
           </Text>
 
           {resendStatus !== "" && (
-            <Text style={[styles.statusMessage, { color: resendStatus.includes("resent") ? C.main : "#E53E3E" }]}>
+            <Text style={[styles.statusMessage, { color: resendStatus.includes("resent") ? C.main : C.error }]}>
               {resendStatus}
             </Text>
           )}
@@ -106,7 +106,7 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
             activeOpacity={0.85}
           >
             {checking ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small" color={C.textLight} />
             ) : (
               <Text style={styles.primaryBtnText}>I've Verified My Email</Text>
             )}
@@ -121,7 +121,7 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
             {resending ? (
               <ActivityIndicator size="small" color={C.main} />
             ) : (
-              <Text style={[styles.resendText, { color: isDark ? "#FFFFFF" : "#000000" }]}>
+              <Text style={[styles.resendText, { color: C.ink }]}>
                 {cooldown > 0 ? `Resend Link (${cooldown}s)` : "Resend Verification Link"}
               </Text>
             )}
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     padding: S.xl,
     alignItems: "center",
     borderWidth: 1,
-    shadowColor: "#000000",
+    shadowColor: C.ink,
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.25,
     shadowRadius: 20,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   statusMessage: {
     fontFamily: FF.body,
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: "Oswald_600SemiBold",
     marginBottom: S.md,
     textAlign: "center",
   },
@@ -203,9 +203,9 @@ const styles = StyleSheet.create({
     marginBottom: S.xs,
   },
   primaryBtnText: {
-    color: "#FFFFFF",
+    color: C.textLight,
     fontSize: 14,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
   },
   resendBtn: {
     paddingVertical: S.xs,
@@ -213,6 +213,6 @@ const styles = StyleSheet.create({
   resendText: {
     fontFamily: FF.body,
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: "Oswald_600SemiBold",
   },
 });

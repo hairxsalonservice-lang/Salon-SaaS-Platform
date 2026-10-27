@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { PLATFORM_RADIUS, PLATFORM_SHADOWS, isIOS } from "../theme/platform";
 import { useLocationStore } from "../store/useLocationStore";
 import { browseService } from "../services/browseService";
 import { calculateDistance, cleanCityName } from "../services/locationService";
@@ -22,6 +23,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { WebView } from "react-native-webview";
 import mapService from "../services/mapService";
 import ComingSoonLocation from "../components/ComingSoonLocation";
+import { C } from "../theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const CARD_WIDTH = SCREEN_WIDTH * 0.78;
@@ -78,12 +80,11 @@ function getStartingPrice(s) {
 }
 
 export default function MapScreen({ navigate }) {
-  const { isDark } = useTheme();
+  const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const styles = useMemo(() => getStyles(isDark, insets), [isDark, insets]);
+  const styles = useMemo(() => getStyles(theme, isDark, insets), [theme, isDark, insets]);
   const bottomBarInset = Math.max(insets.bottom, 10) + 68;
-  // Header pills and map buttons are always white (they float over the map), so icons stay dark
-  const iconColor = "#18181B";
+  const iconColor = theme.ink;
 
   const selectedCity = useLocationStore((state) => state.selectedCity);
   const locationDetails = useLocationStore((state) => state.locationDetails);
@@ -313,7 +314,7 @@ export default function MapScreen({ navigate }) {
       <View style={[styles.headerOverlay, { paddingTop: Math.max(insets?.top || 20, 20) + 12 }]} pointerEvents="box-none">
         <View style={styles.topRow} pointerEvents="box-none">
           <TouchableOpacity activeOpacity={0.8} onPress={() => setLocationModalVisible(true)} style={styles.locationPill}>
-            <Ionicons name="location" size={16} color="#762237" style={{ marginRight: 6 }} />
+            <Ionicons name="location" size={16} color={theme.primary} style={{ marginRight: 6 }} />
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={styles.locationCityText} numberOfLines={1}>{locationTitle || "Choose city"}</Text>
@@ -335,9 +336,9 @@ export default function MapScreen({ navigate }) {
           <>
             {/* Search Pill */}
             <View style={styles.searchPill}>
-              <Ionicons name="search-outline" size={18} color="#9999A0" style={{ marginRight: 8 }} />
+              <Ionicons name="search-outline" size={18} color={theme.muted} style={{ marginRight: 8 }} />
               <TouchableOpacity activeOpacity={1} onPress={() => navigate && navigate("Explore")} style={{ flex: 1, paddingVertical: 14 }}>
-                <Text style={{ fontSize: 14, fontWeight: "400", color: "#9999A0" }}>
+                <Text style={{ fontSize: 14, fontFamily: "Oswald_400Regular", color: theme.muted }}>
                   Search by salon name...
                 </Text>
               </TouchableOpacity>
@@ -386,7 +387,7 @@ export default function MapScreen({ navigate }) {
       ) : loadError ? (
         <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }}>
           <View style={styles.emptyCard}>
-            <Ionicons name="cloud-offline-outline" size={28} color="#71717A" />
+            <Ionicons name="cloud-offline-outline" size={28} color={theme.muted} />
             <Text style={[styles.emptyTitle, { marginTop: 8 }]}>Couldn't load salons</Text>
             <Text style={[styles.emptySub, { textAlign: "center" }]}>Check your internet connection and try again.</Text>
             <TouchableOpacity style={styles.noticeBtn} activeOpacity={0.85} onPress={() => setReloadKey((k) => k + 1)}>
@@ -406,21 +407,23 @@ export default function MapScreen({ navigate }) {
             />
           ) : (
             <WebView
+              key={isDark ? "map-dark" : "map-light"}
               ref={webViewRef}
               originWhitelist={["*"]}
               source={{ html: mapHtml, baseUrl: "https://localhost" }}
-              style={{ flex: 1, width: "100%", height: "100%", backgroundColor: isDark ? "#121216" : "#EAEAEA" }}
+              style={{ flex: 1, width: "100%", height: "100%", backgroundColor: theme.canvas }}
               onMessage={handleMapMessage}
               javaScriptEnabled={true}
               domStorageEnabled={true}
               scalesPageToFit={false}
               mixedContentMode="always"
+              cacheEnabled={false}
             />
           )}
 
           {loading ? (
             <View style={[styles.emptyCard, styles.noticeCard, { bottom: bottomBarInset + 16, flexDirection: "row" }]}>
-              <ActivityIndicator size="small" color="#762237" />
+              <ActivityIndicator size="small" color={theme.primary} />
               <Text style={[styles.emptySub, { marginTop: 0, marginLeft: 8 }]}>Loading salons in {selectedCity}…</Text>
             </View>
           ) : null}
@@ -455,14 +458,19 @@ export default function MapScreen({ navigate }) {
   );
 }
 
-function getStyles(isDark, insets) {
+function getStyles(p, isDark, insets) {
+  const pillBg = p.surface;
+  const pillShadow = isIOS
+    ? { shadowColor: C.ink, shadowOffset: { width: 0, height: 4 }, shadowOpacity: isDark ? 0.3 : 0.1, shadowRadius: 12 }
+    : {};
+  const pillElevation = isIOS ? {} : { elevation: 4 };
+
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#121216" : "#F8F9FA",
+      backgroundColor: p.canvas,
     },
 
-    // Header Overlay Styles
     headerOverlay: {
       position: "absolute",
       top: 0,
@@ -480,58 +488,49 @@ function getStyles(isDark, insets) {
     locationPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "#FFFFFF",
+      backgroundColor: pillBg,
       paddingHorizontal: 14,
       paddingVertical: 10,
-      borderRadius: 24,
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 12,
-      elevation: 5,
+      borderRadius: PLATFORM_RADIUS.pill,
+      ...pillShadow,
+      ...pillElevation,
       maxWidth: "80%",
     },
     locationCityText: {
       fontSize: 15,
-      fontWeight: "700",
-      color: "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: p.ink,
     },
     locationAreaText: {
       fontSize: 12,
-      color: "#71717A",
+      color: p.muted,
       marginTop: 2,
     },
     notificationBtn: {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: pillBg,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 12,
-      elevation: 5,
+      ...pillShadow,
+      ...pillElevation,
     },
     searchPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "#FFFFFF",
-      borderRadius: 24,
+      backgroundColor: pillBg,
+      borderRadius: PLATFORM_RADIUS.pill,
       paddingHorizontal: 16,
       marginHorizontal: 16,
       height: 48,
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.08,
-      shadowRadius: 12,
-      elevation: 4,
+      ...pillShadow,
+      ...pillElevation,
     },
     filterIconButton: {
       padding: 6,
       marginLeft: 6,
-      backgroundColor: "#E5E5EA",
+      backgroundColor: isDark ? p.hairline : p.hairlineSoft || C.border,
       borderRadius: 16,
       position: "relative",
     },
@@ -542,49 +541,43 @@ function getStyles(isDark, insets) {
       width: 14,
       height: 14,
       borderRadius: 7,
-      backgroundColor: "#EF4444",
+      backgroundColor: p.error,
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: "#FFFFFF",
+      borderColor: pillBg,
     },
     filterBadgeText: {
       fontSize: 8,
-      fontWeight: "700",
-      color: "#FFFFFF",
+      fontFamily: "Oswald_700Bold",
+      color: C.textLight,
     },
 
-    // Category Filter Pills
     catPill: {
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 16,
       paddingVertical: 10,
-      borderRadius: 24,
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 8,
-      elevation: 3,
+      borderRadius: PLATFORM_RADIUS.pill,
+      ...PLATFORM_SHADOWS.sm,
     },
     catPillActive: {
-      backgroundColor: "#762237",
+      backgroundColor: p.primary,
     },
     catPillInactive: {
-      backgroundColor: "#FFFFFF",
+      backgroundColor: pillBg,
     },
     catText: {
       fontSize: 13,
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
     },
     catTextActive: {
-      color: "#FFFFFF",
+      color: C.textLight,
     },
     catTextInactive: {
-      color: "#4B5563",
+      color: p.body,
     },
 
-    // Map Area
     mapContainer: {
       flex: 1,
       position: "relative",
@@ -595,59 +588,50 @@ function getStyles(isDark, insets) {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: pillBg,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#000000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 10,
-      elevation: 6,
+      ...pillShadow,
+      ...pillElevation,
+      ...(isIOS ? {} : { elevation: 6 }),
       zIndex: 15,
     },
 
-    // Single Selected Salon Floating Card Styles
-
-    // Empty / Loading
     emptyCard: {
       alignSelf: "center",
       width: CARD_WIDTH,
-      backgroundColor: isDark ? "#1E1E24" : "#FFFFFF",
-      borderRadius: 20,
+      backgroundColor: p.surface,
+      borderRadius: PLATFORM_RADIUS.lg,
       padding: 16,
       alignItems: "center",
       justifyContent: "center",
     },
     emptyTitle: {
       fontSize: 14,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: p.ink,
     },
     emptySub: {
       fontSize: 12,
-      fontWeight: "400",
-      color: isDark ? "#888894" : "#71717A",
+      fontFamily: "Oswald_400Regular",
+      color: p.muted,
       marginTop: 2,
     },
     noticeCard: {
       position: "absolute",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.12,
-      shadowRadius: 12,
-      elevation: 6,
+      ...PLATFORM_SHADOWS.lg,
     },
     noticeBtn: {
       marginTop: 12,
       paddingHorizontal: 16,
       paddingVertical: 9,
-      borderRadius: 12,
-      backgroundColor: "#762237",
+      borderRadius: PLATFORM_RADIUS.button,
+      backgroundColor: p.primary,
     },
     noticeBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 13,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
   });
 }

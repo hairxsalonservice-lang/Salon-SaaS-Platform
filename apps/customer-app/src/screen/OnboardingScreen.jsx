@@ -16,14 +16,14 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { storage } from "../services/storage";
-import { C } from "../theme";
+import { C, FF } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 
 const { width, height } = Dimensions.get("window");
 
 const ONBOARDING_KEY = "@salon_app_has_onboarded";
 
-// ── Design Tokens (Global Brand Theme #0071e3) ──────────────────
+// ── Design Tokens (Global Brand Theme #FF6082) ──────────────────
 const COLORS = {
   canvas: C.bg,
   canvasSoft: C.lifted,
@@ -32,19 +32,19 @@ const COLORS = {
   body: C.textSecondary,
   muted: C.muted,
   mutedSoft: C.dustTaupe,
-  primary: C.main || "#0071e3",
-  primaryActive: C.mainDark || "#8C1D17",
-  onPrimary: "#FFFFFF",
+  primary: C.main || C.main,
+  primaryActive: C.mainDark || C.error,
+  onPrimary: C.textLight,
   hairline: C.border,
   hairlineSoft: C.borderLight,
   hairlineStrong: C.borderDark,
   surfaceStrong: C.bone,
   // Brand crimson decorations
-  thinking: "#FDF2F2",
-  grep: "#E8F0FE",
-  read: "#F9D5D5",
-  edit: "#F4B8B8",
-  done: C.main || "#0071e3",
+  thinking: C.crimsonTint,
+  grep: C.infoBg,
+  read: C.crimsonTint,
+  edit: C.errorBg,
+  done: C.main || C.main,
 };
 
 const SLIDES = [
@@ -684,7 +684,7 @@ export default function OnboardingScreen({ onFinish, navigate }) {
 
             const backgroundColor = scrollX.interpolate({
               inputRange,
-              outputRange: [COLORS.hairlineStrong, C.main || "#0071e3", COLORS.hairlineStrong],
+              outputRange: [COLORS.hairlineStrong, C.main || C.main, COLORS.hairlineStrong],
               extrapolate: "clamp",
             });
 
@@ -781,7 +781,7 @@ function getStyles() {
     },
     logoText: {
       fontSize: 12,
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
       color: COLORS.ink,
       letterSpacing: 2,
       marginLeft: 10,
@@ -796,8 +796,8 @@ function getStyles() {
     },
     skipText: {
       fontSize: 13,
-      fontWeight: "500",
-      color: C.main || "#0071e3",
+      fontFamily: "Oswald_500Medium",
+      color: C.main || C.main,
     },
 
     // ── Carousel Wrapper ──────────────────────────────────────
@@ -904,7 +904,7 @@ function getStyles() {
     },
     badgeText: {
       fontSize: 10,
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
       color: COLORS.ink,
       letterSpacing: 1.2,
     },
@@ -917,16 +917,16 @@ function getStyles() {
       overflow: "hidden",
     },
     titleText: {
+      fontFamily: FF.display,
       fontSize: 28,
-      fontWeight: "400",
       color: COLORS.ink,
       textAlign: "center",
       lineHeight: 36,
-      letterSpacing: -0.6,
+      letterSpacing: 0.2,
     },
     subtitleText: {
       fontSize: 15,
-      fontWeight: "400",
+      fontFamily: "Oswald_400Regular",
       color: COLORS.body,
       textAlign: "center",
       lineHeight: 23,
@@ -956,7 +956,7 @@ function getStyles() {
       width: "100%",
       height: 52,
       borderRadius: 8,
-      backgroundColor: C.main || "#0071e3",
+      backgroundColor: C.main || C.main,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
@@ -974,7 +974,7 @@ function getStyles() {
     },
     ctaButtonText: {
       fontSize: 15,
-      fontWeight: "500",
+      fontFamily: "Oswald_500Medium",
       color: COLORS.onPrimary,
       letterSpacing: 0.2,
     },
@@ -991,7 +991,7 @@ function getStyles() {
     // ── Terms Hint ────────────────────────────────────────────
     termsHint: {
       fontSize: 11,
-      fontWeight: "400",
+      fontFamily: "Oswald_400Regular",
       color: COLORS.mutedSoft,
       textAlign: "center",
       marginTop: 14,

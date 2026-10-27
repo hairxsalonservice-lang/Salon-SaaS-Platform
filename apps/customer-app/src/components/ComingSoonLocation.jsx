@@ -34,7 +34,7 @@ function ComingSoonLocation({
           <Ionicons
             name="sparkles"
             size={34}
-            color={isDark ? "#FBBF24" : "#D97706"}
+            color={isDark ? C.warning : C.warning}
           />
         </View>
       </View>
@@ -64,7 +64,7 @@ function ComingSoonLocation({
           scaleTo={0.95}
           hapticType="medium"
         >
-          <Ionicons name="location" size={18} color="#FFFFFF" style={{ marginRight: 8 }} />
+          <Ionicons name="location" size={18} color={C.textLight} style={{ marginRight: 8 }} />
           <Text style={styles.changeLocBtnText}>Change Location</Text>
         </AppleTouchable>
       )}
@@ -85,7 +85,7 @@ function ComingSoonLocation({
                 <Ionicons
                   name="navigate-outline"
                   size={12}
-                  color={isDark ? "#8E8E93" : "#4B5563"}
+                  color={isDark ? C.muted : C.textSecondary}
                   style={{ marginRight: 4 }}
                 />
                 <Text style={styles.quickCityText}>{c}</Text>
@@ -140,36 +140,36 @@ function getStyles(theme, isDark) {
       justifyContent: "center",
     },
     pillTag: {
-      backgroundColor: isDark ? "rgba(245, 158, 11, 0.18)" : "#FEF3C7",
+      backgroundColor: isDark ? "rgba(245, 158, 11, 0.18)" : C.goldTint,
       paddingHorizontal: 12,
       paddingVertical: 5,
       borderRadius: R.pill,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(245, 158, 11, 0.35)" : "#FDE68A",
+      borderColor: isDark ? "rgba(245, 158, 11, 0.35)" : C.goldTint,
       marginBottom: 14,
     },
     pillTagText: {
       fontSize: 10.5,
-      fontWeight: "700",
-      color: isDark ? "#FBBF24" : "#B45309",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.warning : C.warning,
       letterSpacing: 0.8,
     },
     titleText: {
       fontFamily: FONT_FAMILY.serif,
       fontSize: 23,
-      fontWeight: "700",
-      color: isDark ? "#F8FAFC" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.lifted : C.ink,
       textAlign: "center",
       lineHeight: 30,
       marginBottom: 10,
     },
     cityNameHighlight: {
-      color: C.main || "#0071e3",
+      color: C.main || C.main,
     },
     descriptionText: {
       fontSize: 13.5,
       lineHeight: 21,
-      color: isDark ? "#8E8E93" : "#636366",
+      color: C.mutedSoft,
       textAlign: "center",
       marginBottom: 24,
       maxWidth: 320,
@@ -182,7 +182,7 @@ function getStyles(theme, isDark) {
       paddingHorizontal: 22,
       paddingVertical: 13,
       borderRadius: 20,
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.15,
       shadowRadius: 8,
@@ -191,8 +191,8 @@ function getStyles(theme, isDark) {
     },
     changeLocBtnText: {
       fontSize: 14,
-      fontWeight: "700",
-      color: "#FFFFFF",
+      fontFamily: "Oswald_700Bold",
+      color: C.textLight,
       letterSpacing: 0.2,
     },
     quickCitiesSection: {
@@ -204,9 +204,9 @@ function getStyles(theme, isDark) {
     },
     quickCitiesLabel: {
       fontSize: 10.5,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       letterSpacing: 0.8,
-      color: isDark ? "#636366" : "#8E8E93",
+      color: isDark ? C.mutedSoft : C.muted,
       marginBottom: 12,
     },
     quickCitiesRow: {
@@ -218,17 +218,17 @@ function getStyles(theme, isDark) {
     quickCityChip: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "#F1F5F9",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : C.lifted,
       paddingHorizontal: 12,
       paddingVertical: 7,
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(255, 255, 255, 0.08)" : "#E2E8F0",
+      borderColor: isDark ? "rgba(255, 255, 255, 0.08)" : C.border,
     },
     quickCityText: {
       fontSize: 12,
-      fontWeight: "600",
-      color: isDark ? "#E2E8F0" : "#334155",
+      fontFamily: "Oswald_600SemiBold",
+      color: isDark ? C.border : C.textSecondary,
     },
   });
 }

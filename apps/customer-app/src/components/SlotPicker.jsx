@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { C, S, FS, FW, R, TYPO } from "../theme";
 import { toLocalDateStr } from "../services/apiClient";
 import AppleTouchable from "./AppleTouchable";
+import { useTheme } from "../context/ThemeContext";
 
 function timeToMinutes(timeStr) {
   if (!timeStr) return 0;
@@ -38,7 +39,8 @@ export default function SlotPicker({
   selectedDate,
   onSelectDate,
 }) {
-  const styles = getStyles();
+  const { theme, isDark } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDark), [theme, isDark]);
   const currentSlotId = selectedSlotId || selectedSlot?._id || selectedSlot?.id || (typeof selectedSlot === "string" ? selectedSlot : null);
 
   const [timeTab, setTimeTab] = useState("Morning");
@@ -267,7 +269,14 @@ function formatAMPM(timeStr) {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")} ${ampm}`;
 }
 
-function getStyles() {
+function getStyles(theme, isDark) {
+  const inkColor = theme?.ink || (isDark ? "#F0EDF0" : C.ink);
+  const mutedColor = theme?.muted || (isDark ? "#908C96" : C.muted);
+  const cardBg = theme?.surface || (isDark ? "#1C1C26" : "#FFFFFF");
+  const borderColor = theme?.hairline || (isDark ? "rgba(255,255,255,0.12)" : C.border);
+  const liftedBg = theme?.canvasSoft || (isDark ? "#1C1C26" : C.lifted);
+  const mainColor = theme?.primary || C.main;
+
   return StyleSheet.create({
     container: {
       paddingBottom: 20,
@@ -280,13 +289,13 @@ function getStyles() {
     },
     sectionHeading: {
       fontSize: 16,
-      fontWeight: "700",
-      color: "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: inkColor,
     },
     monthYearText: {
       fontSize: 14,
-      fontWeight: "500",
-      color: "#666666",
+      fontFamily: "Oswald_500Medium",
+      color: mutedColor,
     },
     dateList: {
       flexDirection: "row",
@@ -300,38 +309,38 @@ function getStyles() {
       width: 58,
       height: 70,
       borderRadius: 12,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: cardBg,
       borderWidth: 1,
-      borderColor: "#E5E5EA",
+      borderColor: borderColor,
       alignItems: "center",
       justifyContent: "center",
       gap: 4,
     },
     dateCardSelected: {
-      backgroundColor: "#6F2A3B",
-      borderColor: "#6F2A3B",
+      backgroundColor: mainColor,
+      borderColor: mainColor,
     },
     dateWeek: {
       fontSize: 13,
-      color: "#8E8E93",
-      fontWeight: "500",
+      color: mutedColor,
+      fontFamily: "Oswald_500Medium",
     },
     dateWeekSelected: {
       color: "#FFFFFF",
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
     },
     dateNum: {
       fontSize: 16,
-      fontWeight: "600",
-      color: "#1C1C1E",
+      fontFamily: "Oswald_600SemiBold",
+      color: inkColor,
     },
     dateNumSelected: {
       color: "#FFFFFF",
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
     timeTabs: {
       flexDirection: "row",
-      backgroundColor: "#F6F7FA",
+      backgroundColor: liftedBg,
       borderRadius: 12,
       padding: 4,
       marginBottom: 16,
@@ -344,16 +353,16 @@ function getStyles() {
       borderRadius: 8,
     },
     timeTabBtnActive: {
-      backgroundColor: "#6F2A3B",
+      backgroundColor: mainColor,
     },
     timeTabTxt: {
       fontSize: 14,
-      fontWeight: "500",
-      color: "#8A8A9E",
+      fontFamily: "Oswald_500Medium",
+      color: mutedColor,
     },
     timeTabTxtActive: {
       color: "#FFFFFF",
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
     },
     slotGrid: {
       flexDirection: "row",
@@ -364,31 +373,31 @@ function getStyles() {
       width: "31.3%",
       height: 48,
       borderRadius: 8,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: cardBg,
       borderWidth: 1,
-      borderColor: "#E5E5EA",
+      borderColor: borderColor,
       alignItems: "center",
       justifyContent: "center",
     },
     slotChipSelected: {
-      backgroundColor: "#FDF9FA",
-      borderColor: "#6F2A3B",
+      backgroundColor: isDark ? "rgba(255, 96, 130, 0.16)" : (C.lifted || "#F7F3F4"),
+      borderColor: mainColor,
     },
     slotChipBooked: {
-      backgroundColor: "#FFFFFF",
-      borderColor: "#E2E8F0",
+      backgroundColor: isDark ? "#161620" : cardBg,
+      borderColor: borderColor,
       opacity: 0.5,
     },
     slotStart: {
       fontSize: 13,
-      fontWeight: "600",
-      color: "#000000",
+      fontFamily: "Oswald_600SemiBold",
+      color: inkColor,
     },
     slotStartSelected: {
-      color: "#6F2A3B",
+      color: mainColor,
     },
     slotStartBooked: {
-      color: "#8A8A9E",
+      color: mutedColor,
       textDecorationLine: "line-through",
     },
     emptyContainer: {
@@ -397,7 +406,7 @@ function getStyles() {
       justifyContent: "center",
     },
     emptyText: {
-      color: "#8A8A9E",
+      color: mutedColor,
       fontSize: 14,
     },
   });

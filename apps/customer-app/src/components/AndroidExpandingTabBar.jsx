@@ -12,6 +12,7 @@ import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { C } from "../theme";
 
 const isIOS = Platform.OS === "ios";
 
@@ -20,8 +21,8 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
   const insets = useSafeAreaInsets();
   const bottomInset = Math.max(insets.bottom, isIOS ? 10 : 8);
 
-  const tabActiveColor = theme.tabActive || "#0071e3";
-  const inactiveColor = "#8E8E93";
+  const tabActiveColor = theme.tabActive || C.main;
+  const inactiveColor = C.muted;
   const borderColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
 
   // ── iOS: glassmorphism tab bar ──────────────────────────────
@@ -54,7 +55,7 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
                   <Text
                     style={[
                       styles.iosTabLabel,
-                      { color: iconColor, fontWeight: isSelected ? "600" : "400" },
+                      { color: iconColor, fontFamily: isSelected ? "Oswald_600SemiBold" : "Oswald_400Regular" },
                     ]}
                   >
                     {tab.label}
@@ -69,11 +70,11 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
   }
 
   // ── Android: Material You elevated surface bar ──────────────
-  const androidBg = isDark ? "#1C1C1E" : "#FFFBFE";
-  const androidActiveBg = isDark ? "rgba(10, 132, 255, 0.12)" : "rgba(0, 113, 227, 0.08)";
+  const androidBg = isDark ? C.surface : C.bg;
+  const androidActiveBg = isDark ? "rgba(255,96,130,0.12)" : "rgba(255,96,130,0.10)";
 
   return (
-    <View style={[styles.androidBarContainer, { backgroundColor: androidBg, paddingBottom: bottomInset }]}>
+    <View style={[styles.androidBarContainer, { backgroundColor: androidBg, paddingBottom: bottomInset, borderTopColor: borderColor }]}>
       <View style={styles.androidTabsRow}>
         {tabs.map((tab) => {
           const isSelected = currentTab === tab.id;
@@ -82,7 +83,7 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
             <Pressable
               key={tab.id}
               onPress={() => onSelectTab(tab.id)}
-              android_ripple={{ color: "rgba(0, 0, 0, 0.08)", borderless: true }}
+              android_ripple={{ color: "rgba(255,96,130,0.12)", borderless: true }}
               style={styles.androidTabItem}
             >
               <View style={[styles.androidIndicator, isSelected && { backgroundColor: androidActiveBg }]}>
@@ -97,7 +98,7 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
                   styles.androidTabLabel,
                   {
                     color: iconColor,
-                    fontWeight: isSelected ? "600" : "500",
+                    fontFamily: isSelected ? "Oswald_600SemiBold" : "Oswald_400Regular",
                   },
                 ]}
               >
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
   },
   iosTabLabel: {
     fontSize: 10,
-    letterSpacing: -0.1,
+    letterSpacing: 0.1,
     marginTop: 2,
   },
 
@@ -157,33 +158,33 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     zIndex: 999,
-    elevation: 8,
-    borderTopWidth: 0,
+    elevation: 4,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
   androidTabsRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
     paddingHorizontal: 8,
-    paddingTop: 10,
+    paddingTop: 8,
   },
   androidTabItem: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 56,
+    minHeight: 52,
   },
   androidIndicator: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 18,
     paddingVertical: 4,
-    borderRadius: 16,
+    borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 2,
   },
   androidTabLabel: {
-    fontSize: 12,
-    letterSpacing: 0.2,
+    fontSize: 11,
+    letterSpacing: 0.3,
     marginTop: 2,
   },
 });

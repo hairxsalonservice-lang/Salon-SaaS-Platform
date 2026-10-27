@@ -11,7 +11,7 @@ import {
   ImageBackground,
   Dimensions,
 } from "react-native";
-import { C, S, FS, FW, R, TYPO, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle } from "../theme";
+import { C, S, FS, FW, FF, R, TYPO, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import SalonCard from "../components/SalonCard";
@@ -436,7 +436,7 @@ function HomeScreen({ navigate, onScroll }) {
                                   {tagText ? <Text style={styles.heroEyebrow}>{tagText}</Text> : null}
                                   {banner.promoCode ? (
                                     <View style={styles.promoCodeBadge}>
-                                      <Ionicons name="pricetag" size={10} color="#FFFFFF" style={{ marginRight: 3 }} />
+                                      <Ionicons name="pricetag" size={10} color={C.textLight} style={{ marginRight: 3 }} />
                                       <Text style={styles.promoCodeBadgeText}>Code: {banner.promoCode}</Text>
                                     </View>
                                   ) : null}
@@ -446,7 +446,7 @@ function HomeScreen({ navigate, onScroll }) {
 
                                 <View style={styles.heroBookBtn}>
                                   <Text style={styles.heroBookBtnText}>{ctaText}</Text>
-                                  <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                                  <Ionicons name="arrow-forward" size={16} color={C.textLight} style={{ marginLeft: 6 }} />
                                 </View>
                               </View>
 
@@ -497,7 +497,7 @@ function HomeScreen({ navigate, onScroll }) {
             <Text style={styles.emptyTitle}>Couldn't load salons</Text>
             <Text style={styles.emptyText}>Check your internet connection and try again.</Text>
             <TouchableOpacity style={styles.retryBtn} onPress={() => loadData(false)} activeOpacity={0.85}>
-              <Ionicons name="refresh" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Ionicons name="refresh" size={15} color={C.textLight} style={{ marginRight: 6 }} />
               <Text style={styles.retryBtnText}>Try again</Text>
             </TouchableOpacity>
           </View>
@@ -521,7 +521,7 @@ function HomeScreen({ navigate, onScroll }) {
             </View>
 
             {topRatedSalons.length > 0 ? (
-              <SalonCarousel salons={topRatedSalons} onSalonPress={handleSalonPress} styles={styles} />
+              <SalonVerticalList salons={topRatedSalons} onSalonPress={handleSalonPress} styles={styles} />
             ) : null}
 
             {/* THANK YOU LETTER */}
@@ -570,23 +570,23 @@ export default memo(HomeScreen);
 
 // Category tile tints — pastel on light, translucent on dark so icons stay readable
 const CATEGORY_TINTS = {
-  haircut: ["#E8F0FE", "rgba(230, 57, 115, 0.16)"],
-  facial: ["#FEF1E6", "rgba(245, 158, 11, 0.16)"],
-  makeup: ["#F1EBFC", "rgba(139, 92, 246, 0.18)"],
-  massage: ["#E9F8F1", "rgba(16, 185, 129, 0.16)"],
-  nails: ["#FDF0F3", "rgba(236, 72, 153, 0.16)"],
+  haircut: [C.infoBg, "rgba(230, 57, 115, 0.16)"],
+  facial: [C.warningBg, "rgba(245, 158, 11, 0.16)"],
+  makeup: [C.infoBg, "rgba(139, 92, 246, 0.18)"],
+  massage: [C.successBg, "rgba(16, 185, 129, 0.16)"],
+  nails: [C.crimsonTint, "rgba(236, 72, 153, 0.16)"],
 };
 
 function getPalette(theme = {}, isDark = false) {
   return {
-    canvas: theme.canvas || (isDark ? "#000000" : "#F2F2F7"),
-    header: isDark ? theme.canvas || "#000000" : "#FFFFFF",
-    surface: theme.surface || (isDark ? "#1C1C1E" : "#FFFFFF"),
-    ink: theme.ink || (isDark ? "#FFFFFF" : "#1E1E1E"),
-    body: isDark ? "#D0D0CB" : "#333333",
-    muted: isDark ? "#8E8E93" : "#8E8E93",
-    hairline: theme.hairline || (isDark ? "#2C2C2E" : "#EEEEEE"),
-    primary: theme.primary || (isDark ? "#0A84FF" : "#0071e3"),
+    canvas: theme.canvas || (C.bg),
+    header: isDark ? C.bg : C.bg,
+    surface: theme.surface || (C.surface),
+    ink: theme.ink || (C.ink),
+    body: isDark ? C.textSecondary : C.textSecondary,
+    muted: C.muted,
+    hairline: C.border,
+    primary: theme.primary || (C.main),
   };
 }
 
@@ -616,18 +616,18 @@ function buildStyles(theme, isDark) {
       flex: 1,
     },
     sectionTitle: {
+      fontFamily: FF.displayBold,
       fontSize: FS.titleLg,
-      fontWeight: "700",
       color: p.ink,
-      letterSpacing: -0.32,
+      letterSpacing: 0.2,
     },
     seeAllBtn: {
       flexDirection: "row",
       alignItems: "center",
     },
     seeAllText: {
+      fontFamily: FF.bodySemiBold,
       fontSize: 13,
-      fontWeight: "600",
       color: p.primary,
     },
 
@@ -647,7 +647,7 @@ function buildStyles(theme, isDark) {
     },
     headerCityText: {
       fontSize: 16,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: p.ink,
     },
     headerSubtitleText: {
@@ -672,7 +672,7 @@ function buildStyles(theme, isDark) {
       width: 6,
       height: 6,
       borderRadius: 3,
-      backgroundColor: "#FF3B30",
+      backgroundColor: C.error,
     },
 
     // Hero banner — ImageBackground handles cross-platform image + content stacking
@@ -681,7 +681,7 @@ function buildStyles(theme, isDark) {
       borderRadius: PLATFORM_RADIUS.card,
       overflow: "hidden",
       height: 200,
-      backgroundColor: isDark ? p.surface : "#E5E5EA",
+      backgroundColor: isDark ? p.surface : C.border,
       marginBottom: 20,
     },
     heroBannerImage: {
@@ -702,7 +702,7 @@ function buildStyles(theme, isDark) {
     },
     heroEyebrow: {
       fontSize: 10,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: "rgba(255, 255, 255, 0.85)",
       letterSpacing: 1.5,
       marginBottom: 0,
@@ -720,15 +720,15 @@ function buildStyles(theme, isDark) {
       marginLeft: 8,
     },
     promoCodeBadgeText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 10,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       letterSpacing: 0.5,
     },
     heroTitle: {
       fontSize: 22,
-      fontWeight: "700",
-      color: "#FFFFFF",
+      fontFamily: "Oswald_700Bold",
+      color: C.textLight,
       lineHeight: 28,
       marginBottom: 6,
       textShadowColor: "rgba(0,0,0,0.4)",
@@ -754,9 +754,9 @@ function buildStyles(theme, isDark) {
       alignSelf: "flex-start",
     },
     heroBookBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 14,
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
     },
 
 
@@ -783,7 +783,7 @@ function buildStyles(theme, isDark) {
     categoryLabel: {
       fontSize: 11,
       color: p.body,
-      fontWeight: "500",
+      fontFamily: "Oswald_500Medium",
       textAlign: "center",
     },
 
@@ -794,13 +794,13 @@ function buildStyles(theme, isDark) {
       borderRadius: PLATFORM_RADIUS.card,
       padding: 20,
       justifyContent: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderWidth: 1,
       borderColor: p.hairline,
     },
     noteEyebrow: {
       fontSize: 12,
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
       color: p.muted,
       letterSpacing: 0.8,
       marginBottom: 10,
@@ -817,7 +817,7 @@ function buildStyles(theme, isDark) {
     },
     noteSignature: {
       fontSize: 13,
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
       color: p.muted,
       textAlign: "center",
     },
@@ -843,7 +843,7 @@ function buildStyles(theme, isDark) {
     },
     emptyTitle: {
       fontSize: FS.body,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: p.ink,
       textAlign: "center",
     },
@@ -862,9 +862,9 @@ function buildStyles(theme, isDark) {
       backgroundColor: p.primary,
     },
     retryBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 14,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
   });
 }

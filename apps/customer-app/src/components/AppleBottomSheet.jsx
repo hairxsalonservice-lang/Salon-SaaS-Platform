@@ -14,6 +14,7 @@ import { BlurView } from "expo-blur";
 import { useTheme } from "../context/ThemeContext";
 import { APPLE_SPRINGS, triggerHaptic } from "../theme/appleMotion";
 import { PLATFORM_RADIUS } from "../theme/platform";
+import { C } from "../theme";
 
 const isIOS = Platform.OS === "ios";
 
@@ -112,9 +113,9 @@ export default function AppleBottomSheet({
 
   if (!visible) return null;
 
-  const sheetBg = isDark ? "#2C2C2E" : "#FFFFFF";
-  const sheetBorder = isDark ? "#38383A" : "#E5E5EA";
-  const handleColor = isDark ? "rgba(255, 255, 255, 0.3)" : "#C6C6C8";
+  const sheetBg = C.surface;
+  const sheetBorder = isDark ? C.border : C.border;
+  const handleColor = isDark ? "rgba(255, 255, 255, 0.3)" : C.muted;
 
   return (
     <Modal
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: PLATFORM_RADIUS.sheet,
     borderWidth: isIOS ? 1 : 0,
     ...(isIOS
-      ? { shadowColor: "#000", shadowOffset: { width: 0, height: -8 }, shadowOpacity: 0.25, shadowRadius: 16 }
+      ? { shadowColor: C.ink, shadowOffset: { width: 0, height: -8 }, shadowOpacity: 0.25, shadowRadius: 16 }
       : {}),
     elevation: 24,
     overflow: "hidden",

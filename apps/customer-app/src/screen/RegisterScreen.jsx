@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 // theme tokens not needed — accent derived from isDark
 import { useTheme } from "../context/ThemeContext";
+import { C, FF } from "../theme";
 import { useAuth } from "../context/AuthContext";
 import ErrorCardModal from "../components/ErrorCardModal";
 import GoogleSignInModal from "../components/GoogleSignInModal";
@@ -243,7 +244,7 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
                   <Ionicons
                     name={item.icon}
                     size={16}
-                    color={isSelected ? "#FFFFFF" : styles.placeholderColor.color}
+                    color={isSelected ? C.textLight : styles.placeholderColor.color}
                     style={{ marginRight: 6 }}
                   />
                   <Text
@@ -298,7 +299,7 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
                 <Ionicons
                   name={r.ok ? "checkmark-circle" : "ellipse-outline"}
                   size={14}
-                  color={r.ok ? "#10B981" : styles.placeholderColor.color}
+                  color={r.ok ? C.success : styles.placeholderColor.color}
                 />
                 <Text style={[styles.pwRuleText, r.ok && styles.pwRuleTextOk]}>{r.label}</Text>
               </View>
@@ -315,7 +316,7 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
           hapticType="medium"
         >
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
+            <ActivityIndicator color={C.textLight} size="small" />
           ) : (
             <Text style={styles.signUpBtnText}>Create Account</Text>
           )}
@@ -360,12 +361,12 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = isDark ? "#0A84FF" : "#0071e3";
+  const accentColor = C.main;
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#000000" : "#F2F2F7",
+      backgroundColor: C.bg,
     },
     content: {
       paddingHorizontal: 24,
@@ -382,25 +383,25 @@ function getStyles(theme, isDark) {
       borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#E5E5EA",
+      backgroundColor: isDark ? C.surface : C.border,
     },
     headerBlock: {
       marginBottom: 28,
     },
     titleText: {
+      fontFamily: FF.displayBold,
       fontSize: 28,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#000000",
-      letterSpacing: -0.6,
+      color: C.ink,
+      letterSpacing: 0.2,
       marginBottom: 6,
     },
     subtitleText: {
       fontSize: 15,
-      fontWeight: "400",
-      color: "#8E8E93",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
     },
     placeholderColor: {
-      color: isDark ? "#636366" : "#AEAEB2",
+      color: isDark ? C.mutedSoft : C.muted,
     },
     formContainer: {
       flex: 1,
@@ -408,13 +409,13 @@ function getStyles(theme, isDark) {
     inputPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderRadius: 12,
       paddingHorizontal: 18,
       height: 54,
       marginBottom: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
+      borderColor: isDark ? C.border : C.border,
     },
     inputIcon: {
       marginRight: 14,
@@ -432,10 +433,10 @@ function getStyles(theme, isDark) {
     pwRuleText: {
       marginLeft: 6,
       fontSize: 12.5,
-      color: "#8E8E93",
+      color: C.muted,
     },
     pwRuleTextOk: {
-      color: "#10B981",
+      color: C.success,
     },
     genderBlock: {
       marginBottom: 16,
@@ -443,14 +444,14 @@ function getStyles(theme, isDark) {
     },
     genderLabel: {
       fontSize: 14,
-      fontWeight: "600",
-      color: isDark ? "#EBEBF5" : "#3C3C43",
+      fontFamily: "Oswald_600SemiBold",
+      color: isDark ? C.border : C.borderDark,
       marginBottom: 8,
       marginLeft: 4,
     },
     requiredStar: {
-      color: "#EF4444",
-      fontWeight: "700",
+      color: C.error,
+      fontFamily: "Oswald_700Bold",
     },
     genderRow: {
       flexDirection: "row",
@@ -465,9 +466,9 @@ function getStyles(theme, isDark) {
       justifyContent: "center",
       height: 44,
       borderRadius: 14,
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderWidth: 1.5,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
+      borderColor: isDark ? C.border : C.border,
     },
     genderChipSelected: {
       backgroundColor: accentColor,
@@ -475,19 +476,19 @@ function getStyles(theme, isDark) {
     },
     genderChipText: {
       fontSize: 13,
-      fontWeight: "600",
-      color: "#8E8E93",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.muted,
     },
     genderChipTextSelected: {
-      color: "#FFFFFF",
-      fontWeight: "700",
+      color: C.textLight,
+      fontFamily: "Oswald_700Bold",
     },
     input: {
       flex: 1,
       height: "100%",
       fontSize: 15,
-      color: isDark ? "#FFFFFF" : "#000000",
-      fontWeight: "500",
+      color: C.ink,
+      fontFamily: "Oswald_500Medium",
     },
     eyeBtn: {
       padding: 6,
@@ -502,9 +503,9 @@ function getStyles(theme, isDark) {
       marginBottom: 28,
     },
     signUpBtnText: {
-      color: "#FFFFFF",
-      fontSize: 16, fontWeight: "600",
-      letterSpacing: -0.2,
+      color: C.textLight,
+      fontSize: 16, fontFamily: "Oswald_600SemiBold",
+      letterSpacing: 0.1,
     },
     dividerRow: {
       alignItems: "center",
@@ -512,8 +513,8 @@ function getStyles(theme, isDark) {
     },
     dividerText: {
       fontSize: 13,
-      fontWeight: "500",
-      color: "#8E8E93",
+      fontFamily: "Oswald_500Medium",
+      color: C.muted,
     },
     socialRow: {
       flexDirection: "row",
@@ -526,12 +527,12 @@ function getStyles(theme, isDark) {
       width: 58,
       height: 58,
       borderRadius: 18,
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
-      shadowColor: "#000",
+      borderColor: isDark ? C.border : C.border,
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,
@@ -548,11 +549,11 @@ function getStyles(theme, isDark) {
     },
     hasAccountText: {
       fontSize: 14,
-      color: "#8E8E93",
+      color: C.muted,
     },
     signInText: {
       fontSize: 14,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: accentColor,
     },
   });

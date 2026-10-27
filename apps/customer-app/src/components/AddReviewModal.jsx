@@ -106,7 +106,7 @@ export default function AddReviewModal({
               style={styles.closeBtn}
               activeOpacity={0.7}
             >
-              <Ionicons name="close" size={18} color={isDark ? "#8E8E93" : "#636366"} />
+              <Ionicons name="close" size={18} color={C.mutedSoft} />
             </TouchableOpacity>
           </View>
 
@@ -126,7 +126,7 @@ export default function AddReviewModal({
                       <Ionicons
                         name={item.icon}
                         size={16}
-                        color={isDark ? "#0A84FF" : "#0071e3"}
+                        color={C.main}
                         style={{ marginRight: 8 }}
                       />
                       <Text style={styles.aspectLabel}>{item.label}</Text>
@@ -144,7 +144,7 @@ export default function AddReviewModal({
                           <Ionicons
                             name={star <= currentScore ? "star" : "star-outline"}
                             size={20}
-                            color={star <= currentScore ? "#FFC107" : isDark ? "#3A3A3D" : "#D1D5DB"}
+                            color={star <= currentScore ? C.warning : isDark ? C.borderDark : C.border}
                           />
                         </TouchableOpacity>
                       ))}
@@ -173,7 +173,7 @@ export default function AddReviewModal({
             <TextInput
               style={styles.textInput}
               placeholder="Share more feedback about cleanliness, ambience, service..."
-              placeholderTextColor={isDark ? "#636366" : "#8E8E93"}
+              placeholderTextColor={isDark ? C.mutedSoft : C.muted}
               multiline
               numberOfLines={4}
               value={comment}
@@ -191,7 +191,7 @@ export default function AddReviewModal({
               hapticType="success"
             >
               {submitting ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
+                <ActivityIndicator color={C.textLight} size="small" />
               ) : (
                 <Text style={styles.submitBtnText}>Submit Review</Text>
               )}
@@ -204,7 +204,7 @@ export default function AddReviewModal({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = isDark ? "#0A84FF" : "#0071e3";
+  const accentColor = C.main;
 
   return StyleSheet.create({
     sheetInner: {
@@ -220,7 +220,7 @@ function getStyles(theme, isDark) {
     },
     title: {
       fontSize: 12,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       letterSpacing: 1.2,
       color: accentColor,
     },
@@ -228,29 +228,29 @@ function getStyles(theme, isDark) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#2C2C2E" : "#E5E5EA",
+      backgroundColor: isDark ? C.lifted : C.border,
       alignItems: "center",
       justifyContent: "center",
     },
     subtitle: {
       fontSize: 14,
-      color: isDark ? "#8E8E93" : "#71717A",
+      color: C.muted,
       marginBottom: 18,
       lineHeight: 20,
     },
     salonBold: {
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     scrollBody: {
       flexGrow: 0,
     },
     aspectsContainer: {
-      backgroundColor: isDark ? "#1C1C1E" : "#F6F7FA",
+      backgroundColor: isDark ? C.surface : C.lifted,
       borderRadius: 20,
       padding: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#E5E5EA",
+      borderColor: isDark ? C.lifted : C.border,
       marginBottom: 16,
       gap: 12,
     },
@@ -266,8 +266,8 @@ function getStyles(theme, isDark) {
     },
     aspectLabel: {
       fontSize: 14,
-      fontWeight: "600",
-      color: isDark ? "#FFFFFF" : "#000000",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.ink,
     },
     starRow: {
       flexDirection: "row",
@@ -278,7 +278,7 @@ function getStyles(theme, isDark) {
       padding: 2,
     },
     overallBadge: {
-      backgroundColor: isDark ? "rgba(108, 92, 231, 0.15)" : "#F0EEFF",
+      backgroundColor: isDark ? "rgba(108, 92, 231, 0.15)" : C.infoBg,
       paddingVertical: 10,
       paddingHorizontal: 16,
       borderRadius: 14,
@@ -287,21 +287,21 @@ function getStyles(theme, isDark) {
     },
     overallText: {
       fontSize: 13,
-      color: isDark ? "#E2E8F0" : "#4A4A5A",
-      fontWeight: "600",
+      color: isDark ? C.border : C.muted,
+      fontFamily: "Oswald_600SemiBold",
     },
     overallScoreBold: {
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: accentColor,
     },
     textInput: {
-      backgroundColor: isDark ? "#1C1C1E" : "#F6F7FA",
+      backgroundColor: isDark ? C.surface : C.lifted,
       borderRadius: 20,
       padding: 16,
       fontSize: 14,
-      color: isDark ? "#FFFFFF" : "#000000",
+      color: C.ink,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#E5E5EA",
+      borderColor: isDark ? C.lifted : C.border,
       height: 100,
       marginBottom: 20,
       lineHeight: 20,
@@ -323,10 +323,10 @@ function getStyles(theme, isDark) {
       opacity: 0.5,
     },
     submitBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 16,
-      fontWeight: "700",
-      letterSpacing: -0.2,
+      fontFamily: "Oswald_700Bold",
+      letterSpacing: 0.1,
     },
   });
 }

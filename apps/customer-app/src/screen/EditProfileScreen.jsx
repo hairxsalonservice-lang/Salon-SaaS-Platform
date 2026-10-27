@@ -20,6 +20,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { authService } from "../services/authService";
+import { C } from "../theme";
 
 const MALE_AVATAR_ASSET = require("../../assets/male-avatar.png");
 const FEMALE_AVATAR_ASSET = require("../../assets/female-avatar.png");
@@ -32,7 +33,7 @@ const GENDER_OPTIONS = [
   { id: "female", label: "Female" },
   { id: "other", label: "Other" },
 ];
-const ACCENT = "#0071e3";
+const ACCENT = C.main;
 
 function normalizeGender(value) {
   const v = typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -125,7 +126,7 @@ export default function EditProfileScreen({ goBack }) {
   };
 
   const styles = getStyles(isDark);
-  const helperColor = isDark ? "#8E8E93" : "#71717A";
+  const helperColor = C.muted;
 
   return (
     <KeyboardAvoidingView
@@ -143,7 +144,7 @@ export default function EditProfileScreen({ goBack }) {
         <View style={styles.topHeader}>
           <View style={{ flex: 1 }} />
           <TouchableOpacity onPress={goBack} style={styles.closeBtn} activeOpacity={0.7} disabled={saving}>
-            <Ionicons name="close" size={24} color={isDark ? "#FFFFFF" : "#18181B"} />
+            <Ionicons name="close" size={24} color={C.ink} />
           </TouchableOpacity>
         </View>
 
@@ -166,7 +167,7 @@ export default function EditProfileScreen({ goBack }) {
               value={name}
               onChangeText={setName}
               placeholder="Enter full name"
-              placeholderTextColor="#A0A0AB"
+              placeholderTextcolor={C.muted}
               autoCapitalize="words"
               autoComplete="name"
               textContentType="name"
@@ -180,7 +181,7 @@ export default function EditProfileScreen({ goBack }) {
           <Text style={styles.label}>Email</Text>
           <View style={[styles.inputBox, { opacity: 0.6 }]}>
             <Text style={styles.selectText} numberOfLines={1}>{email || "—"}</Text>
-            <Ionicons name="lock-closed-outline" size={15} color="#66666E" />
+            <Ionicons name="lock-closed-outline" size={15} color={C.muted} />
           </View>
           <Text style={{ fontSize: 12, color: helperColor, marginTop: 6 }}>
             Your email is used to sign in and can't be changed here.
@@ -192,7 +193,7 @@ export default function EditProfileScreen({ goBack }) {
           <Text style={styles.label}>Gender</Text>
           <TouchableOpacity style={styles.inputBox} onPress={() => setShowGenderModal(true)} activeOpacity={0.8}>
             <Text style={styles.selectText}>{genderLabel}</Text>
-            <Ionicons name="chevron-down" size={16} color="#66666E" />
+            <Ionicons name="chevron-down" size={16} color={C.muted} />
           </TouchableOpacity>
         </View>
 
@@ -206,7 +207,7 @@ export default function EditProfileScreen({ goBack }) {
               onChangeText={setPhone}
               keyboardType="phone-pad"
               placeholder="Phone number"
-              placeholderTextColor="#A0A0AB"
+              placeholderTextcolor={C.muted}
               autoComplete="tel"
               textContentType="telephoneNumber"
               maxLength={16}
@@ -219,7 +220,7 @@ export default function EditProfileScreen({ goBack }) {
         {/* Save Button */}
         <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving} activeOpacity={0.88}>
           {saving ? (
-            <ActivityIndicator color="#FFFFFF" size="small" />
+            <ActivityIndicator color={C.textLight} size="small" />
           ) : (
             <Text style={styles.saveBtnText}>Save</Text>
           )}
@@ -247,7 +248,7 @@ export default function EditProfileScreen({ goBack }) {
                     setShowGenderModal(false);
                   }}
                 >
-                  <Text style={[styles.genderOptionText, isSelected && { color: ACCENT, fontWeight: "700" }]}>{g.label}</Text>
+                  <Text style={[styles.genderOptionText, isSelected && { color: ACCENT, fontFamily: "Oswald_700Bold" }]}>{g.label}</Text>
                   {isSelected && <Ionicons name="checkmark" size={18} color={ACCENT} />}
                 </TouchableOpacity>
               );
@@ -263,7 +264,7 @@ function getStyles(isDark) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#121216" : "#FFFFFF",
+      backgroundColor: C.bg,
     },
     scrollContent: {
       paddingHorizontal: 24,
@@ -289,7 +290,7 @@ function getStyles(isDark) {
       height: 72,
       borderRadius: 24,
       overflow: "hidden",
-      backgroundColor: isDark ? "#2A2A34" : "#F0F0F5",
+      backgroundColor: C.lifted,
       marginRight: 16,
     },
     avatarImg: {
@@ -302,22 +303,22 @@ function getStyles(isDark) {
     },
     changeAvatarText: {
       fontSize: 15,
-      fontWeight: "700",
-      color: "#0071e3",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
     },
     fieldGroup: {
       marginBottom: 20,
     },
     label: {
       fontSize: 13,
-      fontWeight: "600",
-      color: isDark ? "#9999A0" : "#8E8E93",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.muted,
       marginBottom: 8,
     },
     inputBox: {
       height: 52,
       borderRadius: 14,
-      backgroundColor: isDark ? "#1E1E26" : "#F7F7FA",
+      backgroundColor: C.lifted,
       paddingHorizontal: 16,
       flexDirection: "row",
       alignItems: "center",
@@ -326,21 +327,21 @@ function getStyles(isDark) {
     textInput: {
       flex: 1,
       fontSize: 14.5,
-      fontWeight: "500",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_500Medium",
+      color: C.ink,
     },
     selectText: {
       fontSize: 14.5,
-      fontWeight: "500",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_500Medium",
+      color: C.ink,
     },
     saveBtn: {
       height: 54,
       borderRadius: 18,
-      backgroundColor: "#0071e3",
+      backgroundColor: C.main,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#0071e3",
+      shadowColor: C.main,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.25,
       shadowRadius: 10,
@@ -348,8 +349,8 @@ function getStyles(isDark) {
     },
     saveBtnText: {
       fontSize: 16,
-      fontWeight: "700",
-      color: "#FFFFFF",
+      fontFamily: "Oswald_700Bold",
+      color: C.textLight,
     },
     modalOverlay: {
       flex: 1,
@@ -360,14 +361,14 @@ function getStyles(isDark) {
     },
     modalContent: {
       width: "100%",
-      backgroundColor: isDark ? "#1E1E26" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderRadius: 20,
       padding: 20,
     },
     modalTitle: {
       fontSize: 17,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       marginBottom: 16,
     },
     genderOption: {
@@ -376,12 +377,12 @@ function getStyles(isDark) {
       justifyContent: "space-between",
       paddingVertical: 14,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#2E2E38" : "#EFEFF4",
+      borderBottomColor: C.border,
     },
     genderOptionText: {
       fontSize: 15,
-      fontWeight: "500",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_500Medium",
+      color: C.ink,
     },
   });
 }

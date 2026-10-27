@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { C, S, FS, FW, R } from "../theme";
+import { C, S, FS, FW, FF, R } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 
 const TABS = [
@@ -99,7 +99,7 @@ export default function LegalScreen({ goBack, routeParams, onScroll }) {
         <View style={[styles.infoBanner, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
           <Ionicons name="information-circle-outline" size={18} color={theme.primary} />
           <Text style={[styles.infoBannerText, { color: theme.body }]}>
-            Last updated: <Text style={{ color: theme.ink, fontWeight: FW.bold }}>August 12, 2026</Text> • Applies to all HairX Salon Platform services.
+            Last updated: <Text style={{ color: theme.ink, fontFamily: "Oswald_700Bold" }}>August 12, 2026</Text> • Applies to all HairX Salon Platform services.
           </Text>
         </View>
 
@@ -256,8 +256,8 @@ function getStyles() {
     alignItems: "center",
   },
   headerTitle: {
+    fontFamily: FF.displayBold,
     fontSize: FS.md,
-    fontWeight: FW.bold,
   },
   headerSub: {
     fontSize: FS.xs - 1,
@@ -282,10 +282,10 @@ function getStyles() {
   },
   tabLabel: {
     fontSize: FS.xs,
-    fontWeight: FW.medium,
+    fontFamily: "Oswald_500Medium",
   },
   tabLabelActive: {
-    fontWeight: FW.bold,
+    fontFamily: "Oswald_700Bold",
   },
   scrollContent: {
     padding: S.md,
@@ -315,7 +315,7 @@ function getStyles() {
   },
   cardTitle: {
     fontSize: FS.sm + 1,
-    fontWeight: FW.bold,
+    fontFamily: "Oswald_700Bold",
     marginBottom: S.xs + 2,
   },
   paragraph: {
@@ -345,7 +345,7 @@ function getStyles() {
   deleteBtnText: {
     color: C.bg,
     fontSize: FS.xs + 1,
-    fontWeight: FW.bold,
+    fontFamily: "Oswald_700Bold",
   },
   contactCard: {
     borderRadius: R.md,
@@ -356,7 +356,7 @@ function getStyles() {
   },
   contactTitle: {
     fontSize: FS.sm,
-    fontWeight: FW.bold,
+    fontFamily: "Oswald_700Bold",
     textAlign: "center",
   },
   contactSub: {
@@ -374,7 +374,7 @@ function getStyles() {
   },
   contactBtnText: {
     fontSize: FS.xs,
-    fontWeight: FW.bold,
+    fontFamily: "Oswald_700Bold",
   },
   });
 }

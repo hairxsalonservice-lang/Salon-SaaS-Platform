@@ -247,7 +247,7 @@ export default function AppointmentDetailModal({
                     activeOpacity={0.7}
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                   >
-                    <Ionicons name="close" size={18} color="#000000" />
+                    <Ionicons name="close" size={18} color={C.ink} />
                   </TouchableOpacity>
                 </View>
 
@@ -264,7 +264,7 @@ export default function AppointmentDetailModal({
                       </View>
                       {branchAddress ? (
                         <View style={styles.salonAddressRow}>
-                          <Ionicons name="location" size={14} color="#6B7280" style={{ marginTop: 2 }} />
+                          <Ionicons name="location" size={14} color={C.muted} style={{ marginTop: 2 }} />
                           <Text style={styles.salonAddressText} numberOfLines={2}>{branchAddress}</Text>
                         </View>
                       ) : null}
@@ -275,7 +275,7 @@ export default function AppointmentDetailModal({
                 {/* 2. Appointment Slot Card */}
                 <View style={styles.slotCard}>
                   <View style={styles.slotIconBox}>
-                    <Ionicons name="calendar-outline" size={20} color="#6F2A3B" />
+                    <Ionicons name="calendar-outline" size={20} color={C.main} />
                   </View>
                   <View style={styles.slotTextCol}>
                     <Text style={styles.slotLabel}>APPOINTMENT SLOT</Text>
@@ -295,7 +295,7 @@ export default function AppointmentDetailModal({
                 <View style={styles.detailsCard}>
                   <View style={styles.detailRow}>
                     <View style={styles.detailIconWrap}>
-                      <Ionicons name="cut-outline" size={16} color="#000000" />
+                      <Ionicons name="cut-outline" size={16} color={C.ink} />
                     </View>
                     <Text style={styles.detailLabel}>Service</Text>
                     <Text style={styles.detailValue} numberOfLines={1}>{serviceName}</Text>
@@ -303,7 +303,7 @@ export default function AppointmentDetailModal({
                   
                   <View style={styles.detailRow}>
                     <View style={styles.detailIconWrap}>
-                      <Ionicons name="person-outline" size={16} color="#000000" />
+                      <Ionicons name="person-outline" size={16} color={C.ink} />
                     </View>
                     <Text style={styles.detailLabel}>Specialist</Text>
                     <Text style={styles.detailValue} numberOfLines={1}>{staffName || "Any Available"}</Text>
@@ -311,7 +311,7 @@ export default function AppointmentDetailModal({
                   
                   <View style={styles.detailRow}>
                     <View style={styles.detailIconWrap}>
-                      <Ionicons name="time-outline" size={16} color="#000000" />
+                      <Ionicons name="time-outline" size={16} color={C.ink} />
                     </View>
                     <Text style={styles.detailLabel}>Duration</Text>
                     <Text style={styles.detailValue}>{durationMinutes} mins</Text>
@@ -320,10 +320,10 @@ export default function AppointmentDetailModal({
                   {price !== undefined && price !== null && (
                     <View style={styles.detailRow}>
                       <View style={styles.detailIconWrap}>
-                        <Ionicons name="card-outline" size={16} color="#000000" />
+                        <Ionicons name="card-outline" size={16} color={C.ink} />
                       </View>
                       <Text style={styles.detailLabel}>Amount</Text>
-                      <Text style={[styles.detailValue, { fontWeight: "700", fontSize: 16 }]}>{paiseToINR(price)}</Text>
+                      <Text style={[styles.detailValue, { fontFamily: "Oswald_700Bold", fontSize: 16 }]}>{paiseToINR(price)}</Text>
                     </View>
                   )}
                 </View>
@@ -338,7 +338,7 @@ export default function AppointmentDetailModal({
                     }}
                     activeOpacity={0.8}
                   >
-                    <Ionicons name="navigate-outline" size={18} color="#6F2A3B" style={{ marginRight: 6, transform: [{ rotate: '45deg' }] }} />
+                    <Ionicons name="navigate-outline" size={18} color={C.main} style={{ marginRight: 6, transform: [{ rotate: '45deg' }] }} />
                     <Text style={styles.actionBtnOutlineText}>Directions</Text>
                   </TouchableOpacity>
 
@@ -350,7 +350,7 @@ export default function AppointmentDetailModal({
                       }}
                       activeOpacity={0.8}
                     >
-                      <Ionicons name="call-outline" size={18} color="#6F2A3B" style={{ marginRight: 6 }} />
+                      <Ionicons name="call-outline" size={18} color={C.main} style={{ marginRight: 6 }} />
                       <Text style={styles.actionBtnOutlineText}>Call Salon</Text>
                     </TouchableOpacity>
                   ) : null}
@@ -366,7 +366,7 @@ export default function AppointmentDetailModal({
                     }}
                     activeOpacity={0.82}
                   >
-                    <Ionicons name="calendar-outline" size={18} color="#6F2A3B" style={{ marginRight: 6 }} />
+                    <Ionicons name="calendar-outline" size={18} color={C.main} style={{ marginRight: 6 }} />
                     <Text style={styles.actionBtnOutlineText}>Reschedule</Text>
                   </TouchableOpacity>
                 ) : null}
@@ -381,7 +381,7 @@ export default function AppointmentDetailModal({
                     }}
                     activeOpacity={0.82}
                   >
-                    <Ionicons name="close-circle-outline" size={18} color="#6F2A3B" style={{ marginRight: 6 }} />
+                    <Ionicons name="close-circle-outline" size={18} color={C.main} style={{ marginRight: 6 }} />
                     <Text style={styles.cancelBtnText}>Cancel Booking</Text>
                   </TouchableOpacity>
                 ) : null}
@@ -429,7 +429,7 @@ function getStyles() {
       justifyContent: "flex-end",
     },
     sheetContainer: {
-      backgroundColor: "#F2F2F7",
+      backgroundColor: C.lifted,
       borderTopLeftRadius: 32,
       borderTopRightRadius: 32,
       maxHeight: "92%",
@@ -440,7 +440,7 @@ function getStyles() {
       width: 48,
       height: 4,
       borderRadius: 2,
-      backgroundColor: "#D1D5DB",
+      backgroundColor: C.border,
       alignSelf: "center",
       marginBottom: 20,
     },
@@ -454,12 +454,12 @@ function getStyles() {
     },
     passHeaderTitle: {
       fontSize: 22,
-      fontWeight: "700",
-      color: "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     passHeaderSub: {
       fontSize: 13,
-      color: "#6B7280",
+      color: C.muted,
       marginTop: 4,
     },
     closeBtn: {
@@ -469,18 +469,18 @@ function getStyles() {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: "#E5E5EA",
+      backgroundColor: C.border,
       alignItems: "center",
       justifyContent: "center",
     },
     
     /* 1. Salon Info Card */
     card: {
-      backgroundColor: "#FFFFFF",
+      backgroundColor: C.textLight,
       borderRadius: 16,
       padding: 16,
       marginBottom: 12,
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.03,
       shadowRadius: 8,
@@ -494,7 +494,7 @@ function getStyles() {
       width: 64,
       height: 64,
       borderRadius: 12,
-      backgroundColor: "#E5E5EA",
+      backgroundColor: C.border,
     },
     salonDetailsCol: {
       flex: 1,
@@ -508,21 +508,21 @@ function getStyles() {
     },
     salonNameText: {
       fontSize: 15,
-      fontWeight: "700",
-      color: "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       flex: 1,
       marginRight: 8,
     },
     statusPill: {
-      backgroundColor: "#FFF7ED",
+      backgroundColor: C.warningBg,
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 10,
     },
     statusPillText: {
       fontSize: 10,
-      fontWeight: "700",
-      color: "#9A3412",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
     },
     salonAddressRow: {
       flexDirection: "row",
@@ -530,7 +530,7 @@ function getStyles() {
     },
     salonAddressText: {
       fontSize: 12,
-      color: "#6B7280",
+      color: C.muted,
       marginLeft: 4,
       flex: 1,
       lineHeight: 16,
@@ -538,7 +538,7 @@ function getStyles() {
 
     /* 2. Appointment Slot Card */
     slotCard: {
-      backgroundColor: "#FDF3F4",
+      backgroundColor: C.crimsonTint,
       borderRadius: 16,
       padding: 16,
       marginBottom: 12,
@@ -560,31 +560,31 @@ function getStyles() {
     },
     slotLabel: {
       fontSize: 10,
-      fontWeight: "700",
-      color: "#9CA3AF",
+      fontFamily: "Oswald_700Bold",
+      color: C.muted,
       letterSpacing: 0.5,
       marginBottom: 4,
     },
     slotDate: {
       fontSize: 15,
-      fontWeight: "700",
-      color: "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       marginBottom: 2,
     },
     slotTime: {
       fontSize: 14,
-      fontWeight: "600",
-      color: "#000000",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.ink,
     },
 
     /* 3. QR Code Card */
     qrCard: {
-      backgroundColor: "#FFFFFF",
+      backgroundColor: C.textLight,
       borderRadius: 16,
       padding: 24,
       alignItems: "center",
       marginBottom: 12,
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.03,
       shadowRadius: 8,
@@ -593,7 +593,7 @@ function getStyles() {
     qrVisualBox: {
       width: 180,
       height: 180,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: C.textLight,
       borderRadius: 16,
       alignItems: "center",
       justifyContent: "center",
@@ -601,7 +601,7 @@ function getStyles() {
     },
     qrContainer: {
       padding: 10,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: C.textLight,
       borderRadius: 12,
     },
     qrGrid: {
@@ -618,30 +618,30 @@ function getStyles() {
     },
     qrLabel: {
       fontSize: 10,
-      fontWeight: "700",
-      color: "#9CA3AF",
+      fontFamily: "Oswald_700Bold",
+      color: C.muted,
       letterSpacing: 0.5,
       marginBottom: 4,
     },
     qrCodeText: {
       fontSize: 24,
-      fontWeight: "700",
-      color: "#6F2A3B",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
       marginBottom: 8,
     },
     qrInstruction: {
       fontSize: 12,
-      color: "#6B7280",
+      color: C.muted,
       textAlign: "center",
     },
 
     /* 4. Details Card */
     detailsCard: {
-      backgroundColor: "#FFFFFF",
+      backgroundColor: C.textLight,
       borderRadius: 16,
       padding: 16,
       marginBottom: 20,
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.03,
       shadowRadius: 8,
@@ -659,13 +659,13 @@ function getStyles() {
     },
     detailLabel: {
       fontSize: 13,
-      color: "#6B7280",
+      color: C.muted,
       flex: 1,
     },
     detailValue: {
       fontSize: 13,
-      fontWeight: "700",
-      color: "#000000",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       textAlign: "right",
       maxWidth: "50%",
     },
@@ -684,13 +684,13 @@ function getStyles() {
       paddingVertical: 14,
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: "#FDF3F4",
-      backgroundColor: "#FFFFFF",
+      borderColor: C.crimsonTint,
+      backgroundColor: C.textLight,
     },
     actionBtnOutlineText: {
       fontSize: 14,
-      fontWeight: "700",
-      color: "#6F2A3B",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
     },
     cancelBtn: {
       flexDirection: "row",
@@ -698,12 +698,12 @@ function getStyles() {
       justifyContent: "center",
       paddingVertical: 14,
       borderRadius: 12,
-      backgroundColor: "#FDF3F4",
+      backgroundColor: C.crimsonTint,
     },
     cancelBtnText: {
       fontSize: 14,
-      fontWeight: "700",
-      color: "#6F2A3B",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
     },
   });
 }
