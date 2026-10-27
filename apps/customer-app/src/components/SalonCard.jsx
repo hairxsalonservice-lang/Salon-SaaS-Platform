@@ -173,7 +173,7 @@ function SalonCard({ salon, onPress, isHorizontal = false, index = 0, variant = 
                     key={star}
                     name={star < Math.round(numericRating) ? "star" : "star-outline"}
                     size={10}
-                    color="#7A0026"
+                    color="#FF9500"
                   />
                 ))}
               </View>
@@ -285,7 +285,7 @@ function SalonCard({ salon, onPress, isHorizontal = false, index = 0, variant = 
             <Ionicons
               name="arrow-forward"
               size={14}
-              color={index === 0 ? "#FFFFFF" : isDark ? "#F43F5E" : "#7A0026"}
+              color={index === 0 ? "#FFFFFF" : isDark ? "#0A84FF" : "#0071e3"}
               style={{ marginLeft: 6 }}
             />
           </TouchableOpacity>
@@ -300,14 +300,14 @@ export default memo(SalonCard);
 function getStyles(theme = {}, isDark = false) {
   return StyleSheet.create({
     card: {
-      backgroundColor: isDark ? "#1E1E24" : "#FFFFFF",
-      borderRadius: 20,
-      marginBottom: 16,
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      borderRadius: 14,
+      marginBottom: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#F0F0F3",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.2 : 0.05,
+      shadowOpacity: isDark ? 0.2 : 0.06,
       shadowRadius: 8,
       elevation: 2,
       overflow: "hidden",
@@ -325,13 +325,13 @@ function getStyles(theme = {}, isDark = false) {
       minHeight: 76,
       paddingVertical: 9,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#27272A" : "#EFEFF4",
+      borderBottomColor: isDark ? "#38383A" : "#E5E5EA",
     },
     compactImage: {
       width: 58,
       height: 58,
       borderRadius: 12,
-      backgroundColor: isDark ? "#27272A" : "#F4F4F6",
+      backgroundColor: isDark ? "#2C2C2E" : "#F2F2F7",
     },
     compactImageWrap: {
       width: 58,
@@ -401,7 +401,7 @@ function getStyles(theme = {}, isDark = false) {
     },
     imageFrame: {
       height: 160,
-      backgroundColor: isDark ? "#27272A" : "#F4F4F6",
+      backgroundColor: isDark ? "#2C2C2E" : "#F2F2F7",
       position: "relative",
       width: "100%",
     },
@@ -500,17 +500,17 @@ function getStyles(theme = {}, isDark = false) {
       marginBottom: 12,
     },
     tagPill: {
-      backgroundColor: isDark ? "#2A1B22" : "#FDF0F2",
+      backgroundColor: isDark ? "#1C2A3E" : "#E8F0FE",
       paddingHorizontal: 10,
       paddingVertical: 5,
       borderRadius: 12,
     },
     extraTagPill: {
-      backgroundColor: isDark ? "#27272A" : "#F4F4F6",
+      backgroundColor: isDark ? "#2C2C2E" : "#F2F2F7",
     },
     tagText: {
       fontSize: 11,
-      color: isDark ? "#F43F5E" : "#7A0026",
+      color: isDark ? "#0A84FF" : "#0071e3",
       fontWeight: "600",
     },
     footerRow: {
@@ -543,12 +543,12 @@ function getStyles(theme = {}, isDark = false) {
       borderRadius: 19,
     },
     bookBtnFilled: {
-      backgroundColor: isDark ? "#9F1239" : "#7A0026",
+      backgroundColor: isDark ? "#0A84FF" : "#0071e3",
     },
     bookBtnOutline: {
-      backgroundColor: isDark ? "#1E1E24" : "#FFFFFF",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderWidth: 1.5,
-      borderColor: isDark ? "#F43F5E" : "#7A0026",
+      borderColor: isDark ? "#0A84FF" : "#0071e3",
     },
     bookBtnText: {
       fontSize: 13,
@@ -558,7 +558,7 @@ function getStyles(theme = {}, isDark = false) {
       color: "#FFFFFF",
     },
     bookBtnTextOutline: {
-      color: isDark ? "#F43F5E" : "#7A0026",
+      color: isDark ? "#0A84FF" : "#0071e3",
     },
   });
 }
