@@ -129,7 +129,15 @@ export default function AppNavigator() {
     const checkOnboarding = async () => {
       try {
         const val = await storage.getItem("@salon_app_has_onboarded");
-        setHasOnboarded(val === "true");
+        const token = await storage.getItem("@salon_app_token");
+        if (val === "true" || !!token) {
+          setHasOnboarded(true);
+          if (val !== "true") {
+            await storage.setItem("@salon_app_has_onboarded", "true");
+          }
+        } else {
+          setHasOnboarded(false);
+        }
       } catch (e) {
         setHasOnboarded(false);
       }

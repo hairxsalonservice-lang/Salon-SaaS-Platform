@@ -77,18 +77,32 @@ export function AuthProvider({ children }) {
         const savedToken = await storage.getItem(AUTH_TOKEN_KEY);
         const savedUser = await storage.getItem(AUTH_USER_KEY);
 
-        if (savedToken && savedUser && savedUser !== "undefined" && savedUser !== "null") {
-          try {
-            const parsedUser = JSON.parse(savedUser);
-            if (parsedUser) {
-              setToken(savedToken);
-              setUser(parsedUser);
-              setAuthToken(savedToken);
+        if (savedToken) {
+          setToken(savedToken);
+          setAuthToken(savedToken);
+
+          if (savedUser && savedUser !== "undefined" && savedUser !== "null") {
+            try {
+              const parsedUser = JSON.parse(savedUser);
+              if (parsedUser) {
+                setUser(parsedUser);
+              }
+            } catch (e) {
+              console.warn("Invalid saved user JSON, clearing user cache:", e);
+              await storage.removeItem(AUTH_USER_KEY);
             }
-          } catch (e) {
-            console.warn("Invalid saved user JSON, clearing session:", e);
-            await storage.removeItem(AUTH_USER_KEY);
           }
+
+          // Background sync profile to keep user info fresh
+          authService.getProfile().then((meRes) => {
+            const freshUser = meRes?.data?.user || meRes?.data || meRes?.user;
+            if (freshUser) {
+              setUser(freshUser);
+              storage.setItem(AUTH_USER_KEY, JSON.stringify(freshUser)).catch(() => {});
+            }
+          }).catch((err) => {
+            console.log("[AuthContext] Profile background sync skipped:", err?.message);
+          });
         }
       } catch (err) {
         console.warn("Failed to restore auth session:", err.message);
@@ -125,6 +139,7 @@ export function AuthProvider({ children }) {
           if (userData) {
             await storage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
           }
+          await storage.setItem("@salon_app_has_onboarded", "true");
         } else {
           // Keep this session in memory only, and drop any older saved session
           memoryRefreshTokenRef.current = refreshToken || null;
@@ -170,6 +185,7 @@ export function AuthProvider({ children }) {
         if (userData) {
           await storage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
         }
+        await storage.setItem("@salon_app_has_onboarded", "true");
 
         return { success: true, user: userData };
       }
@@ -207,6 +223,7 @@ export function AuthProvider({ children }) {
         if (userData) {
           await storage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
         }
+        await storage.setItem("@salon_app_has_onboarded", "true");
 
         return { success: true, user: userData };
       }
@@ -244,6 +261,7 @@ export function AuthProvider({ children }) {
         if (userData) {
           await storage.setItem(AUTH_USER_KEY, JSON.stringify(userData));
         }
+        await storage.setItem("@salon_app_has_onboarded", "true");
 
         return { success: true, user: userData };
       }
