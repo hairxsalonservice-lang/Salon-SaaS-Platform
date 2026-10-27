@@ -1005,6 +1005,7 @@ export default function LandingPage() {
             <a href="#roi" className="hover:text-white transition-colors">ROI Calculator</a>
             <a href="#register" className="hover:text-white transition-colors">Register Salon</a>
             <a href={SALON_PANEL_URL} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Salon Panel Login</a>
+            <a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a>
           </div>
 
           <p className="text-slate-500">© 2026 HAIRX SALON PLATFORM. ALL RIGHTS RESERVED.</p>

@@ -494,7 +494,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
             disabled={submitting} 
             onPress={handleConfirmBooking}
           >
-            {submitting ? <ActivityIndicator color="#FFF" size="small" /> : <Text style={styles.mainBtnText}>Proceed to Payment →</Text>}
+            {submitting ? <ActivityIndicator color="#FFF" size="small" /> : <Text style={styles.mainBtnText}>Book →</Text>}
           </TouchableOpacity>
         )}
       </View>
