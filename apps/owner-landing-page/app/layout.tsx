@@ -13,6 +13,11 @@ export const metadata: Metadata = {
     "Beauty Parlour Management App",
     "Multi Branch Salon Software",
   ],
+  icons: {
+    icon: "/logo.png",
+    shortcut: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({
