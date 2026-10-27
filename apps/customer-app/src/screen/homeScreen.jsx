@@ -11,7 +11,7 @@ import {
   ImageBackground,
   Dimensions,
 } from "react-native";
-import { C, S, FS, FW, R, TYPO } from "../theme";
+import { C, S, FS, FW, R, TYPO, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import SalonCard from "../components/SalonCard";
@@ -678,7 +678,7 @@ function buildStyles(theme, isDark) {
     // Hero banner — ImageBackground handles cross-platform image + content stacking
     heroBannerContainer: {
       marginHorizontal: 16,
-      borderRadius: 14,
+      borderRadius: PLATFORM_RADIUS.card,
       overflow: "hidden",
       height: 200,
       backgroundColor: isDark ? p.surface : "#E5E5EA",
@@ -791,7 +791,7 @@ function buildStyles(theme, isDark) {
     noteCard: {
       marginHorizontal: 16,
       marginTop: 20,
-      borderRadius: 14,
+      borderRadius: PLATFORM_RADIUS.card,
       padding: 20,
       justifyContent: "center",
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",

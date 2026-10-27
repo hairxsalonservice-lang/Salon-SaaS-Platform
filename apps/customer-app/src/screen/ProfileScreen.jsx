@@ -14,7 +14,7 @@ import {
   Share,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { FONT_FAMILY } from "../theme";
+import { FONT_FAMILY, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle, getPlatformButtonStyle } from "../theme";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useFavorites } from "../context/FavoritesContext";
@@ -498,16 +498,9 @@ function getStyles(isDark) {
     primaryAuthBtn: {
       backgroundColor: accentColor,
       flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
+      ...getPlatformButtonStyle(isDark, "filled"),
       paddingHorizontal: 18,
       height: 44,
-      borderRadius: 14,
-      shadowColor: accentColor,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 3,
     },
     primaryAuthBtnText: {
       color: "#FFFFFF",
@@ -531,19 +524,12 @@ function getStyles(isDark) {
     },
     promoCard: {
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 14,
+      ...getPlatformCardStyle(isDark),
       padding: 16,
       marginBottom: 16,
-      borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.2 : 0.04,
-      shadowRadius: 8,
-      elevation: 2,
     },
     promoContentCol: {
       flex: 1,
@@ -595,11 +581,9 @@ function getStyles(isDark) {
     },
     themeCard: {
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 14,
+      ...getPlatformCardStyle(isDark),
       padding: 14,
       marginBottom: 16,
-      borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
     },
     themeCardHeader: {
       fontSize: 10,
@@ -647,15 +631,8 @@ function getStyles(isDark) {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 12,
+      ...getPlatformCardStyle(isDark),
       padding: 14,
-      borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.15 : 0.03,
-      shadowRadius: 6,
-      elevation: 1,
     },
     menuIconBox: {
       width: 40,

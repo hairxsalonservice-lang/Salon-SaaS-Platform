@@ -282,40 +282,31 @@ export const SPACING = {
 };
 export const S = SPACING;
 
-export const RADIUS = {
-  xs: 4,
-  sm: 8,
-  button: 12,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  pill: 9999,
-  circle: 9999,
-};
+import {
+  PLATFORM_RADIUS,
+  PLATFORM_SHADOWS,
+  PLATFORM_SPACING,
+  PLATFORM_TYPO,
+  PLATFORM_PRESS,
+  getPlatformCardStyle,
+  getPlatformInputStyle,
+  getPlatformButtonStyle,
+} from "./platform";
+
+export const RADIUS = PLATFORM_RADIUS;
 export const R = RADIUS;
 
-export const SHADOWS = {
-  sm: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  md: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
-  },
-  lg: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    elevation: 8,
-  },
+export const SHADOWS = PLATFORM_SHADOWS;
+
+export {
+  PLATFORM_RADIUS,
+  PLATFORM_SHADOWS,
+  PLATFORM_SPACING,
+  PLATFORM_TYPO,
+  PLATFORM_PRESS,
+  getPlatformCardStyle,
+  getPlatformInputStyle,
+  getPlatformButtonStyle,
 };
 
 export const TYPO = {

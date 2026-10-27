@@ -2,7 +2,7 @@ import React, { memo, useCallback } from "react";
 import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import VerifiedBadge from "./VerifiedBadge";
-import { C, S, FS, FW, R, SHADOWS, FONT_FAMILY } from "../theme";
+import { C, S, FS, FW, R, SHADOWS, FONT_FAMILY, getPlatformCardStyle } from "../theme";
 import { useFavorites } from "../context/FavoritesContext";
 import { useTheme } from "../context/ThemeContext";
 import BouncyButton from "./BouncyButton";
@@ -301,15 +301,8 @@ function getStyles(theme = {}, isDark = false) {
   return StyleSheet.create({
     card: {
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 14,
+      ...getPlatformCardStyle(isDark),
       marginBottom: 14,
-      borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.2 : 0.06,
-      shadowRadius: 8,
-      elevation: 2,
       overflow: "hidden",
     },
     horizontal: {

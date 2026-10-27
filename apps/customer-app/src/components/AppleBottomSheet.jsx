@@ -13,6 +13,9 @@ import {
 import { BlurView } from "expo-blur";
 import { useTheme } from "../context/ThemeContext";
 import { APPLE_SPRINGS, triggerHaptic } from "../theme/appleMotion";
+import { PLATFORM_RADIUS } from "../theme/platform";
+
+const isIOS = Platform.OS === "ios";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -169,25 +172,24 @@ const styles = StyleSheet.create({
   },
   sheetContainer: {
     width: "100%",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
+    borderTopLeftRadius: PLATFORM_RADIUS.sheet,
+    borderTopRightRadius: PLATFORM_RADIUS.sheet,
+    borderWidth: isIOS ? 1 : 0,
+    ...(isIOS
+      ? { shadowColor: "#000", shadowOffset: { width: 0, height: -8 }, shadowOpacity: 0.25, shadowRadius: 16 }
+      : {}),
     elevation: 24,
     overflow: "hidden",
   },
   dragHandleContainer: {
     width: "100%",
-    height: 28,
+    height: isIOS ? 28 : 32,
     alignItems: "center",
     justifyContent: "center",
   },
   dragHandleBar: {
-    width: 36,
-    height: 5,
+    width: isIOS ? 36 : 32,
+    height: isIOS ? 5 : 4,
     borderRadius: 3,
   },
   content: {

@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { S, FS, FW, R, TYPO } from "../theme";
+import { S, FS, FW, R, TYPO, PLATFORM_RADIUS, PLATFORM_SPACING, PLATFORM_TYPO, getPlatformInputStyle, getPlatformButtonStyle } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import ErrorCardModal from "../components/ErrorCardModal";
@@ -311,10 +311,10 @@ function getStyles(theme, isDark) {
       alignItems: "center",
     },
     titleText: {
-      fontSize: 28,
-      fontWeight: "700",
+      fontSize: PLATFORM_TYPO.titleSize,
+      fontWeight: PLATFORM_TYPO.titleWeight,
       color: isDark ? "#FFFFFF" : "#000000",
-      letterSpacing: -0.4,
+      letterSpacing: PLATFORM_TYPO.letterSpacing,
       marginBottom: 6,
       textAlign: "center",
     },
@@ -333,13 +333,8 @@ function getStyles(theme, isDark) {
     inputPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 12,
-      paddingHorizontal: 16,
-      height: 52,
+      ...getPlatformInputStyle(isDark),
       marginBottom: 14,
-      borderWidth: 1,
-      borderColor: isDark ? "#38383A" : "#E5E5EA",
     },
     inputIcon: {
       marginRight: 14,
@@ -379,11 +374,8 @@ function getStyles(theme, isDark) {
       color: accentColor,
     },
     signInBtn: {
-      height: 50,
-      borderRadius: 12,
+      ...getPlatformButtonStyle(isDark, "filled"),
       backgroundColor: accentColor,
-      alignItems: "center",
-      justifyContent: "center",
       marginBottom: 28,
     },
     signInBtnText: {
