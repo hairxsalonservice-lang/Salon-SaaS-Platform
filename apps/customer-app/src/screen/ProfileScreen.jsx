@@ -14,7 +14,7 @@ import {
   Share,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { FONT_FAMILY, C } from "../theme";
+import { FONT_FAMILY } from "../theme";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useFavorites } from "../context/FavoritesContext";
@@ -98,7 +98,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
     ? user?.email || ""
     : "Sign in to manage your appointments and preferences";
 
-  const accentColor = C.purple || "#0A84FF";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return (
     <View style={styles.container}>
@@ -257,7 +257,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
             onPress={() => navigate && navigate("Bookings")}
             activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(217, 28, 92, 0.15)" : "#FDF2F5" }]}>
+            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(10, 132, 255, 0.15)" : "#E8F0FE" }]}>
               <Ionicons name="calendar-outline" size={20} color={accentColor} />
             </View>
             <View style={styles.menuTextCol}>
@@ -392,12 +392,12 @@ export default function ProfileScreen({ navigate, onScroll }) {
 }
 
 function getStyles(isDark) {
-  const accentColor = C.purple || "#0A84FF";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#0A0A0C" : "#FAFAFC",
+      backgroundColor: isDark ? "#000000" : "#F2F2F7",
     },
     scrollContent: {
       paddingHorizontal: 20,
@@ -437,7 +437,7 @@ function getStyles(isDark) {
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 2,
-      borderColor: isDark ? "#0A0A0C" : "#FAFAFC",
+      borderColor: isDark ? "#000000" : "#F2F2F7",
     },
     topRightActions: {
       flexDirection: "row",
@@ -450,7 +450,7 @@ function getStyles(isDark) {
       borderRadius: 14,
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F3F4F6",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
       alignItems: "center",
       justifyContent: "center",
       position: "relative",
@@ -477,15 +477,15 @@ function getStyles(isDark) {
     },
     userNameText: {
       fontSize: 22,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#111827",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.4,
       marginBottom: 4,
     },
     userSubtext: {
       fontSize: 13,
       fontWeight: "400",
-      color: isDark ? "#9CA3AF" : "#6B7280",
+      color: isDark ? "#8E8E93" : "#8E8E93",
       lineHeight: 18,
       marginBottom: 14,
     },
@@ -522,7 +522,7 @@ function getStyles(isDark) {
       height: 44,
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#E5E7EB",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
     },
     secondaryAuthBtnText: {
       color: isDark ? "#FFFFFF" : "#374151",
@@ -531,11 +531,11 @@ function getStyles(isDark) {
     },
     promoCard: {
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 20,
-      padding: 18,
-      marginBottom: 18,
+      borderRadius: 14,
+      padding: 16,
+      marginBottom: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F3F4F6",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
@@ -550,7 +550,7 @@ function getStyles(isDark) {
       paddingRight: 10,
     },
     promoTagPill: {
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.15)" : "#FDF2F5",
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.15)" : "#E8F0FE",
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 6,
@@ -564,15 +564,15 @@ function getStyles(isDark) {
       letterSpacing: 0.8,
     },
     promoTitle: {
-      fontSize: 17,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#111827",
+      fontSize: 16,
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.3,
       marginBottom: 4,
     },
     promoSub: {
       fontSize: 12.5,
-      color: isDark ? "#9CA3AF" : "#6B7280",
+      color: isDark ? "#8E8E93" : "#8E8E93",
       lineHeight: 17,
       marginBottom: 10,
     },
@@ -586,32 +586,32 @@ function getStyles(isDark) {
       color: accentColor,
     },
     promoIconWrap: {
-      width: 56,
-      height: 56,
-      borderRadius: 18,
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.15)" : "#FDF2F5",
+      width: 52,
+      height: 52,
+      borderRadius: 16,
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.15)" : "#E8F0FE",
       alignItems: "center",
       justifyContent: "center",
     },
     themeCard: {
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 18,
+      borderRadius: 14,
       padding: 14,
-      marginBottom: 18,
+      marginBottom: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F3F4F6",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
     },
     themeCardHeader: {
       fontSize: 10,
-      fontWeight: "800",
-      color: accentColor,
+      fontWeight: "700",
+      color: isDark ? "#8E8E93" : "#8E8E93",
       letterSpacing: 1,
       marginBottom: 10,
     },
     themeSegmentRow: {
       flexDirection: "row",
-      backgroundColor: isDark ? "#2C2C2E" : "#F3F4F6",
-      borderRadius: 12,
+      backgroundColor: isDark ? "#2C2C2E" : "#E5E5EA",
+      borderRadius: 10,
       padding: 3,
     },
     themeTab: {
@@ -647,10 +647,10 @@ function getStyles(isDark) {
       flexDirection: "row",
       alignItems: "center",
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 16,
+      borderRadius: 12,
       padding: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F3F4F6",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: isDark ? 0.15 : 0.03,
@@ -670,14 +670,14 @@ function getStyles(isDark) {
     },
     menuTitle: {
       fontSize: 14.5,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#111827",
+      fontWeight: "600",
+      color: isDark ? "#FFFFFF" : "#000000",
       marginBottom: 2,
     },
     menuSub: {
       fontSize: 12,
       fontWeight: "400",
-      color: isDark ? "#9CA3AF" : "#6B7280",
+      color: isDark ? "#8E8E93" : "#8E8E93",
     },
   });
 }
