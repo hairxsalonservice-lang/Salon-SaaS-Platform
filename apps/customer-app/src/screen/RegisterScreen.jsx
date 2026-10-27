@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { C } from "../theme";
+// theme tokens not needed — accent derived from isDark
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import ErrorCardModal from "../components/ErrorCardModal";
@@ -360,12 +360,12 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#0071e3";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#000000" : "#FAFAFA",
+      backgroundColor: isDark ? "#000000" : "#F2F2F7",
     },
     content: {
       paddingHorizontal: 24,
@@ -379,28 +379,28 @@ function getStyles(theme, isDark) {
     backBtn: {
       width: 40,
       height: 40,
-      borderRadius: 20,
+      borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#F0F1F5",
+      backgroundColor: isDark ? "#1C1C1E" : "#E5E5EA",
     },
     headerBlock: {
       marginBottom: 28,
     },
     titleText: {
-      fontSize: 34,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontSize: 28,
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.6,
       marginBottom: 6,
     },
     subtitleText: {
       fontSize: 15,
       fontWeight: "400",
-      color: isDark ? "#94A3B8" : "#9498A4",
+      color: "#8E8E93",
     },
     placeholderColor: {
-      color: isDark ? "#64748B" : "#B0B4C0",
+      color: isDark ? "#636366" : "#AEAEB2",
     },
     formContainer: {
       flex: 1,
@@ -408,13 +408,13 @@ function getStyles(theme, isDark) {
     inputPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
-      borderRadius: 20,
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      borderRadius: 12,
       paddingHorizontal: 18,
       height: 54,
       marginBottom: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
     },
     inputIcon: {
       marginRight: 14,
@@ -432,7 +432,7 @@ function getStyles(theme, isDark) {
     pwRuleText: {
       marginLeft: 6,
       fontSize: 12.5,
-      color: isDark ? "#94A3B8" : "#6B7280",
+      color: "#8E8E93",
     },
     pwRuleTextOk: {
       color: "#10B981",
@@ -444,7 +444,7 @@ function getStyles(theme, isDark) {
     genderLabel: {
       fontSize: 14,
       fontWeight: "600",
-      color: isDark ? "#CBD5E1" : "#475569",
+      color: isDark ? "#EBEBF5" : "#3C3C43",
       marginBottom: 8,
       marginLeft: 4,
     },
@@ -465,9 +465,9 @@ function getStyles(theme, isDark) {
       justifyContent: "center",
       height: 44,
       borderRadius: 14,
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderWidth: 1.5,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
     },
     genderChipSelected: {
       backgroundColor: accentColor,
@@ -476,7 +476,7 @@ function getStyles(theme, isDark) {
     genderChipText: {
       fontSize: 13,
       fontWeight: "600",
-      color: isDark ? "#94A3B8" : "#64748B",
+      color: "#8E8E93",
     },
     genderChipTextSelected: {
       color: "#FFFFFF",
@@ -486,30 +486,24 @@ function getStyles(theme, isDark) {
       flex: 1,
       height: "100%",
       fontSize: 15,
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       fontWeight: "500",
     },
     eyeBtn: {
       padding: 6,
     },
     signUpBtn: {
-      height: 56,
-      borderRadius: 28,
+      height: 50, borderRadius: 12,
       backgroundColor: accentColor,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: accentColor,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.3,
-      shadowRadius: 10,
-      elevation: 6,
+      
       marginTop: 8,
       marginBottom: 28,
     },
     signUpBtnText: {
       color: "#FFFFFF",
-      fontSize: 17,
-      fontWeight: "700",
+      fontSize: 16, fontWeight: "600",
       letterSpacing: -0.2,
     },
     dividerRow: {
@@ -519,7 +513,7 @@ function getStyles(theme, isDark) {
     dividerText: {
       fontSize: 13,
       fontWeight: "500",
-      color: isDark ? "#64748B" : "#A0A4B0",
+      color: "#8E8E93",
     },
     socialRow: {
       flexDirection: "row",
@@ -536,7 +530,7 @@ function getStyles(theme, isDark) {
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
@@ -554,12 +548,12 @@ function getStyles(theme, isDark) {
     },
     hasAccountText: {
       fontSize: 14,
-      color: isDark ? "#94A3B8" : "#9498A4",
+      color: "#8E8E93",
     },
     signInText: {
       fontSize: 14,
       fontWeight: "700",
-      color: isDark ? "#A5B4FC" : accentColor,
+      color: accentColor,
     },
   });
 }

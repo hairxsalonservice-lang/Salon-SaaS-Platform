@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { C, S, FS, FW, R, TYPO } from "../theme";
+import { S, FS, FW, R, TYPO } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 import ErrorCardModal from "../components/ErrorCardModal";
@@ -266,12 +266,12 @@ export default function LoginScreen({ navigate, goBack, routeParams }) {
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#0071e3";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#000000" : "#FAFAFA",
+      backgroundColor: isDark ? "#000000" : "#F2F2F7",
     },
     scrollContent: {
       paddingHorizontal: 24,
@@ -290,7 +290,7 @@ function getStyles(theme, isDark) {
       borderRadius: 20,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#F0F1F5",
+      backgroundColor: isDark ? "#1C1C1E" : "#E5E5EA",
     },
     skipBtn: {
       flexDirection: "row",
@@ -298,12 +298,12 @@ function getStyles(theme, isDark) {
       paddingVertical: 6,
       paddingHorizontal: 12,
       borderRadius: 16,
-      backgroundColor: isDark ? "#1C1C1E" : "#F0F1F5",
+      backgroundColor: isDark ? "#1C1C1E" : "#E5E5EA",
     },
     skipText: {
       fontSize: 14,
       fontWeight: "600",
-      color: isDark ? "#A5B4FC" : accentColor,
+      color: accentColor,
       marginRight: 2,
     },
     headerBlock: {
@@ -311,21 +311,21 @@ function getStyles(theme, isDark) {
       alignItems: "center",
     },
     titleText: {
-      fontSize: 34,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
-      letterSpacing: -0.6,
+      fontSize: 28,
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
+      letterSpacing: -0.4,
       marginBottom: 6,
       textAlign: "center",
     },
     subtitleText: {
-      fontSize: 16,
+      fontSize: 15,
       fontWeight: "400",
-      color: isDark ? "#94A3B8" : "#9498A4",
+      color: "#8E8E93",
       textAlign: "center",
     },
     placeholderColor: {
-      color: isDark ? "#64748B" : "#B0B4C0",
+      color: isDark ? "#636366" : "#AEAEB2",
     },
     formContainer: {
       width: "100%",
@@ -333,13 +333,13 @@ function getStyles(theme, isDark) {
     inputPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
-      borderRadius: 20,
-      paddingHorizontal: 18,
-      height: 56,
-      marginBottom: 16,
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      height: 52,
+      marginBottom: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
     },
     inputIcon: {
       marginRight: 14,
@@ -348,7 +348,7 @@ function getStyles(theme, isDark) {
       flex: 1,
       height: "100%",
       fontSize: 15,
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       fontWeight: "500",
     },
     eyeBtn: {
@@ -365,7 +365,7 @@ function getStyles(theme, isDark) {
       width: 22,
       height: 22,
       borderRadius: 6,
-      backgroundColor: isDark ? "#2C2C2E" : "#E0E2E9",
+      backgroundColor: isDark ? "#2C2C2E" : "#E5E5EA",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 10,
@@ -376,25 +376,20 @@ function getStyles(theme, isDark) {
     rememberText: {
       fontSize: 14,
       fontWeight: "600",
-      color: isDark ? "#A5B4FC" : accentColor,
+      color: accentColor,
     },
     signInBtn: {
-      height: 56,
-      borderRadius: 28,
+      height: 50,
+      borderRadius: 12,
       backgroundColor: accentColor,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: accentColor,
-      shadowOffset: { width: 0, height: 6 },
-      shadowOpacity: 0.3,
-      shadowRadius: 10,
-      elevation: 6,
-      marginBottom: 32,
+      marginBottom: 28,
     },
     signInBtnText: {
       color: "#FFFFFF",
-      fontSize: 17,
-      fontWeight: "700",
+      fontSize: 16,
+      fontWeight: "600",
       letterSpacing: -0.2,
     },
     dividerRow: {
@@ -404,7 +399,7 @@ function getStyles(theme, isDark) {
     dividerText: {
       fontSize: 13,
       fontWeight: "500",
-      color: isDark ? "#64748B" : "#A0A4B0",
+      color: "#8E8E93",
     },
     socialRow: {
       flexDirection: "row",
@@ -421,7 +416,7 @@ function getStyles(theme, isDark) {
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#38383A" : "#E5E5EA",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
@@ -440,7 +435,7 @@ function getStyles(theme, isDark) {
     forgotText: {
       fontSize: 14,
       fontWeight: "500",
-      color: isDark ? "#94A3B8" : "#9498A4",
+      color: "#8E8E93",
     },
     signUpRow: {
       flexDirection: "row",
@@ -448,12 +443,12 @@ function getStyles(theme, isDark) {
     },
     noAccountText: {
       fontSize: 14,
-      color: isDark ? "#94A3B8" : "#9498A4",
+      color: "#8E8E93",
     },
     signUpText: {
       fontSize: 14,
-      fontWeight: "700",
-      color: isDark ? "#A5B4FC" : accentColor,
+      fontWeight: "600",
+      color: accentColor,
     },
   });
 }
