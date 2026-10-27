@@ -29,7 +29,7 @@ export default function TermsPage() {
 
       <main className="max-w-[720px] mx-auto px-6 py-20">
         <h1 className="text-[32px] sm:text-[44px] font-bold tracking-[-0.025em] leading-[1.1] text-[#1d1d1f]">Terms &amp; Conditions</h1>
-        <p className="text-[13px] text-[#86868b] mt-3 mb-14">Effective Date: [Insert Date]</p>
+        <p className="text-[13px] text-[#86868b] mt-3 mb-14">Effective Date: 27 October 2026</p>
 
         <div className="space-y-10 text-[14px] leading-relaxed text-[#6e6e73]">
           <section>
@@ -166,7 +166,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-[17px] font-semibold text-[#1d1d1f] mb-3">14. Governing Law &amp; Jurisdiction</h2>
-            <p>These Terms shall be governed by and construed in accordance with the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts of [Insert City], India.</p>
+            <p>These Terms shall be governed by and construed in accordance with the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts of Jatni, Odisha, India.</p>
           </section>
 
           <section>
@@ -184,10 +184,10 @@ export default function TermsPage() {
             <p className="mb-3">For any queries, concerns, or grievances:</p>
             <div className="bg-[#f5f5f7] rounded-2xl p-5 space-y-2">
               <p><strong className="text-[#1d1d1f]">Entity Name:</strong> Hair X Salon</p>
-              <p><strong className="text-[#1d1d1f]">Address:</strong> [Insert business address]</p>
+              <p><strong className="text-[#1d1d1f]">Address:</strong> Biswanath Colony, Jatni - 752050, India</p>
               <p><strong className="text-[#1d1d1f]">Email:</strong> <a href="mailto:support@hairxsalon.com" className="text-[#0071e3] hover:underline">support@hairxsalon.com</a></p>
-              <p><strong className="text-[#1d1d1f]">Phone:</strong> [Insert official contact number]</p>
-              <p><strong className="text-[#1d1d1f]">Grievance Officer:</strong> [Insert name and designation]</p>
+              <p><strong className="text-[#1d1d1f]">Phone:</strong> 9861217447</p>
+              <p><strong className="text-[#1d1d1f]">Grievance Officer:</strong> Manguli Naik, Proprietor</p>
             </div>
           </section>
         </div>

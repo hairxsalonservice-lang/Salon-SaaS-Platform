@@ -29,7 +29,7 @@ export default function PrivacyPolicyPage() {
 
       <main className="max-w-[720px] mx-auto px-6 py-20">
         <h1 className="text-[32px] sm:text-[44px] font-bold tracking-[-0.025em] leading-[1.1] text-[#1d1d1f]">Privacy Policy</h1>
-        <p className="text-[13px] text-[#86868b] mt-3 mb-14">Effective Date: [Insert Date]</p>
+        <p className="text-[13px] text-[#86868b] mt-3 mb-14">Effective Date: 27 October 2026</p>
 
         <div className="space-y-10 text-[14px] leading-relaxed text-[#6e6e73]">
           <section>
@@ -181,15 +181,15 @@ export default function PrivacyPolicyPage() {
             <div className="bg-[#f5f5f7] rounded-2xl p-5 space-y-2">
               <p><strong className="text-[#1d1d1f]">Company Name:</strong> Hair X Salon</p>
               <p><strong className="text-[#1d1d1f]">Email:</strong> <a href="mailto:support@hairxsalon.com" className="text-[#0071e3] hover:underline">support@hairxsalon.com</a></p>
-              <p><strong className="text-[#1d1d1f]">Phone:</strong> [Insert official contact number]</p>
-              <p><strong className="text-[#1d1d1f]">Grievance Officer:</strong> [Insert name and designation]</p>
+              <p><strong className="text-[#1d1d1f]">Phone:</strong> 9861217447</p>
+              <p><strong className="text-[#1d1d1f]">Grievance Officer:</strong> Manguli Naik, Proprietor</p>
             </div>
             <p className="mt-4">If you are not satisfied with our response, you may escalate your complaint to the relevant data protection authority or the Cyber Appellate Tribunal under the Information Technology Act, 2000.</p>
           </section>
 
           <section>
             <h2 className="text-[17px] font-semibold text-[#1d1d1f] mb-3">14. Applicable Law</h2>
-            <p>This Privacy Policy shall be governed by and construed in accordance with the laws of India. Any disputes arising from this Policy shall be subject to the exclusive jurisdiction of the courts in [Insert City], India.</p>
+            <p>This Privacy Policy shall be governed by and construed in accordance with the laws of India. Any disputes arising from this Policy shall be subject to the exclusive jurisdiction of the courts in Jatni, Odisha, India.</p>
           </section>
         </div>
       </main>
