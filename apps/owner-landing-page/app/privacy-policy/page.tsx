@@ -1,4 +1,4 @@
-import { Sparkles, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
@@ -13,9 +13,7 @@ export default function PrivacyPolicyPage() {
       <header className="sticky top-0 z-50 bg-[#090d16]/90 backdrop-blur-xl border-b border-slate-800/60">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
-              <Sparkles className="w-4 h-4" />
-            </div>
+            <img src="/logo.png" alt="HairX" className="w-8 h-8 rounded-lg object-cover" />
             <span className="font-bold text-white text-base tracking-tight">
               HAIR<span className="text-indigo-400">X</span>
             </span>

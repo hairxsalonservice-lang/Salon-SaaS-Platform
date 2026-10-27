@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import {
-  Sparkles,
   Building2,
   Calendar,
   Users,
@@ -141,9 +140,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <Sparkles className="w-5.5 h-5.5 text-white" />
-            </div>
+            <img src="/logo.png" alt="HairX" className="w-10 h-10 rounded-xl object-cover" />
             <div>
               <span className="font-display font-bold text-xl text-white tracking-tight">
                 HAIR<span className="text-indigo-400">X</span>
@@ -991,9 +988,7 @@ export default function LandingPage() {
       <footer className="py-12 px-6 bg-[#070a11] border-t border-slate-800/80 text-xs text-slate-400">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white">
-              <Sparkles className="w-4 h-4" />
-            </div>
+            <img src="/logo.png" alt="HairX" className="w-8 h-8 rounded-lg object-cover" />
             <span className="font-display font-bold text-white text-base tracking-tight">
               HAIR<span className="text-indigo-400">X</span>
             </span>
