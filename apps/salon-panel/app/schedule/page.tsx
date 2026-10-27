@@ -392,7 +392,7 @@ export default function SchedulePage() {
             {canManage && (
               <button
                 onClick={() => setShowGenerateModal(true)}
-                className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
               >
                 <Plus size={15} strokeWidth={2.5} />
                 <span>Generate Slots</span>
@@ -456,7 +456,7 @@ export default function SchedulePage() {
 
                 <button
                   onClick={() => setSelectedDate(getToday())}
-                  className="bg-[#f0f7ff] text-[#5542f6] border border-[#e0f2fe] hover:bg-[#e0f2fe] rounded-xl px-4 py-2 text-xs font-extrabold transition-all shadow-2xs ml-1"
+                  className="bg-[#f0f7ff] text-[#0071e3] border border-[#e0f2fe] hover:bg-[#e0f2fe] rounded-xl px-4 py-2 text-xs font-extrabold transition-all shadow-2xs ml-1"
                 >
                   Today
                 </button>
@@ -482,7 +482,7 @@ export default function SchedulePage() {
                 </button>
                 <button
                   onClick={() => setWeekStart(getMonday(getToday()))}
-                  className="bg-[#f0f7ff] text-[#5542f6] border border-[#e0f2fe] hover:bg-[#e0f2fe] rounded-xl px-4 py-2 text-xs font-extrabold transition-all shadow-2xs ml-1"
+                  className="bg-[#f0f7ff] text-[#0071e3] border border-[#e0f2fe] hover:bg-[#e0f2fe] rounded-xl px-4 py-2 text-xs font-extrabold transition-all shadow-2xs ml-1"
                 >
                   This Week
                 </button>
@@ -614,7 +614,7 @@ export default function SchedulePage() {
                               setSelectedStaffForGenerate(staffId);
                               setShowGenerateModal(true);
                             }}
-                            className="bg-white text-[#5542f6] border border-[#5542f6]/30 hover:bg-[#5542f6]/5 font-bold text-xs px-3.5 py-1.5 rounded-xl transition-all shadow-2xs flex items-center gap-1"
+                            className="bg-white text-[#0071e3] border border-[#0071e3]/30 hover:bg-[#0071e3]/5 font-bold text-xs px-3.5 py-1.5 rounded-xl transition-all shadow-2xs flex items-center gap-1"
                           >
                             <Plus size={13} strokeWidth={2.5} />
                             <span>Generate Slots</span>
@@ -638,7 +638,7 @@ export default function SchedulePage() {
                               setSelectedStaffForGenerate(staffId);
                               setShowGenerateModal(true);
                             }}
-                            className="bg-[#5542f6] hover:bg-[#4332e0] text-white font-bold text-xs px-5 py-2.5 rounded-xl mt-4 shadow-xs transition-all inline-flex items-center gap-1.5"
+                            className="bg-[#0071e3] hover:bg-[#4332e0] text-white font-bold text-xs px-5 py-2.5 rounded-xl mt-4 shadow-xs transition-all inline-flex items-center gap-1.5"
                           >
                             <Plus size={14} strokeWidth={2.5} />
                             <span>Generate Slots</span>
@@ -683,12 +683,12 @@ export default function SchedulePage() {
                                         <div className="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-100">
                                           <span
                                             className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                                              isDone ? "bg-slate-100 text-slate-600" : "bg-[#efeefd] text-[#5542f6]"
+                                              isDone ? "bg-slate-100 text-slate-600" : "bg-[#e8f0fe] text-[#0071e3]"
                                             }`}
                                           >
                                             <span
                                               className={`w-1.5 h-1.5 rounded-full ${
-                                                isDone ? "bg-slate-400" : "bg-[#5542f6] animate-pulse"
+                                                isDone ? "bg-slate-400" : "bg-[#0071e3] animate-pulse"
                                               }`}
                                             />
                                             {appt?.status || (isDone ? "Completed" : "Booked")}
@@ -703,7 +703,7 @@ export default function SchedulePage() {
                                     {/* Appointment Name & Customer */}
                                     <div className="space-y-2">
                                       <div className="flex items-center gap-2.5">
-                                        <div className="w-8 h-8 rounded-full bg-[#efeefd] text-[#5542f6] border border-[#5542f6]/20 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
+                                        <div className="w-8 h-8 rounded-full bg-[#e8f0fe] text-[#0071e3] border border-[#0071e3]/20 flex items-center justify-center font-black text-xs shrink-0 shadow-2xs">
                                           <User size={14} />
                                         </div>
                                         <div className="min-w-0 flex-1">
@@ -717,7 +717,7 @@ export default function SchedulePage() {
                                       {/* Service Details Badge */}
                                       <div className="bg-slate-50 border border-slate-100 rounded-xl p-2 flex items-center justify-between mt-1">
                                         <div className="flex items-center gap-2 min-w-0 pr-2">
-                                          <Sparkles size={13} className="text-[#5542f6] shrink-0" />
+                                          <Sparkles size={13} className="text-[#0071e3] shrink-0" />
                                           <span className="text-xs font-bold text-slate-800 truncate">
                                             {appt?.serviceName || "Service"}
                                           </span>
@@ -765,7 +765,7 @@ export default function SchedulePage() {
                       <th
                         key={date}
                         className={`text-center text-xs font-bold px-3 py-3.5 uppercase tracking-wider ${
-                          date === getToday() ? "text-[#5542f6]" : "text-slate-500"
+                          date === getToday() ? "text-[#0071e3]" : "text-slate-500"
                         }`}
                       >
                         {formatDateShort(date)}
@@ -799,7 +799,7 @@ export default function SchedulePage() {
                             <td
                               key={date}
                               className={`text-center px-3 py-4 ${
-                                date === getToday() ? "bg-[#efeefd]/30" : ""
+                                date === getToday() ? "bg-[#e8f0fe]/30" : ""
                               }`}
                             >
                               {total === 0 ? (
@@ -990,7 +990,7 @@ function GenerateSlotsModal({
         {result ? (
           <button
             onClick={onSuccess}
-            className="flex-1 bg-[#5542f6] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs"
+            className="flex-1 bg-[#0071e3] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs"
           >
             Done
           </button>
@@ -998,7 +998,7 @@ function GenerateSlotsModal({
           <button
             onClick={handleSubmit}
             disabled={saving}
-            className="flex-1 bg-[#5542f6] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs disabled:opacity-50"
+            className="flex-1 bg-[#0071e3] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs disabled:opacity-50"
           >
             {saving ? "Generating..." : "Generate"}
           </button>

@@ -326,7 +326,7 @@ export default function BookingDrawer({
               <button
                 onClick={() => onUpdateStatus(a._id, "IN_PROGRESS")}
                 disabled={isUpdating}
-                className="flex-1 bg-[#5542f6] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-xs"
+                className="flex-1 bg-[#0071e3] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-xs"
               >
                 Start Service
               </button>
@@ -357,7 +357,7 @@ export default function BookingDrawer({
         <div className="border-t border-slate-100 pt-4 flex items-center justify-between mt-2">
           <a
             href={`/schedule?date=${dateStr}`}
-            className="text-xs font-bold text-[#5542f6] hover:underline flex items-center gap-1.5 transition-colors"
+            className="text-xs font-bold text-[#0071e3] hover:underline flex items-center gap-1.5 transition-colors"
           >
             <Calendar size={14} />
             <span>View Schedule for {dateStr}</span>

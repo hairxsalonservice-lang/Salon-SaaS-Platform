@@ -209,7 +209,7 @@ export default function LeaveFormModal({
             <select
               value={form.staffId}
               onChange={(e) => set("staffId", e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs cursor-pointer"
+              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs cursor-pointer"
             >
               {staffList.map((s) => (
                 <option key={s._id} value={s._id}>
@@ -226,7 +226,7 @@ export default function LeaveFormModal({
           <select
             value={form.type}
             onChange={(e) => set("type", e.target.value as LeaveType)}
-            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs cursor-pointer"
+            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs cursor-pointer"
           >
             <option value="SINGLE">Single Day</option>
             <option value="RANGE">Date Range</option>
@@ -242,7 +242,7 @@ export default function LeaveFormModal({
               type="date"
               value={form.date}
               onChange={(e) => set("date", e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs cursor-pointer"
+              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs cursor-pointer"
             />
             {getError("date") && <p className="text-[11px] text-rose-600 font-medium mt-1">{getError("date")}</p>}
           </div>
@@ -254,7 +254,7 @@ export default function LeaveFormModal({
                 type="date"
                 value={form.startDate}
                 onChange={(e) => set("startDate", e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs cursor-pointer"
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs cursor-pointer"
               />
               {getError("startDate") && <p className="text-[11px] text-rose-600 font-medium mt-1">{getError("startDate")}</p>}
             </div>
@@ -264,7 +264,7 @@ export default function LeaveFormModal({
                 type="date"
                 value={form.endDate}
                 onChange={(e) => set("endDate", e.target.value)}
-                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs cursor-pointer"
+                className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs cursor-pointer"
               />
               {getError("endDate") && <p className="text-[11px] text-rose-600 font-medium mt-1">{getError("endDate")}</p>}
             </div>
@@ -284,7 +284,7 @@ export default function LeaveFormModal({
                     onClick={() => toggleWeekday(d.value)}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                       active
-                        ? "bg-[#5542f6] text-white border-[#5542f6] shadow-xs"
+                        ? "bg-[#0071e3] text-white border-[#0071e3] shadow-xs"
                         : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                     }`}
                   >
@@ -314,7 +314,7 @@ export default function LeaveFormModal({
             type="button"
             onClick={() => set("allDay", !form.allDay)}
             className={`w-10 h-6 rounded-full transition-all relative shrink-0 ${
-              form.allDay ? "bg-[#5542f6]" : "bg-slate-300"
+              form.allDay ? "bg-[#0071e3]" : "bg-slate-300"
             }`}
             aria-label="Toggle all day"
           >
@@ -359,7 +359,7 @@ export default function LeaveFormModal({
             value={form.reason}
             onChange={(e) => set("reason", e.target.value)}
             maxLength={200}
-            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs"
+            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-medium text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs"
           />
           {getError("reason") && <p className="text-[11px] text-rose-600 font-medium mt-1">{getError("reason")}</p>}
         </div>
@@ -391,7 +391,7 @@ export default function LeaveFormModal({
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="flex-1 bg-[#5542f6] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs disabled:opacity-50"
+          className="flex-1 bg-[#0071e3] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs disabled:opacity-50"
         >
           {saving ? "Saving..." : isEdit ? "Save Changes" : selfMode ? "Request Leave" : "Add Leave"}
         </button>

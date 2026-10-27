@@ -621,7 +621,7 @@ function BranchDrawer({
             <p className="text-xs font-extrabold text-slate-900">Branch Manager</p>
             <button
               onClick={() => setShowAssign(!showAssign)}
-              className="text-xs font-bold text-[#5542f6] hover:underline"
+              className="text-xs font-bold text-[#0071e3] hover:underline"
             >
               {showAssign ? "Cancel" : b.managerId ? "Change" : "Assign"}
             </button>
@@ -695,7 +695,7 @@ function BranchDrawer({
             <p className="text-xs font-extrabold text-slate-900">Working Hours</p>
             <button
               onClick={() => setEditingHours(!editingHours)}
-              className="text-xs font-bold text-[#5542f6] hover:underline"
+              className="text-xs font-bold text-[#0071e3] hover:underline"
             >
               {editingHours ? "Cancel" : "Edit"}
             </button>
@@ -737,7 +737,7 @@ function BranchDrawer({
                       )
                     }
                     className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
-                      wh.isOpen ? "bg-[#5542f6]" : "bg-slate-300"
+                      wh.isOpen ? "bg-[#0071e3]" : "bg-slate-300"
                     }`}
                   >
                     <span

@@ -171,7 +171,7 @@ export default function StaffPage() {
               branchId ? (
                 <button
                   onClick={() => setShowAddModal(true)}
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
                 >
                   <Plus size={15} strokeWidth={2.5} />
                   <span>Add Staff</span>
@@ -179,7 +179,7 @@ export default function StaffPage() {
               ) : (
                 <Link
                   href="/branches"
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
                 >
                   <Plus size={15} strokeWidth={2.5} />
                   <span>Create Branch First</span>
@@ -200,7 +200,7 @@ export default function StaffPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               disabled={!branchId}
-              className="w-full bg-white border border-slate-200/90 rounded-2xl pl-11 pr-4 py-3 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#5542f6] shadow-2xs transition-all disabled:opacity-50"
+              className="w-full bg-white border border-slate-200/90 rounded-2xl pl-11 pr-4 py-3 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#0071e3] shadow-2xs transition-all disabled:opacity-50"
             />
             {search && (
               <button
@@ -221,7 +221,7 @@ export default function StaffPage() {
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
                 disabled={!branchId}
-                className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#5542f6] shadow-2xs cursor-pointer disabled:opacity-50"
+                className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#0071e3] shadow-2xs cursor-pointer disabled:opacity-50"
               >
                 <option value="all">All Roles</option>
                 <option value="manager">Manager</option>
@@ -236,7 +236,7 @@ export default function StaffPage() {
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 disabled={!branchId}
-                className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#5542f6] shadow-2xs cursor-pointer disabled:opacity-50"
+                className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#0071e3] shadow-2xs cursor-pointer disabled:opacity-50"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -294,7 +294,7 @@ export default function StaffPage() {
             {canManage && (
               <Link
                 href="/branches"
-                className="inline-flex items-center gap-1.5 mt-5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 mt-5 px-5 py-2.5 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
               >
                 <Plus size={15} strokeWidth={2.5} />
                 <span>Go to Branches</span>
@@ -315,7 +315,7 @@ export default function StaffPage() {
             {!search && roleFilter === "all" && canManage && (
               <button
                 onClick={() => setShowAddModal(true)}
-                className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-xl transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 mt-4 px-4 py-2 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-xl transition-all shadow-xs"
               >
                 <Plus size={14} strokeWidth={2.5} />
                 <span>Add Staff Member</span>
@@ -327,7 +327,7 @@ export default function StaffPage() {
             {filtered.map((s) => {
               const isManager = s.role.name.toLowerCase() === "manager";
               const avatarStyle = isManager
-                ? "bg-[#efeefd] text-[#5542f6]"
+                ? "bg-[#e8f0fe] text-[#0071e3]"
                 : "bg-emerald-50 text-emerald-600";
               const badgeStyle = isManager
                 ? "bg-blue-50 text-blue-700 border-blue-200/80"
@@ -351,7 +351,7 @@ export default function StaffPage() {
                         </div>
 
                         <div className="min-w-0">
-                          <h3 className="font-extrabold text-sm text-slate-900 group-hover:text-[#5542f6] transition-colors truncate">
+                          <h3 className="font-extrabold text-sm text-slate-900 group-hover:text-[#0071e3] transition-colors truncate">
                             {s.name}
                           </h3>
                           <div className="mt-1 flex items-center gap-1.5">
@@ -460,7 +460,7 @@ function StaffDrawer({
 
   const isManager = s.role.name.toLowerCase() === "manager";
   const avatarStyle = isManager
-    ? "bg-[#efeefd] text-[#5542f6]"
+    ? "bg-[#e8f0fe] text-[#0071e3]"
     : "bg-emerald-50 text-emerald-600";
   const badgeStyle = isManager
     ? "bg-blue-50 text-blue-700 border-blue-200/80"
@@ -580,7 +580,7 @@ function StaffDrawer({
             <select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
-              className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200/60 rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#5542f6]/20 focus:border-[#5542f6]"
+              className="w-full text-xs font-medium text-slate-800 bg-slate-50 border border-slate-200/60 rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 focus:border-[#0071e3]"
             >
               {branches.map((b) => (
                 <option key={b._id} value={b._id}>
@@ -595,7 +595,7 @@ function StaffDrawer({
               <button
                 onClick={handleReassign}
                 disabled={reassigning}
-                className="mt-2.5 w-full bg-[#5542f6] hover:bg-[#4435d4] text-white font-extrabold text-xs py-2.5 rounded-2xl transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2"
+                className="mt-2.5 w-full bg-[#0071e3] hover:bg-[#4435d4] text-white font-extrabold text-xs py-2.5 rounded-2xl transition-all disabled:opacity-50 inline-flex items-center justify-center gap-2"
               >
                 {reassigning ? "Saving..." : needsAssignment ? "Assign Branch" : "Reassign Branch"}
               </button>

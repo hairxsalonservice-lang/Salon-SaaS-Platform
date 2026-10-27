@@ -167,7 +167,7 @@ export default function ServicesPerformanceDetailPage() {
                 onClick={() => handlePresetChange(p.id)}
                 className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   preset === p.id
-                    ? "bg-[#5542f6] text-white shadow-xs"
+                    ? "bg-[#0071e3] text-white shadow-xs"
                     : "bg-slate-100/80 text-slate-600 hover:bg-slate-200/70"
                 }`}
               >
@@ -177,7 +177,7 @@ export default function ServicesPerformanceDetailPage() {
           </div>
 
           <div className="flex items-center gap-2 text-xs font-bold text-slate-500 bg-slate-50 border border-slate-200/70 px-3 py-1.5 rounded-xl">
-            <Calendar size={13} className="text-[#5542f6]" />
+            <Calendar size={13} className="text-[#0071e3]" />
             <span>
               {dates.startDate} to {dates.endDate}
             </span>
@@ -249,7 +249,7 @@ export default function ServicesPerformanceDetailPage() {
               placeholder="Search service by name or category..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 rounded-2xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#5542f6]/20 shadow-xs"
+              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200/90 rounded-2xl text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 shadow-xs"
             />
           </div>
 
@@ -298,14 +298,14 @@ export default function ServicesPerformanceDetailPage() {
                 Revenue contribution and booking frequency per service
               </p>
             </div>
-            <span className="text-xs font-bold text-[#5542f6] bg-[#efeefd] px-3 py-1 rounded-full">
+            <span className="text-xs font-bold text-[#0071e3] bg-[#e8f0fe] px-3 py-1 rounded-full">
               {filteredList.length} Services
             </span>
           </div>
 
           {loading ? (
             <div className="py-16 text-center space-y-3">
-              <div className="w-8 h-8 border-3 border-[#5542f6] border-t-transparent rounded-full animate-spin mx-auto" />
+              <div className="w-8 h-8 border-3 border-[#0071e3] border-t-transparent rounded-full animate-spin mx-auto" />
               <p className="text-xs font-bold text-slate-400">Loading service analytics...</p>
             </div>
           ) : filteredList.length === 0 ? (
@@ -357,7 +357,7 @@ export default function ServicesPerformanceDetailPage() {
                         {/* Service Name */}
                         <td className="py-4 px-5">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-[#efeefd] text-[#5542f6] border border-[#5542f6]/20 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                            <div className="w-9 h-9 rounded-xl bg-[#e8f0fe] text-[#0071e3] border border-[#0071e3]/20 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
                               <Sparkles size={16} />
                             </div>
                             <span className="text-xs font-black text-slate-900 capitalize">

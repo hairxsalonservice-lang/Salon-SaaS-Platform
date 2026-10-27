@@ -301,7 +301,7 @@ export default function DashboardPage() {
                 </div>
                 <button
                   onClick={() => router.push("/bookings")}
-                  className="text-xs font-bold text-[#5542f6] hover:underline flex items-center gap-1 transition-colors"
+                  className="text-xs font-bold text-[#0071e3] hover:underline flex items-center gap-1 transition-colors"
                 >
                   View all <ArrowRight size={13} />
                 </button>
@@ -348,7 +348,7 @@ export default function DashboardPage() {
                             {getName(item.staffId, "—")}
                           </td>
                           <td className="py-2.5 px-3 whitespace-nowrap">
-                            <span className="bg-[#efeefd] text-[#5542f6] px-2.5 py-0.5 rounded-md text-[11px] font-bold inline-block">
+                            <span className="bg-[#e8f0fe] text-[#0071e3] px-2.5 py-0.5 rounded-md text-[11px] font-bold inline-block">
                               {item.status || "Upcoming"}
                             </span>
                           </td>
@@ -377,7 +377,7 @@ export default function DashboardPage() {
                 {/* 1. Manage Bookings */}
                 <button
                   onClick={() => router.push("/bookings")}
-                  className="bg-[#f5f3ff] text-[#5542f6] hover:bg-[#ede9fe] border border-[#ede9fe] rounded-xl p-2.5 flex items-center justify-between text-xs font-bold transition-all shadow-2xs group"
+                  className="bg-[#f5f3ff] text-[#0071e3] hover:bg-[#ede9fe] border border-[#ede9fe] rounded-xl p-2.5 flex items-center justify-between text-xs font-bold transition-all shadow-2xs group"
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <CalendarDays size={15} className="shrink-0" />
@@ -432,7 +432,7 @@ export default function DashboardPage() {
                 </h2>
                 <button
                   onClick={() => router.push("/bookings")}
-                  className="text-xs font-bold text-[#5542f6] hover:underline flex items-center gap-1 transition-colors"
+                  className="text-xs font-bold text-[#0071e3] hover:underline flex items-center gap-1 transition-colors"
                 >
                   View all <ArrowRight size={12} />
                 </button>
@@ -467,7 +467,7 @@ export default function DashboardPage() {
                             <p className="text-[10px] font-medium text-slate-400">{item.startTime}</p>
                           </td>
                           <td className="py-2 pl-2 text-right whitespace-nowrap">
-                            <span className="bg-[#efeefd] text-[#5542f6] px-2 py-0.5 rounded-md text-[10px] font-bold inline-block">
+                            <span className="bg-[#e8f0fe] text-[#0071e3] px-2 py-0.5 rounded-md text-[10px] font-bold inline-block">
                               {item.status || "Upcoming"}
                             </span>
                           </td>

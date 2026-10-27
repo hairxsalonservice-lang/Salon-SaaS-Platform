@@ -155,7 +155,7 @@ export default function AddStaffModal({
             <select
               value={selectedBranchId}
               onChange={(e) => { setSelectedBranchId(e.target.value); setServerError(null); }}
-              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs cursor-pointer"
+              className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs cursor-pointer"
             >
               {branches.map((b) => (
                 <option key={b._id} value={b._id}>{b.name}</option>
@@ -172,7 +172,7 @@ export default function AddStaffModal({
             placeholder="e.g. Priya Sharma"
             value={form.name}
             onChange={(e) => set("name", e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs"
+            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs"
           />
           {getError("name") && <p className="text-[11px] text-rose-600 font-medium mt-1">{getError("name")}</p>}
         </div>
@@ -185,7 +185,7 @@ export default function AddStaffModal({
             placeholder="priya@salon.com"
             value={form.email}
             onChange={(e) => set("email", e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs"
+            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs"
           />
           {getError("email") && <p className="text-[11px] text-rose-600 font-medium mt-1">{getError("email")}</p>}
         </div>
@@ -198,7 +198,7 @@ export default function AddStaffModal({
             placeholder="+91-9000000000"
             value={form.phone}
             onChange={(e) => set("phone", e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs"
+            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs"
           />
           {getError("phone") && <p className="text-[11px] text-rose-600 font-medium mt-1">{getError("phone")}</p>}
         </div>
@@ -212,7 +212,7 @@ export default function AddStaffModal({
               placeholder="Min 8 chars, uppercase, number, special"
               value={form.password}
               onChange={(e) => set("password", e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl pl-3.5 pr-10 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs"
+              className="w-full bg-white border border-slate-200 rounded-xl pl-3.5 pr-10 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs"
             />
             <button
               type="button"
@@ -254,7 +254,7 @@ export default function AddStaffModal({
           <select
             value={form.role}
             onChange={(e) => set("role", e.target.value as "staff" | "manager")}
-            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#5542f6] shadow-xs cursor-pointer capitalize"
+            className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#0071e3] shadow-xs cursor-pointer capitalize"
           >
             {allowedRoles.map((r) => (
               <option key={r} value={r}>
@@ -285,7 +285,7 @@ export default function AddStaffModal({
         <button
           onClick={handleSubmit}
           disabled={saving}
-          className="flex-1 bg-[#5542f6] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs disabled:opacity-50"
+          className="flex-1 bg-[#0071e3] hover:bg-[#4332e0] text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-xs disabled:opacity-50"
         >
           {saving ? "Adding..." : "Add Staff"}
         </button>

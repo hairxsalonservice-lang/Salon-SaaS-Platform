@@ -198,7 +198,7 @@ function fillDateRange(startStr: string, endStr: string, existing: DailyBooking[
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  hair: "#5542f6",
+  hair: "#0071e3",
   skin: "#e11d48",
   nails: "#ec4899",
   makeup: "#d97706",
@@ -481,7 +481,7 @@ export default function ReportsPage() {
               {/* Chart Legend */}
               <div className="flex items-center gap-4 text-xs font-bold">
                 <div className="flex items-center gap-1.5">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#5542f6]" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#0071e3]" />
                   <span className="text-slate-600">Revenue (₹)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -535,7 +535,7 @@ export default function ReportsPage() {
                               <div className="bg-slate-900 text-white text-[11px] p-3 rounded-2xl shadow-xl whitespace-nowrap space-y-1 border border-slate-700 animate-slide-up">
                                 <p className="font-extrabold text-slate-200">{formatDateShort(d.date)} 2026</p>
                                 <div className="flex items-center gap-1.5 text-purple-300 font-bold">
-                                  <div className="w-2 h-2 rounded-full bg-[#5542f6]" />
+                                  <div className="w-2 h-2 rounded-full bg-[#0071e3]" />
                                   <span>Revenue: {formatPrice(d.revenue)}</span>
                                 </div>
                                 <div className="flex items-center gap-1.5 text-emerald-300 font-bold">
@@ -551,7 +551,7 @@ export default function ReportsPage() {
                             {/* Revenue Bar */}
                             {d.revenue > 0 ? (
                               <div
-                                className="w-1.5 sm:w-2 bg-gradient-to-t from-[#5542f6] to-[#818cf8] rounded-t-full transition-all group-hover:brightness-110 shadow-2xs"
+                                className="w-1.5 sm:w-2 bg-gradient-to-t from-[#0071e3] to-[#818cf8] rounded-t-full transition-all group-hover:brightness-110 shadow-2xs"
                                 style={{ height: `${Math.max(revenuePct, 8)}%` }}
                               />
                             ) : null}
@@ -604,7 +604,7 @@ export default function ReportsPage() {
                 </div>
                 <Link
                   href="/reports/services-performance"
-                  className="text-xs font-bold text-[#5542f6] hover:underline inline-flex items-center gap-1"
+                  className="text-xs font-bold text-[#0071e3] hover:underline inline-flex items-center gap-1"
                 >
                   <span>View All</span>
                   <ArrowRight size={13} />
@@ -664,7 +664,7 @@ export default function ReportsPage() {
             </div>
             <Link
               href="/reports/staff-performance"
-              className="text-xs font-bold text-[#5542f6] hover:underline inline-flex items-center gap-1"
+              className="text-xs font-bold text-[#0071e3] hover:underline inline-flex items-center gap-1"
             >
               <span>View All</span>
               <ArrowRight size={13} />

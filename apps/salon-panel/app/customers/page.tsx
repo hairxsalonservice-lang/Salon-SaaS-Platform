@@ -317,7 +317,7 @@ export default function CustomersPage() {
               placeholder="Search by name, email, or phone..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-white border border-slate-200/90 rounded-2xl pl-11 pr-4 py-3 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#5542f6] shadow-2xs transition-all"
+              className="w-full bg-white border border-slate-200/90 rounded-2xl pl-11 pr-4 py-3 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#0071e3] shadow-2xs transition-all"
             />
             {search && (
               <button
@@ -335,7 +335,7 @@ export default function CustomersPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full bg-white border border-slate-200/90 rounded-2xl pl-9 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#5542f6] shadow-2xs cursor-pointer"
+              className="w-full bg-white border border-slate-200/90 rounded-2xl pl-9 pr-8 py-3 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#0071e3] shadow-2xs cursor-pointer"
             >
               <option value="visits">Most Visits</option>
               <option value="spent">Most Spent</option>
@@ -414,7 +414,7 @@ export default function CustomersPage() {
                               {getInitials(c.name)}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs font-extrabold text-slate-900 group-hover:text-[#5542f6] transition-colors truncate">
+                              <p className="text-xs font-extrabold text-slate-900 group-hover:text-[#0071e3] transition-colors truncate">
                                 {c.name}
                               </p>
                               <p className="text-[11px] font-medium text-slate-400 truncate">

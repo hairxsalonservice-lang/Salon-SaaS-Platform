@@ -140,7 +140,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-12 bg-white text-slate-900 font-sans selection:bg-[#5542f6] selection:text-white">
+    <div className="min-h-screen w-full grid grid-cols-1 lg:grid-cols-12 bg-white text-[#1d1d1f] font-sans selection:bg-[#0071e3] selection:text-white">
       
       {/* ── Left Side: High-Resolution Salon Imagery & Showcase ── */}
       <div className="lg:col-span-7 xl:col-span-7 relative hidden lg:flex flex-col justify-between p-12 xl:p-16 text-white overflow-hidden min-h-screen">
@@ -155,7 +155,7 @@ export default function LoginPage() {
         />
 
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/40 backdrop-brightness-90" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-[#1d1d1f]/40 backdrop-brightness-90" />
 
         {/* Top Branding Pill */}
         <div className="relative z-10 flex items-center justify-between">
@@ -166,7 +166,7 @@ export default function LoginPage() {
               className="w-10 h-10 rounded-xl object-contain bg-black p-1 shrink-0 shadow-lg border border-white/20 backdrop-blur-md"
             />
             <div>
-              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-amber-400">
+              <p className="text-[10px] font-black tracking-[0.2em] uppercase text-[#64d2ff]">
                 HAIRX PARTNER
               </p>
               <p className="text-xs font-bold text-white tracking-wide">
@@ -176,7 +176,7 @@ export default function LoginPage() {
           </div>
 
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md text-white text-xs font-semibold">
-            <Sparkles size={13} className="text-amber-400 animate-pulse" />
+            <Sparkles size={13} className="text-[#64d2ff] animate-pulse" />
             <span>Partner Portal</span>
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function LoginPage() {
         <div className="relative z-10 max-w-xl my-auto space-y-6">
           <h1 className="text-4xl xl:text-5xl font-black tracking-tight leading-none text-white drop-shadow-sm">
             Manage your salon with <br />
-            <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-indigo-300 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#64d2ff] via-[#0071e3] to-[#5e5ce6] bg-clip-text text-transparent">
               unmatched precision.
             </span>
           </h1>
@@ -196,7 +196,7 @@ export default function LoginPage() {
           {/* Key Feature Highlights */}
           <div className="grid grid-cols-3 gap-3 pt-4">
             <div className="bg-white/10 border border-white/15 rounded-2xl p-3.5 backdrop-blur-md space-y-1">
-              <div className="w-7 h-7 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-[#64d2ff]/20 text-[#64d2ff] flex items-center justify-center">
                 <Zap size={15} />
               </div>
               <p className="text-xs font-bold text-white mt-1">Live Sync</p>
@@ -204,7 +204,7 @@ export default function LoginPage() {
             </div>
 
             <div className="bg-white/10 border border-white/15 rounded-2xl p-3.5 backdrop-blur-md space-y-1">
-              <div className="w-7 h-7 rounded-lg bg-indigo-400/20 text-indigo-300 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-[#0071e3]/20 text-[#5ac8fa] flex items-center justify-center">
                 <Building2 size={15} />
               </div>
               <p className="text-xs font-bold text-white mt-1">Branches</p>
@@ -224,7 +224,7 @@ export default function LoginPage() {
         {/* Bottom Rating Card */}
         <div className="relative z-10 flex items-center justify-between bg-black/40 border border-white/15 rounded-2xl p-4 backdrop-blur-md">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1 text-amber-400">
+            <div className="flex items-center gap-1 text-[#ffd60a]">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Star key={i} size={14} fill="currentColor" />
               ))}
@@ -286,7 +286,7 @@ export default function LoginPage() {
                     setEmail(e.target.value);
                     setError("");
                   }}
-                  className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 focus:outline-none transition-all"
+                  className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 focus:outline-none transition-all"
                 />
                 <Mail size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
               </div>
@@ -306,7 +306,7 @@ export default function LoginPage() {
                     setPassword(e.target.value);
                     setError("");
                   }}
-                  className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 focus:outline-none transition-all"
+                  className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 focus:outline-none transition-all"
                 />
                 <Lock size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
                 <button
@@ -325,7 +325,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setForgotStep(1)}
-                className="text-xs font-semibold text-[#5542f6] hover:text-[#4338ca] transition-colors"
+                className="text-xs font-semibold text-[#0071e3] hover:text-[#0062c4] transition-colors"
               >
                 Forgot password?
               </button>
@@ -344,7 +344,7 @@ export default function LoginPage() {
               type="button"
               onClick={handleLogin}
               disabled={loading}
-              className="w-full h-12 bg-[#5542f6] hover:bg-[#4338ca] active:scale-[0.99] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#5542f6]/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+              className="w-full h-12 bg-[#0071e3] hover:bg-[#0062c4] active:scale-[0.99] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-md shadow-[#0071e3]/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed mt-2"
             >
               {loading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -394,11 +394,11 @@ export default function LoginPage() {
                     value={forgotEmail}
                     onChange={(e) => { setForgotEmail(e.target.value); setForgotError(""); }}
                     onKeyDown={(e) => e.key === "Enter" && handleForgotSubmit()}
-                    className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 focus:outline-none transition-all"
+                    className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 focus:outline-none transition-all"
                   />
                   <Mail size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
                 </div>
-                <button onClick={handleForgotSubmit} disabled={forgotLoading} className="w-full h-11 bg-[#5542f6] hover:bg-[#4338ca] text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                <button onClick={handleForgotSubmit} disabled={forgotLoading} className="w-full h-11 bg-[#0071e3] hover:bg-[#0062c4] text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70">
                   {forgotLoading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : "Send Code"}
                 </button>
               </>
@@ -426,7 +426,7 @@ export default function LoginPage() {
                   maxLength={6}
                   value={otp}
                   onChange={(e) => { setOtp(e.target.value.replace(/\D/g, "")); setForgotError(""); }}
-                  className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-center tracking-[0.3em] text-slate-900 placeholder:text-slate-400 placeholder:tracking-normal placeholder:font-medium focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 focus:outline-none transition-all"
+                  className="w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-center tracking-[0.3em] text-slate-900 placeholder:text-slate-400 placeholder:tracking-normal placeholder:font-medium focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 focus:outline-none transition-all"
                 />
                 <div className="relative">
                   <input
@@ -434,7 +434,7 @@ export default function LoginPage() {
                     placeholder="New password"
                     value={newPassword}
                     onChange={(e) => { setNewPassword(e.target.value); setForgotError(""); }}
-                    className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 focus:outline-none transition-all"
+                    className="w-full h-11 pl-10 pr-10 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 focus:outline-none transition-all"
                   />
                   <Lock size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
                   <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 transition-colors">
@@ -448,11 +448,11 @@ export default function LoginPage() {
                     value={confirmPassword}
                     onChange={(e) => { setConfirmPassword(e.target.value); setForgotError(""); }}
                     onKeyDown={(e) => e.key === "Enter" && handleResetSubmit()}
-                    className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 focus:outline-none transition-all"
+                    className="w-full h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 focus:outline-none transition-all"
                   />
                   <Lock size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
                 </div>
-                <button onClick={handleResetSubmit} disabled={forgotLoading} className="w-full h-11 bg-[#5542f6] hover:bg-[#4338ca] text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+                <button onClick={handleResetSubmit} disabled={forgotLoading} className="w-full h-11 bg-[#0071e3] hover:bg-[#0062c4] text-white text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70">
                   {forgotLoading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : "Change Password"}
                 </button>
               </>
@@ -466,7 +466,7 @@ export default function LoginPage() {
                 </div>
                 <h3 className="text-xl font-black text-slate-900">Password Reset</h3>
                 <p className="text-sm text-slate-500 text-center">Your password has been reset successfully.</p>
-                <button onClick={closeForgot} className="h-11 px-8 bg-[#5542f6] hover:bg-[#4338ca] text-white text-sm font-bold rounded-xl transition-all">
+                <button onClick={closeForgot} className="h-11 px-8 bg-[#0071e3] hover:bg-[#0062c4] text-white text-sm font-bold rounded-xl transition-all">
                   Back to Sign In
                 </button>
               </div>

@@ -91,12 +91,8 @@ export default function Sidebar({
     const poll = async () => {
       try {
         const count = await getUnreadCount();
-        if (!cancelled) {
-          setUnread(count);
-        }
-      } catch {
-        // silent fallback
-      }
+        if (!cancelled) setUnread(count);
+      } catch {}
     };
     poll();
     const timer = setInterval(poll, UNREAD_POLL_MS);
@@ -145,14 +141,14 @@ export default function Sidebar({
     onClose();
   }
 
-  const sidebarWidth = collapsed ? "w-[72px]" : "w-64";
+  const sidebarWidth = collapsed ? "w-[68px]" : "w-[240px]";
 
   return (
     <>
       {/* Mobile backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-slate-900/30 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
@@ -160,110 +156,110 @@ export default function Sidebar({
       {/* Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-40 ${sidebarWidth} bg-white border-r border-slate-200/80
-          flex flex-col transition-all duration-300 ease-in-out shadow-sm
+          fixed inset-y-0 left-0 z-40 ${sidebarWidth} bg-white/80 backdrop-blur-2xl
+          border-r border-[#d2d2d7]/50
+          flex flex-col transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0
         `}
       >
-        {/* Brand Header */}
-        <div className={`px-5 pt-5 pb-6 shrink-0 flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
+        {/* Brand */}
+        <div className={`px-4 pt-4 pb-5 shrink-0 flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
           {!collapsed ? (
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               <img
                 src="/logo.png"
-                alt="HairX Logo"
-                className="w-10 h-10 rounded-xl object-contain bg-black p-1 shrink-0 shadow-md border border-slate-800"
+                alt="HairX"
+                className="w-8 h-8 rounded-lg object-cover shrink-0"
               />
               <div className="min-w-0">
-                <p className="text-[9px] font-extrabold tracking-[0.18em] text-slate-400 uppercase">
-                  HAIRX PARTNER
+                <p className="text-[10px] font-semibold tracking-wider text-[#86868b] uppercase">
+                  HairX
                 </p>
-                <h1 className="text-sm font-extrabold text-slate-900 leading-tight truncate">
-                  {salonName || "Ramesh Salon"}
+                <h1 className="text-[13px] font-semibold text-[#1d1d1f] leading-tight truncate">
+                  {salonName || "Salon"}
                 </h1>
               </div>
             </div>
           ) : (
             <img
               src="/logo.png"
-              alt="HairX Logo"
-              className="w-9 h-9 rounded-xl object-contain bg-black p-1 shrink-0 shadow-md border border-slate-800"
+              alt="HairX"
+              className="w-8 h-8 rounded-lg object-cover shrink-0"
             />
           )}
           <button
             onClick={onToggleCollapse}
-            className="hidden lg:flex text-slate-400 hover:text-slate-700 transition-colors p-1"
+            className="hidden lg:flex text-[#aeaeb2] hover:text-[#1d1d1f] transition-colors p-1 rounded-md hover:bg-[#f5f5f7]"
           >
             {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 overflow-y-auto space-y-5 scrollbar-thin">
-          {/* Main Items */}
+        <nav className="flex-1 px-2.5 overflow-y-auto space-y-4 scrollbar-thin">
           <NavGroup items={mainItems} currentPage={currentPage} collapsed={collapsed} onNavigate={handleNavigate} unread={unread} />
 
-          {/* Management Items */}
           {manageItems.length > 0 && (
-            <div className="pt-2">
+            <div>
               {!collapsed && (
-                <p className="text-[10px] font-extrabold tracking-[0.15em] text-slate-400 uppercase px-3 mb-2">
-                  MANAGE
+                <p className="text-[10px] font-semibold tracking-wider text-[#aeaeb2] uppercase px-2.5 mb-1.5">
+                  Manage
                 </p>
               )}
+              {collapsed && <div className="border-t border-[#e5e5ea] mx-2 mb-2" />}
               <NavGroup items={manageItems} currentPage={currentPage} collapsed={collapsed} onNavigate={handleNavigate} unread={unread} />
             </div>
           )}
 
-          {/* Other Items */}
           {otherItems.length > 0 && (
-            <div className="pt-2">
+            <div>
+              {collapsed && <div className="border-t border-[#e5e5ea] mx-2 mb-2" />}
               <NavGroup items={otherItems} currentPage={currentPage} collapsed={collapsed} onNavigate={handleNavigate} unread={unread} />
             </div>
           )}
         </nav>
 
         {/* Profile Footer */}
-        <div className="p-3 border-t border-slate-100 shrink-0 bg-white">
-          <div className={`flex items-center ${collapsed ? "flex-col gap-2" : "gap-2 px-1 py-1"}`}>
-            <div className="w-9 h-9 rounded-full bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-sm">
-              {initials || "R"}
+        <div className="p-2.5 border-t border-[#e5e5ea]/60 shrink-0">
+          <div className={`flex items-center ${collapsed ? "flex-col gap-2" : "gap-2.5 px-1.5 py-1"}`}>
+            <div className="w-8 h-8 rounded-full bg-[#1d1d1f] text-white flex items-center justify-center text-[11px] font-semibold shrink-0">
+              {initials || "?"}
             </div>
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-slate-900 truncate">{name || "Ramesh rana"}</p>
-                <p className="text-[11px] font-medium text-slate-400 capitalize">{role || "Owner"}</p>
+                <p className="text-[12px] font-semibold text-[#1d1d1f] truncate">{name || "User"}</p>
+                <p className="text-[10px] font-medium text-[#86868b] capitalize">{role || "Owner"}</p>
               </div>
             )}
             {!collapsed ? (
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center gap-0.5 shrink-0">
                 {onChangePassword && (
                   <button
                     onClick={onChangePassword}
                     title="Change Password"
-                    className="text-slate-400 hover:text-[#5542f6] hover:bg-[#efeefd] transition-colors p-1.5 rounded-lg"
+                    className="text-[#aeaeb2] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition-colors p-1.5 rounded-lg"
                   >
-                    <KeyRound size={16} strokeWidth={1.75} />
+                    <KeyRound size={15} strokeWidth={1.75} />
                   </button>
                 )}
                 <button
                   onClick={onLogout}
                   title="Sign out"
-                  className="text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors p-1.5 rounded-lg"
+                  className="text-[#aeaeb2] hover:text-[#ff3b30] hover:bg-red-50 transition-colors p-1.5 rounded-lg"
                 >
-                  <LogOut size={16} strokeWidth={1.75} />
+                  <LogOut size={15} strokeWidth={1.75} />
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col items-center gap-1 shrink-0">
+              <div className="flex flex-col items-center gap-0.5 shrink-0">
                 {onChangePassword && (
                   <button
                     onClick={onChangePassword}
                     title="Change Password"
-                    className="text-slate-400 hover:text-[#5542f6] hover:bg-[#efeefd] transition-colors p-1.5 rounded-lg"
+                    className="text-[#aeaeb2] hover:text-[#1d1d1f] hover:bg-[#f5f5f7] transition-colors p-1.5 rounded-lg"
                   >
-                    <KeyRound size={16} strokeWidth={1.75} />
+                    <KeyRound size={15} strokeWidth={1.75} />
                   </button>
                 )}
               </div>
@@ -289,7 +285,7 @@ function NavGroup({
   unread: number;
 }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-0.5">
       {items.map(({ page, label, icon: Icon }) => {
         const active = currentPage === page;
         const showBadge = page === "notifications" && unread > 0;
@@ -299,22 +295,26 @@ function NavGroup({
             onClick={() => onNavigate(page)}
             title={collapsed ? label : undefined}
             className={`
-              relative w-full flex items-center gap-3.5 rounded-xl text-xs font-semibold
+              relative w-full flex items-center gap-3 rounded-lg text-[12px] font-medium
               transition-all duration-150
-              ${collapsed ? "justify-center px-2 py-3" : "px-3.5 py-2.5"}
+              ${collapsed ? "justify-center px-2 py-2.5" : "px-2.5 py-2"}
               ${
                 active
-                  ? "bg-[#efeefd] text-[#5542f6]"
-                  : "text-slate-600 hover:text-[#5542f6] hover:bg-slate-50"
+                  ? "bg-[#f5f5f7] text-[#1d1d1f]"
+                  : "text-[#6e6e73] hover:text-[#1d1d1f] hover:bg-[#f5f5f7]/60"
               }
             `}
           >
-            <Icon size={18} strokeWidth={active ? 2.2 : 1.75} className={active ? "text-[#5542f6]" : "text-slate-500"} />
-            {!collapsed && <span className="flex-1 text-left tracking-wide">{label}</span>}
+            <Icon
+              size={17}
+              strokeWidth={active ? 2 : 1.5}
+              className={active ? "text-[#0071e3]" : "text-[#86868b]"}
+            />
+            {!collapsed && <span className="flex-1 text-left">{label}</span>}
             {showBadge && (
               <span
-                className={`rounded-full bg-rose-500 text-white text-[10px] font-extrabold flex items-center justify-center h-4 min-w-[16px] px-1 shrink-0 shadow-sm ${
-                  collapsed ? "absolute top-1 right-1" : ""
+                className={`rounded-full bg-[#ff3b30] text-white text-[9px] font-bold flex items-center justify-center h-[16px] min-w-[16px] px-1 shrink-0 ${
+                  collapsed ? "absolute top-0.5 right-0.5" : ""
                 }`}
               >
                 {unread > 99 ? "99+" : unread}

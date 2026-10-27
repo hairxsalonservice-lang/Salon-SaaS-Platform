@@ -304,7 +304,7 @@ export default function LeavesPage() {
                 setEditing(null);
                 setShowModal(true);
               }}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
             >
               <Plus size={15} strokeWidth={2.5} />
               <span>{selfMode ? "Request Leave" : "Add Leave"}</span>
@@ -322,7 +322,7 @@ export default function LeavesPage() {
                 <select
                   value={selectedStaffId}
                   onChange={(e) => setSelectedStaffId(e.target.value)}
-                  className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-2.5 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#5542f6] shadow-2xs cursor-pointer"
+                  className="w-full bg-white border border-slate-200/90 rounded-2xl pl-10 pr-8 py-2.5 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:border-[#0071e3] shadow-2xs cursor-pointer"
                 >
                   {staffList.map((s) => (
                     <option key={s._id} value={s._id}>
@@ -362,7 +362,7 @@ export default function LeavesPage() {
               type="checkbox"
               checked={includePast}
               onChange={(e) => setIncludePast(e.target.checked)}
-              className="w-4 h-4 rounded-md text-[#5542f6] focus:ring-[#5542f6] border-slate-300 accent-[#5542f6] cursor-pointer"
+              className="w-4 h-4 rounded-md text-[#0071e3] focus:ring-[#0071e3] border-slate-300 accent-[#0071e3] cursor-pointer"
             />
             <span>Show cancelled / past leaves</span>
           </label>
@@ -510,7 +510,7 @@ export default function LeavesPage() {
                   setEditing(null);
                   setShowModal(true);
                 }}
-                className="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                className="mt-4 inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
               >
                 <Plus size={15} strokeWidth={2.5} />
                 <span>Add Leave</span>

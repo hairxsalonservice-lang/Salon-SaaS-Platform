@@ -113,7 +113,7 @@ export default function AttendancePage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-xs">
             <div className="flex items-center gap-2 mb-2">
-              <CalendarDays size={14} className="text-[#5542f6]" />
+              <CalendarDays size={14} className="text-[#0071e3]" />
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Days Present</span>
             </div>
             <p className="text-2xl font-black text-slate-900">{totalDays}</p>
@@ -145,7 +145,7 @@ export default function AttendancePage() {
         {canManage && summary.length > 0 && (
           <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs overflow-hidden">
             <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2">
-              <Users size={15} className="text-[#5542f6]" />
+              <Users size={15} className="text-[#0071e3]" />
               <h2 className="text-sm font-extrabold text-slate-800">Staff Summary</h2>
             </div>
             <div className="overflow-x-auto">
@@ -186,7 +186,7 @@ export default function AttendancePage() {
         {/* Attendance Records Table */}
         <div className="bg-white border border-slate-200/80 rounded-xl shadow-xs overflow-hidden">
           <div className="px-5 py-3 border-b border-slate-100 flex items-center gap-2">
-            <Timer size={15} className="text-[#5542f6]" />
+            <Timer size={15} className="text-[#0071e3]" />
             <h2 className="text-sm font-extrabold text-slate-800">Attendance Log</h2>
           </div>
 

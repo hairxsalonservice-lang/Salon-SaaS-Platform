@@ -117,7 +117,7 @@ export default function ChangePasswordModal({
         {/* Modal Header */}
         <div className="px-6 pt-6 pb-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#efeefd] text-[#5542f6] flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-[#e8f0fe] text-[#0071e3] flex items-center justify-center shrink-0">
               <ShieldCheck size={20} strokeWidth={2.2} />
             </div>
             <div>
@@ -173,7 +173,7 @@ export default function ChangePasswordModal({
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
                     required
-                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 transition-all outline-none"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 transition-all outline-none"
                   />
                   <button
                     type="button"
@@ -197,7 +197,7 @@ export default function ChangePasswordModal({
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter new password"
                     required
-                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 transition-all outline-none"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 transition-all outline-none"
                   />
                   <button
                     type="button"
@@ -252,7 +252,7 @@ export default function ChangePasswordModal({
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter new password"
                     required
-                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:border-[#5542f6] focus:ring-2 focus:ring-[#5542f6]/20 transition-all outline-none"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:bg-white focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20 transition-all outline-none"
                   />
                   <button
                     type="button"
@@ -288,7 +288,7 @@ export default function ChangePasswordModal({
                 <button
                   type="submit"
                   disabled={loading || !allRulesPassed || !passwordsMatch || !currentPassword}
-                  className="px-5 py-2.5 rounded-xl bg-[#5542f6] hover:bg-[#4332d6] text-white text-xs font-extrabold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-xl bg-[#0071e3] hover:bg-[#4332d6] text-white text-xs font-extrabold transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {loading && <Loader2 size={14} className="animate-spin" />}
                   <span>{loading ? "Updating..." : "Update Password"}</span>

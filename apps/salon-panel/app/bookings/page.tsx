@@ -409,17 +409,17 @@ export default function BookingsPage() {
               placeholder="Search by client, service, staff, branch..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50/80 border border-slate-200/60 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5542f6]/20 transition-all"
+              className="w-full bg-slate-50/80 border border-slate-200/60 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 transition-all"
             />
           </div>
 
           {/* Branch Filter Select */}
           <div className="relative w-48">
-            <Building2 size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5542f6]" />
+            <Building2 size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0071e3]" />
             <select
               value={branchFilter}
               onChange={(e) => setBranchFilter(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:ring-[#5542f6]/20 shadow-xs cursor-pointer"
+              className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 shadow-xs cursor-pointer"
             >
               <option value="all">All Branches</option>
               {branchOptions.map((b) => (
@@ -435,11 +435,11 @@ export default function BookingsPage() {
 
           {/* Status Filter Select */}
           <div className="relative w-44">
-            <Clock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5542f6]" />
+            <Clock size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0071e3]" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:ring-[#5542f6]/20 shadow-xs cursor-pointer"
+              className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-8 py-2.5 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 shadow-xs cursor-pointer"
             >
               {STATUS_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -460,7 +460,7 @@ export default function BookingsPage() {
                 setPageSize(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:ring-[#5542f6]/20 shadow-xs cursor-pointer"
+              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 appearance-none focus:outline-none focus:ring-2 focus:ring-[#0071e3]/20 shadow-xs cursor-pointer"
             >
               {PAGE_SIZE_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -610,7 +610,7 @@ export default function BookingsPage() {
                                 <XCircle size={12} strokeWidth={2.5} /> No Show
                               </span>
                             ) : (
-                              <span className="bg-indigo-50 text-[#5542f6] border border-indigo-200/80 font-extrabold text-xs px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-2xs">
+                              <span className="bg-indigo-50 text-[#0071e3] border border-indigo-200/80 font-extrabold text-xs px-3 py-1 rounded-full inline-flex items-center gap-1 shadow-2xs">
                                 <CalendarCheck size={12} strokeWidth={2.5} /> Confirmed
                               </span>
                             )}

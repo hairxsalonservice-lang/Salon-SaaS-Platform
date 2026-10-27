@@ -256,7 +256,7 @@ export default function ServicesPage() {
               ) : (
                 <Link
                   href="/branches"
-                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
                 >
                   <Plus size={15} strokeWidth={2.5} />
                   <span>Create Branch First</span>
@@ -370,7 +370,7 @@ export default function ServicesPage() {
             {canManage && (
               <Link
                 href="/branches"
-                className="inline-flex items-center gap-1.5 mt-5 px-5 py-2.5 text-xs font-bold bg-[#5542f6] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
+                className="inline-flex items-center gap-1.5 mt-5 px-5 py-2.5 text-xs font-bold bg-[#0071e3] hover:bg-[#4332e0] text-white rounded-2xl transition-all shadow-xs"
               >
                 <Plus size={15} strokeWidth={2.5} />
                 <span>Go to Branches</span>
