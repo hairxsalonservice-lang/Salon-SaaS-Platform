@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import ThemeToggle from "@/lib/ThemeToggle";
 
 export const metadata = {
   title: "Terms & Conditions — HairX Salon Platform",
@@ -8,22 +9,25 @@ export const metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-white text-[#1d1d1f]">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[#d2d2d7]/60">
+    <div className="min-h-screen bg-white dark:bg-[#09090b] text-[#1d1d1f] dark:text-[#f5f5f7] transition-colors duration-250">
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-xl border-b border-[#d2d2d7]/60 dark:border-white/10 transition-colors duration-250">
         <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <img src="/logo.png" alt="HairX" className="w-8 h-8 rounded-lg object-cover" />
-            <span className="font-semibold text-[17px] tracking-tight">
+            <span className="font-semibold text-[17px] tracking-tight text-[#1d1d1f] dark:text-white">
               Hair<span className="font-bold">X</span>
             </span>
           </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-[13px] font-medium text-[#6e6e73] hover:text-[#1d1d1f] transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Link>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-[13px] font-medium text-[#6e6e73] dark:text-[#a1a1a6] hover:text-[#1d1d1f] dark:hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -182,18 +186,18 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[17px] font-semibold text-[#1d1d1f] mb-3">17. Contact Information</h2>
             <p className="mb-3">For any queries, concerns, or grievances:</p>
-            <div className="bg-[#f5f5f7] rounded-2xl p-5 space-y-2">
-              <p><strong className="text-[#1d1d1f]">Entity Name:</strong> Hair X Salon</p>
-              <p><strong className="text-[#1d1d1f]">Address:</strong> Biswanath Colony, Jatni - 752050, India</p>
-              <p><strong className="text-[#1d1d1f]">Email:</strong> <a href="mailto:support@hairxsalon.com" className="text-[#0071e3] hover:underline">support@hairxsalon.com</a></p>
-              <p><strong className="text-[#1d1d1f]">Phone:</strong> 9861217447</p>
-              <p><strong className="text-[#1d1d1f]">Grievance Officer:</strong> Manguli Naik, Proprietor</p>
+            <div className="bg-[#f5f5f7] dark:bg-[#16161a] border border-transparent dark:border-white/10 rounded-2xl p-5 space-y-2">
+              <p><strong className="text-[#1d1d1f] dark:text-white">Entity Name:</strong> Hair X Salon</p>
+              <p><strong className="text-[#1d1d1f] dark:text-white">Address:</strong> Biswanath Colony, Jatni - 752050, India</p>
+              <p><strong className="text-[#1d1d1f] dark:text-white">Email:</strong> <a href="mailto:support@hairxsalon.com" className="text-[#0071e3] hover:underline">support@hairxsalon.com</a></p>
+              <p><strong className="text-[#1d1d1f] dark:text-white">Phone:</strong> 9861217447</p>
+              <p><strong className="text-[#1d1d1f] dark:text-white">Grievance Officer:</strong> Manguli Naik, Proprietor</p>
             </div>
           </section>
         </div>
       </main>
 
-      <footer className="border-t border-[#d2d2d7] py-6 px-6 text-center text-[12px] text-[#86868b]">
+      <footer className="border-t border-[#d2d2d7] dark:border-white/10 py-6 px-6 text-center text-[12px] text-[#86868b] dark:text-[#71717a]">
         <p>© 2026 HairX. All rights reserved.</p>
       </footer>
     </div>
