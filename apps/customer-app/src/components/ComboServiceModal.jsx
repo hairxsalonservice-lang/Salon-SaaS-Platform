@@ -215,7 +215,7 @@ function getStyles(theme, isDark, insets) {
       flex: 1,
     },
     sheetContainer: {
-      backgroundColor: isDark ? "#141416" : "#FFFFFF",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderTopLeftRadius: 28,
       borderTopRightRadius: 28,
       maxHeight: SCREEN_HEIGHT * 0.88,
@@ -351,7 +351,7 @@ function getStyles(theme, isDark, insets) {
       paddingBottom: bottomPadding,
       borderTopWidth: 1,
       borderTopColor: isDark ? "#242426" : "#F1F2F4",
-      backgroundColor: isDark ? "#141416" : "#FFFFFF",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
     },
     priceMetaCol: {
       flex: 1,

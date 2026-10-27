@@ -166,7 +166,7 @@ export default function CategoryAccordionList({
                   size={18}
                   color={
                     isExpanded || selectedInGroup
-                      ? C.purple || "#6C5CE7"
+                      ? C.purple || "#0071e3"
                       : isDark
                         ? "#94A3B8"
                         : "#8E8E93"
@@ -243,7 +243,7 @@ export default function CategoryAccordionList({
                           <Ionicons
                             name={isSelected ? "checkmark" : "add"}
                             size={16}
-                            color={isSelected ? "#FFFFFF" : C.purple || "#6C5CE7"}
+                            color={isSelected ? "#FFFFFF" : C.purple || "#0071e3"}
                           />
                         </SpringTouchable>
                       </View>
@@ -261,7 +261,7 @@ export default function CategoryAccordionList({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.purple || "#0071e3";
 
   return StyleSheet.create({
     container: {
@@ -307,7 +307,7 @@ function getStyles(theme, isDark) {
     },
     accordionHeaderExpanded: {
       borderBottomWidth: 1,
-      borderBottomColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderBottomColor: isDark ? "#2C2C2E" : "#EBECEF",
     },
     categoryTitle: {
       fontSize: 16,
@@ -343,7 +343,7 @@ function getStyles(theme, isDark) {
       marginTop: 1,
     },
     expandedContent: {
-      backgroundColor: isDark ? "#141416" : "#FFFFFF",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       paddingHorizontal: 18,
       paddingVertical: 8,
     },
@@ -353,7 +353,7 @@ function getStyles(theme, isDark) {
       justifyContent: "space-between",
       paddingVertical: 12,
       borderBottomWidth: 1,
-      borderBottomColor: isDark ? "#262628" : "#F0F0F5",
+      borderBottomColor: isDark ? "#2C2C2E" : "#F0F0F5",
     },
     serviceRowLast: {
       borderBottomWidth: 0,

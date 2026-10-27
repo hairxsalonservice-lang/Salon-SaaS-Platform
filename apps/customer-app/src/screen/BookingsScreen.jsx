@@ -153,7 +153,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
   const { isAuthenticated, user } = useAuth();
   const { theme, isDark } = useTheme();
   const styles = useMemo(() => getStyles(theme, isDark), [theme, isDark]);
-  const brand = C.purple || "#B3261E";
+  const brand = C.purple || "#0071e3";
 
   const [activeTab, setActiveTab] = useState("Upcoming");
   const [appointments, setAppointments] = useState([]);
@@ -894,7 +894,7 @@ function getStyles(theme = {}, isDark = false) {
   const border = isDark ? "#27272A" : "#EEEEEC";
   const text = isDark ? "#FAFAFA" : "#18181B";
   const muted = isDark ? "#A1A1AA" : "#71717A";
-  const brand = C.purple || "#B3261E";
+  const brand = C.purple || "#0071e3";
 
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: bg },

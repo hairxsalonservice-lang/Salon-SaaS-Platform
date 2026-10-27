@@ -171,7 +171,7 @@ export default function AppNavigator() {
     Animated.spring(slideAnim, {
       toValue: -index * SCREEN_WIDTH,
       useNativeDriver: true,
-      speed: 20,
+      speed: 22,
       bounciness: 0,
     }).start();
   }, [currentTab]);
@@ -319,9 +319,11 @@ export default function AppNavigator() {
             initialRouteName={initialRouteName}
             screenOptions={{
               headerShown: false,
-              animation: "default",
+              animation: "ios_from_right",
               gestureEnabled: true,
               fullScreenGestureEnabled: true,
+              animationDuration: 350,
+              contentStyle: { backgroundColor: theme.canvas },
             }}
           >
             <Stack.Screen name="MainTabs" component={renderMainTabs} />

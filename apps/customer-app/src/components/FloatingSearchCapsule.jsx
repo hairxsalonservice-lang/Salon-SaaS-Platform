@@ -108,7 +108,7 @@ export default function FloatingSearchCapsule({
             activeOpacity={0.85}
           >
             <View style={styles.locationIconBox}>
-              <Ionicons name="location" size={17} color={isDark ? "#FFFFFF" : "#6C5CE7"} />
+              <Ionicons name="location" size={17} color={isDark ? "#FFFFFF" : "#0071e3"} />
             </View>
             <View style={styles.locationTextStack}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
@@ -127,7 +127,7 @@ export default function FloatingSearchCapsule({
           {/* Search Bar Input + Filter Button */}
           <View style={styles.searchRow}>
             <View style={styles.inputPillContainer}>
-              <Ionicons name="search-outline" size={18} color={isDark ? "#A0A09C" : "#666666"} style={{ marginRight: 8 }} />
+              <Ionicons name="search-outline" size={18} color={isDark ? "#8E8E93" : "#8E8E93"} style={{ marginRight: 8 }} />
               <TextInput
                 style={styles.searchInput}
                 value={query}

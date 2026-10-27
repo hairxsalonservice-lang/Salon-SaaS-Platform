@@ -214,7 +214,7 @@ export default function ReviewsSection({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.purple || "#0071e3";
 
   return StyleSheet.create({
     container: {
@@ -256,7 +256,7 @@ function getStyles(theme, isDark) {
       borderRadius: 20,
       padding: 18,
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: isDark ? 0.25 : 0.04,
@@ -357,7 +357,7 @@ function getStyles(theme, isDark) {
       borderRadius: 18,
       padding: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#F0F1F5",
+      borderColor: isDark ? "#2C2C2E" : "#F0F1F5",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: isDark ? 0.2 : 0.04,
@@ -413,7 +413,7 @@ function getStyles(theme, isDark) {
       fontSize: 11,
       fontWeight: "600",
       color: isDark ? "#64748B" : "#94A3B8",
-      backgroundColor: isDark ? "#2A2A2C" : "#F8FAFC",
+      backgroundColor: isDark ? "#2C2C2E" : "#F8FAFC",
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 8,

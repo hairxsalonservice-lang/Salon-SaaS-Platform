@@ -360,12 +360,12 @@ export default function RegisterScreen({ navigate, goBack, routeParams }) {
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.purple || "#0071e3";
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#0D0D0D" : "#FAFAFA",
+      backgroundColor: isDark ? "#000000" : "#FAFAFA",
     },
     content: {
       paddingHorizontal: 24,
@@ -414,7 +414,7 @@ function getStyles(theme, isDark) {
       height: 54,
       marginBottom: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
     },
     inputIcon: {
       marginRight: 14,
@@ -467,7 +467,7 @@ function getStyles(theme, isDark) {
       borderRadius: 14,
       backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
       borderWidth: 1.5,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
     },
     genderChipSelected: {
       backgroundColor: accentColor,
@@ -536,7 +536,7 @@ function getStyles(theme, isDark) {
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,

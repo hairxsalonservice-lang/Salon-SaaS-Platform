@@ -354,7 +354,7 @@ function getStyles(theme = {}, isDark = false) {
       zIndex: 2,
     },
     pricePillIcon: {
-      color: "#D49B45",
+      color: "#0A84FF",
       fontSize: 10,
     },
     pricePillText: {

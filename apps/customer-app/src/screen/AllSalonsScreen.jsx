@@ -354,7 +354,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#121212" : "#FAFAFB"} />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#000000" : "#FAFAFB"} />
 
       <FlatList
         data={loading ? [] : displayedSalons}
@@ -394,7 +394,7 @@ function buildStyles(isDark, insets) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#121212" : "#FAFAFB",
+      backgroundColor: isDark ? "#000000" : "#FAFAFB",
     },
     flatListContent: {
       paddingTop: Math.max(insets?.top || 20, 20) + 12,

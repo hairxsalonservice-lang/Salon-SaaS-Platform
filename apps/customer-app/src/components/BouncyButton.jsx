@@ -24,7 +24,7 @@ export default function BouncyButton({ children, onPress, style, ...props }) {
       onPress={onPress}
       style={({ pressed }) => [
         pressableStyle,
-        pressed ? { opacity: 0.85 } : null,
+        pressed ? { opacity: 0.7, transform: [{ scale: 0.97 }] } : null,
       ]}
       {...props}
     >

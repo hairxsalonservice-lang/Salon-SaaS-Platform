@@ -38,7 +38,7 @@ export default function ShopScreen({ navigate, onScroll }) {
   };
 
   const styles = getStyles(isDark);
-  const accentColor = C.purple || "#D91C5C";
+  const accentColor = C.purple || "#0A84FF";
 
   if (isCityEmpty) {
     return (
@@ -116,7 +116,7 @@ export default function ShopScreen({ navigate, onScroll }) {
 }
 
 function getStyles(isDark) {
-  const accentColor = C.purple || "#D91C5C";
+  const accentColor = C.purple || "#0A84FF";
 
   return StyleSheet.create({
     container: {

@@ -303,7 +303,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.purple || "#0071e3";
 
   return StyleSheet.create({
     modalOverlay: {
@@ -376,7 +376,7 @@ function getStyles(theme, isDark) {
       height: 56,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
     },
     inputIcon: {
       marginRight: 14,

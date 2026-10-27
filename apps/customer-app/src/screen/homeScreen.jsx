@@ -570,7 +570,7 @@ export default memo(HomeScreen);
 
 // Category tile tints — pastel on light, translucent on dark so icons stay readable
 const CATEGORY_TINTS = {
-  haircut: ["#FCE8E8", "rgba(230, 57, 115, 0.16)"],
+  haircut: ["#E8F0FE", "rgba(230, 57, 115, 0.16)"],
   facial: ["#FEF1E6", "rgba(245, 158, 11, 0.16)"],
   makeup: ["#F1EBFC", "rgba(139, 92, 246, 0.18)"],
   massage: ["#E9F8F1", "rgba(16, 185, 129, 0.16)"],
@@ -579,14 +579,14 @@ const CATEGORY_TINTS = {
 
 function getPalette(theme = {}, isDark = false) {
   return {
-    canvas: theme.canvas || (isDark ? "#0D0D0D" : "#FBFBF9"),
-    header: isDark ? theme.canvas || "#0D0D0D" : "#FFFFFF",
+    canvas: theme.canvas || (isDark ? "#000000" : "#F2F2F7"),
+    header: isDark ? theme.canvas || "#000000" : "#FFFFFF",
     surface: theme.surface || (isDark ? "#1C1C1E" : "#FFFFFF"),
-    ink: theme.ink || (isDark ? "#F4F4F2" : "#1E1E1E"),
+    ink: theme.ink || (isDark ? "#FFFFFF" : "#1E1E1E"),
     body: isDark ? "#D0D0CB" : "#333333",
-    muted: isDark ? "#A0A09C" : "#666666",
-    hairline: theme.hairline || (isDark ? "#2A2A2C" : "#EEEEEE"),
-    primary: theme.primary || (isDark ? "#E63973" : "#B3261E"),
+    muted: isDark ? "#8E8E93" : "#8E8E93",
+    hairline: theme.hairline || (isDark ? "#2C2C2E" : "#EEEEEE"),
+    primary: theme.primary || (isDark ? "#0A84FF" : "#0071e3"),
   };
 }
 

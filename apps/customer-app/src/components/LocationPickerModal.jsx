@@ -368,7 +368,7 @@ function getStyles(isDark) {
   return StyleSheet.create({
     sheetInner: {
       flex: 1,
-      backgroundColor: isDark ? "#181820" : "#FFFFFF",
+      backgroundColor: isDark ? "#2C2C2E" : "#FFFFFF",
       paddingHorizontal: 20,
       paddingTop: 10,
       paddingBottom: Platform.OS === "ios" ? 28 : 16,
@@ -398,7 +398,7 @@ function getStyles(isDark) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#282834" : "#F4F4F6",
+      backgroundColor: isDark ? "#38383A" : "#F4F4F6",
       alignItems: "center",
       justifyContent: "center",
     },
@@ -495,7 +495,7 @@ function getStyles(isDark) {
       marginTop: 2,
     },
     currentBadge: {
-      backgroundColor: isDark ? "#2A2A2C" : "#FFFFFF",
+      backgroundColor: isDark ? "#2C2C2E" : "#FFFFFF",
       paddingHorizontal: 10,
       paddingVertical: 4,
       borderRadius: 12,

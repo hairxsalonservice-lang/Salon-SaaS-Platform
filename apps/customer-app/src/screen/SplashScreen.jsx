@@ -20,13 +20,13 @@ const TAGLINE = "BOOK YOUR STYLE.";
 
 // Colours come from the active theme so dark-mode users don't get a bright flash on launch
 function getColors(theme, isDark) {
-  const primary = theme?.primary || (isDark ? "#E63973" : "#B3261E");
+  const primary = theme?.primary || (isDark ? "#0A84FF" : "#0071e3");
   return {
-    canvas: theme?.canvas || (isDark ? "#0D0D0D" : "#FBFBF9"),
+    canvas: theme?.canvas || (isDark ? "#000000" : "#F2F2F7"),
     surface: theme?.surface || (isDark ? "#1C1C1E" : "#FFFFFF"),
-    ink: theme?.ink || (isDark ? "#F4F4F2" : "#121212"),
-    muted: theme?.muted || (isDark ? "#787874" : "#8E8E8A"),
-    hairline: theme?.hairline || (isDark ? "#2A2A2C" : "#E8E8E0"),
+    ink: theme?.ink || (isDark ? "#FFFFFF" : "#000000"),
+    muted: theme?.muted || (isDark ? "#8E8E93" : "#8E8E93"),
+    hairline: theme?.hairline || (isDark ? "#2C2C2E" : "#C6C6C8"),
     primary,
   };
 }
@@ -331,7 +331,7 @@ export default function SplashScreen({ onFinish }) {
   );
 }
 
-// "#B3261E" + alpha byte -> "#B3261E33"; only valid for 6-digit hex colours
+// "#0071e3" + alpha byte -> "#0071e333"; only valid for 6-digit hex colours
 function withAlpha(hex, alpha) {
   if (typeof hex !== "string" || !/^#[0-9a-fA-F]{6}$/.test(hex)) return hex;
   const a = Math.round(Math.min(Math.max(alpha, 0), 1) * 255).toString(16).padStart(2, "0");

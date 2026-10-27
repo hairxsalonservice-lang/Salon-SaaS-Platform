@@ -75,12 +75,12 @@ export default function AppleSignInButton({ onSuccess, onError, variant = "full"
         hapticType="medium"
       >
         {loading ? (
-          <ActivityIndicator color={isDark ? "#121212" : "#FFFFFF"} size="small" />
+          <ActivityIndicator color={isDark ? "#000000" : "#FFFFFF"} size="small" />
         ) : (
           <Ionicons
             name="logo-apple"
             size={26}
-            color={isDark ? "#121212" : "#FFFFFF"}
+            color={isDark ? "#000000" : "#FFFFFF"}
           />
         )}
       </SpringTouchable>
@@ -99,16 +99,16 @@ export default function AppleSignInButton({ onSuccess, onError, variant = "full"
       hapticType="medium"
     >
       {loading ? (
-        <ActivityIndicator color={isDark ? "#121212" : "#FFFFFF"} size="small" />
+        <ActivityIndicator color={isDark ? "#000000" : "#FFFFFF"} size="small" />
       ) : (
         <View style={styles.appleBtnContent}>
           <Ionicons
             name="logo-apple"
             size={22}
-            color={isDark ? "#121212" : "#FFFFFF"}
+            color={isDark ? "#000000" : "#FFFFFF"}
             style={{ marginRight: 10 }}
           />
-          <Text style={[styles.appleBtnText, { color: isDark ? "#121212" : "#FFFFFF" }]}>
+          <Text style={[styles.appleBtnText, { color: isDark ? "#000000" : "#FFFFFF" }]}>
             Continue with Apple
           </Text>
         </View>
@@ -136,8 +136,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   appleBtnLight: {
-    backgroundColor: "#121212",
-    borderColor: "#121212",
+    backgroundColor: "#000000",
+    borderColor: "#000000",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,

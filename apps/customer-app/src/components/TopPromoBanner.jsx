@@ -299,7 +299,7 @@ function getStyles() {
       elevation: 3,
     },
     luxuryButtonText: {
-      color: "#121212",
+      color: "#000000",
       fontSize: 13,
       fontWeight: "700",
       letterSpacing: -0.1,
@@ -317,7 +317,7 @@ function getStyles() {
     },
     dotActive: {
       width: 18,
-      backgroundColor: C.main || "#C48B36",
+      backgroundColor: C.main || "#0071e3",
     },
     dotInactive: {
       width: 6,

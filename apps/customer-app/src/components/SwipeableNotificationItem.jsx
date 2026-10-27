@@ -221,7 +221,7 @@ function getStyles(isDark) {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: isDark ? "#FF5252" : "#B3261E",
+      backgroundColor: isDark ? "#FF5252" : "#0071e3",
     },
     readHollowRing: {
       width: 8,

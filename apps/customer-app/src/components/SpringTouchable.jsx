@@ -28,7 +28,7 @@ export default function SpringTouchable({
       disabled={disabled}
       style={({ pressed }) => [
         flatStyle,
-        pressed && !disabled ? { opacity: 0.85 } : null,
+        pressed && !disabled ? { opacity: 0.7, transform: [{ scale: 0.97 }] } : null,
       ]}
       {...props}
     >

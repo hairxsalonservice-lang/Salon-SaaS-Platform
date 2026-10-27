@@ -164,7 +164,7 @@ function getStyles(theme, isDark) {
       marginBottom: 10,
     },
     cityNameHighlight: {
-      color: C.main || "#C48B36",
+      color: C.main || "#0071e3",
     },
     descriptionText: {
       fontSize: 13.5,

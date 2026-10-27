@@ -109,9 +109,9 @@ export default function AppleBottomSheet({
 
   if (!visible) return null;
 
-  const sheetBg = isDark ? "#181820" : "#FFFFFF";
-  const sheetBorder = isDark ? "#282834" : "#EFEFF4";
-  const handleColor = isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.2)";
+  const sheetBg = isDark ? "#2C2C2E" : "#FFFFFF";
+  const sheetBorder = isDark ? "#38383A" : "#E5E5EA";
+  const handleColor = isDark ? "rgba(255, 255, 255, 0.3)" : "#C6C6C8";
 
   return (
     <Modal
@@ -128,7 +128,7 @@ export default function AppleBottomSheet({
             {Platform.OS === "ios" ? (
               <BlurView intensity={30} style={StyleSheet.absoluteFill} tint={isDark ? "dark" : "light"} />
             ) : null}
-            <View style={[styles.scrimDim, { backgroundColor: isDark ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.5)" }]} />
+            <View style={[styles.scrimDim, { backgroundColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.3)" }]} />
           </Animated.View>
         </TouchableWithoutFeedback>
 
@@ -169,8 +169,8 @@ const styles = StyleSheet.create({
   },
   sheetContainer: {
     width: "100%",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -8 },
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dragHandleBar: {
-    width: 38,
+    width: 36,
     height: 5,
     borderRadius: 3,
   },

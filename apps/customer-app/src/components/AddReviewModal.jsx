@@ -126,7 +126,7 @@ export default function AddReviewModal({
                       <Ionicons
                         name={item.icon}
                         size={16}
-                        color={C.purple || "#6C5CE7"}
+                        color={C.purple || "#0071e3"}
                         style={{ marginRight: 8 }}
                       />
                       <Text style={styles.aspectLabel}>{item.label}</Text>
@@ -204,7 +204,7 @@ export default function AddReviewModal({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.purple || "#0071e3";
 
   return StyleSheet.create({
     sheetInner: {
@@ -228,7 +228,7 @@ function getStyles(theme, isDark) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#2A2A2C" : "#F0F1F5",
+      backgroundColor: isDark ? "#2C2C2E" : "#F0F1F5",
       alignItems: "center",
       justifyContent: "center",
     },
@@ -250,7 +250,7 @@ function getStyles(theme, isDark) {
       borderRadius: 20,
       padding: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
       marginBottom: 16,
       gap: 12,
     },
@@ -301,7 +301,7 @@ function getStyles(theme, isDark) {
       fontSize: 14,
       color: isDark ? "#FFFFFF" : "#1A1A24",
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
       height: 100,
       marginBottom: 20,
       lineHeight: 20,

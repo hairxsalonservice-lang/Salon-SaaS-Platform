@@ -126,7 +126,7 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
                     <Ionicons
                       name="sparkles"
                       size={28}
-                      color={isSelected ? "#6C5CE7" : isDark ? "#94A3B8" : "#64748B"}
+                      color={isSelected ? "#0071e3" : isDark ? "#94A3B8" : "#64748B"}
                     />
                   </View>
                 ) : (
@@ -178,7 +178,7 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.purple || "#0071e3";
 
   return StyleSheet.create({
     container: {
@@ -221,7 +221,7 @@ function getStyles(theme, isDark) {
       width: 72,
       height: 72,
       borderRadius: 18,
-      backgroundColor: isDark ? "#2A2A2C" : "#E2E8F0",
+      backgroundColor: isDark ? "#2C2C2E" : "#E2E8F0",
     },
     genderBadge: {
       position: "absolute",
@@ -247,7 +247,7 @@ function getStyles(theme, isDark) {
       backgroundColor: "#EC4899", // Bright female pink
     },
     anyAvatar: {
-      backgroundColor: isDark ? "#2A2A2C" : "#EDEBF9",
+      backgroundColor: isDark ? "#2C2C2E" : "#EDEBF9",
       alignItems: "center",
       justifyContent: "center",
     },

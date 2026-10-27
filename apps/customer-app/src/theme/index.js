@@ -1,235 +1,218 @@
 // src/theme/index.js
-import { Platform } from "react-native";
-
-/**
- * Global Design System — Luxe Gold & Editorial Theme (from reference-theme)
- *
- * Theme Characteristics:
- *  - Primary Accent: Warm Luxury Amber Gold (#C48B36)
- *  - Canvas: Cream Silk White (#FBFBF9) in Light / Deep Obsidian (#0D0D0D) in Dark
- *  - Serif Font Family: Georgia / Serif Editorial titles
- *  - Flat & Hairline Depth: 1px subtle borders, 0px elevation shadows
- */
 
 export const C = {
-  // Global Crimson Brand Colors (#B3261E)
-  crimson: "#B3261E",
-  crimsonDark: "#8C1D2A",
-  crimsonLight: "#D9383A",
-  crimsonTint: "rgba(179, 38, 30, 0.10)",
-  crimsonTintStrong: "rgba(179, 38, 30, 0.18)",
+  main: "#0071e3",
+  primary: "#0071e3",
+  brand: "#0071e3",
+  accent: "#0071e3",
+  price: "#0071e3",
+  button: "#0071e3",
+  highlight: "#0071e3",
 
-  // Primary Accent & Highlighting Tokens
-  main: "#B3261E",
-  primary: "#B3261E",
-  brand: "#B3261E",
-  accent: "#B3261E",
-  price: "#B3261E",
-  button: "#B3261E",
-  highlight: "#B3261E",
+  crimson: "#0071e3",
+  crimsonDark: "#0062c4",
+  crimsonLight: "#3694f5",
+  crimsonTint: "rgba(0, 113, 227, 0.10)",
+  crimsonTintStrong: "rgba(0, 113, 227, 0.18)",
 
-  // Theme Aliases & Fallbacks
-  purple: "#B3261E",
-  purpleDark: "#8C1D2A",
-  purpleLight: "#D9383A",
-  purpleTint: "rgba(179, 38, 30, 0.12)",
+  purple: "#0071e3",
+  purpleDark: "#0062c4",
+  purpleLight: "#3694f5",
+  purpleTint: "rgba(0, 113, 227, 0.12)",
 
-  gold: "#B3261E",
-  goldDark: "#8C1D2A",
-  goldLight: "#D9383A",
-  goldTint: "rgba(179, 38, 30, 0.10)",
-  goldTintStrong: "rgba(179, 38, 30, 0.18)",
+  gold: "#0071e3",
+  goldDark: "#0062c4",
+  goldLight: "#3694f5",
+  goldTint: "rgba(0, 113, 227, 0.10)",
+  goldTintStrong: "rgba(0, 113, 227, 0.18)",
 
-  // Primary Ink & Dark (#121212)
-  dark: "#121212",
-  charcoal: "#1A1A1A",
-  ink: "#121212",
+  dark: "#000000",
+  charcoal: "#1C1C1E",
+  ink: "#000000",
 
-  // Canvas & Surface
-  bg: "#FBFBF9",             // Warm Luxury Cream Canvas
-  bgWarm: "#FBFBF9",
-  lifted: "#F5F5F0",         // Soft Cream Surface
-  surface: "#FFFFFF",        // Card Surface Pure White
-  bone: "#EFEFE8",           // Soft Hairline Divider
+  bg: "#F2F2F7",
+  bgWarm: "#F2F2F7",
+  lifted: "#E5E5EA",
+  surface: "#FFFFFF",
+  bone: "#E5E5EA",
 
-  // Aliases
-  light: "#FBFBF9",
-  lightGrey: "#F5F5F0",
-  lightGreyBorder: "#E8E8E0",
+  light: "#F2F2F7",
+  lightGrey: "#E5E5EA",
+  lightGreyBorder: "#C6C6C8",
   card: "#FFFFFF",
 
-  // Typography & Neutrals
-  textPrimary: "#121212",    // Rich Ink
-  textSecondary: "#4A4A4A",  // Slate Body
-  body: "#4A4A4A",
-  textMuted: "#8E8E8A",      // Soft Muted
+  textPrimary: "#000000",
+  textSecondary: "#3C3C43",
+  body: "#3C3C43",
+  textMuted: "#8E8E93",
   textLight: "#FFFFFF",
-  dustTaupe: "#A0A09C",      // Taupe Accent
-  mutedSoft: "#8E8E8A",
+  dustTaupe: "#8E8E93",
+  mutedSoft: "#8E8E93",
 
-  // Hairlines & Borders
-  border: "#E8E8E0",         // Subtle Warm Border
-  borderLight: "#F0F0EB",    // Soft Hairline
-  borderDark: "#D0D0C8",     // Strong Border
-  divider: "#E8E8E0",
+  border: "#C6C6C8",
+  borderLight: "#E5E5EA",
+  borderDark: "#AEAEB2",
+  divider: "#C6C6C8",
 
-  // Timeline & Badges
-  thinking: "rgba(196, 139, 54, 0.15)",
-  grep: "#E8E8E0",
-  read: "#E8E8E0",
-  edit: "#E8E8E0",
-  done: "#C48B36",
+  error: "#FF3B30",
+  errorText: "#FF3B30",
+  errorBg: "rgba(255, 59, 48, 0.08)",
 
-  // Status
-  error: "#C48B36",
-  errorText: "#C48B36",
-  errorBg: "rgba(196, 139, 54, 0.08)",
+  success: "#34C759",
+  successText: "#34C759",
+  successBg: "rgba(52, 199, 89, 0.08)",
 
-  success: "#C48B36",
-  successText: "#C48B36",
-  successBg: "rgba(196, 139, 54, 0.08)",
+  info: "#0071e3",
+  infoBg: "rgba(0, 113, 227, 0.12)",
 
-  info: "#C48B36",
-  infoBg: "rgba(196, 139, 54, 0.12)",
+  warning: "#FF9F0A",
 
-  muted: "#8E8E8A",
-  text: "#121212",
+  muted: "#8E8E93",
+  text: "#000000",
 
-  heart: "#ff0000ff",
+  heart: "#FF3B30",
+  verified: "#0071e3",
 
-  verified: "#2a7dff",
+  tabActive: "#0071e3",
+  tabActiveTint: "#E8F0FE",
+  tabCenterBtn: "#0071e3",
 
-  // Tab Bar Tokens
-  tabActive: "#B3261E",
-  tabActiveTint: "#FCE8E8",
-  tabCenterBtn: "#8C1D2A",
+  green: "#34C759",
+  blue: "#0071e3",
+  blur: "rgba(255, 255, 255, 0.8)",
 
-  green: "#228B22",
-  blue: "#6C5CE7",
-  blur: "rgba(255, 255, 255, 0.3)",
+  thinking: "rgba(0, 113, 227, 0.15)",
+  grep: "#E5E5EA",
+  read: "#E5E5EA",
+  edit: "#E5E5EA",
+  done: "#0071e3",
 };
 
-/**
- * applyTheme — mutates C in-place so all screens that import C
- * pick up the new tokens on their next render cycle.
- */
 export function applyTheme(isDark) {
   if (isDark) {
-    // ── Dark Obsidian Luxury Tokens ──────────────────
-    C.bg = "#0D0D0D";
-    C.bgWarm = "#0D0D0D";
-    C.lifted = "#141416";
+    C.bg = "#000000";
+    C.bgWarm = "#000000";
+    C.lifted = "#2C2C2E";
     C.surface = "#1C1C1E";
     C.card = "#1C1C1E";
-    C.bone = "#262628";
-    C.light = "#141416";
-    C.lightGrey = "#141416";
-    C.lightGreyBorder = "#2A2A2C";
+    C.bone = "#2C2C2E";
+    C.light = "#1C1C1E";
+    C.lightGrey = "#2C2C2E";
+    C.lightGreyBorder = "#38383A";
 
-    C.main = "#D49B45";
-    C.gold = "#D49B45";
-    C.goldDark = "#C48B36";
-    C.goldLight = "#E5B05D";
-    C.goldTint = "rgba(212, 155, 69, 0.16)";
-    C.goldTintStrong = "rgba(212, 155, 69, 0.25)";
+    C.main = "#0A84FF";
+    C.primary = "#0A84FF";
+    C.brand = "#0A84FF";
+    C.accent = "#0A84FF";
+    C.price = "#0A84FF";
+    C.button = "#0A84FF";
+    C.highlight = "#0A84FF";
+    C.crimson = "#0A84FF";
+    C.gold = "#0A84FF";
+    C.goldDark = "#0A84FF";
+    C.goldLight = "#409CFF";
+    C.goldTint = "rgba(10, 132, 255, 0.16)";
+    C.goldTintStrong = "rgba(10, 132, 255, 0.25)";
 
-    C.ink = "#F4F4F2";
-    C.dark = "#F4F4F2";
-    C.charcoal = "#F4F4F2";
-    C.text = "#F4F4F2";
-    C.textPrimary = "#F4F4F2";
-    C.textSecondary = "#D0D0CB";
-    C.body = "#D0D0CB";
-    C.textMuted = "#A0A09C";
-    C.dustTaupe = "#A0A09C";
-    C.muted = "#A0A09C";
-    C.mutedSoft = "#B8B8B0";
+    C.ink = "#FFFFFF";
+    C.dark = "#FFFFFF";
+    C.charcoal = "#FFFFFF";
+    C.text = "#FFFFFF";
+    C.textPrimary = "#FFFFFF";
+    C.textSecondary = "#EBEBF5";
+    C.body = "#EBEBF5";
+    C.textMuted = "#8E8E93";
+    C.dustTaupe = "#8E8E93";
+    C.muted = "#8E8E93";
+    C.mutedSoft = "#636366";
 
-    C.border = "#2A2A2C";
-    C.borderLight = "#222224";
-    C.borderDark = "#38383C";
-    C.divider = "#2A2A2C";
+    C.border = "#38383A";
+    C.borderLight = "#2C2C2E";
+    C.borderDark = "#48484A";
+    C.divider = "#38383A";
 
-    C.thinking = "rgba(212, 155, 69, 0.25)";
-    C.tabActive = "#E63973";
-    C.tabActiveTint = "rgba(230, 57, 115, 0.18)";
-    C.tabCenterBtn = "#D91C5C";
-    C.grep = "#2A2A2C";
-    C.read = "#2A2A2C";
-    C.edit = "#2A2A2C";
-    C.done = "#D49B45";
+    C.thinking = "rgba(10, 132, 255, 0.25)";
+    C.tabActive = "#0A84FF";
+    C.tabActiveTint = "rgba(10, 132, 255, 0.18)";
+    C.tabCenterBtn = "#0A84FF";
+    C.grep = "#2C2C2E";
+    C.read = "#2C2C2E";
+    C.edit = "#2C2C2E";
+    C.done = "#0A84FF";
 
-    C.error = "#D49B45";
-    C.errorText = "#D49B45";
-    C.errorBg = "rgba(212, 155, 69, 0.15)";
+    C.error = "#FF453A";
+    C.errorText = "#FF453A";
+    C.errorBg = "rgba(255, 69, 58, 0.15)";
 
-    C.success = "#F4F4F2";
-    C.successText = "#F4F4F2";
-    C.successBg = "rgba(244, 244, 242, 0.1)";
+    C.success = "#30D158";
+    C.successText = "#30D158";
+    C.successBg = "rgba(48, 209, 88, 0.15)";
+
+    C.blur = "rgba(0, 0, 0, 0.8)";
   } else {
-    // ── Light Cream Luxury Tokens ────────────────────
-    C.bg = "#FBFBF9";
-    C.bgWarm = "#FBFBF9";
-    C.lifted = "#F5F5F0";
+    C.bg = "#F2F2F7";
+    C.bgWarm = "#F2F2F7";
+    C.lifted = "#E5E5EA";
     C.surface = "#FFFFFF";
     C.card = "#FFFFFF";
-    C.bone = "#EFEFE8";
-    C.light = "#FBFBF9";
-    C.lightGrey = "#F5F5F0";
-    C.lightGreyBorder = "#E8E8E0";
+    C.bone = "#E5E5EA";
+    C.light = "#F2F2F7";
+    C.lightGrey = "#E5E5EA";
+    C.lightGreyBorder = "#C6C6C8";
 
-    C.main = "#B3261E";
-    C.primary = "#B3261E";
-    C.brand = "#B3261E";
-    C.accent = "#B3261E";
-    C.price = "#B3261E";
-    C.button = "#B3261E";
-    C.highlight = "#B3261E";
-    C.crimson = "#B3261E";
-    C.gold = "#B3261E";
-    C.goldDark = "#8C1D2A";
-    C.goldLight = "#D9383A";
-    C.goldTint = "rgba(179, 38, 30, 0.10)";
-    C.goldTintStrong = "rgba(179, 38, 30, 0.18)";
+    C.main = "#0071e3";
+    C.primary = "#0071e3";
+    C.brand = "#0071e3";
+    C.accent = "#0071e3";
+    C.price = "#0071e3";
+    C.button = "#0071e3";
+    C.highlight = "#0071e3";
+    C.crimson = "#0071e3";
+    C.gold = "#0071e3";
+    C.goldDark = "#0062c4";
+    C.goldLight = "#3694f5";
+    C.goldTint = "rgba(0, 113, 227, 0.10)";
+    C.goldTintStrong = "rgba(0, 113, 227, 0.18)";
 
-    C.ink = "#121212";
-    C.dark = "#121212";
-    C.charcoal = "#121212";
-    C.text = "#121212";
-    C.textPrimary = "#121212";
-    C.textSecondary = "#4A4A4A";
-    C.body = "#4A4A4A";
-    C.textMuted = "#8E8E8A";
-    C.dustTaupe = "#A0A09C";
-    C.muted = "#8E8E8A";
-    C.mutedSoft = "#8E8E8A";
+    C.ink = "#000000";
+    C.dark = "#000000";
+    C.charcoal = "#1C1C1E";
+    C.text = "#000000";
+    C.textPrimary = "#000000";
+    C.textSecondary = "#3C3C43";
+    C.body = "#3C3C43";
+    C.textMuted = "#8E8E93";
+    C.dustTaupe = "#8E8E93";
+    C.muted = "#8E8E93";
+    C.mutedSoft = "#8E8E93";
 
-    C.border = "#E8E8E0";
-    C.borderLight = "#F0F0EB";
-    C.borderDark = "#D0D0C8";
-    C.divider = "#E8E8E0";
+    C.border = "#C6C6C8";
+    C.borderLight = "#E5E5EA";
+    C.borderDark = "#AEAEB2";
+    C.divider = "#C6C6C8";
 
-    C.thinking = "rgba(196, 139, 54, 0.15)";
-    C.tabActive = "#B3261E";
-    C.tabActiveTint = "#FCE8E8";
-    C.tabCenterBtn = "#8C1D2A";
-    C.grep = "#E8E8E0";
-    C.read = "#E8E8E0";
-    C.edit = "#E8E8E0";
-    C.done = "#C48B36";
+    C.thinking = "rgba(0, 113, 227, 0.15)";
+    C.tabActive = "#0071e3";
+    C.tabActiveTint = "#E8F0FE";
+    C.tabCenterBtn = "#0071e3";
+    C.grep = "#E5E5EA";
+    C.read = "#E5E5EA";
+    C.edit = "#E5E5EA";
+    C.done = "#0071e3";
 
-    C.error = "#C48B36";
-    C.errorText = "#C48B36";
-    C.errorBg = "rgba(196, 139, 54, 0.08)";
+    C.error = "#FF3B30";
+    C.errorText = "#FF3B30";
+    C.errorBg = "rgba(255, 59, 48, 0.08)";
 
-    C.success = "#121212";
-    C.successText = "#121212";
-    C.successBg = "rgba(18, 18, 18, 0.06)";
+    C.success = "#34C759";
+    C.successText = "#34C759";
+    C.successBg = "rgba(52, 199, 89, 0.08)";
+
+    C.blur = "rgba(255, 255, 255, 0.8)";
   }
 
-  // Sync TYPO preset colors
   if (TYPO) {
-    if (TYPO.eyebrow) TYPO.eyebrow.color = C.goldDark;
+    if (TYPO.eyebrow) TYPO.eyebrow.color = C.main;
     if (TYPO.screenTitle) TYPO.screenTitle.color = C.textPrimary;
     if (TYPO.sectionTitle) TYPO.sectionTitle.color = C.textPrimary;
     if (TYPO.cardTitle) TYPO.cardTitle.color = C.textPrimary;
@@ -239,18 +222,16 @@ export function applyTheme(isDark) {
   }
 }
 
-// ── Typography (Fraunces Editorial Serif Headers + Inter Body) ───────
-
 export const FONT_FAMILY = {
   primary: "Inter_400Regular",
   body: "Inter_400Regular",
   bodyMedium: "Inter_500Medium",
   bodySemiBold: "Inter_600SemiBold",
   bodyBold: "Inter_700Bold",
-  display: "Fraunces_600SemiBold",
-  displayMedium: "Fraunces_500Medium",
-  displayBold: "Fraunces_700Bold",
-  serif: "Fraunces_600SemiBold",
+  display: "Inter_600SemiBold",
+  displayMedium: "Inter_500Medium",
+  displayBold: "Inter_700Bold",
+  serif: "Inter_600SemiBold",
   code: "Inter_400Regular",
 };
 export const FF = FONT_FAMILY;
@@ -264,15 +245,15 @@ export const FONT_SIZE = {
   bodySm: 14,
   body: 16,
   bodyLg: 16,
-  cardTitle: 17,
-  cardMeta: 13,
+  cardTitle: 16,
+  cardMeta: 12,
   button: 14,
   titleSm: 16,
   title: 18,
-  titleLg: 22,
-  headline: 30,
-  hero: 30,
-  display: 34,
+  titleLg: 20,
+  headline: 28,
+  hero: 28,
+  display: 32,
 };
 export const FS = FONT_SIZE;
 
@@ -286,8 +267,6 @@ export const FONT_WEIGHT = {
   black: "900",
 };
 export const FW = FONT_WEIGHT;
-
-// ── Spacing (Base 4px unit: 4, 8, 12, 16, 20, 24, 32, 48, 80) ──
 
 export const SPACING = {
   none: 0,
@@ -303,61 +282,55 @@ export const SPACING = {
 };
 export const S = SPACING;
 
-// ── Border Radius Scale ───────────────────────────────
-
 export const RADIUS = {
   xs: 4,
-  sm: 6,
-  button: 14,
-  md: 14,
-  lg: 18,
-  xl: 24,
+  sm: 8,
+  button: 12,
+  md: 12,
+  lg: 16,
+  xl: 20,
   pill: 9999,
   circle: 9999,
 };
 export const R = RADIUS;
 
-// ── Depth & Flat Hairline Shadows ─────────────────────
-
 export const SHADOWS = {
   sm: {
-    shadowColor: "transparent",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 1,
   },
   md: {
-    shadowColor: "transparent",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   lg: {
-    shadowColor: "transparent",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
-    elevation: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 8,
   },
 };
-
-// ── Typography Presets ────────────────────────────────────────
 
 export const TYPO = {
   eyebrow: {
     fontFamily: FONT_FAMILY.bodySemiBold,
     fontSize: FONT_SIZE.eyebrow,
-    color: C.goldDark,
-    letterSpacing: 1.2,
+    color: C.main,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
   headline: {
     fontFamily: FONT_FAMILY.display,
     fontSize: FONT_SIZE.headline,
     color: C.ink,
-    lineHeight: FONT_SIZE.headline * 1.08,
+    lineHeight: FONT_SIZE.headline * 1.12,
   },
   subheadline: {
     fontFamily: FONT_FAMILY.body,
@@ -365,22 +338,22 @@ export const TYPO = {
     color: C.muted,
   },
   screenTitle: {
-    fontFamily: FONT_FAMILY.display,
+    fontFamily: FONT_FAMILY.displayBold,
     fontSize: FONT_SIZE.hero,
     color: C.textPrimary,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   sectionTitle: {
     fontFamily: FONT_FAMILY.display,
     fontSize: FONT_SIZE.titleLg,
     color: C.textPrimary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   cardTitle: {
     fontFamily: FONT_FAMILY.display,
     fontSize: FONT_SIZE.cardTitle,
     color: C.textPrimary,
-    letterSpacing: 0,
+    letterSpacing: -0.1,
   },
   cardMeta: {
     fontFamily: FONT_FAMILY.body,
@@ -391,13 +364,13 @@ export const TYPO = {
     fontFamily: FONT_FAMILY.body,
     fontSize: FONT_SIZE.body,
     color: C.textSecondary,
-    lineHeight: 24,
+    lineHeight: 22,
   },
   badgeText: {
     fontFamily: FONT_FAMILY.bodySemiBold,
     fontSize: FONT_SIZE.caption,
     color: C.textPrimary,
-    letterSpacing: 1.0,
+    letterSpacing: 0.8,
     textTransform: "uppercase",
   },
   navLink: {

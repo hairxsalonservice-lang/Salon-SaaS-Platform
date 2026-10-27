@@ -106,7 +106,7 @@ export default function PermissionPromptModal({
                 <Ionicons
                   name={isLocation ? "location" : "notifications"}
                   size={42}
-                  color={C.purple || "#6C5CE7"}
+                  color={C.purple || "#0071e3"}
                 />
               </View>
 
@@ -135,7 +135,7 @@ export default function PermissionPromptModal({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.purple || "#0071e3";
 
   return StyleSheet.create({
     overlay: {
@@ -155,7 +155,7 @@ function getStyles(theme, isDark) {
       paddingBottom: 16,
       alignItems: "center",
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 12 },
       shadowOpacity: 0.25,
@@ -170,7 +170,7 @@ function getStyles(theme, isDark) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#2A2A2C" : "#F0F1F5",
+      backgroundColor: isDark ? "#2C2C2E" : "#F0F1F5",
       justifyContent: "center",
       alignItems: "center",
       zIndex: 10,

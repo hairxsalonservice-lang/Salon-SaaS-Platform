@@ -74,20 +74,20 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={[styles.card, { backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF", borderColor: isDark ? "#2A2A2C" : "#E8E8E0" }]}>
+        <View style={[styles.card, { backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF", borderColor: isDark ? "#2C2C2E" : "#C6C6C8" }]}>
           <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
-            <Ionicons name="close" size={20} color={isDark ? "#F4F4F2" : "#121212"} />
+            <Ionicons name="close" size={20} color={isDark ? "#FFFFFF" : "#000000"} />
           </TouchableOpacity>
 
           <View style={styles.iconContainer}>
             <Ionicons name="mail-unread" size={32} color={C.main} />
           </View>
 
-          <Text style={[styles.title, { color: isDark ? "#F4F4F2" : "#121212" }]}>
+          <Text style={[styles.title, { color: isDark ? "#FFFFFF" : "#000000" }]}>
             Check Your Inbox
           </Text>
 
-          <Text style={[styles.description, { color: isDark ? "#A0A09C" : "#666666" }]}>
+          <Text style={[styles.description, { color: isDark ? "#8E8E93" : "#8E8E93" }]}>
             We've sent a verification link to{"\n"}
             <Text style={{ color: C.main, fontWeight: "700" }}>{targetEmail || "your email"}</Text>.
             Tap the link to activate your HairX account.
@@ -121,7 +121,7 @@ export default function VerifyEmailModal({ visible, email, onClose, onVerified }
             {resending ? (
               <ActivityIndicator size="small" color={C.main} />
             ) : (
-              <Text style={[styles.resendText, { color: isDark ? "#F4F4F2" : "#121212" }]}>
+              <Text style={[styles.resendText, { color: isDark ? "#FFFFFF" : "#000000" }]}>
                 {cooldown > 0 ? `Resend Link (${cooldown}s)` : "Resend Verification Link"}
               </Text>
             )}

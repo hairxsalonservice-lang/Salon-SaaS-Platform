@@ -271,11 +271,11 @@ export default function FilterModal({
 }
 
 function getStyles(theme, isDark) {
-  const primaryColor = theme?.primary || "#C48B36";
+  const primaryColor = theme?.primary || "#0071e3";
   return StyleSheet.create({
     sheetInner: {
       flex: 1,
-      backgroundColor: isDark ? "#181820" : "#FFFFFF",
+      backgroundColor: isDark ? "#2C2C2E" : "#FFFFFF",
       paddingHorizontal: 20,
       paddingTop: 12,
       paddingBottom: Platform.OS === "ios" ? 28 : 16,
@@ -285,7 +285,7 @@ function getStyles(theme, isDark) {
       alignItems: "center",
       paddingBottom: 16,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#282834" : "#EFEFF4",
+      borderBottomColor: isDark ? "#38383A" : "#EFEFF4",
     },
     eyebrow: {
       fontSize: 10,
@@ -316,7 +316,7 @@ function getStyles(theme, isDark) {
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: isDark ? "#282834" : "#F4F4F6",
+      backgroundColor: isDark ? "#38383A" : "#F4F4F6",
       alignItems: "center",
       justifyContent: "center",
     },
@@ -376,7 +376,7 @@ function getStyles(theme, isDark) {
     footer: {
       paddingTop: 12,
       borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: isDark ? "#282834" : "#EFEFF4",
+      borderTopColor: isDark ? "#38383A" : "#EFEFF4",
     },
     applyBtn: {
       backgroundColor: primaryColor,

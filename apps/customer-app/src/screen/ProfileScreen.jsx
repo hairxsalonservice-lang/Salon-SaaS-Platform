@@ -98,7 +98,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
     ? user?.email || ""
     : "Sign in to manage your appointments and preferences";
 
-  const accentColor = C.purple || "#D91C5C";
+  const accentColor = C.purple || "#0A84FF";
 
   return (
     <View style={styles.container}>
@@ -392,7 +392,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
 }
 
 function getStyles(isDark) {
-  const accentColor = C.purple || "#D91C5C";
+  const accentColor = C.purple || "#0A84FF";
 
   return StyleSheet.create({
     container: {

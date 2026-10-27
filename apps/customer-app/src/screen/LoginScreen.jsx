@@ -266,12 +266,12 @@ export default function LoginScreen({ navigate, goBack, routeParams }) {
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.purple || "#0071e3";
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#0D0D0D" : "#FAFAFA",
+      backgroundColor: isDark ? "#000000" : "#FAFAFA",
     },
     scrollContent: {
       paddingHorizontal: 24,
@@ -339,7 +339,7 @@ function getStyles(theme, isDark) {
       height: 56,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
     },
     inputIcon: {
       marginRight: 14,
@@ -365,7 +365,7 @@ function getStyles(theme, isDark) {
       width: 22,
       height: 22,
       borderRadius: 6,
-      backgroundColor: isDark ? "#2A2A2C" : "#E0E2E9",
+      backgroundColor: isDark ? "#2C2C2E" : "#E0E2E9",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 10,
@@ -421,7 +421,7 @@ function getStyles(theme, isDark) {
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,

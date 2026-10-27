@@ -140,17 +140,17 @@ function getStyles() {
       minWidth: 72,
     },
     addBtnDefault: {
-      backgroundColor: C.crimsonTint || "#FCE8E8", // Light crimson tint
+      backgroundColor: C.crimsonTint || "#E8F0FE", // Light crimson tint
     },
     addBtnSelected: {
-      backgroundColor: C.button, // Solid #B3261E
+      backgroundColor: C.button, // Solid #0071e3
     },
     addBtnText: {
       fontSize: 13,
       fontWeight: "700",
     },
     addBtnTextDefault: {
-      color: C.crimsonDark, // #8C1D2A text
+      color: C.crimsonDark, // #0062c4 text
     },
     addBtnTextSelected: {
       color: "#FFFFFF",

@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   googleBtnDark: {
     backgroundColor: "#1C1C1E",
-    borderColor: "#2A2A2C",
+    borderColor: "#2C2C2E",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,

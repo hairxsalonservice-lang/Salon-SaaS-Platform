@@ -1212,7 +1212,7 @@ function getStyles(isDark) {
       borderRadius: 16,
       backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#F0F0F0",
+      borderColor: isDark ? "#2C2C2E" : "#F0F0F0",
       paddingHorizontal: 12,
       paddingVertical: 4,
     },
@@ -1222,7 +1222,7 @@ function getStyles(isDark) {
     viewAllServicesBtn: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "#FCE8E8",
+      backgroundColor: "#E8F0FE",
       paddingHorizontal: 20,
       paddingVertical: 10,
       borderRadius: 20,
@@ -1231,7 +1231,7 @@ function getStyles(isDark) {
     viewAllServicesText: {
       fontSize: 13,
       fontWeight: "700",
-      color: "#8C1D2A",
+      color: "#0062c4",
     },
     statusBadgePill: {
       flexDirection: "row",
@@ -1397,10 +1397,10 @@ function getStyles(isDark) {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: "#6C5CE7",
+      backgroundColor: "#0071e3",
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#6C5CE7",
+      shadowColor: "#0071e3",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.4,
       shadowRadius: 8,
@@ -1639,7 +1639,7 @@ function getStyles(isDark) {
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       borderTopWidth: 1,
-      borderTopColor: isDark ? "#2A2A2C" : "#F0F1F5",
+      borderTopColor: isDark ? "#2C2C2E" : "#F0F1F5",
       overflow: "hidden",
     },
     floatingBottomBarTint: {

@@ -61,7 +61,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <View style={styles.featureRow}>
             <View style={styles.featureIconBox}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#6C5CE7" />
+              <Ionicons name="shield-checkmark-outline" size={20} color="#0071e3" />
             </View>
             <View style={styles.featureTextGroup}>
               <Text style={styles.featureTitle}>Certified Salons</Text>
@@ -71,7 +71,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <View style={styles.featureRow}>
             <View style={styles.featureIconBox}>
-              <Ionicons name="flash-outline" size={20} color="#6C5CE7" />
+              <Ionicons name="flash-outline" size={20} color="#0071e3" />
             </View>
             <View style={styles.featureTextGroup}>
               <Text style={styles.featureTitle}>Instant Booking</Text>
@@ -81,7 +81,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <View style={styles.featureRow}>
             <View style={styles.featureIconBox}>
-              <Ionicons name="gift-outline" size={20} color="#6C5CE7" />
+              <Ionicons name="gift-outline" size={20} color="#0071e3" />
             </View>
             <View style={styles.featureTextGroup}>
               <Text style={styles.featureTitle}>Luxe Rewards</Text>
@@ -91,7 +91,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <View style={styles.featureRowNoBorder}>
             <View style={styles.featureIconBox}>
-              <Ionicons name="card-outline" size={20} color="#6C5CE7" />
+              <Ionicons name="card-outline" size={20} color="#0071e3" />
             </View>
             <View style={styles.featureTextGroup}>
               <Text style={styles.featureTitle}>Flexible Checkout</Text>
@@ -192,11 +192,11 @@ function getStyles(isDark) {
       width: 72,
       height: 72,
       borderRadius: 22,
-      backgroundColor: "#6C5CE7",
+      backgroundColor: "#0071e3",
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 14,
-      shadowColor: "#6C5CE7",
+      shadowColor: "#0071e3",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 10,
@@ -219,7 +219,7 @@ function getStyles(isDark) {
     versionText: {
       fontSize: 12,
       fontWeight: "700",
-      color: "#6C5CE7",
+      color: "#0071e3",
     },
     taglineText: {
       fontSize: 13.5,
@@ -236,7 +236,7 @@ function getStyles(isDark) {
     sectionHeader: {
       fontSize: 12,
       fontWeight: "800",
-      color: "#6C5CE7",
+      color: "#0071e3",
       letterSpacing: 1,
       marginBottom: 14,
     },

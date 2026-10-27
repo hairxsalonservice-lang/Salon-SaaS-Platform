@@ -198,7 +198,7 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
             activeOpacity={0.7}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="checkmark-done-sharp" size={15} color={isDark ? "#FF5252" : "#B3261E"} style={{ marginRight: 4 }} />
+            <Ionicons name="checkmark-done-sharp" size={15} color={isDark ? "#FF5252" : "#0071e3"} style={{ marginRight: 4 }} />
             <Text style={styles.markAllReadText}>Mark all as read</Text>
           </TouchableOpacity>
 
@@ -216,14 +216,14 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
       {/* Notification List Scroll */}
       {loading ? (
         <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color={isDark ? "#FF5252" : "#B3261E"} />
+          <ActivityIndicator size="large" color={isDark ? "#FF5252" : "#0071e3"} />
         </View>
       ) : !isAuthenticated || notifications.length === 0 ? (
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           refreshControl={
             isAuthenticated ? (
-              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={isDark ? "#FF5252" : "#B3261E"} />
+              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={isDark ? "#FF5252" : "#0071e3"} />
             ) : undefined
           }
         >
@@ -232,7 +232,7 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
               <Ionicons
                 name={!isAuthenticated ? "log-in-outline" : loadFailed ? "cloud-offline-outline" : "notifications-off-outline"}
                 size={32}
-                color={isDark ? "#FF5252" : "#B3261E"}
+                color={isDark ? "#FF5252" : "#0071e3"}
               />
             </View>
             <Text style={styles.emptyTitle}>
@@ -257,7 +257,7 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
           style={styles.scrollView}
           contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomInset }]}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={isDark ? "#FF5252" : "#B3261E"} />}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={isDark ? "#FF5252" : "#0071e3"} />}
         >
           {notifications.map((item, index) => {
             const isLast = index === notifications.length - 1;
@@ -289,7 +289,7 @@ function getStyles(isDark) {
       borderRadius: 12,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: isDark ? "#FF5252" : "#B3261E",
+      backgroundColor: isDark ? "#FF5252" : "#0071e3",
     },
     emptyCtaText: {
       color: "#FFFFFF",
@@ -339,7 +339,7 @@ function getStyles(isDark) {
     markAllReadText: {
       fontSize: 13.5,
       fontWeight: "600",
-      color: isDark ? "#FF5252" : "#B3261E",
+      color: isDark ? "#FF5252" : "#0071e3",
     },
     unreadPill: {
       backgroundColor: isDark ? "rgba(179, 38, 30, 0.22)" : "rgba(179, 38, 30, 0.10)",
@@ -350,7 +350,7 @@ function getStyles(isDark) {
     unreadPillText: {
       fontSize: 12,
       fontWeight: "600",
-      color: isDark ? "#FF5252" : "#B3261E",
+      color: isDark ? "#FF5252" : "#0071e3",
     },
     divider: {
       height: StyleSheet.hairlineWidth,
@@ -387,7 +387,7 @@ function getStyles(isDark) {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: isDark ? "#FF5252" : "#B3261E",
+      backgroundColor: isDark ? "#FF5252" : "#0071e3",
     },
     readHollowRing: {
       width: 8,
@@ -415,7 +415,7 @@ function getStyles(isDark) {
     },
     actionTextLink: {
       fontWeight: "700",
-      color: isDark ? "#FF5252" : "#B3261E",
+      color: isDark ? "#FF5252" : "#0071e3",
     },
     timestampText: {
       fontSize: 12,

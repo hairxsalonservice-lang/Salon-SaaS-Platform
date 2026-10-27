@@ -32,7 +32,7 @@ const GENDER_OPTIONS = [
   { id: "female", label: "Female" },
   { id: "other", label: "Other" },
 ];
-const ACCENT = "#B3261E";
+const ACCENT = "#0071e3";
 
 function normalizeGender(value) {
   const v = typeof value === "string" ? value.trim().toLowerCase() : "";
@@ -303,7 +303,7 @@ function getStyles(isDark) {
     changeAvatarText: {
       fontSize: 15,
       fontWeight: "700",
-      color: "#6C5CE7",
+      color: "#0071e3",
     },
     fieldGroup: {
       marginBottom: 20,
@@ -337,10 +337,10 @@ function getStyles(isDark) {
     saveBtn: {
       height: 54,
       borderRadius: 18,
-      backgroundColor: "#6C5CE7",
+      backgroundColor: "#0071e3",
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#6C5CE7",
+      shadowColor: "#0071e3",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.25,
       shadowRadius: 10,
