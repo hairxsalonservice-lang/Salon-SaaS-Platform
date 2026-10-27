@@ -16,14 +16,7 @@ import {
   User,
   Phone,
   AlertCircle,
-  HelpCircle,
-  Clock,
-  Briefcase,
-  Star,
-  Zap,
-  Sliders,
-  DollarSign,
-  ExternalLink,
+  ArrowUpRight,
 } from "lucide-react";
 import apiClient, { parseApiError } from "@/lib/api-client";
 
@@ -32,7 +25,6 @@ const SALON_PANEL_URL =
   process.env.NEXT_PUBLIC_SALON_PANEL_URL || "https://app.hairxsalon.com";
 
 export default function LandingPage() {
-  // ── Registration Form State ──────────────────────────────
   const [salonName, setSalonName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
@@ -51,20 +43,16 @@ export default function LandingPage() {
     salonName: string;
   }>(null);
 
-  // ── Interactive Panel Guide Tab State ────────────────────
   const [activeGuideTab, setActiveGuideTab] = useState<
     "dashboard" | "bookings" | "branches" | "staff" | "reports"
   >("dashboard");
 
-  // ── ROI Calculator State ────────────────────────────────
   const [branchCount, setBranchCount] = useState(2);
   const [dailyBookings, setDailyBookings] = useState(25);
-  const [avgTicketPrice, setAvgTicketPrice] = useState(1200); // INR or USD equivalent
+  const [avgTicketPrice, setAvgTicketPrice] = useState(1200);
 
-  // ── FAQ Accordion State ────────────────────────────────
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // ── Form Validation ──────────────────────────────────────
   function validateForm(): Record<string, string> {
     const errs: Record<string, string> = {};
     if (salonName.trim().length < 2) errs.salonName = "Salon name is required (min 2 chars)";
@@ -90,7 +78,6 @@ export default function LandingPage() {
     return errs;
   }
 
-  // ── Form Submit Handler ──────────────────────────────────
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -127,43 +114,28 @@ export default function LandingPage() {
     }
   }
 
-  // ROI calculations
   const estimatedMonthlyBookings = dailyBookings * 30 * branchCount;
   const estimatedMonthlyRevenue = estimatedMonthlyBookings * avgTicketPrice;
   const estimatedTimeSavedHours = Math.round(branchCount * 18);
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans">
-      {/* ────────────────────────────────────────────────────────
-          1. HEADER / NAVBAR
-      ──────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 glass-panel border-b border-slate-800/80 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="HairX" className="w-10 h-10 rounded-xl object-cover" />
-            <div>
-              <span className="font-display font-bold text-xl text-white tracking-tight">
-                HAIR<span className="text-indigo-400">X</span>
-              </span>
-              <span className="hidden sm:inline-block ml-2 text-[10px] uppercase font-semibold px-2 py-0.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">
-                SaaS Partner Portal
-              </span>
-            </div>
+    <div className="min-h-screen bg-white text-[#1d1d1f] flex flex-col font-sans">
+
+      {/* ── NAVBAR ─────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-[#d2d2d7]/60">
+        <div className="max-w-[1200px] mx-auto px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="HairX" className="w-8 h-8 rounded-lg object-cover" />
+            <span className="font-semibold text-[17px] tracking-tight">
+              Hair<span className="font-bold">X</span>
+            </span>
           </div>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
-            <a href="#benefits" className="hover:text-white transition-colors">
-              Benefits
-            </a>
-            <a href="#guide" className="hover:text-white transition-colors">
-              Panel Guide
-            </a>
-            <a href="#roi" className="hover:text-white transition-colors">
-              ROI Calculator
-            </a>
-            <a href="#faq" className="hover:text-white transition-colors">
-              FAQ
-            </a>
+          <nav className="hidden md:flex items-center gap-8 text-[13px] font-medium text-[#6e6e73]">
+            <a href="#benefits" className="hover:text-[#1d1d1f] transition-colors">Benefits</a>
+            <a href="#guide" className="hover:text-[#1d1d1f] transition-colors">How It Works</a>
+            <a href="#roi" className="hover:text-[#1d1d1f] transition-colors">ROI Calculator</a>
+            <a href="#faq" className="hover:text-[#1d1d1f] transition-colors">FAQ</a>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -171,281 +143,203 @@ export default function LandingPage() {
               href={SALON_PANEL_URL}
               target="_blank"
               rel="noreferrer"
-              className="text-xs font-semibold text-slate-300 hover:text-white px-4 py-2.5 rounded-lg border border-slate-700 hover:border-slate-600 transition-all flex items-center gap-1.5"
+              className="hidden sm:inline-flex text-[13px] font-medium text-[#6e6e73] hover:text-[#1d1d1f] transition-colors"
             >
-              Salon Panel Login <ExternalLink className="w-3.5 h-3.5" />
+              Sign In
             </a>
             <a
               href="#register"
-              className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2.5 rounded-lg shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="text-[13px] font-medium text-white bg-[#1d1d1f] hover:bg-[#333336] px-5 py-2 rounded-full transition-all"
             >
-              Register Salon
+              Get Started
             </a>
           </div>
         </div>
       </header>
 
-      {/* ────────────────────────────────────────────────────────
-          2. HERO SECTION
-      ──────────────────────────────────────────────────────── */}
-      <section className="relative pt-20 pb-24 px-6 overflow-hidden">
-        {/* Background glow graphics */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
-        <div className="absolute top-1/3 right-10 w-[350px] h-[350px] bg-teal-500/10 rounded-full blur-[120px] pointer-events-none" />
+      {/* ── HERO ───────────────────────────────────────────── */}
+      <section className="pt-24 sm:pt-32 pb-20 px-6">
+        <div className="max-w-[980px] mx-auto text-center">
+          <p className="text-[13px] sm:text-sm font-semibold text-[#6e6e73] uppercase tracking-widest mb-5">
+            Salon Management Platform
+          </p>
 
-        <div className="max-w-6xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full glass-card border border-indigo-500/30 text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-6">
-            <Zap className="w-3.5 h-3.5 text-indigo-400" /> Multi-Branch Salon SaaS Platform
-          </div>
-
-          <h1 className="font-display text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.15] max-w-4xl mx-auto">
-            Scale & Automate Your Salon Business with <span className="gradient-accent-text">HairX SaaS</span>
+          <h1 className="text-[44px] sm:text-[64px] lg:text-[80px] font-bold tracking-[-0.03em] leading-[1.05] text-[#1d1d1f]">
+            Scale your salon.
+            <br />
+            <span className="gradient-text-accent">Effortlessly.</span>
           </h1>
 
-          <p className="mt-6 text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            The complete management platform designed for modern salon owners. Streamline multi-branch operations, automate customer bookings, manage staff commissions & leave requests, and track revenue growth effortlessly.
+          <p className="mt-6 text-lg sm:text-xl text-[#6e6e73] max-w-[600px] mx-auto leading-relaxed font-normal">
+            Multi-branch management, automated bookings, staff scheduling, and real-time analytics — all in one platform.
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a
               href="#register"
-              className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
+              className="w-full sm:w-auto px-8 py-3.5 bg-[#1d1d1f] hover:bg-[#333336] text-white text-[15px] font-semibold rounded-full flex items-center justify-center gap-2 transition-all"
             >
               Register Your Salon <ArrowRight className="w-4 h-4" />
             </a>
             <a
               href="#guide"
-              className="w-full sm:w-auto px-8 py-4 glass-card hover:bg-slate-800/60 text-slate-200 font-semibold rounded-xl border border-slate-700/80 flex items-center justify-center gap-2 transition-all"
+              className="w-full sm:w-auto px-8 py-3.5 text-[#1d1d1f] text-[15px] font-semibold rounded-full border border-[#d2d2d7] hover:border-[#86868b] flex items-center justify-center gap-2 transition-all"
             >
-              Explore Panel Features
+              See How It Works
             </a>
           </div>
+        </div>
 
-          {/* Key Stat Badges */}
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            <div className="glass-card p-4 rounded-2xl text-center">
-              <p className="text-2xl font-bold text-white">24 Hours</p>
-              <p className="text-xs text-slate-400 mt-1">Fast Account Approval</p>
-            </div>
-            <div className="glass-card p-4 rounded-2xl text-center">
-              <p className="text-2xl font-bold text-indigo-400">100% Real-Time</p>
-              <p className="text-xs text-slate-400 mt-1">WebSocket Slot Updates</p>
-            </div>
-            <div className="glass-card p-4 rounded-2xl text-center">
-              <p className="text-2xl font-bold text-teal-400">Multi-Branch</p>
-              <p className="text-xs text-slate-400 mt-1">Centralized Control</p>
-            </div>
-            <div className="glass-card p-4 rounded-2xl text-center">
-              <p className="text-2xl font-bold text-amber-400">Zero Setup</p>
-              <p className="text-xs text-slate-400 mt-1">Free Onboarding</p>
-            </div>
+        {/* Stats */}
+        <div className="mt-20 max-w-[900px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-[#d2d2d7]">
+          <div className="text-center px-6 py-2">
+            <p className="text-[28px] sm:text-[36px] font-bold tracking-tight text-[#1d1d1f]">24h</p>
+            <p className="text-[13px] text-[#86868b] mt-1">Fast Approval</p>
+          </div>
+          <div className="text-center px-6 py-2">
+            <p className="text-[28px] sm:text-[36px] font-bold tracking-tight text-[#1d1d1f]">Real-Time</p>
+            <p className="text-[13px] text-[#86868b] mt-1">Slot Updates</p>
+          </div>
+          <div className="text-center px-6 py-2">
+            <p className="text-[28px] sm:text-[36px] font-bold tracking-tight text-[#1d1d1f]">Multi</p>
+            <p className="text-[13px] text-[#86868b] mt-1">Branch Control</p>
+          </div>
+          <div className="text-center px-6 py-2">
+            <p className="text-[28px] sm:text-[36px] font-bold tracking-tight text-[#1d1d1f]">Free</p>
+            <p className="text-[13px] text-[#86868b] mt-1">Onboarding</p>
           </div>
         </div>
       </section>
 
-      {/* ────────────────────────────────────────────────────────
-          3. PRODUCT BENEFITS
-      ──────────────────────────────────────────────────────── */}
-      <section id="benefits" className="py-20 px-6 bg-[#0b101d] border-y border-slate-800/80">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-3">
-              Why Salon Owners Choose Us
+      {/* ── BENEFITS ───────────────────────────────────────── */}
+      <section id="benefits" className="py-24 px-6 bg-[#f5f5f7]">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center max-w-[680px] mx-auto mb-16">
+            <h2 className="text-[13px] font-semibold text-[#6e6e73] uppercase tracking-widest mb-4">
+              Why Salon Owners Choose HairX
             </h2>
-            <p className="font-display text-3xl sm:text-4xl font-bold text-white">
-              Everything You Need to Run & Grow Your Salon
-            </p>
-            <p className="text-slate-400 text-sm mt-3">
-              Designed to eliminate scheduling conflicts, automate staff workflows, and provide total operational clarity across all branches.
+            <p className="text-[32px] sm:text-[44px] font-bold tracking-[-0.025em] leading-[1.1] text-[#1d1d1f]">
+              Everything you need to run and grow your salon.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Benefit 1 */}
-            <div className="glass-card p-7 rounded-2xl flex flex-col justify-between transition-all duration-300">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-5">
-                  <Building2 className="w-6 h-6" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              {
+                icon: Building2,
+                color: "#2563eb",
+                title: "Multi-Branch Management",
+                desc: "Control multiple locations from one dashboard. Assign managers, customize hours, and set unique services per branch.",
+                features: ["Location-based pricing", "Branch-specific staff"],
+              },
+              {
+                icon: Calendar,
+                color: "#0d9488",
+                title: "Automated Slot Booking",
+                desc: "Real-time availability computed from staff hours, active leaves, and duration offsets. Zero double bookings.",
+                features: ["Instant confirmations", "Dynamic rescheduling"],
+              },
+              {
+                icon: Users,
+                color: "#d97706",
+                title: "Staff & Leave Management",
+                desc: "Staff request leaves, owners approve — affected slots auto-lock. Commission tracking built in.",
+                features: ["Self-service leaves", "Commission calculations"],
+              },
+              {
+                icon: TrendingUp,
+                color: "#7c3aed",
+                title: "Financial Reports",
+                desc: "Revenue per branch, top stylists, popular services, daily counts — all visualized on your dashboard.",
+                features: ["Exportable summaries", "Per-stylist metrics"],
+              },
+              {
+                icon: Bell,
+                color: "#e11d48",
+                title: "Real-Time Alerts",
+                desc: "Instant WebSocket notifications when clients book, change, or cancel. Never miss an update.",
+                features: ["In-app notifications", "Auto customer updates"],
+              },
+              {
+                icon: ShieldCheck,
+                color: "#059669",
+                title: "Secure & Multi-Tenant",
+                desc: "JWT authentication, admin-verified onboarding, and role-based access keep your data isolated and safe.",
+                features: ["Admin-verified onboarding", "Owner, Manager, Staff roles"],
+              },
+            ].map((b, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl p-7 flex flex-col transition-shadow hover:shadow-lg"
+              >
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
+                  style={{ backgroundColor: `${b.color}10`, color: b.color }}
+                >
+                  <b.icon className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Multi-Branch Management</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  Add and control multiple salon locations from one owner dashboard. Assign managers, customize operational hours, and set unique branch services.
-                </p>
-              </div>
-              <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-4 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" /> Location-based services & pricing</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" /> Branch-specific staff allocation</li>
-              </ul>
-            </div>
-
-            {/* Benefit 2 */}
-            <div className="glass-card p-7 rounded-2xl flex flex-col justify-between transition-all duration-300">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center mb-5">
-                  <Calendar className="w-6 h-6" />
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f] mb-2">{b.title}</h3>
+                <p className="text-[14px] text-[#6e6e73] leading-relaxed flex-1">{b.desc}</p>
+                <div className="mt-5 pt-4 border-t border-[#f5f5f7] space-y-2">
+                  {b.features.map((f, j) => (
+                    <div key={j} className="flex items-center gap-2 text-[13px] text-[#1d1d1f]">
+                      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: b.color }} />
+                      {f}
+                    </div>
+                  ))}
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">Automated Slot Booking</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  Real-time slot availability algorithm automatically computes staff working hours, active leaves, and duration offsets to eliminate double bookings.
-                </p>
               </div>
-              <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-4 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-teal-400" /> Instant confirmation & status updates</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-teal-400" /> Dynamic reschedule & cancellation control</li>
-              </ul>
-            </div>
-
-            {/* Benefit 3 */}
-            <div className="glass-card p-7 rounded-2xl flex flex-col justify-between transition-all duration-300">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-5">
-                  <Users className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Staff & Leave Management</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  Empower your team with staff roles. Staff members can request leaves which owners or managers approve, automatically blocking affected slots.
-                </p>
-              </div>
-              <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-4 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-amber-400" /> Self-service leave requests</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-amber-400" /> Commission percentage calculations</li>
-              </ul>
-            </div>
-
-            {/* Benefit 4 */}
-            <div className="glass-card p-7 rounded-2xl flex flex-col justify-between transition-all duration-300">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-violet-500/10 border border-violet-500/20 text-violet-400 flex items-center justify-center mb-5">
-                  <TrendingUp className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Financial Reports & Insights</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  Visual reporting dashboards break down revenue per branch, top-performing stylists, popular services, and daily appointment counts.
-                </p>
-              </div>
-              <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-4 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-violet-400" /> Exportable revenue summaries</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-violet-400" /> Performance metrics per stylist</li>
-              </ul>
-            </div>
-
-            {/* Benefit 5 */}
-            <div className="glass-card p-7 rounded-2xl flex flex-col justify-between transition-all duration-300">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-5">
-                  <Bell className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Real-Time WebSocket Alerts</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  Never miss an update. Receive instant notifications on your panel whenever a client places a booking, requests a change, or cancels.
-                </p>
-              </div>
-              <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-4 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-rose-400" /> In-app notification center</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-rose-400" /> Automated customer status notifications</li>
-              </ul>
-            </div>
-
-            {/* Benefit 6 */}
-            <div className="glass-card p-7 rounded-2xl flex flex-col justify-between transition-all duration-300">
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-5">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <h3 className="text-lg font-bold text-white mb-2">Secure Multi-Tenant Platform</h3>
-                <p className="text-sm text-slate-400 leading-relaxed">
-                  Your salon data is completely isolated and protected with JWT token authentication, superadmin verification, and role-based access control.
-                </p>
-              </div>
-              <ul className="mt-5 space-y-2 border-t border-slate-800/80 pt-4 text-xs text-slate-300">
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Admin-verified owner onboarding</li>
-                <li className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Role permissions (Owner, Manager, Staff)</li>
-              </ul>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ────────────────────────────────────────────────────────
-          4. SALON PANEL USAGE GUIDE (STEP-BY-STEP & INTERACTIVE)
-      ──────────────────────────────────────────────────────── */}
-      <section id="guide" className="py-24 px-6 bg-[#090d16] relative overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-3">
-              Onboarding & Usage Guide
+      {/* ── HOW IT WORKS ───────────────────────────────────── */}
+      <section id="guide" className="py-24 px-6">
+        <div className="max-w-[1200px] mx-auto">
+          <div className="text-center max-w-[680px] mx-auto mb-16">
+            <h2 className="text-[13px] font-semibold text-[#6e6e73] uppercase tracking-widest mb-4">
+              How It Works
             </h2>
-            <p className="font-display text-3xl sm:text-4xl font-bold text-white">
-              How the Salon Panel Works for You
-            </p>
-            <p className="text-slate-400 text-sm mt-3">
-              Getting started takes just 4 simple steps. Explore how easy it is to manage your salon operations once approved.
+            <p className="text-[32px] sm:text-[44px] font-bold tracking-[-0.025em] leading-[1.1] text-[#1d1d1f]">
+              Up and running in four simple steps.
             </p>
           </div>
 
-          {/* 4 Step Process Cards */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-            <div className="glass-card p-6 rounded-2xl relative border-t-2 border-t-indigo-500">
-              <span className="text-3xl font-black text-indigo-500/40 absolute top-4 right-5">01</span>
-              <div className="w-9 h-9 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center mb-4 font-bold text-sm">
-                Step 1
+          {/* Steps */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+            {[
+              { step: "01", title: "Self-Register", desc: "Fill out the registration form with your salon details.", color: "#2563eb" },
+              { step: "02", title: "Get Approved", desc: "Platform admins verify and activate your account within 24 hours.", color: "#0d9488" },
+              { step: "03", title: "Configure", desc: "Add branches, set up services, invite staff members.", color: "#d97706" },
+              { step: "04", title: "Grow", desc: "Receive appointments, manage schedules, track revenue.", color: "#7c3aed" },
+            ].map((s, i) => (
+              <div key={i} className="relative">
+                <div className="text-[64px] font-bold leading-none tracking-tight" style={{ color: `${s.color}15` }}>
+                  {s.step}
+                </div>
+                <h3 className="text-[17px] font-semibold text-[#1d1d1f] mt-3 mb-2">{s.title}</h3>
+                <p className="text-[14px] text-[#6e6e73] leading-relaxed">{s.desc}</p>
               </div>
-              <h3 className="text-base font-bold text-white mb-1.5">Self-Register</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Fill out the owner registration form with your salon name, contact details, and password.
-              </p>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl relative border-t-2 border-t-teal-500">
-              <span className="text-3xl font-black text-teal-500/40 absolute top-4 right-5">02</span>
-              <div className="w-9 h-9 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center mb-4 font-bold text-sm">
-                Step 2
-              </div>
-              <h3 className="text-base font-bold text-white mb-1.5">Superadmin Approval</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Platform admins review your registration for security and activate your salon account within 24 hours.
-              </p>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl relative border-t-2 border-t-amber-500">
-              <span className="text-3xl font-black text-amber-500/40 absolute top-4 right-5">03</span>
-              <div className="w-9 h-9 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center mb-4 font-bold text-sm">
-                Step 3
-              </div>
-              <h3 className="text-base font-bold text-white mb-1.5">Configure Salon</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Log in to the Salon Panel, add your branches, set up hair/beauty services, and invite staff members.
-              </p>
-            </div>
-
-            <div className="glass-card p-6 rounded-2xl relative border-t-2 border-t-violet-500">
-              <span className="text-3xl font-black text-violet-500/40 absolute top-4 right-5">04</span>
-              <div className="w-9 h-9 rounded-lg bg-violet-500/10 text-violet-400 flex items-center justify-center mb-4 font-bold text-sm">
-                Step 4
-              </div>
-              <h3 className="text-base font-bold text-white mb-1.5">Accept & Grow</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Receive live customer appointments, manage daily schedules, approve staff leaves, and view revenue analytics.
-              </p>
-            </div>
+            ))}
           </div>
 
-          {/* Interactive Salon Panel Simulator Showcase */}
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-800">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+          {/* Interactive Panel Simulator */}
+          <div className="bg-[#1d1d1f] rounded-3xl p-6 sm:p-8 overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/10">
               <div>
-                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wide">Interactive Panel Simulator</span>
-                <h3 className="text-xl font-bold text-white mt-0.5">Explore the Salon Owner Workspace</h3>
+                <p className="text-[13px] font-medium text-white/50 uppercase tracking-wide">Live Preview</p>
+                <h3 className="text-[20px] font-semibold text-white mt-0.5">Salon Owner Dashboard</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {(["dashboard", "bookings", "branches", "staff", "reports"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveGuideTab(tab)}
-                    className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg capitalize transition-all ${
+                    className={`px-4 py-2 text-[13px] font-medium rounded-full capitalize transition-all ${
                       activeGuideTab === tab
-                        ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/30"
-                        : "bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-800"
+                        ? "bg-white text-[#1d1d1f]"
+                        : "text-white/60 hover:text-white hover:bg-white/10"
                     }`}
                   >
                     {tab}
@@ -454,126 +348,109 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="mt-6 bg-[#0e1424] rounded-2xl p-6 border border-slate-800/80 min-h-[300px]">
+            <div className="mt-6 min-h-[280px]">
               {activeGuideTab === "dashboard" && (
-                <div className="space-y-4 animate-fadeIn">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                    <p className="text-sm font-semibold text-white">Salon Dashboard Overview</p>
-                    <span className="text-xs text-slate-400">Live Status: Connected</span>
-                  </div>
+                <div className="space-y-4 animate-fade-in-up">
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                      <p className="text-xs text-slate-400">Today's Revenue</p>
-                      <p className="text-2xl font-bold text-white mt-1">₹18,450</p>
-                      <p className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">↑ 14% vs yesterday</p>
+                    <div className="bg-white/5 backdrop-blur p-5 rounded-2xl border border-white/10">
+                      <p className="text-[12px] text-white/50 font-medium">Today&apos;s Revenue</p>
+                      <p className="text-[28px] font-bold text-white mt-1">₹18,450</p>
+                      <p className="text-[12px] text-emerald-400 mt-1">↑ 14% vs yesterday</p>
                     </div>
-                    <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                      <p className="text-xs text-slate-400">Active Bookings</p>
-                      <p className="text-2xl font-bold text-indigo-400 mt-1">16 Bookings</p>
-                      <p className="text-[11px] text-slate-400 mt-1">4 pending confirmation</p>
+                    <div className="bg-white/5 backdrop-blur p-5 rounded-2xl border border-white/10">
+                      <p className="text-[12px] text-white/50 font-medium">Active Bookings</p>
+                      <p className="text-[28px] font-bold text-white mt-1">16</p>
+                      <p className="text-[12px] text-white/40 mt-1">4 pending confirmation</p>
                     </div>
-                    <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                      <p className="text-xs text-slate-400">Active Staff Today</p>
-                      <p className="text-2xl font-bold text-teal-400 mt-1">8 Stylists</p>
-                      <p className="text-[11px] text-slate-400 mt-1">2 branches operating</p>
+                    <div className="bg-white/5 backdrop-blur p-5 rounded-2xl border border-white/10">
+                      <p className="text-[12px] text-white/50 font-medium">Active Staff Today</p>
+                      <p className="text-[28px] font-bold text-white mt-1">8</p>
+                      <p className="text-[12px] text-white/40 mt-1">2 branches operating</p>
                     </div>
                   </div>
                 </div>
               )}
 
               {activeGuideTab === "bookings" && (
-                <div className="space-y-4 animate-fadeIn">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                    <p className="text-sm font-semibold text-white">Live Booking Management</p>
-                    <span className="text-xs text-indigo-400 font-medium">Real-Time Feed</span>
+                <div className="space-y-3 animate-fade-in-up">
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div>
+                      <p className="text-[14px] font-medium text-white">Aria Sharma · Hair Styling & Highlights</p>
+                      <p className="text-[12px] text-white/40 mt-1">02:30 PM – 03:30 PM · Stylist: Rahul V.</p>
+                    </div>
+                    <span className="px-3 py-1 bg-amber-500/15 text-amber-400 text-[12px] font-semibold rounded-full">Pending</span>
                   </div>
-                  <div className="space-y-2">
-                    <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-                      <div>
-                        <p className="font-semibold text-white">Aria Sharma · Hair Styling & Highlights</p>
-                        <p className="text-slate-400 mt-0.5">Time: 02:30 PM - 03:30 PM | Stylist: Rahul V.</p>
-                      </div>
-                      <span className="px-2.5 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold rounded-md">PENDING</span>
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                    <div>
+                      <p className="text-[14px] font-medium text-white">Rohan Gupta · Premium Facial & Beard Trim</p>
+                      <p className="text-[12px] text-white/40 mt-1">04:00 PM – 05:00 PM · Stylist: Vikram K.</p>
                     </div>
-                    <div className="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
-                      <div>
-                        <p className="font-semibold text-white">Rohan Gupta · Premium Facial & Beard Trim</p>
-                        <p className="text-slate-400 mt-0.5">Time: 04:00 PM - 05:00 PM | Stylist: Vikram K.</p>
-                      </div>
-                      <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold rounded-md">CONFIRMED</span>
-                    </div>
+                    <span className="px-3 py-1 bg-emerald-500/15 text-emerald-400 text-[12px] font-semibold rounded-full">Confirmed</span>
                   </div>
                 </div>
               )}
 
               {activeGuideTab === "branches" && (
-                <div className="space-y-4 animate-fadeIn">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                    <p className="text-sm font-semibold text-white">Multi-Branch Locations</p>
-                    <button className="text-xs bg-indigo-600 px-3 py-1.5 text-white font-medium rounded-lg">+ Add Branch</button>
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                      <p className="font-bold text-white text-sm">Downtown Luxury Salon</p>
-                      <p className="text-xs text-slate-400 mt-1">Connaught Place, New Delhi</p>
-                      <div className="mt-3 flex items-center gap-3 text-xs text-slate-300">
-                        <span>Staff: 6</span> • <span>Open: 09:00 AM - 08:00 PM</span>
-                      </div>
+                <div className="grid sm:grid-cols-2 gap-4 animate-fade-in-up">
+                  <div className="bg-white/5 p-5 rounded-2xl border border-white/10">
+                    <p className="text-[15px] font-semibold text-white">Downtown Luxury Salon</p>
+                    <p className="text-[13px] text-white/40 mt-1">Connaught Place, New Delhi</p>
+                    <div className="mt-3 flex items-center gap-3 text-[12px] text-white/60">
+                      <span>Staff: 6</span> · <span>09:00 AM – 08:00 PM</span>
                     </div>
-                    <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
-                      <p className="font-bold text-white text-sm">Westside Boutique Salon</p>
-                      <p className="text-xs text-slate-400 mt-1">Bandra West, Mumbai</p>
-                      <div className="mt-3 flex items-center gap-3 text-xs text-slate-300">
-                        <span>Staff: 4</span> • <span>Open: 10:00 AM - 09:00 PM</span>
-                      </div>
+                  </div>
+                  <div className="bg-white/5 p-5 rounded-2xl border border-white/10">
+                    <p className="text-[15px] font-semibold text-white">Westside Boutique Salon</p>
+                    <p className="text-[13px] text-white/40 mt-1">Bandra West, Mumbai</p>
+                    <div className="mt-3 flex items-center gap-3 text-[12px] text-white/60">
+                      <span>Staff: 4</span> · <span>10:00 AM – 09:00 PM</span>
                     </div>
                   </div>
                 </div>
               )}
 
               {activeGuideTab === "staff" && (
-                <div className="space-y-4 animate-fadeIn">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                    <p className="text-sm font-semibold text-white">Staff Management & Leave Requests</p>
-                    <span className="text-xs text-slate-400">1 Pending Leave Request</span>
-                  </div>
-                  <div className="bg-slate-900/80 p-4 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+                <div className="space-y-3 animate-fade-in-up">
+                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-white">Priya Sen (Senior Hair Specialist)</p>
-                      <p className="text-slate-400 mt-0.5">Leave requested for: Aug 18, 2026 (Personal Leave)</p>
+                      <p className="text-[14px] font-medium text-white">Priya Sen — Senior Hair Specialist</p>
+                      <p className="text-[12px] text-white/40 mt-1">Leave requested: Aug 18, 2026 (Personal)</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button className="px-3 py-1 bg-emerald-600 text-white font-semibold rounded-md">Approve</button>
-                      <button className="px-3 py-1 bg-rose-500/20 text-rose-300 font-semibold rounded-md">Reject</button>
+                      <button className="px-4 py-1.5 bg-emerald-500 text-white text-[12px] font-semibold rounded-full">Approve</button>
+                      <button className="px-4 py-1.5 bg-white/10 text-white/60 text-[12px] font-semibold rounded-full">Reject</button>
                     </div>
                   </div>
                 </div>
               )}
 
               {activeGuideTab === "reports" && (
-                <div className="space-y-4 animate-fadeIn">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                    <p className="text-sm font-semibold text-white">Revenue & Service Insights</p>
-                    <span className="text-xs text-teal-400 font-medium">Monthly Breakdown</span>
-                  </div>
-                  <div className="space-y-3 text-xs">
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Hair Styling & Coloring</span>
-                        <span className="font-semibold text-white">₹1,45,000 (45%)</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-500 w-[45%]" />
-                      </div>
+                <div className="space-y-5 animate-fade-in-up">
+                  <div>
+                    <div className="flex justify-between text-[13px] text-white/80 mb-2">
+                      <span>Hair Styling & Coloring</span>
+                      <span className="font-semibold text-white">₹1,45,000 (45%)</span>
                     </div>
-                    <div>
-                      <div className="flex justify-between text-slate-300 mb-1">
-                        <span>Facials & Skincare</span>
-                        <span className="font-semibold text-white">₹95,000 (30%)</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-teal-400 w-[30%]" />
-                      </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-blue-500 rounded-full" style={{ width: "45%" }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-[13px] text-white/80 mb-2">
+                      <span>Facials & Skincare</span>
+                      <span className="font-semibold text-white">₹95,000 (30%)</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-teal-400 rounded-full" style={{ width: "30%" }} />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-[13px] text-white/80 mb-2">
+                      <span>Beard & Grooming</span>
+                      <span className="font-semibold text-white">₹80,000 (25%)</span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div className="h-full bg-violet-400 rounded-full" style={{ width: "25%" }} />
                     </div>
                   </div>
                 </div>
@@ -583,30 +460,25 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ────────────────────────────────────────────────────────
-          5. ROI & REVENUE CALCULATOR
-      ──────────────────────────────────────────────────────── */}
-      <section id="roi" className="py-20 px-6 bg-[#0b101d] border-y border-slate-800/80">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-xs font-bold text-teal-400 uppercase tracking-widest mb-3">
+      {/* ── ROI CALCULATOR ─────────────────────────────────── */}
+      <section id="roi" className="py-24 px-6 bg-[#f5f5f7]">
+        <div className="max-w-[980px] mx-auto">
+          <div className="text-center max-w-[600px] mx-auto mb-14">
+            <h2 className="text-[13px] font-semibold text-[#6e6e73] uppercase tracking-widest mb-4">
               Growth Estimator
             </h2>
-            <p className="font-display text-3xl font-bold text-white">
-              Calculate Your Salon Revenue Growth
-            </p>
-            <p className="text-slate-400 text-sm mt-2">
-              See how much time and money HairX Salon SaaS saves your business each month.
+            <p className="text-[32px] sm:text-[44px] font-bold tracking-[-0.025em] leading-[1.1] text-[#1d1d1f]">
+              See your potential.
             </p>
           </div>
 
-          <div className="glass-panel p-8 rounded-3xl grid md:grid-cols-2 gap-8 items-center border border-slate-800">
-            {/* Controls */}
-            <div className="space-y-6">
+          <div className="bg-white rounded-3xl p-8 sm:p-10 grid md:grid-cols-2 gap-10 items-center">
+            {/* Sliders */}
+            <div className="space-y-8">
               <div>
-                <div className="flex justify-between text-sm font-semibold mb-2">
-                  <span className="text-slate-300">Number of Salon Branches</span>
-                  <span className="text-indigo-400 font-bold text-base">{branchCount}</span>
+                <div className="flex justify-between text-[14px] font-medium mb-3">
+                  <span className="text-[#6e6e73]">Salon Branches</span>
+                  <span className="text-[#1d1d1f] font-semibold text-[17px]">{branchCount}</span>
                 </div>
                 <input
                   type="range"
@@ -614,14 +486,13 @@ export default function LandingPage() {
                   max="10"
                   value={branchCount}
                   onChange={(e) => setBranchCount(Number(e.target.value))}
-                  className="w-full accent-indigo-500 bg-slate-800 h-2 rounded-lg cursor-pointer"
+                  className="w-full cursor-pointer"
                 />
               </div>
-
               <div>
-                <div className="flex justify-between text-sm font-semibold mb-2">
-                  <span className="text-slate-300">Avg. Daily Bookings per Branch</span>
-                  <span className="text-teal-400 font-bold text-base">{dailyBookings}</span>
+                <div className="flex justify-between text-[14px] font-medium mb-3">
+                  <span className="text-[#6e6e73]">Daily Bookings / Branch</span>
+                  <span className="text-[#1d1d1f] font-semibold text-[17px]">{dailyBookings}</span>
                 </div>
                 <input
                   type="range"
@@ -630,14 +501,13 @@ export default function LandingPage() {
                   step="5"
                   value={dailyBookings}
                   onChange={(e) => setDailyBookings(Number(e.target.value))}
-                  className="w-full accent-teal-400 bg-slate-800 h-2 rounded-lg cursor-pointer"
+                  className="w-full cursor-pointer"
                 />
               </div>
-
               <div>
-                <div className="flex justify-between text-sm font-semibold mb-2">
-                  <span className="text-slate-300">Average Booking Value (₹)</span>
-                  <span className="text-amber-400 font-bold text-base">₹{avgTicketPrice}</span>
+                <div className="flex justify-between text-[14px] font-medium mb-3">
+                  <span className="text-[#6e6e73]">Avg. Booking Value</span>
+                  <span className="text-[#1d1d1f] font-semibold text-[17px]">₹{avgTicketPrice}</span>
                 </div>
                 <input
                   type="range"
@@ -646,80 +516,82 @@ export default function LandingPage() {
                   step="100"
                   value={avgTicketPrice}
                   onChange={(e) => setAvgTicketPrice(Number(e.target.value))}
-                  className="w-full accent-amber-400 bg-slate-800 h-2 rounded-lg cursor-pointer"
+                  className="w-full cursor-pointer"
                 />
               </div>
             </div>
 
-            {/* Calculated Output */}
-            <div className="bg-[#0e1424] p-6 rounded-2xl border border-indigo-500/20 text-center space-y-5">
+            {/* Results */}
+            <div className="text-center space-y-6">
               <div>
-                <p className="text-xs uppercase font-bold text-slate-400 tracking-wider">Estimated Monthly Volume</p>
-                <p className="text-3xl font-extrabold text-white mt-1">{estimatedMonthlyBookings.toLocaleString()} Bookings</p>
+                <p className="text-[12px] uppercase font-semibold text-[#86868b] tracking-wider">Monthly Volume</p>
+                <p className="text-[36px] font-bold tracking-tight text-[#1d1d1f] mt-1">
+                  {estimatedMonthlyBookings.toLocaleString()}
+                </p>
+                <p className="text-[13px] text-[#86868b]">bookings</p>
               </div>
 
-              <div className="border-t border-slate-800 pt-4">
-                <p className="text-xs uppercase font-bold text-slate-400 tracking-wider">Projected Monthly Revenue</p>
-                <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-teal-400 mt-1">
+              <div className="border-t border-[#f5f5f7] pt-6">
+                <p className="text-[12px] uppercase font-semibold text-[#86868b] tracking-wider">Projected Revenue</p>
+                <p className="text-[44px] font-bold tracking-tight gradient-text-accent mt-1">
                   ₹{estimatedMonthlyRevenue.toLocaleString()}
                 </p>
+                <p className="text-[13px] text-[#86868b]">per month</p>
               </div>
 
-              <div className="border-t border-slate-800 pt-4">
-                <p className="text-xs uppercase font-bold text-slate-400 tracking-wider">Admin Time Saved</p>
-                <p className="text-xl font-bold text-amber-400 mt-0.5">~{estimatedTimeSavedHours} Hours / Week</p>
+              <div className="border-t border-[#f5f5f7] pt-6">
+                <p className="text-[12px] uppercase font-semibold text-[#86868b] tracking-wider">Admin Time Saved</p>
+                <p className="text-[28px] font-bold tracking-tight text-[#1d1d1f] mt-1">
+                  ~{estimatedTimeSavedHours} hrs
+                </p>
+                <p className="text-[13px] text-[#86868b]">per week</p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ────────────────────────────────────────────────────────
-          6. OWNER SELF-REGISTRATION FORM
-      ──────────────────────────────────────────────────────── */}
-      <section id="register" className="py-24 px-6 bg-[#090d16] relative">
-        <div className="max-w-4xl mx-auto">
+      {/* ── REGISTRATION ───────────────────────────────────── */}
+      <section id="register" className="py-24 px-6">
+        <div className="max-w-[720px] mx-auto">
           <div className="text-center mb-12">
-            <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest">
-              Join HairX Salon Platform
-            </span>
-            <h2 className="font-display text-3xl sm:text-5xl font-extrabold text-white mt-2">
-              Register Your Salon
+            <h2 className="text-[13px] font-semibold text-[#6e6e73] uppercase tracking-widest mb-4">
+              Get Started
             </h2>
-            <p className="text-slate-400 text-sm mt-3 max-w-xl mx-auto">
-              Submit your salon registration request below. Our platform admin team will review and activate your account within 24 hours.
+            <p className="text-[32px] sm:text-[44px] font-bold tracking-[-0.025em] leading-[1.1] text-[#1d1d1f]">
+              Register your salon.
+            </p>
+            <p className="text-[15px] text-[#6e6e73] mt-4 max-w-[480px] mx-auto">
+              Submit your details below. Our team reviews and activates accounts within 24 hours.
             </p>
           </div>
 
           {submittedData ? (
-            /* Success State Card */
-            <div className="glass-panel p-8 sm:p-12 rounded-3xl border border-emerald-500/30 text-center animate-fadeIn">
-              <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/30 rounded-full flex items-center justify-center mx-auto text-emerald-400 mb-6">
-                <CheckCircle2 className="w-9 h-9" />
+            <div className="bg-[#f5f5f7] rounded-3xl p-10 text-center animate-fade-in-up">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mx-auto text-emerald-600 mb-6">
+                <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h3 className="font-display text-2xl sm:text-3xl font-bold text-white">
-                Registration Request Submitted!
+              <h3 className="text-[24px] sm:text-[28px] font-bold text-[#1d1d1f]">
+                Registration Submitted
               </h3>
-              <p className="text-sm text-slate-300 mt-3 max-w-md mx-auto leading-relaxed">
-                Thank you, <span className="text-white font-semibold">{submittedData.ownerName}</span>. Your salon{" "}
-                <span className="text-indigo-400 font-semibold">&ldquo;{submittedData.salonName}&rdquo;</span> is now queued for admin review.
+              <p className="text-[15px] text-[#6e6e73] mt-3 max-w-md mx-auto">
+                Thank you, <span className="text-[#1d1d1f] font-semibold">{submittedData.ownerName}</span>. Your salon{" "}
+                <span className="font-semibold">&ldquo;{submittedData.salonName}&rdquo;</span> is queued for review.
               </p>
 
-              <div className="mt-8 bg-slate-900/90 border border-slate-800 rounded-2xl p-6 text-left max-w-md mx-auto space-y-3 text-xs text-slate-300">
-                <p className="font-bold text-slate-400 uppercase tracking-wider text-[11px]">What happens next?</p>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-indigo-600/30 text-indigo-300 text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
-                  <p>Superadmin verifies your salon details for platform security.</p>
+              <div className="mt-8 bg-white rounded-2xl p-6 text-left max-w-md mx-auto space-y-3 text-[13px] text-[#6e6e73]">
+                <p className="font-semibold text-[#86868b] uppercase tracking-wider text-[11px]">What happens next</p>
+                <div className="flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#1d1d1f] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</span>
+                  <p>Admin verifies your salon details.</p>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-indigo-600/30 text-indigo-300 text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
-                  <p>Account approval is completed (usually within 24 hours).</p>
+                <div className="flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#1d1d1f] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</span>
+                  <p>Account approved within 24 hours.</p>
                 </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="w-5 h-5 rounded-full bg-indigo-600/30 text-indigo-300 text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
-                  <p>
-                    Log in to Salon Panel with email <span className="text-white font-medium">{submittedData.ownerEmail}</span>.
-                  </p>
+                <div className="flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-[#1d1d1f] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</span>
+                  <p>Log in with <span className="text-[#1d1d1f] font-medium">{submittedData.ownerEmail}</span>.</p>
                 </div>
               </div>
 
@@ -728,9 +600,9 @@ export default function LandingPage() {
                   href={SALON_PANEL_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all"
+                  className="px-6 py-3 bg-[#1d1d1f] hover:bg-[#333336] text-white text-[14px] font-semibold rounded-full flex items-center gap-2 transition-all"
                 >
-                  Go to Salon Panel Login <ExternalLink className="w-4 h-4" />
+                  Go to Salon Panel <ArrowUpRight className="w-4 h-4" />
                 </a>
                 <button
                   onClick={() => {
@@ -743,236 +615,178 @@ export default function LandingPage() {
                     setConfirmPassword("");
                     setSalonDescription("");
                   }}
-                  className="text-xs text-slate-400 hover:text-white underline py-2"
+                  className="text-[13px] text-[#6e6e73] hover:text-[#1d1d1f] underline underline-offset-2 py-2 transition-colors"
                 >
-                  Submit Another Registration
+                  Submit another registration
                 </button>
               </div>
             </div>
           ) : (
-            /* Registration Form */
-            <form onSubmit={handleSubmit} className="glass-panel p-8 sm:p-10 rounded-3xl border border-slate-800 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs flex items-center gap-3">
+                <div className="p-4 rounded-2xl bg-red-50 border border-red-100 text-red-700 text-[13px] flex items-center gap-3">
                   <AlertCircle className="w-4 h-4 shrink-0" />
                   <p>{error}</p>
                 </div>
               )}
 
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Salon Name */}
+              <div className="grid md:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-2">
-                    Salon Name <span className="text-rose-400">*</span>
+                  <label className="block text-[13px] font-medium text-[#1d1d1f] mb-2">
+                    Salon Name <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Building2 className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      placeholder="e.g. HairX Salon & Beauty Studio"
-                      value={salonName}
-                      onChange={(e) => {
-                        setSalonName(e.target.value);
-                        setFieldErrs((p) => ({ ...p, salonName: "" }));
-                      }}
-                      className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                  {fieldErrs.salonName && <p className="text-[11px] text-rose-400 mt-1">{fieldErrs.salonName}</p>}
+                  <input
+                    type="text"
+                    placeholder="e.g. HairX Salon & Beauty Studio"
+                    value={salonName}
+                    onChange={(e) => { setSalonName(e.target.value); setFieldErrs((p) => ({ ...p, salonName: "" })); }}
+                    className="w-full bg-[#f5f5f7] border border-transparent rounded-xl px-4 py-3 text-[14px] text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-all"
+                  />
+                  {fieldErrs.salonName && <p className="text-[12px] text-red-500 mt-1">{fieldErrs.salonName}</p>}
                 </div>
 
-                {/* Owner Name */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-2">
-                    Owner Full Name <span className="text-rose-400">*</span>
+                  <label className="block text-[13px] font-medium text-[#1d1d1f] mb-2">
+                    Owner Full Name <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
-                    <input
-                      type="text"
-                      placeholder="e.g. Ananya Roy"
-                      value={ownerName}
-                      onChange={(e) => {
-                        setOwnerName(e.target.value);
-                        setFieldErrs((p) => ({ ...p, ownerName: "" }));
-                      }}
-                      className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                  {fieldErrs.ownerName && <p className="text-[11px] text-rose-400 mt-1">{fieldErrs.ownerName}</p>}
+                  <input
+                    type="text"
+                    placeholder="e.g. Ananya Roy"
+                    value={ownerName}
+                    onChange={(e) => { setOwnerName(e.target.value); setFieldErrs((p) => ({ ...p, ownerName: "" })); }}
+                    className="w-full bg-[#f5f5f7] border border-transparent rounded-xl px-4 py-3 text-[14px] text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-all"
+                  />
+                  {fieldErrs.ownerName && <p className="text-[12px] text-red-500 mt-1">{fieldErrs.ownerName}</p>}
                 </div>
 
-                {/* Owner Phone */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-2">
-                    Phone Number <span className="text-rose-400">*</span>
+                  <label className="block text-[13px] font-medium text-[#1d1d1f] mb-2">
+                    Phone Number <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
-                    <input
-                      type="tel"
-                      placeholder="+91 98765 43210"
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value);
-                        setFieldErrs((p) => ({ ...p, phone: "" }));
-                      }}
-                      className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                  {fieldErrs.phone && <p className="text-[11px] text-rose-400 mt-1">{fieldErrs.phone}</p>}
+                  <input
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    value={phone}
+                    onChange={(e) => { setPhone(e.target.value); setFieldErrs((p) => ({ ...p, phone: "" })); }}
+                    className="w-full bg-[#f5f5f7] border border-transparent rounded-xl px-4 py-3 text-[14px] text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-all"
+                  />
+                  {fieldErrs.phone && <p className="text-[12px] text-red-500 mt-1">{fieldErrs.phone}</p>}
                 </div>
 
-                {/* Owner Email */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-2">
-                    Email Address <span className="text-rose-400">*</span>
+                  <label className="block text-[13px] font-medium text-[#1d1d1f] mb-2">
+                    Email Address <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
-                    <input
-                      type="email"
-                      placeholder="owner@yoursalon.com"
-                      value={email}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        setFieldErrs((p) => ({ ...p, email: "" }));
-                      }}
-                      className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                  {fieldErrs.email && <p className="text-[11px] text-rose-400 mt-1">{fieldErrs.email}</p>}
+                  <input
+                    type="email"
+                    placeholder="owner@yoursalon.com"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setFieldErrs((p) => ({ ...p, email: "" })); }}
+                    className="w-full bg-[#f5f5f7] border border-transparent rounded-xl px-4 py-3 text-[14px] text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-all"
+                  />
+                  {fieldErrs.email && <p className="text-[12px] text-red-500 mt-1">{fieldErrs.email}</p>}
                 </div>
 
-                {/* Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-2">
-                    Account Password <span className="text-rose-400">*</span>
+                  <label className="block text-[13px] font-medium text-[#1d1d1f] mb-2">
+                    Password <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => {
-                        setPassword(e.target.value);
-                        setFieldErrs((p) => ({ ...p, password: "", confirmPassword: "" }));
-                      }}
-                      className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                  {fieldErrs.password && <p className="text-[11px] text-rose-400 mt-1">{fieldErrs.password}</p>}
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); setFieldErrs((p) => ({ ...p, password: "", confirmPassword: "" })); }}
+                    className="w-full bg-[#f5f5f7] border border-transparent rounded-xl px-4 py-3 text-[14px] text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-all"
+                  />
+                  {fieldErrs.password && <p className="text-[12px] text-red-500 mt-1">{fieldErrs.password}</p>}
                 </div>
 
-                {/* Confirm Password */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-2">
-                    Confirm Password <span className="text-rose-400">*</span>
+                  <label className="block text-[13px] font-medium text-[#1d1d1f] mb-2">
+                    Confirm Password <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => {
-                        setConfirmPassword(e.target.value);
-                        setFieldErrs((p) => ({ ...p, confirmPassword: "" }));
-                      }}
-                      className="w-full bg-slate-900/90 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                  {fieldErrs.confirmPassword && (
-                    <p className="text-[11px] text-rose-400 mt-1">{fieldErrs.confirmPassword}</p>
-                  )}
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => { setConfirmPassword(e.target.value); setFieldErrs((p) => ({ ...p, confirmPassword: "" })); }}
+                    className="w-full bg-[#f5f5f7] border border-transparent rounded-xl px-4 py-3 text-[14px] text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-all"
+                  />
+                  {fieldErrs.confirmPassword && <p className="text-[12px] text-red-500 mt-1">{fieldErrs.confirmPassword}</p>}
                 </div>
               </div>
 
-              {/* Salon Description */}
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-2">
-                  Salon Description & Locations (Optional)
+                <label className="block text-[13px] font-medium text-[#1d1d1f] mb-2">
+                  Salon Description (Optional)
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Tell us about your salon, location(s), team size, and services offered..."
+                  placeholder="Tell us about your salon, locations, team size, and services..."
                   value={salonDescription}
                   onChange={(e) => setSalonDescription(e.target.value)}
-                  className="w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#f5f5f7] border border-transparent rounded-xl px-4 py-3 text-[14px] text-[#1d1d1f] placeholder-[#86868b] focus:outline-none focus:border-[#0071e3] focus:ring-1 focus:ring-[#0071e3] transition-all resize-none"
                 />
               </div>
 
-              <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span>Password must be at least 8 characters with 1 uppercase, 1 number & 1 special character.</span>
-              </div>
+              <p className="text-[12px] text-[#86868b]">
+                Password must be at least 8 characters with 1 uppercase, 1 number & 1 special character.
+              </p>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 bg-[#1d1d1f] hover:bg-[#333336] disabled:opacity-50 text-white font-semibold text-[15px] rounded-full transition-all flex items-center justify-center gap-2"
               >
-                {loading ? (
-                  "Submitting Request..."
-                ) : (
-                  <>
-                    Submit Salon Registration <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
+                {loading ? "Submitting..." : (<>Submit Registration <ArrowRight className="w-4 h-4" /></>)}
               </button>
             </form>
           )}
         </div>
       </section>
 
-      {/* ────────────────────────────────────────────────────────
-          7. FAQ ACCORDION
-      ──────────────────────────────────────────────────────── */}
-      <section id="faq" className="py-20 px-6 bg-[#0b101d] border-t border-slate-800/80">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2">
-              Got Questions?
+      {/* ── FAQ ────────────────────────────────────────────── */}
+      <section id="faq" className="py-24 px-6 bg-[#f5f5f7]">
+        <div className="max-w-[680px] mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-[32px] sm:text-[44px] font-bold tracking-[-0.025em] leading-[1.1] text-[#1d1d1f]">
+              Frequently asked questions.
             </h2>
-            <p className="font-display text-3xl font-bold text-white">
-              Frequently Asked Questions
-            </p>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-0 divide-y divide-[#d2d2d7]">
             {[
               {
-                q: "Why is my salon registration request held for admin approval?",
-                a: "To ensure platform integrity and multi-tenant security, platform superadmins verify each new salon request before activating the owner account.",
+                q: "Why is my registration held for admin approval?",
+                a: "To ensure platform integrity and security, our admin team verifies each new salon before activating the owner account. This typically takes under 24 hours.",
               },
               {
-                q: "Can I manage multiple salon branches under one owner account?",
-                a: "Yes! HairX Salon SaaS natively supports multi-branch management. Once approved, you can create and manage unlimited branch locations from your single owner panel.",
+                q: "Can I manage multiple branches under one account?",
+                a: "Absolutely. HairX natively supports multi-branch management. Once approved, you can create and manage unlimited branch locations from your owner panel.",
               },
               {
                 q: "How do customer appointments work?",
-                a: "Customers use the Customer Mobile/Web App to select a branch, pick an available service and stylist, and book available time slots in real time.",
+                a: "Customers use the HairX mobile app to select a branch, pick a service and stylist, and book available time slots in real time. You manage everything from your dashboard.",
               },
               {
-                q: "How do staff leaves affect available appointment slots?",
-                a: "When a staff member submits a leave request and it is approved by an owner or manager, affected time slots are automatically locked to prevent customer double-booking.",
+                q: "How do staff leaves affect booking slots?",
+                a: "When a staff member's leave is approved, their slots are automatically blocked for that period — preventing any double-booking or scheduling conflicts.",
               },
             ].map((faq, index) => (
-              <div key={index} className="glass-card rounded-2xl overflow-hidden border border-slate-800">
+              <div key={index}>
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full p-5 text-left flex items-center justify-between font-semibold text-sm text-white hover:text-indigo-400 transition-colors"
+                  className="w-full py-5 text-left flex items-center justify-between gap-4"
                 >
-                  <span>{faq.q}</span>
+                  <span className="text-[15px] sm:text-[17px] font-semibold text-[#1d1d1f]">{faq.q}</span>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-200 ${
-                      openFaq === index ? "rotate-180 text-indigo-400" : "text-slate-500"
+                    className={`w-5 h-5 shrink-0 text-[#86868b] transition-transform duration-200 ${
+                      openFaq === index ? "rotate-180" : ""
                     }`}
                   />
                 </button>
                 {openFaq === index && (
-                  <div className="px-5 pb-5 text-xs text-slate-300 leading-relaxed border-t border-slate-800/60 pt-3">
+                  <div className="pb-5 text-[14px] sm:text-[15px] text-[#6e6e73] leading-relaxed -mt-1">
                     {faq.a}
                   </div>
                 )}
@@ -982,29 +796,57 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ────────────────────────────────────────────────────────
-          8. FOOTER
-      ──────────────────────────────────────────────────────── */}
-      <footer className="py-12 px-6 bg-[#070a11] border-t border-slate-800/80 text-xs text-slate-400">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="HairX" className="w-8 h-8 rounded-lg object-cover" />
-            <span className="font-display font-bold text-white text-base tracking-tight">
-              HAIR<span className="text-indigo-400">X</span>
-            </span>
+      {/* ── CTA BANNER ─────────────────────────────────────── */}
+      <section className="py-24 px-6 text-center">
+        <div className="max-w-[600px] mx-auto">
+          <h2 className="text-[32px] sm:text-[44px] font-bold tracking-[-0.025em] leading-[1.1] text-[#1d1d1f]">
+            Ready to transform your salon?
+          </h2>
+          <p className="text-[15px] text-[#6e6e73] mt-4">
+            Join HairX today and start managing your business the modern way.
+          </p>
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="#register"
+              className="px-8 py-3.5 bg-[#1d1d1f] hover:bg-[#333336] text-white text-[15px] font-semibold rounded-full flex items-center gap-2 transition-all"
+            >
+              Get Started Free <ArrowRight className="w-4 h-4" />
+            </a>
+            <a
+              href={SALON_PANEL_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="text-[15px] font-semibold text-[#0071e3] hover:underline flex items-center gap-1 transition-colors"
+            >
+              Sign in to Salon Panel <ArrowUpRight className="w-4 h-4" />
+            </a>
           </div>
+        </div>
+      </section>
 
-          <div className="flex flex-wrap gap-6 text-slate-400">
-            <a href="#benefits" className="hover:text-white transition-colors">Benefits</a>
-            <a href="#guide" className="hover:text-white transition-colors">Panel Guide</a>
-            <a href="#roi" className="hover:text-white transition-colors">ROI Calculator</a>
-            <a href="#register" className="hover:text-white transition-colors">Register Salon</a>
-            <a href={SALON_PANEL_URL} target="_blank" rel="noreferrer" className="hover:text-white transition-colors">Salon Panel Login</a>
-            <a href="/terms" className="hover:text-white transition-colors">Terms & Conditions</a>
-            <a href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</a>
+      {/* ── FOOTER ─────────────────────────────────────────── */}
+      <footer className="border-t border-[#d2d2d7]">
+        <div className="max-w-[1200px] mx-auto px-6 py-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-2.5">
+              <img src="/logo.png" alt="HairX" className="w-7 h-7 rounded-md object-cover" />
+              <span className="font-semibold text-[14px] tracking-tight text-[#1d1d1f]">
+                Hair<span className="font-bold">X</span>
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-6 text-[12px] text-[#6e6e73]">
+              <a href="#benefits" className="hover:text-[#1d1d1f] transition-colors">Benefits</a>
+              <a href="#guide" className="hover:text-[#1d1d1f] transition-colors">How It Works</a>
+              <a href="#roi" className="hover:text-[#1d1d1f] transition-colors">Calculator</a>
+              <a href="#register" className="hover:text-[#1d1d1f] transition-colors">Register</a>
+              <a href={SALON_PANEL_URL} target="_blank" rel="noreferrer" className="hover:text-[#1d1d1f] transition-colors">Salon Panel</a>
+              <a href="/terms" className="hover:text-[#1d1d1f] transition-colors">Terms</a>
+              <a href="/privacy-policy" className="hover:text-[#1d1d1f] transition-colors">Privacy</a>
+            </div>
+
+            <p className="text-[12px] text-[#86868b]">© 2026 HairX. All rights reserved.</p>
           </div>
-
-          <p className="text-slate-500">© 2026 HAIRX SALON PLATFORM. ALL RIGHTS RESERVED.</p>
         </div>
       </footer>
     </div>
