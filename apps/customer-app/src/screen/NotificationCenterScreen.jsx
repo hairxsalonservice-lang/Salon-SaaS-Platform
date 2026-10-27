@@ -354,7 +354,7 @@ function getStyles(isDark) {
     },
     divider: {
       height: StyleSheet.hairlineWidth,
-      backgroundColor: isDark ? "#2C2C34" : "#EBECEF",
+      backgroundColor: isDark ? "#2C2C34" : "#E5E5EA",
       marginHorizontal: -22,
     },
     scrollView: {

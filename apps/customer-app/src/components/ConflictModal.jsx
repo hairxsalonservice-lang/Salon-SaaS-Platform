@@ -144,7 +144,7 @@ function getStyles() {
   },
   title: {
     fontSize: 20,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.ink,
     marginBottom: 6,
     textAlign: "center",
@@ -183,7 +183,7 @@ function getStyles() {
   },
   cardHeaderTitle: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.main,
     letterSpacing: 1,
   },
@@ -207,7 +207,7 @@ function getStyles() {
   },
   highlightTime: {
     color: C.main,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   btnContainer: {
     width: "100%",

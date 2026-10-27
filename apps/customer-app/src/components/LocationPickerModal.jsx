@@ -285,7 +285,7 @@ export default function LocationPickerModal({
                 activeOpacity={0.85}
               >
                 <View style={styles.currentLocIconCircle}>
-                  <Ionicons name="location-sharp" size={20} color={isDark ? "#F9A8C4" : "#7A0026"} />
+                  <Ionicons name="location-sharp" size={20} color={isDark ? "#F9A8C4" : "#0071e3"} />
                 </View>
                 <View style={styles.currentLocTextWrap}>
                   <Text style={styles.currentLocCity}>
@@ -411,13 +411,13 @@ function getStyles(isDark) {
       borderRadius: 16,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#F4F4F6",
+      borderColor: isDark ? "#38383A" : "#F4F4F6",
     },
     gpsIconCircle: {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#E8F0FE",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 12,
@@ -466,7 +466,7 @@ function getStyles(isDark) {
     currentLocCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#E8F0FE",
       padding: 14,
       borderRadius: 16,
       borderWidth: 1.5,
@@ -476,7 +476,7 @@ function getStyles(isDark) {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#E8F0FE",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 12,
@@ -504,7 +504,7 @@ function getStyles(isDark) {
     currentBadgeText: {
       fontSize: 11,
       fontWeight: "600",
-      color: isDark ? "#F9A8C4" : "#7A0026",
+      color: isDark ? "#F9A8C4" : "#0071e3",
     },
     checkCircle: {
       width: 22,
@@ -533,17 +533,17 @@ function getStyles(isDark) {
       borderRadius: 16,
       marginBottom: 10,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#F4F4F6",
+      borderColor: isDark ? "#38383A" : "#F4F4F6",
     },
     cityCardSelected: {
       borderColor: "#C05278",
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#E8F0FE",
     },
     cityIconWrap: {
       width: 48,
       height: 48,
       borderRadius: 12,
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#E8F0FE",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 14,

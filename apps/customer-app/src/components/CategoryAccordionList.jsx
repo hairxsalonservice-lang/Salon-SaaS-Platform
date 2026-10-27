@@ -166,9 +166,9 @@ export default function CategoryAccordionList({
                   size={18}
                   color={
                     isExpanded || selectedInGroup
-                      ? C.purple || "#0071e3"
+                      ? isDark ? "#0A84FF" : "#0071e3"
                       : isDark
-                        ? "#94A3B8"
+                        ? "#8E8E93"
                         : "#8E8E93"
                   }
                   style={{ marginLeft: 6 }}
@@ -243,7 +243,7 @@ export default function CategoryAccordionList({
                           <Ionicons
                             name={isSelected ? "checkmark" : "add"}
                             size={16}
-                            color={isSelected ? "#FFFFFF" : C.purple || "#0071e3"}
+                            color={isSelected ? "#FFFFFF" : isDark ? "#0A84FF" : "#0071e3"}
                           />
                         </SpringTouchable>
                       </View>
@@ -261,7 +261,7 @@ export default function CategoryAccordionList({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#0071e3";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     container: {
@@ -270,7 +270,7 @@ function getStyles(theme, isDark) {
     searchContainer: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderRadius: 16,
       paddingHorizontal: 16,
       height: 48,
@@ -284,7 +284,7 @@ function getStyles(theme, isDark) {
     },
     groupCardWrapper: {
       borderRadius: 20,
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderWidth: 1.5,
       borderColor: "transparent",
       overflow: "hidden",
@@ -307,16 +307,16 @@ function getStyles(theme, isDark) {
     },
     accordionHeaderExpanded: {
       borderBottomWidth: 1,
-      borderBottomColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderBottomColor: isDark ? "#2C2C2E" : "#E5E5EA",
     },
     categoryTitle: {
       fontSize: 16,
       fontWeight: "600",
-      color: isDark ? "#94A3B8" : "#8E8E93",
+      color: isDark ? "#8E8E93" : "#8E8E93",
     },
     categoryTitleActive: {
       color: accentColor,
-      fontWeight: "800",
+      fontWeight: "700",
     },
     headerRightRow: {
       flexDirection: "row",
@@ -325,7 +325,7 @@ function getStyles(theme, isDark) {
     countText: {
       fontSize: 14,
       fontWeight: "700",
-      color: isDark ? "#E2E8F0" : "#1A1A24",
+      color: isDark ? "#E2E8F0" : "#000000",
     },
     selectedMetaCol: {
       alignItems: "flex-end",
@@ -333,12 +333,12 @@ function getStyles(theme, isDark) {
     selectedSubName: {
       fontSize: 13,
       fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       maxWidth: 140,
     },
     selectedPriceText: {
       fontSize: 12,
-      fontWeight: "800",
+      fontWeight: "700",
       color: accentColor,
       marginTop: 1,
     },
@@ -365,12 +365,12 @@ function getStyles(theme, isDark) {
     serviceName: {
       fontSize: 15,
       fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       marginBottom: 2,
     },
     serviceMeta: {
       fontSize: 12,
-      color: isDark ? "#94A3B8" : "#8E8E93",
+      color: isDark ? "#8E8E93" : "#8E8E93",
     },
     serviceRight: {
       flexDirection: "row",
@@ -379,8 +379,8 @@ function getStyles(theme, isDark) {
     },
     servicePrice: {
       fontSize: 15,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
     },
     comboHeaderPill: {
       backgroundColor: isDark ? "rgba(245, 158, 11, 0.2)" : "#FEF3C7",
@@ -392,7 +392,7 @@ function getStyles(theme, isDark) {
     },
     comboHeaderPillText: {
       fontSize: 10.5,
-      fontWeight: "800",
+      fontWeight: "700",
       color: isDark ? "#FBBF24" : "#B45309",
       letterSpacing: 0.2,
     },
@@ -431,11 +431,11 @@ function getStyles(theme, isDark) {
     emptyCard: {
       padding: 24,
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderRadius: 20,
     },
     emptyText: {
-      color: isDark ? "#94A3B8" : "#8E8E93",
+      color: isDark ? "#8E8E93" : "#8E8E93",
       fontSize: 14,
     },
   });

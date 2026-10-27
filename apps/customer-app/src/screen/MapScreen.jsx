@@ -531,7 +531,7 @@ function getStyles(isDark, insets) {
     filterIconButton: {
       padding: 6,
       marginLeft: 6,
-      backgroundColor: "#F3F4F6",
+      backgroundColor: "#E5E5EA",
       borderRadius: 16,
       position: "relative",
     },
@@ -550,7 +550,7 @@ function getStyles(isDark, insets) {
     },
     filterBadgeText: {
       fontSize: 8,
-      fontWeight: "800",
+      fontWeight: "700",
       color: "#FFFFFF",
     },
 

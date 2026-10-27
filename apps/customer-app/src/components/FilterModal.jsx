@@ -289,14 +289,14 @@ function getStyles(theme, isDark) {
     },
     eyebrow: {
       fontSize: 10,
-      fontWeight: "800",
+      fontWeight: "700",
       color: primaryColor,
       letterSpacing: 1.2,
       marginBottom: 2,
     },
     title: {
       fontSize: 22,
-      fontWeight: "800",
+      fontWeight: "700",
       color: isDark ? "#FFFFFF" : "#18181B",
       letterSpacing: -0.3,
     },
@@ -332,7 +332,7 @@ function getStyles(theme, isDark) {
     },
     sectionTitle: {
       fontSize: 10,
-      fontWeight: "800",
+      fontWeight: "700",
       color: isDark ? "#8E8E9A" : "#8E8E93",
       letterSpacing: 1,
       marginBottom: 4,

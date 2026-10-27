@@ -115,7 +115,7 @@ export default function FloatingSearchCapsule({
                 <Text style={styles.locationTitleText}>
                   {activeCity}{selectedState ? `, ${selectedState}` : ""}
                 </Text>
-                <Ionicons name="chevron-down" size={13} color={isDark ? "#9498A4" : "#71717A"} style={{ marginTop: 1 }} />
+                <Ionicons name="chevron-down" size={13} color={isDark ? "#8E8E93" : "#71717A"} style={{ marginTop: 1 }} />
               </View>
               <Text style={styles.locationSubText}>Find the perfect salon for you</Text>
             </View>
@@ -133,7 +133,7 @@ export default function FloatingSearchCapsule({
                 value={query}
                 onChangeText={handleTextChange}
                 placeholder={placeholder}
-                placeholderTextColor={isDark ? "#8E8E93" : "#9498A4"}
+                placeholderTextColor={isDark ? "#8E8E93" : "#8E8E93"}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setTimeout(() => setIsFocused(false), 200)}
                 onSubmitEditing={() => onSearchSubmit && onSearchSubmit(query)}
@@ -201,7 +201,7 @@ function getStyles(isDark) {
       shadowRadius: 16,
       elevation: isDark ? 10 : 4,
       borderWidth: 1,
-      borderColor: isDark ? "#3a3a3a6e" : "#EBECEF",
+      borderColor: isDark ? "#3a3a3a6e" : "#E5E5EA",
     },
     darkHeaderBlock: {
       flexDirection: "row",
@@ -229,13 +229,13 @@ function getStyles(isDark) {
       justifyContent: "center",
     },
     locationTitleText: {
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       fontSize: 16,
       fontWeight: "700",
       letterSpacing: -0.2,
     },
     locationSubText: {
-      color: isDark ? "#9498A4" : "#64748B",
+      color: isDark ? "#8E8E93" : "#636366",
       fontSize: 12,
       fontWeight: "500",
       letterSpacing: -0.1,
@@ -318,7 +318,7 @@ function getStyles(isDark) {
       paddingVertical: 8,
       paddingHorizontal: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C34" : "#EBECEF",
+      borderColor: isDark ? "#2C2C34" : "#E5E5EA",
       overflow: "hidden",
       shadowColor: "#000000",
       shadowOffset: { width: 0, height: 6 },

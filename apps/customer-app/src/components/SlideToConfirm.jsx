@@ -240,7 +240,7 @@ function getStyles() {
   priceLabel: {
     color: C.muted,
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 1.2,
   },
   priceValue: {
@@ -269,7 +269,7 @@ function getStyles() {
   trackText: {
     color: C.main,
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     letterSpacing: 0.3,
   },
   trackTextDisabled: {

@@ -281,7 +281,7 @@ function getStyles() {
     sectionHeading: {
       fontSize: 16,
       fontWeight: "700",
-      color: "#1A1A24",
+      color: "#000000",
     },
     monthYearText: {
       fontSize: 14,
@@ -302,7 +302,7 @@ function getStyles() {
       borderRadius: 12,
       backgroundColor: "#FFFFFF",
       borderWidth: 1,
-      borderColor: "#EBECEF",
+      borderColor: "#E5E5EA",
       alignItems: "center",
       justifyContent: "center",
       gap: 4,
@@ -366,7 +366,7 @@ function getStyles() {
       borderRadius: 8,
       backgroundColor: "#FFFFFF",
       borderWidth: 1,
-      borderColor: "#EBECEF",
+      borderColor: "#E5E5EA",
       alignItems: "center",
       justifyContent: "center",
     },
@@ -375,14 +375,14 @@ function getStyles() {
       borderColor: "#6F2A3B",
     },
     slotChipBooked: {
-      backgroundColor: "#F4F5F8",
+      backgroundColor: "#FFFFFF",
       borderColor: "#E2E8F0",
       opacity: 0.5,
     },
     slotStart: {
       fontSize: 13,
       fontWeight: "600",
-      color: "#1A1A24",
+      color: "#000000",
     },
     slotStartSelected: {
       color: "#6F2A3B",

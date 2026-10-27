@@ -106,7 +106,7 @@ export default function AddReviewModal({
               style={styles.closeBtn}
               activeOpacity={0.7}
             >
-              <Ionicons name="close" size={18} color={isDark ? "#94A3B8" : "#64748B"} />
+              <Ionicons name="close" size={18} color={isDark ? "#8E8E93" : "#636366"} />
             </TouchableOpacity>
           </View>
 
@@ -126,7 +126,7 @@ export default function AddReviewModal({
                       <Ionicons
                         name={item.icon}
                         size={16}
-                        color={C.purple || "#0071e3"}
+                        color={isDark ? "#0A84FF" : "#0071e3"}
                         style={{ marginRight: 8 }}
                       />
                       <Text style={styles.aspectLabel}>{item.label}</Text>
@@ -173,7 +173,7 @@ export default function AddReviewModal({
             <TextInput
               style={styles.textInput}
               placeholder="Share more feedback about cleanliness, ambience, service..."
-              placeholderTextColor={isDark ? "#64748B" : "#A0A4B0"}
+              placeholderTextColor={isDark ? "#636366" : "#8E8E93"}
               multiline
               numberOfLines={4}
               value={comment}
@@ -204,7 +204,7 @@ export default function AddReviewModal({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#0071e3";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     sheetInner: {
@@ -220,7 +220,7 @@ function getStyles(theme, isDark) {
     },
     title: {
       fontSize: 12,
-      fontWeight: "800",
+      fontWeight: "700",
       letterSpacing: 1.2,
       color: accentColor,
     },
@@ -228,19 +228,19 @@ function getStyles(theme, isDark) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#2C2C2E" : "#F0F1F5",
+      backgroundColor: isDark ? "#2C2C2E" : "#E5E5EA",
       alignItems: "center",
       justifyContent: "center",
     },
     subtitle: {
       fontSize: 14,
-      color: isDark ? "#94A3B8" : "#71717A",
+      color: isDark ? "#8E8E93" : "#71717A",
       marginBottom: 18,
       lineHeight: 20,
     },
     salonBold: {
       fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
     },
     scrollBody: {
       flexGrow: 0,
@@ -250,7 +250,7 @@ function getStyles(theme, isDark) {
       borderRadius: 20,
       padding: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#E5E5EA",
       marginBottom: 16,
       gap: 12,
     },
@@ -267,7 +267,7 @@ function getStyles(theme, isDark) {
     aspectLabel: {
       fontSize: 14,
       fontWeight: "600",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
     },
     starRow: {
       flexDirection: "row",
@@ -291,7 +291,7 @@ function getStyles(theme, isDark) {
       fontWeight: "600",
     },
     overallScoreBold: {
-      fontWeight: "800",
+      fontWeight: "700",
       color: accentColor,
     },
     textInput: {
@@ -299,9 +299,9 @@ function getStyles(theme, isDark) {
       borderRadius: 20,
       padding: 16,
       fontSize: 14,
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#E5E5EA",
       height: 100,
       marginBottom: 20,
       lineHeight: 20,

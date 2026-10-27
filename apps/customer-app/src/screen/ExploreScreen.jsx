@@ -150,7 +150,7 @@ export default function ExploreScreen({ goBack, navigate }) {
                   </TouchableOpacity>
                 </View>
 
-                <View style={[styles.historyCard, { backgroundColor: isDark ? "#18181B" : "#FFFFFF", borderColor: isDark ? "#27272A" : "#F4F4F6" }]}>
+                <View style={[styles.historyCard, { backgroundColor: isDark ? "#18181B" : "#FFFFFF", borderColor: isDark ? "#38383A" : "#F4F4F6" }]}>
                   {history.map((item, index) => (
                     <TouchableOpacity
                       key={`${item}-${index}`}
@@ -158,7 +158,7 @@ export default function ExploreScreen({ goBack, navigate }) {
                         styles.historyItem,
                         index < history.length - 1 && {
                           borderBottomWidth: 1,
-                          borderBottomColor: isDark ? "#27272A" : "#F4F4F6"
+                          borderBottomColor: isDark ? "#38383A" : "#F4F4F6"
                         }
                       ]}
                       onPress={() => handleExecuteSearch(item)}

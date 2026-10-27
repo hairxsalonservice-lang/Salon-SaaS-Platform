@@ -247,7 +247,7 @@ export default function AppointmentDetailModal({
                     activeOpacity={0.7}
                     hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
                   >
-                    <Ionicons name="close" size={18} color="#111827" />
+                    <Ionicons name="close" size={18} color="#000000" />
                   </TouchableOpacity>
                 </View>
 
@@ -295,7 +295,7 @@ export default function AppointmentDetailModal({
                 <View style={styles.detailsCard}>
                   <View style={styles.detailRow}>
                     <View style={styles.detailIconWrap}>
-                      <Ionicons name="cut-outline" size={16} color="#111827" />
+                      <Ionicons name="cut-outline" size={16} color="#000000" />
                     </View>
                     <Text style={styles.detailLabel}>Service</Text>
                     <Text style={styles.detailValue} numberOfLines={1}>{serviceName}</Text>
@@ -303,7 +303,7 @@ export default function AppointmentDetailModal({
                   
                   <View style={styles.detailRow}>
                     <View style={styles.detailIconWrap}>
-                      <Ionicons name="person-outline" size={16} color="#111827" />
+                      <Ionicons name="person-outline" size={16} color="#000000" />
                     </View>
                     <Text style={styles.detailLabel}>Specialist</Text>
                     <Text style={styles.detailValue} numberOfLines={1}>{staffName || "Any Available"}</Text>
@@ -311,7 +311,7 @@ export default function AppointmentDetailModal({
                   
                   <View style={styles.detailRow}>
                     <View style={styles.detailIconWrap}>
-                      <Ionicons name="time-outline" size={16} color="#111827" />
+                      <Ionicons name="time-outline" size={16} color="#000000" />
                     </View>
                     <Text style={styles.detailLabel}>Duration</Text>
                     <Text style={styles.detailValue}>{durationMinutes} mins</Text>
@@ -320,10 +320,10 @@ export default function AppointmentDetailModal({
                   {price !== undefined && price !== null && (
                     <View style={styles.detailRow}>
                       <View style={styles.detailIconWrap}>
-                        <Ionicons name="card-outline" size={16} color="#111827" />
+                        <Ionicons name="card-outline" size={16} color="#000000" />
                       </View>
                       <Text style={styles.detailLabel}>Amount</Text>
-                      <Text style={[styles.detailValue, { fontWeight: "800", fontSize: 16 }]}>{paiseToINR(price)}</Text>
+                      <Text style={[styles.detailValue, { fontWeight: "700", fontSize: 16 }]}>{paiseToINR(price)}</Text>
                     </View>
                   )}
                 </View>
@@ -429,7 +429,7 @@ function getStyles() {
       justifyContent: "flex-end",
     },
     sheetContainer: {
-      backgroundColor: "#FAFAFC",
+      backgroundColor: "#F2F2F7",
       borderTopLeftRadius: 32,
       borderTopRightRadius: 32,
       maxHeight: "92%",
@@ -454,8 +454,8 @@ function getStyles() {
     },
     passHeaderTitle: {
       fontSize: 22,
-      fontWeight: "800",
-      color: "#111827",
+      fontWeight: "700",
+      color: "#000000",
     },
     passHeaderSub: {
       fontSize: 13,
@@ -469,7 +469,7 @@ function getStyles() {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: "#F3F4F6",
+      backgroundColor: "#E5E5EA",
       alignItems: "center",
       justifyContent: "center",
     },
@@ -494,7 +494,7 @@ function getStyles() {
       width: 64,
       height: 64,
       borderRadius: 12,
-      backgroundColor: "#F3F4F6",
+      backgroundColor: "#E5E5EA",
     },
     salonDetailsCol: {
       flex: 1,
@@ -509,7 +509,7 @@ function getStyles() {
     salonNameText: {
       fontSize: 15,
       fontWeight: "700",
-      color: "#111827",
+      color: "#000000",
       flex: 1,
       marginRight: 8,
     },
@@ -521,7 +521,7 @@ function getStyles() {
     },
     statusPillText: {
       fontSize: 10,
-      fontWeight: "800",
+      fontWeight: "700",
       color: "#9A3412",
     },
     salonAddressRow: {
@@ -568,13 +568,13 @@ function getStyles() {
     slotDate: {
       fontSize: 15,
       fontWeight: "700",
-      color: "#111827",
+      color: "#000000",
       marginBottom: 2,
     },
     slotTime: {
       fontSize: 14,
       fontWeight: "600",
-      color: "#111827",
+      color: "#000000",
     },
 
     /* 3. QR Code Card */
@@ -625,7 +625,7 @@ function getStyles() {
     },
     qrCodeText: {
       fontSize: 24,
-      fontWeight: "800",
+      fontWeight: "700",
       color: "#6F2A3B",
       marginBottom: 8,
     },
@@ -665,7 +665,7 @@ function getStyles() {
     detailValue: {
       fontSize: 13,
       fontWeight: "700",
-      color: "#111827",
+      color: "#000000",
       textAlign: "right",
       maxWidth: "50%",
     },

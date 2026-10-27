@@ -365,7 +365,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
 
       <View style={[styles.header, { paddingTop: topInset }]}>
         <TouchableOpacity style={styles.backBtn} onPress={() => step === 2 ? setStep(1) : goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#1A1A24" />
+          <Ionicons name="arrow-back" size={24} color="#000000" />
         </TouchableOpacity>
       </View>
 
@@ -456,7 +456,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
                   <Text style={styles.priceLabel}>Service Price</Text>
                   <Text style={styles.priceVal}>{paiseToINR(rawTotalPrice)}</Text>
                 </View>
-                <View style={[styles.summaryRow, { borderBottomWidth: 1, borderBottomColor: "#F4F5F8", paddingBottom: 12, paddingTop: 4 }]}>
+                <View style={[styles.summaryRow, { borderBottomWidth: 1, borderBottomColor: "#FFFFFF", paddingBottom: 12, paddingTop: 4 }]}>
                   <Text style={styles.priceLabel}>Platform Fee <Ionicons name="information-circle-outline" size={12} color="#8A8A9E" /></Text>
                   <Text style={styles.priceVal}>₹0</Text>
                 </View>
@@ -508,12 +508,12 @@ function getStyles() {
     header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingBottom: 10, backgroundColor: "#FAF9F6" },
     backBtn: { width: 36, height: 36, justifyContent: "center" },
     contentContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 140 },
-    pageTitle: { fontSize: 26, fontWeight: "800", color: "#1A1A24", marginBottom: 4 },
+    pageTitle: { fontSize: 26, fontWeight: "700", color: "#000000", marginBottom: 4 },
     pageSubTitle: { fontSize: 13, color: "#8A8A9E", marginBottom: 24, lineHeight: 18 },
     salonCard: { flexDirection: "row", backgroundColor: "#FFFFFF", borderRadius: 16, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: "#F0EFEA" },
     salonImg: { width: 60, height: 60, borderRadius: 12, marginRight: 12 },
     salonInfo: { flex: 1, justifyContent: "center" },
-    salonName: { fontSize: 15, fontWeight: "700", color: "#1A1A24", marginBottom: 4 },
+    salonName: { fontSize: 15, fontWeight: "700", color: "#000000", marginBottom: 4 },
     ratingRow: { flexDirection: "row", alignItems: "center", marginBottom: 2 },
     ratingTxt: { fontSize: 12, color: "#666", marginLeft: 4, fontWeight: "500" },
     locationRow: { flexDirection: "row", alignItems: "center" },
@@ -521,22 +521,22 @@ function getStyles() {
     serviceCard: { flexDirection: "row", alignItems: "center", backgroundColor: "#FDF9FA", borderRadius: 16, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: "#F6EEF0" },
     svcIconWrap: { width: 44, height: 44, borderRadius: 12, backgroundColor: "#F3E6E8", alignItems: "center", justifyContent: "center", marginRight: 12 },
     svcInfo: { flex: 1, flexShrink: 1, paddingRight: 8 },
-    svcName: { fontSize: 15, fontWeight: "600", color: "#1A1A24", marginBottom: 2 },
+    svcName: { fontSize: 15, fontWeight: "600", color: "#000000", marginBottom: 2 },
     svcSub: { fontSize: 12, color: "#8A8A9E" },
-    svcPrice: { fontSize: 15, fontWeight: "700", color: "#1A1A24", flexShrink: 0 },
+    svcPrice: { fontSize: 15, fontWeight: "700", color: "#000000", flexShrink: 0 },
     summarySection: { marginBottom: 24 },
-    sectionTitle: { fontSize: 16, fontWeight: "700", color: "#1A1A24", marginBottom: 12 },
+    sectionTitle: { fontSize: 16, fontWeight: "700", color: "#000000", marginBottom: 12 },
     summaryCard: { backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#F0EFEA" },
     summaryRow: { flexDirection: "row", alignItems: "flex-start", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "#F9F9F9" },
     summaryIcon: { width: 24, marginTop: 2 },
     summaryLabel: { flex: 1, fontSize: 14, color: "#8A8A9E", marginTop: 1 },
     summaryValWrap: { flex: 2, alignItems: "flex-end" },
-    summaryVal: { fontSize: 14, fontWeight: "600", color: "#1A1A24", textAlign: "right" },
+    summaryVal: { fontSize: 14, fontWeight: "600", color: "#000000", textAlign: "right" },
     summaryValSub: { fontSize: 12, color: "#8A8A9E", marginTop: 2, textAlign: "right" },
     priceLabel: { flex: 1, fontSize: 14, color: "#8A8A9E" },
-    priceVal: { fontSize: 15, fontWeight: "600", color: "#1A1A24" },
-    totalLabel: { flex: 1, fontSize: 16, fontWeight: "700", color: "#1A1A24" },
-    totalVal: { fontSize: 18, fontWeight: "800", color: "#1A1A24" },
+    priceVal: { fontSize: 15, fontWeight: "600", color: "#000000" },
+    totalLabel: { flex: 1, fontSize: 16, fontWeight: "700", color: "#000000" },
+    totalVal: { fontSize: 18, fontWeight: "700", color: "#000000" },
     cancellationBanner: { flexDirection: "row", alignItems: "center", backgroundColor: "#ECFDF5", padding: 16, borderRadius: 12, borderWidth: 1, borderColor: "#D1FAE5", marginBottom: 20 },
     cancelTextWrap: { flex: 1, marginLeft: 10 },
     cancelTitle: { fontSize: 13, fontWeight: "700", color: "#065F46", marginBottom: 2 },
@@ -550,21 +550,21 @@ function getStyles() {
     successScreenWrapper: { flexGrow: 1, backgroundColor: "#FFFFFF", paddingHorizontal: 20, paddingTop: 30, paddingBottom: 30, alignItems: "center" },
     successHeader: { alignItems: "center", marginBottom: 24, marginTop: 10 },
     successCheckRing: { width: 72, height: 72, borderRadius: 36, backgroundColor: "#6F2A3B", alignItems: "center", justifyContent: "center", marginBottom: 16, borderWidth: 6, borderColor: "#F3E6E8" },
-    successTitle: { fontSize: 22, fontWeight: "800", color: "#111827", textAlign: "center", marginBottom: 6 },
+    successTitle: { fontSize: 22, fontWeight: "700", color: "#000000", textAlign: "center", marginBottom: 6 },
     successSub: { fontSize: 13, color: "#6B7280", textAlign: "center", lineHeight: 20 },
-    successDetailsCard: { width: "100%", backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: "#F3F4F6" },
+    successDetailsCard: { width: "100%", backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, marginBottom: 20, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: "#E5E5EA" },
     successServiceRow: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
     successServiceImg: { width: 50, height: 50, borderRadius: 10, marginRight: 12 },
     successServiceInfo: { flex: 1 },
-    successServiceName: { fontSize: 15, fontWeight: "700", color: "#111827", marginBottom: 2 },
+    successServiceName: { fontSize: 15, fontWeight: "700", color: "#000000", marginBottom: 2 },
     successServiceDesc: { fontSize: 12, color: "#6B7280", marginBottom: 6 },
     successServiceMeta: { flexDirection: "row", alignItems: "center" },
     successServiceMetaText: { fontSize: 12, color: "#4B5563", marginLeft: 4, fontWeight: "500" },
-    successDivider: { height: 1, backgroundColor: "#F3F4F6", marginVertical: 12 },
+    successDivider: { height: 1, backgroundColor: "#E5E5EA", marginVertical: 12 },
     successDetailRow: { flexDirection: "row", alignItems: "center" },
     successIconBox: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", marginRight: 12 },
     successDetailTextWrap: { flex: 1 },
-    successDetailLabel: { fontSize: 12, fontWeight: "600", color: "#111827", marginBottom: 2 },
+    successDetailLabel: { fontSize: 12, fontWeight: "600", color: "#000000", marginBottom: 2 },
     successDetailValue: { fontSize: 13, color: "#4B5563" },
     successDetailSubValue: { fontSize: 12, color: "#9CA3AF", marginTop: 2 },
     copyBtn: { backgroundColor: "#FDF9FA", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },

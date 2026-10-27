@@ -169,7 +169,7 @@ function getStyles() {
   },
   reasonHeader: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.main,
     letterSpacing: 1.1,
     marginBottom: S.xs,
@@ -231,7 +231,7 @@ function getStyles() {
   },
   keepBtnText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.textSecondary,
   },
   cancelBtn: {
@@ -243,7 +243,7 @@ function getStyles() {
   },
   cancelBtnText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.bg,
   },
   });

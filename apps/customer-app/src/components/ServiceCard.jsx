@@ -111,7 +111,7 @@ function getStyles() {
     },
     price: {
       fontSize: 15,
-      fontWeight: "800",
+      fontWeight: "700",
       letterSpacing: 0.2,
     },
     dotSeparator: {

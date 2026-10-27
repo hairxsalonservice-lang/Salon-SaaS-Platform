@@ -243,7 +243,7 @@ function getStyles(theme, isDark, insets) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#242426" : "#F3F4F6",
+      backgroundColor: isDark ? "#242426" : "#E5E5EA",
       alignItems: "center",
       justifyContent: "center",
       zIndex: 10,
@@ -289,21 +289,21 @@ function getStyles(theme, isDark, insets) {
     titleText: {
       fontFamily: FONT_FAMILY.serif,
       fontSize: 21,
-      fontWeight: "800",
-      color: isDark ? "#F8FAFC" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#F8FAFC" : "#000000",
       lineHeight: 26,
       marginBottom: 4,
     },
     offerSubtitleText: {
       fontSize: 12,
       fontWeight: "600",
-      color: isDark ? "#94A3B8" : "#8E8E93",
+      color: isDark ? "#8E8E93" : "#8E8E93",
       letterSpacing: 0.2,
     },
     descriptionText: {
       fontSize: 13,
       lineHeight: 20,
-      color: isDark ? "#CBD5E1" : "#4A5568",
+      color: isDark ? "#EBEBF5" : "#4A5568",
       marginBottom: 20,
     },
     servicesSection: {
@@ -311,8 +311,8 @@ function getStyles(theme, isDark, insets) {
     },
     servicesHeading: {
       fontSize: 16,
-      fontWeight: "800",
-      color: isDark ? "#F8FAFC" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#F8FAFC" : "#000000",
       marginBottom: 14,
     },
     checklistGrid: {
@@ -359,7 +359,7 @@ function getStyles(theme, isDark, insets) {
     priceLabel: {
       fontSize: 9.5,
       fontWeight: "700",
-      color: isDark ? "#94A3B8" : "#8E8E93",
+      color: isDark ? "#8E8E93" : "#8E8E93",
       letterSpacing: 0.8,
       marginBottom: 2,
     },
@@ -371,12 +371,12 @@ function getStyles(theme, isDark, insets) {
     priceValue: {
       fontSize: 18,
       fontWeight: "900",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
     },
     durationValue: {
       fontSize: 12,
       fontWeight: "600",
-      color: isDark ? "#94A3B8" : "#718096",
+      color: isDark ? "#8E8E93" : "#718096",
     },
     actionBtn: {
       backgroundColor: C.blue || "#3B82F6",

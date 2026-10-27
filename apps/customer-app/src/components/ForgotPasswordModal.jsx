@@ -182,7 +182,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
           {subStep === 2 && (
             <View style={styles.popupContainer}>
               <View style={styles.iconCircleMail}>
-                <Ionicons name="mail-outline" size={42} color={isDark ? "#FFFFFF" : "#1A1A24"} />
+                <Ionicons name="mail-outline" size={42} color={isDark ? "#FFFFFF" : "#000000"} />
               </View>
 
               <Text style={styles.popupTitle}>Code has been sent</Text>
@@ -303,7 +303,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#0071e3";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     modalOverlay: {
@@ -334,7 +334,7 @@ function getStyles(theme, isDark) {
       width: 38,
       height: 38,
       borderRadius: 19,
-      backgroundColor: isDark ? "#1C1C1E" : "#F0F1F5",
+      backgroundColor: isDark ? "#1C1C1E" : "#E5E5EA",
       alignItems: "center",
       justifyContent: "center",
     },
@@ -343,20 +343,20 @@ function getStyles(theme, isDark) {
     },
     titleText: {
       fontSize: 30,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.5,
       marginBottom: 8,
     },
     subtitleText: {
       fontSize: 15,
       fontWeight: "400",
-      color: isDark ? "#94A3B8" : "#9498A4",
+      color: isDark ? "#8E8E93" : "#8E8E93",
       lineHeight: 22,
       marginBottom: 24,
     },
     placeholderColor: {
-      color: isDark ? "#64748B" : "#B0B4C0",
+      color: isDark ? "#636366" : "#AEAEB2",
     },
     errorText: {
       color: "#EF4444",
@@ -370,13 +370,13 @@ function getStyles(theme, isDark) {
     inputPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       borderRadius: 20,
       paddingHorizontal: 18,
       height: 56,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#E5E5EA",
     },
     inputIcon: {
       marginRight: 14,
@@ -385,7 +385,7 @@ function getStyles(theme, isDark) {
       flex: 1,
       height: "100%",
       fontSize: 15,
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       fontWeight: "500",
     },
     eyeBtn: {
@@ -421,7 +421,7 @@ function getStyles(theme, isDark) {
       width: 72,
       height: 72,
       borderRadius: 24,
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
+      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 24,
@@ -439,8 +439,8 @@ function getStyles(theme, isDark) {
     },
     popupTitle: {
       fontSize: 26,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.4,
       marginBottom: 10,
       textAlign: "center",
@@ -448,7 +448,7 @@ function getStyles(theme, isDark) {
     popupSubtitle: {
       fontSize: 15,
       fontWeight: "400",
-      color: isDark ? "#94A3B8" : "#9498A4",
+      color: isDark ? "#8E8E93" : "#8E8E93",
       lineHeight: 22,
       textAlign: "center",
       maxWidth: 280,

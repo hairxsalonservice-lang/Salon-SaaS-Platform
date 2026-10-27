@@ -76,7 +76,7 @@ export default function ErrorCardModal({
 }
 
 function getStyles(theme, isDark) {
-  const primaryAccent = C.purple || "#0071e3";
+  const primaryAccent = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     overlay: {
@@ -94,7 +94,7 @@ function getStyles(theme, isDark) {
       padding: 24,
       alignItems: "center",
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#E5E5EA",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.25,
@@ -109,13 +109,13 @@ function getStyles(theme, isDark) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#2C2C2E" : "#F0F1F5",
+      backgroundColor: isDark ? "#2C2C2E" : "#E5E5EA",
       justifyContent: "center",
       alignItems: "center",
       zIndex: 10,
     },
     closeIconColor: {
-      color: isDark ? "#94A3B8" : "#64748B",
+      color: isDark ? "#8E8E93" : "#636366",
     },
     iconWrapper: {
       marginBottom: 16,
@@ -133,8 +133,8 @@ function getStyles(theme, isDark) {
     },
     title: {
       fontSize: 20,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       textAlign: "center",
       marginBottom: 8,
       letterSpacing: -0.4,
@@ -142,7 +142,7 @@ function getStyles(theme, isDark) {
     message: {
       fontSize: 14,
       fontWeight: "400",
-      color: isDark ? "#94A3B8" : "#71717A",
+      color: isDark ? "#8E8E93" : "#71717A",
       textAlign: "center",
       lineHeight: 20,
       marginBottom: 24,

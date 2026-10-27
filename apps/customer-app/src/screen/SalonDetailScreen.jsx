@@ -1007,7 +1007,7 @@ function getStyles(isDark) {
     },
     heroStatusText: {
       fontSize: 10.5,
-      fontWeight: "800",
+      fontWeight: "700",
       letterSpacing: 0.6,
     },
     heroTextOpen: {
@@ -1639,7 +1639,7 @@ function getStyles(isDark) {
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
       borderTopWidth: 1,
-      borderTopColor: isDark ? "#2C2C2E" : "#F0F1F5",
+      borderTopColor: isDark ? "#2C2C2E" : "#E5E5EA",
       overflow: "hidden",
     },
     floatingBottomBarTint: {

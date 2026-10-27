@@ -163,7 +163,7 @@ function SwipeableNotificationItem({
                 <Ionicons
                   name="trash-outline"
                   size={14}
-                  color={isDark ? "#94A3B8" : "#8E8E93"}
+                  color={isDark ? "#8E8E93" : "#8E8E93"}
                   style={{ marginRight: 4 }}
                 />
                 <Text style={styles.swipeHintText}>slide or tap to delete</Text>
@@ -248,14 +248,14 @@ function getStyles(isDark) {
     deleteHintBtn: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#F3F4F6",
+      backgroundColor: isDark ? "rgba(255, 255, 255, 0.05)" : "#E5E5EA",
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 8,
     },
     swipeHintText: {
       fontSize: 11,
-      color: isDark ? "#94A3B8" : "#6B7280",
+      color: isDark ? "#8E8E93" : "#6B7280",
       fontWeight: "600",
     },
     deleteButton: {

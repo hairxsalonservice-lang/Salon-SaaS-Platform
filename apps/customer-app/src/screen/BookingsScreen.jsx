@@ -153,7 +153,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
   const { isAuthenticated, user } = useAuth();
   const { theme, isDark } = useTheme();
   const styles = useMemo(() => getStyles(theme, isDark), [theme, isDark]);
-  const brand = C.purple || "#0071e3";
+  const brand = isDark ? "#0A84FF" : "#0071e3";
 
   const [activeTab, setActiveTab] = useState("Upcoming");
   const [appointments, setAppointments] = useState([]);
@@ -889,12 +889,12 @@ function GuestView({ styles, brand, navigate }) {
 }
 
 function getStyles(theme = {}, isDark = false) {
-  const bg = isDark ? "#0A0A0C" : "#FAFAF8";
+  const bg = isDark ? "#000000" : "#FAFAF8";
   const surface = isDark ? "#18181B" : "#FFFFFF";
-  const border = isDark ? "#27272A" : "#EEEEEC";
-  const text = isDark ? "#FAFAFA" : "#18181B";
+  const border = isDark ? "#38383A" : "#EEEEEC";
+  const text = isDark ? "#F2F2F7" : "#18181B";
   const muted = isDark ? "#A1A1AA" : "#71717A";
-  const brand = C.purple || "#0071e3";
+  const brand = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: bg },
@@ -902,7 +902,7 @@ function getStyles(theme = {}, isDark = false) {
 
     /* Header */
     header: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 12, backgroundColor: bg },
-    title: { fontSize: 30, fontWeight: "800", color: text, letterSpacing: -0.8 },
+    title: { fontSize: 30, fontWeight: "700", color: text, letterSpacing: -0.8 },
     subTitle: { fontSize: 14, color: muted, marginTop: 2, marginBottom: 16 },
 
     /* Segmented control */
@@ -934,7 +934,7 @@ function getStyles(theme = {}, isDark = false) {
       height: 20,
       paddingHorizontal: 6,
       borderRadius: 10,
-      backgroundColor: isDark ? "#27272A" : "#E4E4E0",
+      backgroundColor: isDark ? "#38383A" : "#E4E4E0",
       alignItems: "center",
       justifyContent: "center",
     },
@@ -953,13 +953,13 @@ function getStyles(theme = {}, isDark = false) {
       width: 56,
       paddingVertical: 8,
       borderRadius: 14,
-      backgroundColor: isDark ? "#27272A" : "#F6F2EF",
+      backgroundColor: isDark ? "#38383A" : "#F6F2EF",
       alignItems: "center",
     },
     dateTileLarge: { width: 72, paddingVertical: 10, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.1)" },
-    dateTileMonth: { fontSize: 10, fontWeight: "800", color: brand, letterSpacing: 0.8 },
+    dateTileMonth: { fontSize: 10, fontWeight: "700", color: brand, letterSpacing: 0.8 },
     dateTileMonthLarge: { fontSize: 11, color: "#FCA5A5" },
-    dateTileDay: { fontSize: 22, fontWeight: "800", color: text, lineHeight: 26 },
+    dateTileDay: { fontSize: 22, fontWeight: "700", color: text, lineHeight: 26 },
     dateTileDayLarge: { fontSize: 30, color: "#FFFFFF", lineHeight: 34 },
     dateTileWeekday: { fontSize: 11, fontWeight: "600", color: muted },
     dateTileWeekdayLarge: { fontSize: 12, color: "rgba(255,255,255,0.7)" },
@@ -986,7 +986,7 @@ function getStyles(theme = {}, isDark = false) {
     },
     heroCountdownText: { color: "#FFFFFF", fontSize: 12, fontWeight: "700" },
     heroBody: { flexDirection: "row", alignItems: "center" },
-    heroSalon: { fontSize: 19, fontWeight: "800", color: "#FFFFFF", letterSpacing: -0.3, marginBottom: 6 },
+    heroSalon: { fontSize: 19, fontWeight: "700", color: "#FFFFFF", letterSpacing: -0.3, marginBottom: 6 },
     heroMuted: { fontSize: 13, color: "rgba(255,255,255,0.7)", marginLeft: 5, flexShrink: 1 },
     heroServices: {
       marginTop: 16,
@@ -999,7 +999,7 @@ function getStyles(theme = {}, isDark = false) {
     heroServiceMeta: { fontSize: 12, color: "rgba(255,255,255,0.6)" },
     heroTotalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 6 },
     heroTotalLabel: { fontSize: 12, color: "rgba(255,255,255,0.6)" },
-    heroTotalValue: { fontSize: 17, fontWeight: "800", color: "#FFFFFF" },
+    heroTotalValue: { fontSize: 17, fontWeight: "700", color: "#FFFFFF" },
     heroActions: { flexDirection: "row", alignItems: "center", marginTop: 18, gap: 10 },
     heroPrimaryBtn: {
       flex: 1,
@@ -1051,7 +1051,7 @@ function getStyles(theme = {}, isDark = false) {
     },
     statCell: { flex: 1, alignItems: "center", paddingHorizontal: 8 },
     statDivider: { width: StyleSheet.hairlineWidth, alignSelf: "stretch", backgroundColor: border },
-    statValue: { fontSize: 20, fontWeight: "800", color: text, letterSpacing: -0.4, textAlign: "center" },
+    statValue: { fontSize: 20, fontWeight: "700", color: text, letterSpacing: -0.4, textAlign: "center" },
     statValueSmall: { fontSize: 14, letterSpacing: 0, lineHeight: 18 },
     statLabel: { fontSize: 11.5, fontWeight: "600", color: muted, marginTop: 4 },
     filterRow: { flexDirection: "row", gap: 8, marginBottom: 18 },
@@ -1075,7 +1075,7 @@ function getStyles(theme = {}, isDark = false) {
     historyRow: { flexDirection: "row", paddingVertical: 14 },
     historyRowDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: border },
     historyDate: { width: 40, alignItems: "center", marginRight: 12, paddingTop: 1 },
-    historyDay: { fontSize: 20, fontWeight: "800", color: text, lineHeight: 24 },
+    historyDay: { fontSize: 20, fontWeight: "700", color: text, lineHeight: 24 },
     historyMonth: { fontSize: 11, fontWeight: "700", color: muted, textTransform: "uppercase" },
     historyInfo: { flex: 1 },
     historyTitleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
@@ -1101,7 +1101,7 @@ function getStyles(theme = {}, isDark = false) {
       justifyContent: "center",
       marginBottom: 16,
     },
-    emptyTitle: { fontSize: 19, fontWeight: "800", color: text, textAlign: "center", letterSpacing: -0.3 },
+    emptyTitle: { fontSize: 19, fontWeight: "700", color: text, textAlign: "center", letterSpacing: -0.3 },
     emptySub: { fontSize: 14, color: muted, textAlign: "center", lineHeight: 20, marginTop: 6, maxWidth: 300 },
     emptyCta: {
       flexDirection: "row",

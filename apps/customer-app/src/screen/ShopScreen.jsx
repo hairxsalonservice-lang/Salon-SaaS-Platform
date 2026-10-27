@@ -38,7 +38,7 @@ export default function ShopScreen({ navigate, onScroll }) {
   };
 
   const styles = getStyles(isDark);
-  const accentColor = C.purple || "#0A84FF";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   if (isCityEmpty) {
     return (
@@ -116,23 +116,23 @@ export default function ShopScreen({ navigate, onScroll }) {
 }
 
 function getStyles(isDark) {
-  const accentColor = C.purple || "#0A84FF";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#0A0A0C" : "#FAFAFC",
+      backgroundColor: isDark ? "#000000" : "#F2F2F7",
     },
     header: {
       paddingTop: TOP_INSET,
       paddingHorizontal: 24,
       paddingBottom: 16,
-      backgroundColor: isDark ? "#0A0A0C" : "#FAFAFC",
+      backgroundColor: isDark ? "#000000" : "#F2F2F7",
     },
     headerTitle: {
       fontSize: 24,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#111827",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.5,
     },
     content: {
@@ -146,30 +146,30 @@ function getStyles(isDark) {
       width: 96,
       height: 96,
       borderRadius: 48,
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.12)" : "#FDF2F5",
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.12)" : "#E8F0FE",
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 20,
       borderWidth: 1.5,
-      borderColor: isDark ? "rgba(217, 28, 92, 0.25)" : "#FCE7EC",
+      borderColor: isDark ? "rgba(10, 132, 255, 0.25)" : "#FCE7EC",
     },
     iconRingInner: {
       width: 72,
       height: 72,
       borderRadius: 36,
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.2)" : "#FBE6EA",
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.2)" : "#FBE6EA",
       alignItems: "center",
       justifyContent: "center",
     },
     badgePill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.15)" : "#FDF2F5",
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.15)" : "#E8F0FE",
       paddingHorizontal: 12,
       paddingVertical: 5,
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(217, 28, 92, 0.3)" : "#FCE7EC",
+      borderColor: isDark ? "rgba(10, 132, 255, 0.3)" : "#FCE7EC",
       marginBottom: 16,
     },
     glowingDot: {
@@ -181,14 +181,14 @@ function getStyles(isDark) {
     },
     badgeText: {
       fontSize: 10.5,
-      fontWeight: "800",
+      fontWeight: "700",
       color: accentColor,
       letterSpacing: 0.8,
     },
     title: {
       fontSize: 24,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#111827",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       textAlign: "center",
       marginBottom: 10,
       letterSpacing: -0.4,

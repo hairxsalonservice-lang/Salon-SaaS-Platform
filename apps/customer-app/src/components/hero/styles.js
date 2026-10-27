@@ -35,7 +35,7 @@ export default StyleSheet.create({
     city: {
         color: "#fff",
         fontSize: 17,
-        fontWeight: "800"
+        fontWeight: "700"
     },
 
     subCity: {

@@ -221,7 +221,7 @@ function getStyles() {
   },
   title: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.main,
     letterSpacing: 1.1,
   },
@@ -277,7 +277,7 @@ function getStyles() {
   confirmBtnText: {
     color: C.bg,
     fontSize: 15,
-    fontWeight: "800",
+    fontWeight: "700",
   },
 });
 }

@@ -169,7 +169,7 @@ function getStyles(isDark) {
     },
     headerTitle: {
       fontSize: 22,
-      fontWeight: "800",
+      fontWeight: "700",
       color: isDark ? "#FFFFFF" : "#18181B",
       letterSpacing: -0.3,
     },
@@ -235,7 +235,7 @@ function getStyles(isDark) {
     },
     sectionHeader: {
       fontSize: 12,
-      fontWeight: "800",
+      fontWeight: "700",
       color: "#0071e3",
       letterSpacing: 1,
       marginBottom: 14,

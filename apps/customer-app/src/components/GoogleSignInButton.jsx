@@ -23,7 +23,7 @@ export default function GoogleSignInButton({ onPress, loading = false, disabled 
         hapticType="medium"
       >
         {loading ? (
-          <ActivityIndicator color={isDark ? "#FFFFFF" : "#1A1A24"} size="small" />
+          <ActivityIndicator color={isDark ? "#FFFFFF" : "#000000"} size="small" />
         ) : (
           <Ionicons name="logo-google" size={24} color="#EA4335" />
         )}
@@ -44,11 +44,11 @@ export default function GoogleSignInButton({ onPress, loading = false, disabled 
       hapticType="medium"
     >
       {loading ? (
-        <ActivityIndicator color={isDark ? "#FFFFFF" : "#1A1A24"} size="small" />
+        <ActivityIndicator color={isDark ? "#FFFFFF" : "#000000"} size="small" />
       ) : (
         <View style={styles.contentRow}>
           <Ionicons name="logo-google" size={20} color="#EA4335" style={{ marginRight: 12 }} />
-          <Text style={[styles.btnText, { color: isDark ? "#FFFFFF" : "#1A1A24" }]}>
+          <Text style={[styles.btnText, { color: isDark ? "#FFFFFF" : "#000000" }]}>
             Continue with Google
           </Text>
         </View>

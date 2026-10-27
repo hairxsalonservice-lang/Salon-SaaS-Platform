@@ -122,7 +122,7 @@ function getStyles(isDark) {
     },
     headerTitle: {
       fontSize: 22,
-      fontWeight: "800",
+      fontWeight: "700",
       color: isDark ? "#FFFFFF" : "#18181B",
       letterSpacing: -0.3,
     },

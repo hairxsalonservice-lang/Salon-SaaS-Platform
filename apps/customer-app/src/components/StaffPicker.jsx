@@ -126,7 +126,7 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
                     <Ionicons
                       name="sparkles"
                       size={28}
-                      color={isSelected ? "#0071e3" : isDark ? "#94A3B8" : "#64748B"}
+                      color={isSelected ? "#0071e3" : isDark ? "#8E8E93" : "#636366"}
                     />
                   </View>
                 ) : (
@@ -178,7 +178,7 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#0071e3";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     container: {
@@ -192,8 +192,8 @@ function getStyles(theme, isDark) {
     },
     sectionTitle: {
       fontSize: 16,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.3,
     },
     scrollContent: {
@@ -202,12 +202,12 @@ function getStyles(theme, isDark) {
     },
     staffCard: {
       width: 104,
-      backgroundColor: isDark ? "#1C1C1E" : (C.bg || "#FAFAFC"),
+      backgroundColor: isDark ? "#1C1C1E" : (C.bg || "#F2F2F7"),
       borderRadius: 22,
       padding: 10,
       alignItems: "center",
       borderWidth: 2,
-      borderColor: isDark ? "#1C1C1E" : (C.bg || "#FAFAFC"),
+      borderColor: isDark ? "#1C1C1E" : (C.bg || "#F2F2F7"),
     },
     staffCardSelected: {
       borderColor: accentColor,
@@ -257,7 +257,7 @@ function getStyles(theme, isDark) {
     name: {
       fontSize: 13,
       fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       textAlign: "center",
     },
     nameSelected: {
@@ -266,7 +266,7 @@ function getStyles(theme, isDark) {
     title: {
       fontSize: 11,
       fontWeight: "500",
-      color: isDark ? "#94A3B8" : "#8A8A9E",
+      color: isDark ? "#8E8E93" : "#8A8A9E",
       textAlign: "center",
       marginTop: 2,
     },

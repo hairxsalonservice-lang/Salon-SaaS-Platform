@@ -472,7 +472,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
             activeOpacity={0.8}
           >
             <Text style={styles.chatNowText}>Chat Now</Text>
-            <Ionicons name="arrow-forward" size={13} color={isDark ? "#F9A8C4" : "#7A0026"} style={{ marginLeft: 3 }} />
+            <Ionicons name="arrow-forward" size={13} color={isDark ? "#F9A8C4" : "#0071e3"} style={{ marginLeft: 3 }} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -515,7 +515,7 @@ function buildStyles(isDark) {
     },
     headerTitle: {
       fontSize: 20,
-      fontWeight: "800",
+      fontWeight: "700",
       color: isDark ? "#FFFFFF" : "#18181B",
       letterSpacing: -0.3,
     },
@@ -576,7 +576,7 @@ function buildStyles(isDark) {
     },
     heroTitle: {
       fontSize: 22,
-      fontWeight: "800",
+      fontWeight: "700",
       color: isDark ? "#FFFFFF" : "#18181B",
       lineHeight: 26,
       letterSpacing: -0.4,
@@ -617,8 +617,8 @@ function buildStyles(isDark) {
     },
     badgeStampText: {
       fontSize: 9,
-      fontWeight: "800",
-      color: "#7A0026",
+      fontWeight: "700",
+      color: "#0071e3",
       textAlign: "center",
       fontStyle: "italic",
     },
@@ -633,7 +633,7 @@ function buildStyles(isDark) {
       alignItems: "center",
       backgroundColor: isDark ? "#1E1E24" : "#FFFFFF",
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#E4E4E7",
+      borderColor: isDark ? "#38383A" : "#E4E4E7",
       paddingHorizontal: 14,
       paddingVertical: 8,
       borderRadius: 20,
@@ -641,7 +641,7 @@ function buildStyles(isDark) {
     },
     filterPillActive: {
       borderColor: "#C05278",
-      backgroundColor: isDark ? "#2A1B22" : "#FDF0F2",
+      backgroundColor: isDark ? "#2A1B22" : "#E8F0FE",
     },
     filterPillText: {
       fontSize: 13,
@@ -666,7 +666,7 @@ function buildStyles(isDark) {
     mapViewBtn: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#2A1B22" : "#FDF0F2",
+      backgroundColor: isDark ? "#2A1B22" : "#E8F0FE",
       borderWidth: 1,
       borderColor: "rgba(192, 82, 120, 0.3)",
       paddingHorizontal: 12,
@@ -686,7 +686,7 @@ function buildStyles(isDark) {
       padding: 12,
       marginBottom: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#F4F4F6",
+      borderColor: isDark ? "#38383A" : "#F4F4F6",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.04,
@@ -752,7 +752,7 @@ function buildStyles(isDark) {
       flexWrap: "wrap",
     },
     tagPill: {
-      backgroundColor: isDark ? "#27272A" : "#F4F4F6",
+      backgroundColor: isDark ? "#38383A" : "#F4F4F6",
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 8,
@@ -773,7 +773,7 @@ function buildStyles(isDark) {
       padding: 4,
     },
     bookNowBtn: {
-      backgroundColor: isDark ? "#2A1B22" : "#FDF0F2",
+      backgroundColor: isDark ? "#2A1B22" : "#E8F0FE",
       paddingHorizontal: 12,
       paddingVertical: 7,
       borderRadius: 12,
@@ -782,13 +782,13 @@ function buildStyles(isDark) {
     bookNowText: {
       fontSize: 12,
       fontWeight: "700",
-      color: isDark ? "#F9A8C4" : "#7A0026",
+      color: isDark ? "#F9A8C4" : "#0071e3",
     },
     /* Consultation Banner */
     ctaBanner: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#20171B" : "#FDF0F2",
+      backgroundColor: isDark ? "#20171B" : "#E8F0FE",
       borderRadius: 18,
       padding: 14,
       marginTop: 10,
@@ -828,7 +828,7 @@ function buildStyles(isDark) {
     chatNowText: {
       fontSize: 12,
       fontWeight: "700",
-      color: isDark ? "#F9A8C4" : "#7A0026",
+      color: isDark ? "#F9A8C4" : "#0071e3",
     },
     loadingBox: {
       alignItems: "center",

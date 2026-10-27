@@ -315,13 +315,13 @@ function getStyles() {
   },
   headerSub: {
     fontSize: 9,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.muted,
     letterSpacing: 1.2,
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.ink,
     marginTop: 2,
   },
@@ -354,7 +354,7 @@ function getStyles() {
   },
   filterText: {
     fontSize: 11,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.ink,
   },
   filterTextActive: {
@@ -430,7 +430,7 @@ function getStyles() {
   pinBadgeText: {
     color: "#FFFFFF",
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "700",
   },
   pinBadgeTextSelected: {
     color: C.bg,
@@ -464,13 +464,13 @@ function getStyles() {
   },
   distTagText: {
     fontSize: 10,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.main,
     letterSpacing: 0.8,
   },
   popupTitle: {
     fontSize: 18,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.ink,
   },
   popupAddr: {
@@ -497,7 +497,7 @@ function getStyles() {
   },
   ratingVal: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.ink,
   },
   popupActionRow: {
@@ -518,7 +518,7 @@ function getStyles() {
   },
   dirBtnText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.ink,
   },
   bookBtn: {
@@ -531,7 +531,7 @@ function getStyles() {
   },
   bookBtnText: {
     fontSize: 12,
-    fontWeight: "800",
+    fontWeight: "700",
     color: C.main,
   },
   });

@@ -271,7 +271,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
               activeOpacity={0.8}
             >
               <View style={[styles.catIconWrap, isSelected && styles.catIconWrapActive]}>
-                <Ionicons name={cat.iconName} size={15} color={isSelected ? "#FFFFFF" : "#7A0026"} />
+                <Ionicons name={cat.iconName} size={15} color={isSelected ? "#FFFFFF" : "#0071e3"} />
               </View>
               <Text style={[styles.catText, isSelected ? styles.catTextActive : styles.catTextInactive]}>
                 {cat.label}
@@ -302,7 +302,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
     if (loading) {
       return (
         <View style={styles.centerBlock}>
-          <ActivityIndicator size="small" color="#7A0026" />
+          <ActivityIndicator size="small" color="#0071e3" />
           <Text style={styles.loadingText}>Loading partner studios in {selectedCity}...</Text>
         </View>
       );
@@ -362,7 +362,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
         contentContainerStyle={styles.flatListContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#7A0026" colors={["#7A0026"]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#0071e3" colors={["#0071e3"]} />}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={renderEmpty}
         ListFooterComponent={listFooter}
@@ -446,10 +446,10 @@ function buildStyles(isDark, insets) {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: "#7A0026",
+      backgroundColor: "#0071e3",
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#7A0026",
+      shadowColor: "#0071e3",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.3,
       shadowRadius: 6,
@@ -470,18 +470,18 @@ function buildStyles(isDark, insets) {
       marginRight: 10,
     },
     catPillActive: {
-      backgroundColor: "#7A0026",
+      backgroundColor: "#0071e3",
     },
     catPillInactive: {
       backgroundColor: isDark ? "#18181B" : "#FFFFFF",
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#E4E4E7",
+      borderColor: isDark ? "#38383A" : "#E4E4E7",
     },
     catIconWrap: {
       width: 24,
       height: 24,
       borderRadius: 12,
-      backgroundColor: "#FDF0F2",
+      backgroundColor: "#E8F0FE",
       alignItems: "center",
       justifyContent: "center",
       marginRight: 8,
@@ -497,7 +497,7 @@ function buildStyles(isDark, insets) {
       color: "#FFFFFF",
     },
     catTextInactive: {
-      color: isDark ? "#FAFAFA" : "#3F3F46",
+      color: isDark ? "#F2F2F7" : "#3F3F46",
     },
     resultsHeaderRow: {
       flexDirection: "row",
@@ -542,7 +542,7 @@ function buildStyles(isDark, insets) {
       textAlign: "center",
     },
     retryBtn: {
-      backgroundColor: "#7A0026",
+      backgroundColor: "#0071e3",
       paddingHorizontal: 20,
       paddingVertical: 10,
       borderRadius: 20,
@@ -563,7 +563,7 @@ function buildStyles(isDark, insets) {
     },
     loadMoreBtnText: {
       fontSize: 13,
-      color: "#7A0026",
+      color: "#0071e3",
       fontWeight: "700",
     },
   });

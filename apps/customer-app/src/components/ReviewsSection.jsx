@@ -104,7 +104,7 @@ export default function ReviewsSection({
               <Ionicons
                 name={userRating > 0 && star <= userRating ? "star" : "star-outline"}
                 size={28}
-                color={userRating > 0 && star <= userRating ? "#F59E0B" : isDark ? "#475569" : "#CBD5E1"}
+                color={userRating > 0 && star <= userRating ? "#F59E0B" : isDark ? "#3C3C43" : "#EBEBF5"}
                 style={{ marginHorizontal: 4 }}
               />
             </TouchableOpacity>
@@ -115,7 +115,7 @@ export default function ReviewsSection({
         <TextInput
           style={styles.textInputBox}
           placeholder="Leave your experience..."
-          placeholderTextColor={isDark ? "#64748B" : "#94A3B8"}
+          placeholderTextColor={isDark ? "#636366" : "#8E8E93"}
           value={commentText}
           onChangeText={setCommentText}
           maxLength={500} // server rejects longer reviews
@@ -192,7 +192,7 @@ export default function ReviewsSection({
                         key={star}
                         name={star <= ratingNum ? "star" : "star-outline"}
                         size={13}
-                        color={star <= ratingNum ? "#F59E0B" : isDark ? "#475569" : "#CBD5E1"}
+                        color={star <= ratingNum ? "#F59E0B" : isDark ? "#3C3C43" : "#EBEBF5"}
                         style={{ marginRight: 2 }}
                       />
                     ))}
@@ -214,7 +214,7 @@ export default function ReviewsSection({
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#0071e3";
+  const accentColor = isDark ? "#0A84FF" : "#0071e3";
 
   return StyleSheet.create({
     container: {
@@ -237,7 +237,7 @@ function getStyles(theme, isDark) {
     summaryScoreNum: {
       fontSize: 28,
       fontWeight: "900",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.5,
     },
     summaryStarsRow: {
@@ -247,7 +247,7 @@ function getStyles(theme, isDark) {
     summarySubtext: {
       fontSize: 12,
       fontWeight: "600",
-      color: isDark ? "#A0A0B8" : "#64748B",
+      color: isDark ? "#A0A0B8" : "#636366",
     },
 
     // 2. Write Review Card
@@ -256,7 +256,7 @@ function getStyles(theme, isDark) {
       borderRadius: 20,
       padding: 18,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#EBECEF",
+      borderColor: isDark ? "#2C2C2E" : "#E5E5EA",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: isDark ? 0.25 : 0.04,
@@ -272,8 +272,8 @@ function getStyles(theme, isDark) {
     },
     writeTitle: {
       fontSize: 17,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.3,
     },
     ratingBadge: {
@@ -299,7 +299,7 @@ function getStyles(theme, isDark) {
       borderRadius: 16,
       padding: 14,
       fontSize: 14,
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      color: isDark ? "#FFFFFF" : "#000000",
       minHeight: 80,
       borderWidth: 1,
       borderColor: isDark ? "#3A3A3D" : "#E2E8F0",
@@ -339,8 +339,8 @@ function getStyles(theme, isDark) {
     },
     allReviewsTitle: {
       fontSize: 18,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       letterSpacing: -0.3,
     },
 
@@ -357,7 +357,7 @@ function getStyles(theme, isDark) {
       borderRadius: 18,
       padding: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F0F1F5",
+      borderColor: isDark ? "#2C2C2E" : "#E5E5EA",
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: isDark ? 0.2 : 0.04,
@@ -387,8 +387,8 @@ function getStyles(theme, isDark) {
     },
     userName: {
       fontSize: 15,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#FFFFFF" : "#000000",
       marginRight: 6,
     },
     verifiedBadge: {
@@ -412,7 +412,7 @@ function getStyles(theme, isDark) {
     reviewTimeAgo: {
       fontSize: 11,
       fontWeight: "600",
-      color: isDark ? "#64748B" : "#94A3B8",
+      color: isDark ? "#636366" : "#8E8E93",
       backgroundColor: isDark ? "#2C2C2E" : "#F8FAFC",
       paddingHorizontal: 8,
       paddingVertical: 3,
@@ -421,7 +421,7 @@ function getStyles(theme, isDark) {
     commentContent: {
       fontSize: 14,
       fontWeight: "400",
-      color: isDark ? "#CBD5E1" : "#475569",
+      color: isDark ? "#EBEBF5" : "#3C3C43",
       lineHeight: 22,
     },
   });

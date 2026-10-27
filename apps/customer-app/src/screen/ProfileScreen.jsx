@@ -132,7 +132,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
                 onPress={() => navigate && navigate("NotificationCenter")}
                 activeOpacity={0.75}
               >
-                <Ionicons name="notifications-outline" size={20} color={isDark ? "#FFFFFF" : "#111827"} />
+                <Ionicons name="notifications-outline" size={20} color={isDark ? "#FFFFFF" : "#000000"} />
                 <View style={styles.redBadgeDot} />
               </TouchableOpacity>
 
@@ -141,7 +141,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
                 onPress={() => navigate && navigate("SavedSalons")}
                 activeOpacity={0.75}
               >
-                <Ionicons name="heart-outline" size={20} color={isDark ? "#FFFFFF" : "#111827"} />
+                <Ionicons name="heart-outline" size={20} color={isDark ? "#FFFFFF" : "#000000"} />
                 {favorites.length > 0 && <View style={styles.favBadgeDot} />}
               </TouchableOpacity>
             </View>
@@ -418,7 +418,7 @@ function getStyles(isDark) {
       height: 72,
       borderRadius: 36,
       position: "relative",
-      backgroundColor: isDark ? "#1C1C1E" : "#F3F4F6",
+      backgroundColor: isDark ? "#1C1C1E" : "#E5E5EA",
     },
     avatarImage: {
       width: 72,
@@ -525,7 +525,7 @@ function getStyles(isDark) {
       borderColor: isDark ? "#38383A" : "#E5E5EA",
     },
     secondaryAuthBtnText: {
-      color: isDark ? "#FFFFFF" : "#374151",
+      color: isDark ? "#FFFFFF" : "#3C3C43",
       fontSize: 13.5,
       fontWeight: "600",
     },
@@ -559,7 +559,7 @@ function getStyles(isDark) {
     },
     promoTagText: {
       fontSize: 9.5,
-      fontWeight: "800",
+      fontWeight: "700",
       color: accentColor,
       letterSpacing: 0.8,
     },

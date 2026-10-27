@@ -85,7 +85,7 @@ function ComingSoonLocation({
                 <Ionicons
                   name="navigate-outline"
                   size={12}
-                  color={isDark ? "#94A3B8" : "#4B5563"}
+                  color={isDark ? "#8E8E93" : "#4B5563"}
                   style={{ marginRight: 4 }}
                 />
                 <Text style={styles.quickCityText}>{c}</Text>
@@ -150,15 +150,15 @@ function getStyles(theme, isDark) {
     },
     pillTagText: {
       fontSize: 10.5,
-      fontWeight: "800",
+      fontWeight: "700",
       color: isDark ? "#FBBF24" : "#B45309",
       letterSpacing: 0.8,
     },
     titleText: {
       fontFamily: FONT_FAMILY.serif,
       fontSize: 23,
-      fontWeight: "800",
-      color: isDark ? "#F8FAFC" : "#1A1A24",
+      fontWeight: "700",
+      color: isDark ? "#F8FAFC" : "#000000",
       textAlign: "center",
       lineHeight: 30,
       marginBottom: 10,
@@ -169,7 +169,7 @@ function getStyles(theme, isDark) {
     descriptionText: {
       fontSize: 13.5,
       lineHeight: 21,
-      color: isDark ? "#94A3B8" : "#64748B",
+      color: isDark ? "#8E8E93" : "#636366",
       textAlign: "center",
       marginBottom: 24,
       maxWidth: 320,
@@ -204,9 +204,9 @@ function getStyles(theme, isDark) {
     },
     quickCitiesLabel: {
       fontSize: 10.5,
-      fontWeight: "800",
+      fontWeight: "700",
       letterSpacing: 0.8,
-      color: isDark ? "#64748B" : "#94A3B8",
+      color: isDark ? "#636366" : "#8E8E93",
       marginBottom: 12,
     },
     quickCitiesRow: {
