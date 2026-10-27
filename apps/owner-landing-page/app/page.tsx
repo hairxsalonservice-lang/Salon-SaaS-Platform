@@ -347,7 +347,7 @@ export default function LandingPage() {
               <div key={i} className={`reveal reveal-delay-${i + 1} relative group`}>
                 <div
                   className="text-[72px] font-black leading-none tracking-tighter transition-colors duration-300"
-                  style={{ color: `${s.color}08` }}
+                  style={{ color: `${s.color}20` }}
                 >
                   {s.step}
                 </div>
