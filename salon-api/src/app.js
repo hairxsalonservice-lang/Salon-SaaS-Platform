@@ -63,41 +63,11 @@ if (process.env.NODE_ENV !== "test") {
 app.use(helmet());
 
 // Configure strict CORS for development, staging, & production
-const parseAllowedOrigins = () => {
-  const envOrigins = process.env.ALLOWED_ORIGINS;
-  if (!envOrigins) return [];
-  return envOrigins
-    .split(",")
-    .map((o) => o.trim())
-    .filter(Boolean);
-};
-
-const allowedOriginsList = parseAllowedOrigins();
+const { isAllowedOrigin } = require("./config/cors");
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile native apps, curl, server-to-server)
-    if (!origin) return callback(null, true);
-
-    // Development mode: allow explicit origins, localhost, local dev IPs
-    if (process.env.NODE_ENV === "development") {
-      if (
-        allowedOriginsList.includes("*") ||
-        allowedOriginsList.includes(origin) ||
-        /^http:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/.test(
-          origin
-        )
-      ) {
-        return callback(null, true);
-      }
-    }
-
-    // Production & Staging: Allow explicit whitelist or hairxsalon.com domains
-    if (
-      allowedOriginsList.includes(origin) ||
-      /^https:\/\/([a-zA-Z0-9-]+\.)*hairxsalon\.com$/.test(origin) ||
-      /^https:\/\/([a-zA-Z0-9-]+\.)*up\.railway\.app$/.test(origin)
-    ) {
+    if (isAllowedOrigin(origin)) {
       return callback(null, true);
     }
 

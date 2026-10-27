@@ -50,6 +50,70 @@ const buildStatusPush = (appointment, serviceName = "appointment", salonName = "
   };
 };
 
+// Socket events are visible to every client in a room. Only send the fields
+// the UI needs for a live update — never the full appointment document, which
+// contains customer email/phone and internal notes.
+const buildAppointmentEventPayload = (appointment) => {
+  if (!appointment) return null;
+
+  const raw =
+    typeof appointment.toObject === "function"
+      ? appointment.toObject()
+      : appointment;
+
+  const asObject = (value) =>
+    value && typeof value === "object" && (value._id || value.name)
+      ? value
+      : null;
+
+  const idOf = (value) => {
+    const object = asObject(value);
+    return object ? object._id || object.id || null : value || null;
+  };
+
+  const customer = asObject(raw.customerId);
+  const service = asObject(raw.serviceId);
+  const staff = asObject(raw.staffId);
+  const branch = asObject(raw.branchId);
+  const salon = asObject(raw.salonId);
+
+  return {
+    appointmentId: raw._id,
+    status: raw.status,
+    customerName: customer?.name || raw.customerName || null,
+    serviceName: service?.name || raw.serviceName || null,
+    appointment: {
+      _id: raw._id,
+      status: raw.status,
+      date: raw.date,
+      startTime: raw.startTime,
+      endTime: raw.endTime,
+      pricePaid: raw.pricePaid,
+      customerId: {
+        _id: idOf(raw.customerId),
+        name: customer?.name || raw.customerName || null,
+      },
+      serviceId: {
+        _id: idOf(raw.serviceId),
+        name: service?.name || raw.serviceName || null,
+        price: service?.price ?? null,
+      },
+      staffId: {
+        _id: idOf(raw.staffId),
+        name: staff?.name || null,
+      },
+      branchId: {
+        _id: idOf(raw.branchId),
+        name: branch?.name || null,
+      },
+      salonId: {
+        _id: idOf(raw.salonId),
+        name: salon?.name || null,
+      },
+    },
+  };
+};
+
 // ================================
 // POST /api/v1/appointments
 // customer only — book an appointment
@@ -58,6 +122,14 @@ const bookAppointment = async (req, res, next) => {
   try {
     const { slotId, serviceId, serviceIds, customerNotes, guests } = req.body;
     const { userId } = req.user;
+
+    // Server-side counterpart to the app's verification gate: an unverified
+    // email must not be able to create bookings by calling the API directly.
+    if (req.user.isEmailVerified === false) {
+      return next(
+        new AppError("Please verify your email address before booking an appointment.", 403),
+      );
+    }
 
     // --------------------------------
     // Idempotency Key Check
@@ -474,17 +546,15 @@ const bookAppointment = async (req, res, next) => {
         const salonIdStr = String(appointment.salonId);
 
         const populatedAppt = await Appointment.findById(appointment._id)
-          .populate("customerId", "name email phone")
-          .populate("serviceId", "name durationMinutes price")
+          .populate("customerId", "name")
+          .populate("serviceId", "name price")
           .populate("staffId", "name")
           .populate("branchId", "name")
           .populate("salonId", "name");
 
-        const eventData = {
-          appointmentId: appointment._id,
-          status: appointment.status,
-          appointment: populatedAppt || appointment,
-        };
+        const eventData =
+          buildAppointmentEventPayload(populatedAppt) ||
+          buildAppointmentEventPayload(appointment);
 
         console.log(`⚡ [SOCKET EMIT] Emitting new appointment (${appointment._id}) to branch_${branchIdStr}`);
         io.to(`customer_${customerIdStr}`).emit("appointment_created", eventData);
@@ -645,6 +715,10 @@ const getAppointments = async (req, res, next) => {
       if (queryBranchId) {
         filter.branchId = queryBranchId;
       }
+    } else {
+      // Fail closed: never run an unscoped appointment query for an
+      // unrecognized role.
+      return next(new AppError("Access denied. Role not authorized.", 403));
     }
 
     // optional filters
@@ -957,11 +1031,8 @@ const updateAppointmentStatus = async (req, res, next) => {
 
         console.log(`⚡ [SOCKET EMIT] Emitting status change (${appointment.status}) to room customer_${customerIdStr} & branch_${branchIdStr}`);
 
-        const eventPayload = {
-          appointmentId: appointment._id,
-          status: appointment.status,
-          appointment,
-        };
+        const eventPayload =
+          buildAppointmentEventPayload(appointment);
 
         io.to(`customer_${customerIdStr}`).emit("appointment_status_changed", eventPayload);
         io.to(`branch_${branchIdStr}`).emit("appointment_updated", eventPayload);
@@ -1349,17 +1420,15 @@ const rescheduleAppointment = async (req, res, next) => {
         const salonIdStr = String(appointment.salonId?._id || appointment.salonId);
 
         const populatedAppt = await Appointment.findById(appointment._id)
-          .populate("customerId", "name email phone")
-          .populate("serviceId", "name durationMinutes price")
+          .populate("customerId", "name")
+          .populate("serviceId", "name price")
           .populate("staffId", "name")
           .populate("branchId", "name")
           .populate("salonId", "name");
 
-        const eventData = {
-          appointmentId: appointment._id,
-          status: appointment.status,
-          appointment: populatedAppt || appointment,
-        };
+        const eventData =
+          buildAppointmentEventPayload(populatedAppt) ||
+          buildAppointmentEventPayload(appointment);
 
         console.log(`⚡ [SOCKET EMIT] Emitting rescheduled appointment (${appointment._id}) to branch_${branchIdStr}`);
         io.to(`customer_${customerIdStr}`).emit("appointment_updated", eventData);
@@ -1577,4 +1646,5 @@ module.exports = {
   rateAppointment,
   rescheduleAppointment,
   getMyAppointmentHistory,
+  buildAppointmentEventPayload,
 };

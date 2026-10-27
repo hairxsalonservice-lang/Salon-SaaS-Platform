@@ -2,6 +2,11 @@
 const express = require("express");
 const router = express.Router();
 const { reverseGeocode, searchLocations, getPlaceDetails } = require("../controllers/location.controller");
+const { locationLimiter } = require("../middleware/rateLimiter.middleware");
+
+// These routes are public (signed-out browsing uses them), but call paid
+// upstream APIs, so they get a dedicated per-IP rate limit.
+router.use(locationLimiter);
 
 // Reverse geocode latitude & longitude to address/city
 router.post("/reverse-geocode", reverseGeocode);

@@ -12,12 +12,20 @@ const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || "";
  */
 const reverseGeocode = async (req, res) => {
   try {
-    const { latitude, longitude } = req.body;
+    const latitude = Number(req.body.latitude);
+    const longitude = Number(req.body.longitude);
 
-    if (!latitude || !longitude) {
+    if (
+      !Number.isFinite(latitude) ||
+      !Number.isFinite(longitude) ||
+      latitude < -90 ||
+      latitude > 90 ||
+      longitude < -180 ||
+      longitude > 180
+    ) {
       return res.status(400).json({
         success: false,
-        message: "Latitude and longitude are required",
+        message: "Valid latitude (-90..90) and longitude (-180..180) are required",
       });
     }
 
@@ -148,12 +156,20 @@ const reverseGeocode = async (req, res) => {
  */
 const searchLocations = async (req, res) => {
   try {
-    const query = req.query.q || req.query.query;
+    const rawQuery = req.query.q || req.query.query;
+    const query = typeof rawQuery === "string" ? rawQuery.trim() : "";
 
-    if (!query || query.trim().length < 2) {
+    if (query.length < 2) {
       return res.status(200).json({
         success: true,
         data: [],
+      });
+    }
+
+    if (query.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: "Search query is too long",
       });
     }
 
@@ -328,12 +344,24 @@ function parseAddressString(addressStr) {
 const getPlaceDetails = async (req, res) => {
   try {
     const { place_id } = req.query;
-    const queryText = req.query.q || req.query.query || req.query.address || place_id;
+    const rawQueryText = req.query.q || req.query.query || req.query.address || place_id;
+    const queryText =
+      typeof rawQueryText === "string" ? rawQueryText.trim() : "";
 
     if (!place_id && !queryText) {
       return res.status(400).json({
         success: false,
         message: "place_id or query string is required",
+      });
+    }
+
+    if (
+      (place_id && (typeof place_id !== "string" || place_id.length > 200)) ||
+      queryText.length > 200
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or oversized place identifier",
       });
     }
 

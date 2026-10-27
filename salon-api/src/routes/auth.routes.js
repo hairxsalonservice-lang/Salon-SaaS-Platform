@@ -24,7 +24,8 @@ const {
   registerValidator,
   ownerRegisterValidator,
   loginValidator,
-  refreshValidator
+  refreshValidator,
+  appleLoginValidator
 } = require('../validators/auth.validator')
 
 const { authLimiter } = require('../middleware/rateLimiter.middleware')
@@ -34,7 +35,7 @@ router.post('/register', authLimiter, registerValidator, validate, register)
 router.post('/register-owner', authLimiter, ownerRegisterValidator, validate, registerOwner)
 router.post('/login', authLimiter, loginValidator, validate, login)
 router.post('/google', authLimiter, googleLogin)
-router.post('/apple', authLimiter, appleLogin)
+router.post('/apple', authLimiter, appleLoginValidator, validate, appleLogin)
 router.post('/refresh', authLimiter, refreshValidator, validate, refresh)
 router.post('/forgot-password', authLimiter, forgotPassword)
 router.post('/reset-password', authLimiter, resetPassword)

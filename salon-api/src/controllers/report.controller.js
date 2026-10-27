@@ -5,6 +5,7 @@ const Slot = require('../models/slot.model')
 const AppError = require('../utils/AppError')
 const dayjs = require('dayjs')
 const { getCache, setCache } = require('../services/cache.service')
+const reportCacheKey = require('../utils/reportCacheKey')
 
 // ================================
 // GET /api/v1/reports/overview
@@ -37,7 +38,12 @@ const getOverview = async (req, res, next) => {
     const start = startDate || dayjs().startOf('month').format('YYYY-MM-DD')
     const end = endDate || dayjs().endOf('month').format('YYYY-MM-DD')
 
-    const cacheKey = `report:overview:${role}:${salonId || branchId || 'all'}:${start}:${end}`
+    const cacheKey = reportCacheKey('overview', {
+      role,
+      salonId,
+      branchId,
+      suffix: `${start}:${end}`,
+    })
     const cached = await getCache(cacheKey)
     if (cached) {
       return res.status(200).json({ success: true, cached: true, data: cached })
@@ -159,7 +165,12 @@ const getPopularServices = async (req, res, next) => {
     const start = startDate || dayjs().startOf('month').format('YYYY-MM-DD')
     const end = endDate || dayjs().endOf('month').format('YYYY-MM-DD')
 
-    const cacheKey = `report:popular-services:${role}:${salonId || branchId || 'all'}:${start}:${end}:${limit}`
+    const cacheKey = reportCacheKey('popular-services', {
+      role,
+      salonId,
+      branchId,
+      suffix: `${start}:${end}:${limit}`,
+    })
     const cached = await getCache(cacheKey)
     if (cached) {
       return res.status(200).json({ success: true, cached: true, data: cached })
@@ -249,7 +260,12 @@ const getStaffPerformance = async (req, res, next) => {
     const start = startDate || dayjs().startOf('month').format('YYYY-MM-DD')
     const end = endDate || dayjs().endOf('month').format('YYYY-MM-DD')
 
-    const cacheKey = `report:staff-performance:${role}:${salonId || branchId || 'all'}:${start}:${end}`
+    const cacheKey = reportCacheKey('staff-performance', {
+      role,
+      salonId,
+      branchId,
+      suffix: `${start}:${end}`,
+    })
     const cached = await getCache(cacheKey)
     if (cached) {
       return res.status(200).json({ success: true, cached: true, data: cached })
@@ -340,7 +356,12 @@ const getDailyBookings = async (req, res, next) => {
     const start = startDate || dayjs().startOf('month').format('YYYY-MM-DD')
     const end = endDate || dayjs().endOf('month').format('YYYY-MM-DD')
 
-    const cacheKey = `report:daily-bookings:${role}:${salonId || branchId || 'all'}:${start}:${end}`
+    const cacheKey = reportCacheKey('daily-bookings', {
+      role,
+      salonId,
+      branchId,
+      suffix: `${start}:${end}`,
+    })
     const cached = await getCache(cacheKey)
     if (cached) {
       return res.status(200).json({ success: true, cached: true, data: cached })
@@ -419,7 +440,12 @@ const getSlotUtilization = async (req, res, next) => {
 
     const targetDate = date || dayjs().format('YYYY-MM-DD')
 
-    const cacheKey = `report:slot-utilization:${role}:${salonId || branchId || 'all'}:${targetDate}`
+    const cacheKey = reportCacheKey('slot-utilization', {
+      role,
+      salonId,
+      branchId,
+      suffix: targetDate,
+    })
     const cached = await getCache(cacheKey)
     if (cached) {
       return res.status(200).json({ success: true, cached: true, data: cached })
