@@ -166,13 +166,19 @@ export default function LandingPage() {
             <a href="#guide" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">How It Works</a>
             <a href="#roi" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">Calculator</a>
             <a href="#faq" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">FAQ</a>
-            <a href={SALON_PANEL_URL} target="_blank" rel="noreferrer" className="hover:text-[#1d1d1f] dark:hover:text-white transition-colors">
-              Sign In
-            </a>
           </nav>
 
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <ThemeToggle />
+            <a
+              href={SALON_PANEL_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 text-[12px] font-semibold text-[#1d1d1f] dark:text-white bg-[#f5f5f7] dark:bg-white/[0.08] hover:bg-[#e8e8ed] dark:hover:bg-white/[0.16] border border-[#d2d2d7]/80 dark:border-white/20 px-3.5 py-1.5 rounded-full transition-all btn-press shadow-xs hover:border-[#86868b] dark:hover:border-white/40"
+            >
+              <span>Sign In</span>
+              <ArrowUpRight className="w-3.5 h-3.5 text-[#86868b] dark:text-[#a1a1a6]" />
+            </a>
             <a
               href="#register"
               className="text-[12px] font-medium text-white bg-[#1d1d1f] hover:bg-[#424245] dark:bg-white dark:text-[#09090b] dark:hover:bg-[#e5e5ea] px-4 py-1.5 rounded-full transition-all btn-press shadow-sm"
