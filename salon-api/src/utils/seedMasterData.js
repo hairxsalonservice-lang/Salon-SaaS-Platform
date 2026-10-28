@@ -85,10 +85,11 @@ const ROLE_PERMISSIONS = {
     "staff:create", "staff:read", "staff:update", "staff:delete",
     "service:create", "service:read", "service:update", "service:delete",
     "slot:create", "slot:read", "slot:update", "slot:delete",
-    "appointment:read", "appointment:update", "report:read"
+    "appointment:create", "appointment:read", "appointment:update", "report:read"
   ],
   staff: [
-    "service:read", "slot:read", "appointment:read", "appointment:update"
+    "service:read", "slot:read",
+    "appointment:create", "appointment:read", "appointment:update"
   ],
   customer: [
     "service:read", "slot:read", "appointment:create", "appointment:read", "appointment:update", "appointment:delete"

@@ -38,10 +38,14 @@ export async function browseBranchById(branchId: string) {
   return data;
 }
 
-export async function browseBranchSlots(branchId: string, date: string) {
+export async function browseBranchSlots(
+  branchId: string,
+  date: string,
+  options?: { serviceId?: string; staffId?: string },
+) {
   const { data } = await apiClient.get<ApiResponse<Record<string, Slot[]>>>(
     `/browse/branches/${branchId}/slots`,
-    { params: { date } },
+    { params: { date, ...options } },
   );
   return data;
 }

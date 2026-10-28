@@ -14,7 +14,7 @@ import {
   Share,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { FONT_FAMILY, C } from "../theme";
+import { C, FONT_FAMILY, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle, getPlatformButtonStyle } from "../theme";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useFavorites } from "../context/FavoritesContext";
@@ -98,7 +98,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
     ? user?.email || ""
     : "Sign in to manage your appointments and preferences";
 
-  const accentColor = C.purple || "#D91C5C";
+  const accentColor = C.main;
 
   return (
     <View style={styles.container}>
@@ -121,7 +121,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
             >
               <Image source={userAvatarSource} style={styles.avatarImage} />
               <View style={styles.editBadge}>
-                <Ionicons name="pencil" size={12} color="#FFFFFF" />
+                <Ionicons name="pencil" size={12} color={C.textLight} />
               </View>
             </TouchableOpacity>
 
@@ -132,7 +132,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
                 onPress={() => navigate && navigate("NotificationCenter")}
                 activeOpacity={0.75}
               >
-                <Ionicons name="notifications-outline" size={20} color={isDark ? "#FFFFFF" : "#111827"} />
+                <Ionicons name="notifications-outline" size={20} color={C.ink} />
                 <View style={styles.redBadgeDot} />
               </TouchableOpacity>
 
@@ -141,7 +141,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
                 onPress={() => navigate && navigate("SavedSalons")}
                 activeOpacity={0.75}
               >
-                <Ionicons name="heart-outline" size={20} color={isDark ? "#FFFFFF" : "#111827"} />
+                <Ionicons name="heart-outline" size={20} color={C.ink} />
                 {favorites.length > 0 && <View style={styles.favBadgeDot} />}
               </TouchableOpacity>
             </View>
@@ -160,7 +160,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
                 activeOpacity={0.88}
               >
                 <Text style={styles.primaryAuthBtnText}>Login / Sign Up</Text>
-                <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                <Ionicons name="arrow-forward" size={16} color={C.textLight} style={{ marginLeft: 6 }} />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -210,7 +210,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
               <Ionicons
                 name="sunny"
                 size={14}
-                color={themeMode === "light" ? "#FFFFFF" : isDark ? "#9CA3AF" : "#6B7280"}
+                color={themeMode === "light" ? C.textLight : C.muted}
               />
               <Text style={[styles.themeTabLabel, themeMode === "light" && styles.themeTabLabelActive]}>
                 Light
@@ -225,7 +225,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
               <Ionicons
                 name="moon"
                 size={14}
-                color={themeMode === "dark" ? "#FFFFFF" : isDark ? "#9CA3AF" : "#6B7280"}
+                color={themeMode === "dark" ? C.textLight : C.muted}
               />
               <Text style={[styles.themeTabLabel, themeMode === "dark" && styles.themeTabLabelActive]}>
                 Dark
@@ -240,7 +240,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
               <Ionicons
                 name="phone-portrait-outline"
                 size={14}
-                color={themeMode === "system" ? "#FFFFFF" : isDark ? "#9CA3AF" : "#6B7280"}
+                color={themeMode === "system" ? C.textLight : C.muted}
               />
               <Text style={[styles.themeTabLabel, themeMode === "system" && styles.themeTabLabelActive]}>
                 System
@@ -257,47 +257,16 @@ export default function ProfileScreen({ navigate, onScroll }) {
             onPress={() => navigate && navigate("Bookings")}
             activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(217, 28, 92, 0.15)" : "#FDF2F5" }]}>
+            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(10, 132, 255, 0.15)" : C.infoBg }]}>
               <Ionicons name="calendar-outline" size={20} color={accentColor} />
             </View>
             <View style={styles.menuTextCol}>
               <Text style={styles.menuTitle}>Appointment History</Text>
               <Text style={styles.menuSub}>View and manage your bookings</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
+            <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
 
-          {/* 2. Payment Methods */}
-          <TouchableOpacity
-            style={styles.menuCard}
-            onPress={() => (navigate ? navigate("SavedAddresses") : Alert.alert("Payment Methods", "Manage payment methods."))}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(59, 130, 246, 0.15)" : "#EFF6FF" }]}>
-              <Ionicons name="card-outline" size={20} color="#3B82F6" />
-            </View>
-            <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>Payment Methods</Text>
-              <Text style={styles.menuSub}>Save and manage your payment options</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
-          </TouchableOpacity>
-
-          {/* 3. Payment History */}
-          <TouchableOpacity
-            style={styles.menuCard}
-            onPress={() => navigate && navigate("Bookings")}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(16, 185, 129, 0.15)" : "#F0FDF4" }]}>
-              <Ionicons name="time-outline" size={20} color="#10B981" />
-            </View>
-            <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>Payment History</Text>
-              <Text style={styles.menuSub}>View past transactions</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
-          </TouchableOpacity>
 
           {/* 4. Change Password */}
           <TouchableOpacity
@@ -305,14 +274,14 @@ export default function ProfileScreen({ navigate, onScroll }) {
             onPress={() => (isAuthenticated ? navigate && navigate("EditProfile") : navigate && navigate("Login"))}
             activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(245, 158, 11, 0.15)" : "#FEF3C7" }]}>
-              <Ionicons name="lock-closed-outline" size={20} color="#F59E0B" />
+            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(245, 158, 11, 0.15)" : C.goldTint }]}>
+              <Ionicons name="lock-closed-outline" size={20} color={C.warning} />
             </View>
             <View style={styles.menuTextCol}>
               <Text style={styles.menuTitle}>Change Password</Text>
               <Text style={styles.menuSub}>Keep your account secure</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
+            <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
 
           {/* 5. Invite Friends */}
@@ -321,14 +290,14 @@ export default function ProfileScreen({ navigate, onScroll }) {
             onPress={handleShareApp}
             activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(139, 92, 246, 0.15)" : "#F3E8FF" }]}>
-              <Ionicons name="people-outline" size={20} color="#8B5CF6" />
+            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(139, 92, 246, 0.15)" : C.infoBg }]}>
+              <Ionicons name="people-outline" size={20} color={C.info} />
             </View>
             <View style={styles.menuTextCol}>
               <Text style={styles.menuTitle}>Invite Friends</Text>
               <Text style={styles.menuSub}>Earn rewards together</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
+            <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
 
           {/* 6. FAQs */}
@@ -337,14 +306,14 @@ export default function ProfileScreen({ navigate, onScroll }) {
             onPress={() => navigate && navigate("Support")}
             activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(239, 68, 68, 0.15)" : "#FEE2E2" }]}>
-              <Ionicons name="chatbubble-ellipses-outline" size={20} color="#EF4444" />
+            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(239, 68, 68, 0.15)" : C.errorBg }]}>
+              <Ionicons name="chatbubble-ellipses-outline" size={20} color={C.error} />
             </View>
             <View style={styles.menuTextCol}>
               <Text style={styles.menuTitle}>FAQs</Text>
               <Text style={styles.menuSub}>Find answers to common questions</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
+            <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
 
           {/* 7. About Us */}
@@ -353,14 +322,14 @@ export default function ProfileScreen({ navigate, onScroll }) {
             onPress={() => navigate && navigate("About")}
             activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(99, 102, 241, 0.15)" : "#EEF2FF" }]}>
-              <Ionicons name="information-circle-outline" size={20} color="#6366F1" />
+            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(99, 102, 241, 0.15)" : C.infoBg }]}>
+              <Ionicons name="information-circle-outline" size={20} color={C.info} />
             </View>
             <View style={styles.menuTextCol}>
               <Text style={styles.menuTitle}>About Us</Text>
               <Text style={styles.menuSub}>Learn more about our app</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
+            <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
 
           {/* 8. Login / Logout */}
@@ -369,14 +338,14 @@ export default function ProfileScreen({ navigate, onScroll }) {
             onPress={isAuthenticated ? handleLogoutPress : () => navigate && navigate("Login")}
             activeOpacity={0.7}
           >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(16, 185, 129, 0.15)" : "#ECFDF5" }]}>
-              <Ionicons name={isAuthenticated ? "log-out-outline" : "log-in-outline"} size={20} color="#10B981" />
+            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(16, 185, 129, 0.15)" : C.successBg }]}>
+              <Ionicons name={isAuthenticated ? "log-out-outline" : "log-in-outline"} size={20} color={C.success} />
             </View>
             <View style={styles.menuTextCol}>
               <Text style={styles.menuTitle}>{isAuthenticated ? "Logout" : "Login"}</Text>
               <Text style={styles.menuSub}>{isAuthenticated ? "Sign out of your account" : "Access your account"}</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color={isDark ? "#6B7280" : "#9CA3AF"} />
+            <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -392,12 +361,12 @@ export default function ProfileScreen({ navigate, onScroll }) {
 }
 
 function getStyles(isDark) {
-  const accentColor = C.purple || "#D91C5C";
+  const accentColor = C.main;
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#0A0A0C" : "#FAFAFC",
+      backgroundColor: C.bg,
     },
     scrollContent: {
       paddingHorizontal: 20,
@@ -418,7 +387,7 @@ function getStyles(isDark) {
       height: 72,
       borderRadius: 36,
       position: "relative",
-      backgroundColor: isDark ? "#1C1C1E" : "#F3F4F6",
+      backgroundColor: isDark ? C.surface : C.border,
     },
     avatarImage: {
       width: 72,
@@ -437,7 +406,7 @@ function getStyles(isDark) {
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 2,
-      borderColor: isDark ? "#0A0A0C" : "#FAFAFC",
+      borderColor: C.bg,
     },
     topRightActions: {
       flexDirection: "row",
@@ -448,9 +417,9 @@ function getStyles(isDark) {
       width: 44,
       height: 44,
       borderRadius: 14,
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F3F4F6",
+      borderColor: isDark ? C.border : C.border,
       alignItems: "center",
       justifyContent: "center",
       position: "relative",
@@ -459,12 +428,12 @@ function getStyles(isDark) {
       width: 8,
       height: 8,
       borderRadius: 4,
-      backgroundColor: "#EF4444",
+      backgroundColor: C.error,
       position: "absolute",
       top: 10,
       right: 10,
       borderWidth: 1.5,
-      borderColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      borderColor: C.surface,
     },
     favBadgeDot: {
       width: 8,
@@ -476,16 +445,16 @@ function getStyles(isDark) {
       right: 10,
     },
     userNameText: {
+      fontFamily: FONT_FAMILY.displayBold,
       fontSize: 22,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#111827",
-      letterSpacing: -0.4,
+      color: C.ink,
+      letterSpacing: 0.2,
       marginBottom: 4,
     },
     userSubtext: {
       fontSize: 13,
-      fontWeight: "400",
-      color: isDark ? "#9CA3AF" : "#6B7280",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
       lineHeight: 18,
       marginBottom: 14,
     },
@@ -498,59 +467,45 @@ function getStyles(isDark) {
     primaryAuthBtn: {
       backgroundColor: accentColor,
       flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
+      ...getPlatformButtonStyle(isDark, "filled"),
       paddingHorizontal: 18,
       height: 44,
-      borderRadius: 14,
-      shadowColor: accentColor,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 3,
     },
     primaryAuthBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 13.5,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
     secondaryAuthBtn: {
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 16,
       height: 44,
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#E5E7EB",
+      borderColor: isDark ? C.border : C.border,
     },
     secondaryAuthBtnText: {
-      color: isDark ? "#FFFFFF" : "#374151",
+      color: C.muted,
       fontSize: 13.5,
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
     },
     promoCard: {
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 20,
-      padding: 18,
-      marginBottom: 18,
-      borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F3F4F6",
+      backgroundColor: C.surface,
+      ...getPlatformCardStyle(isDark),
+      padding: 16,
+      marginBottom: 16,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.2 : 0.04,
-      shadowRadius: 8,
-      elevation: 2,
     },
     promoContentCol: {
       flex: 1,
       paddingRight: 10,
     },
     promoTagPill: {
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.15)" : "#FDF2F5",
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.15)" : C.infoBg,
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 6,
@@ -559,20 +514,20 @@ function getStyles(isDark) {
     },
     promoTagText: {
       fontSize: 9.5,
-      fontWeight: "800",
+      fontFamily: "Oswald_700Bold",
       color: accentColor,
       letterSpacing: 0.8,
     },
     promoTitle: {
-      fontSize: 17,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#111827",
-      letterSpacing: -0.3,
+      fontSize: 16,
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
+      letterSpacing: 0.15,
       marginBottom: 4,
     },
     promoSub: {
       fontSize: 12.5,
-      color: isDark ? "#9CA3AF" : "#6B7280",
+      color: C.muted,
       lineHeight: 17,
       marginBottom: 10,
     },
@@ -582,36 +537,34 @@ function getStyles(isDark) {
     },
     promoLinkText: {
       fontSize: 12.5,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: accentColor,
     },
     promoIconWrap: {
-      width: 56,
-      height: 56,
-      borderRadius: 18,
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.15)" : "#FDF2F5",
+      width: 52,
+      height: 52,
+      borderRadius: 16,
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.15)" : C.infoBg,
       alignItems: "center",
       justifyContent: "center",
     },
     themeCard: {
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 18,
+      backgroundColor: C.surface,
+      ...getPlatformCardStyle(isDark),
       padding: 14,
-      marginBottom: 18,
-      borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F3F4F6",
+      marginBottom: 16,
     },
     themeCardHeader: {
       fontSize: 10,
-      fontWeight: "800",
-      color: accentColor,
+      fontFamily: "Oswald_700Bold",
+      color: C.muted,
       letterSpacing: 1,
       marginBottom: 10,
     },
     themeSegmentRow: {
       flexDirection: "row",
-      backgroundColor: isDark ? "#2C2C2E" : "#F3F4F6",
-      borderRadius: 12,
+      backgroundColor: isDark ? C.lifted : C.border,
+      borderRadius: 10,
       padding: 3,
     },
     themeTab: {
@@ -633,12 +586,12 @@ function getStyles(isDark) {
     },
     themeTabLabel: {
       fontSize: 12,
-      fontWeight: "600",
-      color: isDark ? "#9CA3AF" : "#6B7280",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.muted,
     },
     themeTabLabelActive: {
-      color: "#FFFFFF",
-      fontWeight: "700",
+      color: C.textLight,
+      fontFamily: "Oswald_700Bold",
     },
     menuGroup: {
       gap: 10,
@@ -646,16 +599,9 @@ function getStyles(isDark) {
     menuCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderRadius: 16,
+      backgroundColor: C.surface,
+      ...getPlatformCardStyle(isDark),
       padding: 14,
-      borderWidth: 1,
-      borderColor: isDark ? "#2C2C2E" : "#F3F4F6",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: isDark ? 0.15 : 0.03,
-      shadowRadius: 6,
-      elevation: 1,
     },
     menuIconBox: {
       width: 40,
@@ -670,14 +616,14 @@ function getStyles(isDark) {
     },
     menuTitle: {
       fontSize: 14.5,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#111827",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.ink,
       marginBottom: 2,
     },
     menuSub: {
       fontSize: 12,
-      fontWeight: "400",
-      color: isDark ? "#9CA3AF" : "#6B7280",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
     },
   });
 }

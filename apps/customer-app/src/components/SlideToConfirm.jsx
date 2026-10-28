@@ -240,13 +240,13 @@ function getStyles() {
   priceLabel: {
     color: C.muted,
     fontSize: 9,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
     letterSpacing: 1.2,
   },
   priceValue: {
     color: C.bg,
     fontSize: 18,
-    fontWeight: "900",
+    fontFamily: "Oswald_700Bold",
     marginTop: 1,
   },
   trackContainer: {
@@ -269,12 +269,12 @@ function getStyles() {
   trackText: {
     color: C.main,
     fontSize: 12,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
     letterSpacing: 0.3,
   },
   trackTextDisabled: {
     color: C.muted,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
   },
   knob: {
     width: 44,

@@ -97,8 +97,15 @@ const getSalon = async (req, res, next) => {
       return next(new AppError('Salon not found', 404))
     }
 
-    // scope check — owner can only see their own salons
-    if (role === 'owner' && salon.owner._id.toString() !== userId.toString()) {
+    // Scope check — superadmins may read any salon; everyone else must either
+    // own it or belong to it. Default-deny for roles that are not recognized.
+    const ownerId = salon.owner?._id?.toString()
+    const isSuperadmin = role === 'superadmin'
+    const isOwner = ownerId && ownerId === userId.toString()
+    const isMember =
+      req.user.salonId && salon._id.toString() === req.user.salonId.toString()
+
+    if (!isSuperadmin && !isOwner && !isMember) {
       return next(new AppError('Access denied', 403))
     }
 

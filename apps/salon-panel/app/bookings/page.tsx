@@ -10,6 +10,7 @@ import {
 import apiClient from "@/lib/api-client";
 
 import BookingDrawer from "@/components/bookings/BookingDrawer";
+import NewBookingModal from "@/components/bookings/NewBookingModal";
 import CancellationReasonModal from "@/components/bookings/CancellationReasonModal";
 import {
   Search,
@@ -22,6 +23,7 @@ import {
   Volume2,
   VolumeX,
   Sparkles,
+  Plus,
   Building2,
   Clock,
   MapPin,
@@ -61,6 +63,17 @@ function getName(field: unknown, fallback = "—"): string {
     return (field as { name: string }).name || fallback;
   }
   return fallback;
+}
+
+function getClientName(a: any, fallback = "Guest"): string {
+  if (a?.customerId) return getName(a.customerId, fallback);
+  return a?.customerSnapshot?.name || fallback;
+}
+
+function getSourceLabel(source?: string): string | null {
+  if (source === "WALK_IN") return "Walk-in";
+  if (source === "PHONE") return "Phone";
+  return null;
 }
 
 function formatDuration(mins: number): string {
@@ -110,6 +123,7 @@ export default function BookingsPage() {
   const [branchFilter, setBranchFilter] = useState("all");
   const [branchOptions, setBranchOptions] = useState<{ _id: string; name: string }[]>([]);
   const [selected, setSelected] = useState<Appointment | null>(null);
+  const [showNewBooking, setShowNewBooking] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [cancelModalAppt, setCancelModalAppt] = useState<any>(null);
 
@@ -125,6 +139,17 @@ export default function BookingsPage() {
   const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   const branchId = globalBranch?._id || null;
+  const canCreateBooking = role === "owner" || role === "manager" || role === "staff";
+  const bookingBranchId =
+    branchFilter !== "all"
+      ? branchFilter
+      : role === "owner"
+        ? globalBranch?._id || null
+        : (user as any)?.branchId || globalBranch?._id || null;
+  const bookingBranchName =
+    branchOptions.find((b) => b._id === bookingBranchId)?.name ||
+    globalBranch?.name ||
+    null;
 
   useEffect(() => {
     setSoundOn(isSoundEnabled());
@@ -275,6 +300,8 @@ export default function BookingsPage() {
     const q = search.toLowerCase();
     return (
       getName(a.customerId).toLowerCase().includes(q) ||
+      getClientName(a).toLowerCase().includes(q) ||
+      String(a.customerSnapshot?.phone || "").includes(q) ||
       getName(a.serviceId).toLowerCase().includes(q) ||
       getName(a.staffId).toLowerCase().includes(q) ||
       getName(a.branchId).toLowerCase().includes(q)
@@ -299,16 +326,16 @@ export default function BookingsPage() {
   const displayList = filtered.length > 0 ? filtered : (appointments.length === 0 && !loading ? demoFallbackList : []);
   const activeTotalItems = totalItems > 0 ? totalItems : displayList.length;
 
-  async function handleUpdateStatus(id: string, status: AppointmentStatus, note?: string) {
+  async function handleUpdateStatus(id: string, status: AppointmentStatus, note?: string, paymentMethod?: string) {
     setUpdatingId(id);
     try {
-      await updateAppointmentStatus(id, { status, note });
+      await updateAppointmentStatus(id, { status, note, paymentMethod: paymentMethod as any });
       invalidateCache("bookings_");
       setAppointments((prev) =>
-        prev.map((a: any) => (a._id === id ? { ...a, status, cancellation: note ? { reason: note } : a.cancellation } : a)),
+        prev.map((a: any) => (a._id === id ? { ...a, status, paymentMethod: paymentMethod || a.paymentMethod, cancellation: note ? { reason: note } : a.cancellation } : a)),
       );
       setSelected((prev: any) =>
-        prev?._id === id ? { ...prev, status } : prev,
+        prev?._id === id ? { ...prev, status, paymentMethod: paymentMethod || prev?.paymentMethod } : prev,
       );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to update status";
@@ -366,6 +393,16 @@ export default function BookingsPage() {
 
           {/* Top Right Action Buttons */}
           <div className="flex items-center gap-2.5 self-start sm:self-auto">
+            {canCreateBooking && (
+              <button
+                onClick={() => setShowNewBooking(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold bg-slate-900 text-white border border-slate-900 hover:bg-slate-800 rounded-2xl transition-all shadow-xs"
+              >
+                <Plus size={15} />
+                <span>New booking</span>
+              </button>
+            )}
+
             {/* Sound Toggle */}
             <button
               onClick={handleToggleSound}
@@ -544,7 +581,12 @@ export default function BookingsPage() {
                         <td className="py-4 px-4 font-black text-slate-900 whitespace-nowrap">
                           <div className="flex items-center gap-1.5">
                             {isNew && <Sparkles size={13} className="text-emerald-600 shrink-0" />}
-                            <span>{getName(a.customerId, "om prasad")}</span>
+                            <span>{getClientName(a)}</span>
+                            {getSourceLabel(a.source) && (
+                              <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-amber-700">
+                                {getSourceLabel(a.source)}
+                              </span>
+                            )}
                           </div>
                         </td>
 
@@ -686,6 +728,21 @@ export default function BookingsPage() {
             </div>
           </div>
         </div>
+
+        {/* New Booking Modal */}
+        {showNewBooking && (
+          <NewBookingModal
+            onClose={() => setShowNewBooking(false)}
+            defaultBranchId={bookingBranchId}
+            defaultBranchName={bookingBranchName}
+            branchOptions={branchOptions}
+            canChooseBranch={role === "owner"}
+            onCreated={() => {
+              invalidateCache("bookings_");
+              fetchAppointments();
+            }}
+          />
+        )}
 
         {/* Booking Detail Drawer */}
         {selected && (

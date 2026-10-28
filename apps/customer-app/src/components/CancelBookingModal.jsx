@@ -77,7 +77,7 @@ export default function CancelBookingModal({ visible, onClose, onConfirm, bookin
           </Text>
 
           {errorMessage ? (
-            <Text style={{ color: C.error || "#DC2626", fontSize: 13, textAlign: "center", marginBottom: 12 }}>
+            <Text style={{ color: C.error || C.error, fontSize: 13, textAlign: "center", marginBottom: 12 }}>
               {errorMessage}
             </Text>
           ) : null}
@@ -150,10 +150,10 @@ function getStyles() {
   },
   title: {
     fontSize: 16,
-    fontWeight: "900",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
     textAlign: "center",
-    letterSpacing: -0.3,
+    letterSpacing: 0.15,
   },
   subtitle: {
     fontSize: 13,
@@ -164,12 +164,12 @@ function getStyles() {
     lineHeight: 18,
   },
   bold: {
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
   },
   reasonHeader: {
     fontSize: 10,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
     color: C.main,
     letterSpacing: 1.1,
     marginBottom: S.xs,
@@ -211,11 +211,11 @@ function getStyles() {
   reasonText: {
     fontSize: 13,
     color: C.textSecondary,
-    fontWeight: "600",
+    fontFamily: "Oswald_600SemiBold",
   },
   reasonTextSelected: {
     color: C.errorText,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
   },
   actionRow: {
     flexDirection: "row",
@@ -231,7 +231,7 @@ function getStyles() {
   },
   keepBtnText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
     color: C.textSecondary,
   },
   cancelBtn: {
@@ -243,7 +243,7 @@ function getStyles() {
   },
   cancelBtnText: {
     fontSize: 14,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
     color: C.bg,
   },
   });

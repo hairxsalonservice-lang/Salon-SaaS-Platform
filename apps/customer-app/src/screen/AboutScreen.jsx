@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { C, FF } from "../theme";
 
 const TOP_INSET = Platform.OS === "ios" ? 52 : (StatusBar.currentHeight ? StatusBar.currentHeight + 10 : 36);
 
@@ -28,7 +29,7 @@ export default function AboutScreen({ goBack, navigate }) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>About Us</Text>
         <TouchableOpacity onPress={goBack} style={styles.closeBtn} activeOpacity={0.7}>
-          <Ionicons name="close" size={22} color={isDark ? "#FFFFFF" : "#18181B"} />
+          <Ionicons name="close" size={22} color={C.ink} />
         </TouchableOpacity>
       </View>
 
@@ -36,7 +37,7 @@ export default function AboutScreen({ goBack, navigate }) {
         {/* App Branding Hero Card */}
         <View style={styles.heroCard}>
           <View style={styles.logoContainer}>
-            <Ionicons name="scissors" size={38} color="#FFFFFF" />
+            <Ionicons name="scissors" size={38} color={C.textLight} />
           </View>
           <Text style={styles.appNameText}>HairX</Text>
           <View style={styles.versionBadge}>
@@ -61,7 +62,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <View style={styles.featureRow}>
             <View style={styles.featureIconBox}>
-              <Ionicons name="shield-checkmark-outline" size={20} color="#6C5CE7" />
+              <Ionicons name="shield-checkmark-outline" size={20} color={C.main} />
             </View>
             <View style={styles.featureTextGroup}>
               <Text style={styles.featureTitle}>Certified Salons</Text>
@@ -71,7 +72,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <View style={styles.featureRow}>
             <View style={styles.featureIconBox}>
-              <Ionicons name="flash-outline" size={20} color="#6C5CE7" />
+              <Ionicons name="flash-outline" size={20} color={C.main} />
             </View>
             <View style={styles.featureTextGroup}>
               <Text style={styles.featureTitle}>Instant Booking</Text>
@@ -81,7 +82,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <View style={styles.featureRow}>
             <View style={styles.featureIconBox}>
-              <Ionicons name="gift-outline" size={20} color="#6C5CE7" />
+              <Ionicons name="gift-outline" size={20} color={C.main} />
             </View>
             <View style={styles.featureTextGroup}>
               <Text style={styles.featureTitle}>Luxe Rewards</Text>
@@ -91,7 +92,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <View style={styles.featureRowNoBorder}>
             <View style={styles.featureIconBox}>
-              <Ionicons name="card-outline" size={20} color="#6C5CE7" />
+              <Ionicons name="card-outline" size={20} color={C.main} />
             </View>
             <View style={styles.featureTextGroup}>
               <Text style={styles.featureTitle}>Flexible Checkout</Text>
@@ -110,10 +111,10 @@ export default function AboutScreen({ goBack, navigate }) {
             activeOpacity={0.7}
           >
             <View style={styles.linkLeft}>
-              <Ionicons name="globe-outline" size={20} color={isDark ? "#FFFFFF" : "#18181B"} style={{ marginRight: 14 }} />
+              <Ionicons name="globe-outline" size={20} color={C.ink} style={{ marginRight: 14 }} />
               <Text style={styles.linkTitle}>Visit Official Website</Text>
             </View>
-            <Ionicons name="open-outline" size={16} color="#8E8E93" />
+            <Ionicons name="open-outline" size={16} color={C.muted} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -122,10 +123,10 @@ export default function AboutScreen({ goBack, navigate }) {
             activeOpacity={0.7}
           >
             <View style={styles.linkLeft}>
-              <Ionicons name="mail-outline" size={20} color={isDark ? "#FFFFFF" : "#18181B"} style={{ marginRight: 14 }} />
+              <Ionicons name="mail-outline" size={20} color={C.ink} style={{ marginRight: 14 }} />
               <Text style={styles.linkTitle}>Email Customer Support</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color="#8E8E93" />
+            <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -134,10 +135,10 @@ export default function AboutScreen({ goBack, navigate }) {
             activeOpacity={0.7}
           >
             <View style={styles.linkLeft}>
-              <Ionicons name="document-text-outline" size={20} color={isDark ? "#FFFFFF" : "#18181B"} style={{ marginRight: 14 }} />
+              <Ionicons name="document-text-outline" size={20} color={C.ink} style={{ marginRight: 14 }} />
               <Text style={styles.linkTitle}>Terms of Service &amp; Privacy Policy</Text>
             </View>
-            <Ionicons name="chevron-forward" size={16} color="#8E8E93" />
+            <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
         </View>
 
@@ -155,7 +156,7 @@ function getStyles(isDark) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#121216" : "#FFFFFF",
+      backgroundColor: C.bg,
     },
     header: {
       flexDirection: "row",
@@ -165,13 +166,13 @@ function getStyles(isDark) {
       paddingHorizontal: 24,
       paddingBottom: 16,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#2A2A34" : "#EFEFF4",
+      borderBottomColor: C.border,
     },
     headerTitle: {
+      fontFamily: FF.displayBold,
       fontSize: 22,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#18181B",
-      letterSpacing: -0.3,
+      color: C.ink,
+      letterSpacing: 0.2,
     },
     closeBtn: {
       padding: 4,
@@ -183,7 +184,7 @@ function getStyles(isDark) {
     },
     heroCard: {
       alignItems: "center",
-      backgroundColor: isDark ? "#1A1A22" : "#F7F7FA",
+      backgroundColor: C.lifted,
       borderRadius: 24,
       padding: 24,
       marginBottom: 20,
@@ -192,20 +193,20 @@ function getStyles(isDark) {
       width: 72,
       height: 72,
       borderRadius: 22,
-      backgroundColor: "#6C5CE7",
+      backgroundColor: C.main,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 14,
-      shadowColor: "#6C5CE7",
+      shadowColor: C.main,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.3,
       shadowRadius: 10,
       elevation: 4,
     },
     appNameText: {
+      fontFamily: FF.displayBold,
       fontSize: 24,
-      fontWeight: "900",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      color: C.ink,
       letterSpacing: 1.5,
       marginBottom: 6,
     },
@@ -218,32 +219,32 @@ function getStyles(isDark) {
     },
     versionText: {
       fontSize: 12,
-      fontWeight: "700",
-      color: "#6C5CE7",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
     },
     taglineText: {
       fontSize: 13.5,
-      fontWeight: "500",
-      color: isDark ? "#9999A0" : "#71717A",
+      fontFamily: "Oswald_500Medium",
+      color: C.muted,
       textAlign: "center",
     },
     sectionCard: {
-      backgroundColor: isDark ? "#1A1A22" : "#F7F7FA",
+      backgroundColor: C.lifted,
       borderRadius: 20,
       padding: 20,
       marginBottom: 16,
     },
     sectionHeader: {
       fontSize: 12,
-      fontWeight: "800",
-      color: "#6C5CE7",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
       letterSpacing: 1,
       marginBottom: 14,
     },
     bodyText: {
       fontSize: 14,
-      fontWeight: "400",
-      color: isDark ? "#D1D1D6" : "#3F3F46",
+      fontFamily: "Oswald_400Regular",
+      color: C.textSecondary,
       lineHeight: 22,
     },
     featureRow: {
@@ -251,7 +252,7 @@ function getStyles(isDark) {
       alignItems: "center",
       paddingVertical: 12,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#2A2A34" : "#EFEFF4",
+      borderBottomColor: C.border,
     },
     featureRowNoBorder: {
       flexDirection: "row",
@@ -272,14 +273,14 @@ function getStyles(isDark) {
     },
     featureTitle: {
       fontSize: 14.5,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       marginBottom: 2,
     },
     featureSub: {
       fontSize: 12.5,
-      fontWeight: "400",
-      color: isDark ? "#9999A0" : "#71717A",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
     },
     linkRow: {
       flexDirection: "row",
@@ -287,7 +288,7 @@ function getStyles(isDark) {
       justifyContent: "space-between",
       paddingVertical: 14,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#2A2A34" : "#EFEFF4",
+      borderBottomColor: C.border,
     },
     linkRowNoBorder: {
       flexDirection: "row",
@@ -301,8 +302,8 @@ function getStyles(isDark) {
     },
     linkTitle: {
       fontSize: 14.5,
-      fontWeight: "600",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.ink,
     },
     footerContainer: {
       alignItems: "center",
@@ -310,14 +311,14 @@ function getStyles(isDark) {
     },
     copyrightText: {
       fontSize: 13,
-      fontWeight: "600",
-      color: isDark ? "#888894" : "#9999A0",
+      fontFamily: "Oswald_600SemiBold",
+      color: isDark ? C.muted : C.muted,
       marginBottom: 2,
     },
     allRightsText: {
       fontSize: 12,
-      fontWeight: "400",
-      color: isDark ? "#66666E" : "#B0B0B8",
+      fontFamily: "Oswald_400Regular",
+      color: isDark ? C.muted : C.muted,
     },
   });
 }

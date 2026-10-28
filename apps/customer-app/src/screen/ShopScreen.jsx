@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { C } from "../theme";
+import { C, FF } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import SpringTouchable from "../components/SpringTouchable";
 import { useLocationStore } from "../store/useLocationStore";
@@ -38,7 +38,7 @@ export default function ShopScreen({ navigate, onScroll }) {
   };
 
   const styles = getStyles(isDark);
-  const accentColor = C.purple || "#D91C5C";
+  const accentColor = C.main;
 
   if (isCityEmpty) {
     return (
@@ -103,7 +103,7 @@ export default function ShopScreen({ navigate, onScroll }) {
           <Ionicons
             name={notified ? "checkmark-circle" : "notifications-outline"}
             size={18}
-            color="#FFFFFF"
+            color={C.textLight}
             style={{ marginRight: 8 }}
           />
           <Text style={styles.notifyBtnText}>
@@ -116,24 +116,24 @@ export default function ShopScreen({ navigate, onScroll }) {
 }
 
 function getStyles(isDark) {
-  const accentColor = C.purple || "#D91C5C";
+  const accentColor = C.main;
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#0A0A0C" : "#FAFAFC",
+      backgroundColor: C.bg,
     },
     header: {
       paddingTop: TOP_INSET,
       paddingHorizontal: 24,
       paddingBottom: 16,
-      backgroundColor: isDark ? "#0A0A0C" : "#FAFAFC",
+      backgroundColor: C.bg,
     },
     headerTitle: {
+      fontFamily: FF.displayBold,
       fontSize: 24,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#111827",
-      letterSpacing: -0.5,
+      color: C.ink,
+      letterSpacing: 0.2,
     },
     content: {
       flex: 1,
@@ -146,30 +146,30 @@ function getStyles(isDark) {
       width: 96,
       height: 96,
       borderRadius: 48,
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.12)" : "#FDF2F5",
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.12)" : C.infoBg,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 20,
       borderWidth: 1.5,
-      borderColor: isDark ? "rgba(217, 28, 92, 0.25)" : "#FCE7EC",
+      borderColor: isDark ? "rgba(10, 132, 255, 0.25)" : C.crimsonTint,
     },
     iconRingInner: {
       width: 72,
       height: 72,
       borderRadius: 36,
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.2)" : "#FBE6EA",
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.2)" : C.crimsonTint,
       alignItems: "center",
       justifyContent: "center",
     },
     badgePill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "rgba(217, 28, 92, 0.15)" : "#FDF2F5",
+      backgroundColor: isDark ? "rgba(10, 132, 255, 0.15)" : C.infoBg,
       paddingHorizontal: 12,
       paddingVertical: 5,
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: isDark ? "rgba(217, 28, 92, 0.3)" : "#FCE7EC",
+      borderColor: isDark ? "rgba(10, 132, 255, 0.3)" : C.crimsonTint,
       marginBottom: 16,
     },
     glowingDot: {
@@ -181,22 +181,22 @@ function getStyles(isDark) {
     },
     badgeText: {
       fontSize: 10.5,
-      fontWeight: "800",
+      fontFamily: "Oswald_700Bold",
       color: accentColor,
       letterSpacing: 0.8,
     },
     title: {
       fontSize: 24,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#111827",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       textAlign: "center",
       marginBottom: 10,
-      letterSpacing: -0.4,
+      letterSpacing: 0.15,
     },
     subtitle: {
       fontSize: 14,
-      fontWeight: "400",
-      color: isDark ? "#9CA3AF" : "#6B7280",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
       textAlign: "center",
       lineHeight: 22,
       marginBottom: 28,
@@ -219,13 +219,13 @@ function getStyles(isDark) {
       maxWidth: 280,
     },
     notifyBtnDone: {
-      backgroundColor: isDark ? "#10B981" : "#059669",
-      shadowColor: "#10B981",
+      backgroundColor: isDark ? C.success : C.success,
+      shadowColor: C.success,
     },
     notifyBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 14.5,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
   });
 }

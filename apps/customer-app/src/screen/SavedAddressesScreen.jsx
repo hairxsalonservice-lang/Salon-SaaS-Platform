@@ -11,7 +11,7 @@ import {
   StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { C, S, FS, FW, R, TYPO } from "../theme";
+import { C, S, FS, FW, FF, R, TYPO } from "../theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const INITIAL_ADDRESSES = [
@@ -172,8 +172,8 @@ function getStyles() {
       borderColor: C.border,
     },
     headerTitle: {
+      fontFamily: FF.display,
       fontSize: FS.titleSm,
-      fontWeight: FW.semiBold,
       color: C.ink,
     },
     addHeaderBtn: {
@@ -223,7 +223,7 @@ function getStyles() {
     },
     tagText: {
       fontSize: FS.bodySm,
-      fontWeight: FW.medium,
+      fontFamily: "Oswald_500Medium",
       color: C.ink,
     },
     tagTextActive: {
@@ -250,7 +250,7 @@ function getStyles() {
     saveBtnText: {
       color: C.bg,
       fontSize: FS.bodySm,
-      fontWeight: FW.medium,
+      fontFamily: "Oswald_500Medium",
     },
     addressCard: {
       backgroundColor: C.surface,
@@ -278,7 +278,7 @@ function getStyles() {
     },
     tagLabel: {
       fontSize: FS.bodySm,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
       color: C.ink,
       flex: 1,
     },
@@ -291,7 +291,7 @@ function getStyles() {
     },
     defaultText: {
       fontSize: 9,
-      fontWeight: FW.semiBold,
+      fontFamily: "Oswald_600SemiBold",
       color: C.ink,
       letterSpacing: 0.88,
     },
@@ -300,7 +300,7 @@ function getStyles() {
     },
     streetText: {
       fontSize: FS.bodySm,
-      fontWeight: FW.regular,
+      fontFamily: "Oswald_400Regular",
       color: C.ink,
     },
     cityText: {

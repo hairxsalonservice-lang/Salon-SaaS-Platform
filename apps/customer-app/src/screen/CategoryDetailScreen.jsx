@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { C, FF } from "../theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocationStore } from "../store/useLocationStore";
 import { browseService } from "../services/browseService";
@@ -206,13 +207,13 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
   const styles = buildStyles(isDark);
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#121218" : "#FAFAFB" }]}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#121218" : "#FAFAFB"} />
+    <View style={[styles.container, { backgroundColor: isDark ? C.bg : C.lifted }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? C.bg : C.lifted} />
 
       {/* Header Bar */}
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
         <TouchableOpacity style={styles.backBtn} onPress={goBack} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={22} color={isDark ? "#FFFFFF" : "#18181B"} />
+          <Ionicons name="arrow-back" size={22} color={C.ink} />
         </TouchableOpacity>
 
         <View style={styles.headerTextWrap}>
@@ -225,25 +226,25 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
           onPress={() => setIsSearching((prev) => !prev)}
           activeOpacity={0.7}
         >
-          <Ionicons name={isSearching ? "close" : "search-outline"} size={20} color={isDark ? "#FFFFFF" : "#18181B"} />
+          <Ionicons name={isSearching ? "close" : "search-outline"} size={20} color={C.ink} />
         </TouchableOpacity>
       </View>
 
       {/* Search Input Box (Collapsible) */}
       {isSearching && (
         <View style={styles.searchPillWrap}>
-          <Ionicons name="search-outline" size={18} color="#9999A0" style={{ marginRight: 8 }} />
+          <Ionicons name="search-outline" size={18} color={C.muted} style={{ marginRight: 8 }} />
           <TextInput
             style={styles.searchInput}
             placeholder={`Search ${config.title.toLowerCase()} salons...`}
-            placeholderTextColor="#9999A0"
+            placeholderTextcolor={C.muted}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoFocus
           />
           {searchQuery ? (
             <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons name="close-circle" size={18} color="#9999A0" />
+              <Ionicons name="close-circle" size={18} color={C.muted} />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -296,7 +297,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
                 <Ionicons
                   name={pill.icon}
                   size={14}
-                  color={pill.active ? "#C05278" : isDark ? "#D4D4D8" : "#3F3F46"}
+                  color={pill.active ? C.main : C.textSecondary}
                   style={{ marginRight: 5 }}
                 />
                 <Text style={[styles.filterPillText, pill.active && styles.filterPillTextActive]}>{pill.label}</Text>
@@ -317,7 +318,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
               onPress={() => navigate && navigate("Map")}
               activeOpacity={0.8}
             >
-              <Ionicons name="map-outline" size={15} color="#C05278" style={{ marginRight: 5 }} />
+              <Ionicons name="map-outline" size={15} color={C.main} style={{ marginRight: 5 }} />
               <Text style={styles.mapViewBtnText}>Map View</Text>
             </TouchableOpacity>
           </View>
@@ -326,7 +327,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
         {/* Salons List */}
         {loading ? (
           <View style={styles.loadingBox}>
-            <ActivityIndicator size="small" color="#C05278" />
+            <ActivityIndicator size="small" color={C.main} />
             <Text style={styles.loadingText}>Loading salons...</Text>
           </View>
         ) : !isCityLive ? (
@@ -337,23 +338,23 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
           />
         ) : loadError ? (
           <View style={styles.emptyBox}>
-            <Ionicons name="cloud-offline-outline" size={40} color="#A1A1AA" />
+            <Ionicons name="cloud-offline-outline" size={40} color={C.muted} />
             <Text style={styles.emptyTitle}>Couldn't load salons</Text>
             <Text style={styles.emptySub}>Check your internet connection and try again.</Text>
             <TouchableOpacity style={styles.retryBtn} onPress={() => setReloadKey((k) => k + 1)} activeOpacity={0.85}>
-              <Ionicons name="refresh" size={14} color="#FFFFFF" style={{ marginRight: 5 }} />
+              <Ionicons name="refresh" size={14} color={C.textLight} style={{ marginRight: 5 }} />
               <Text style={styles.retryBtnText}>Try again</Text>
             </TouchableOpacity>
           </View>
         ) : salons.length === 0 ? (
           <View style={styles.emptyBox}>
-            <Ionicons name="storefront-outline" size={40} color="#A1A1AA" />
+            <Ionicons name="storefront-outline" size={40} color={C.muted} />
             <Text style={styles.emptyTitle}>No {config.title.toLowerCase()} salons yet</Text>
             <Text style={styles.emptySub}>No salons in {selectedCity} offer this service right now.</Text>
           </View>
         ) : filteredSalons.length === 0 ? (
           <View style={styles.emptyBox}>
-            <Ionicons name="search-outline" size={40} color="#A1A1AA" />
+            <Ionicons name="search-outline" size={40} color={C.muted} />
             <Text style={styles.emptyTitle}>No salons found</Text>
             <Text style={styles.emptySub}>Try adjusting your filters or search criteria</Text>
           </View>
@@ -388,13 +389,13 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
                       {salon.name}
                     </Text>
                     {salon.isVerified ? (
-                      <Ionicons name="checkmark-circle" size={16} color="#1DA1F2" style={{ marginLeft: 4 }} />
+                      <Ionicons name="checkmark-circle" size={16} color={C.info} style={{ marginLeft: 4 }} />
                     ) : null}
                   </View>
 
                   {/* Rating & Reviews */}
                   <View style={styles.ratingRow}>
-                    <Ionicons name="star" size={13} color="#F59E0B" />
+                    <Ionicons name="star" size={13} color={C.warning} />
                     {isNew ? (
                       <Text style={styles.ratingScore}>New</Text>
                     ) : (
@@ -409,7 +410,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
 
                   {/* Location & Distance */}
                   <View style={styles.locationRow}>
-                    <Ionicons name="location-outline" size={13} color="#71717A" />
+                    <Ionicons name="location-outline" size={13} color={C.muted} />
                     <Text style={styles.locationText} numberOfLines={1}>{locationLine}</Text>
                   </View>
 
@@ -438,7 +439,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
                     <Ionicons
                       name={isFavorite(salon._id) ? "heart" : "heart-outline"}
                       size={20}
-                      color={isFavorite(salon._id) ? "#E11D48" : "#A1A1AA"}
+                      color={isFavorite(salon._id) ? C.error : C.muted}
                     />
                   </TouchableOpacity>
 
@@ -458,7 +459,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
         {/* Bottom Consultation CTA Banner */}
         <View style={styles.ctaBanner}>
           <View style={styles.ctaIconCircle}>
-            <Ionicons name="headset-outline" size={22} color="#C05278" />
+            <Ionicons name="headset-outline" size={22} color={C.main} />
           </View>
 
           <View style={styles.ctaTextWrap}>
@@ -472,7 +473,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
             activeOpacity={0.8}
           >
             <Text style={styles.chatNowText}>Chat Now</Text>
-            <Ionicons name="arrow-forward" size={13} color={isDark ? "#F9A8C4" : "#7A0026"} style={{ marginLeft: 3 }} />
+            <Ionicons name="arrow-forward" size={13} color={isDark ? C.crimsonLight : C.main} style={{ marginLeft: 3 }} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -500,7 +501,7 @@ function buildStyles(isDark) {
       alignItems: "center",
       paddingHorizontal: 16,
       paddingBottom: 12,
-      backgroundColor: isDark ? "#121218" : "#FAFAFB",
+      backgroundColor: isDark ? C.bg : C.lifted,
     },
     backBtn: {
       width: 36,
@@ -514,21 +515,21 @@ function buildStyles(isDark) {
       flex: 1,
     },
     headerTitle: {
+      fontFamily: FF.displayBold,
       fontSize: 20,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#18181B",
-      letterSpacing: -0.3,
+      color: C.ink,
+      letterSpacing: 0.2,
     },
     headerSubtitle: {
       fontSize: 12,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
       marginTop: 1,
     },
     searchIconBtn: {
       width: 38,
       height: 38,
       borderRadius: 19,
-      backgroundColor: isDark ? "#22222D" : "#F4F4F6",
+      backgroundColor: isDark ? C.surface : C.lifted,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -537,7 +538,7 @@ function buildStyles(isDark) {
       alignItems: "center",
       marginHorizontal: 16,
       marginBottom: 12,
-      backgroundColor: isDark ? "#22222D" : "#F4F4F6",
+      backgroundColor: isDark ? C.surface : C.lifted,
       borderRadius: 20,
       paddingHorizontal: 14,
       height: 44,
@@ -545,7 +546,7 @@ function buildStyles(isDark) {
     searchInput: {
       flex: 1,
       fontSize: 14,
-      color: isDark ? "#FFFFFF" : "#18181B",
+      color: C.ink,
       paddingVertical: 0,
     },
     scrollContent: {
@@ -555,7 +556,7 @@ function buildStyles(isDark) {
     /* Hero Card */
     heroCard: {
       flexDirection: "row",
-      backgroundColor: isDark ? "#1E1B24" : "#F9F4F0",
+      backgroundColor: isDark ? C.surface : C.lifted,
       borderRadius: 20,
       padding: 16,
       marginBottom: 16,
@@ -569,22 +570,22 @@ function buildStyles(isDark) {
     },
     heroEyebrow: {
       fontSize: 10,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       letterSpacing: 1.2,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
       marginBottom: 6,
     },
     heroTitle: {
       fontSize: 22,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       lineHeight: 26,
-      letterSpacing: -0.4,
+      letterSpacing: 0.15,
       marginBottom: 8,
     },
     heroDesc: {
       fontSize: 12,
-      color: isDark ? "#D4D4D8" : "#52525B",
+      color: isDark ? C.textSecondary : C.muted,
       lineHeight: 16,
     },
     heroRight: {
@@ -609,7 +610,7 @@ function buildStyles(isDark) {
       paddingVertical: 4,
       borderWidth: 1,
       borderColor: "rgba(192, 82, 120, 0.3)",
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.15,
       shadowRadius: 4,
@@ -617,8 +618,8 @@ function buildStyles(isDark) {
     },
     badgeStampText: {
       fontSize: 9,
-      fontWeight: "800",
-      color: "#7A0026",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
       textAlign: "center",
       fontStyle: "italic",
     },
@@ -631,25 +632,25 @@ function buildStyles(isDark) {
     filterPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1E1E24" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#E4E4E7",
+      borderColor: C.border,
       paddingHorizontal: 14,
       paddingVertical: 8,
       borderRadius: 20,
       marginRight: 8,
     },
     filterPillActive: {
-      borderColor: "#C05278",
-      backgroundColor: isDark ? "#2A1B22" : "#FDF0F2",
+      borderColor: C.main,
+      backgroundColor: isDark ? C.surface : C.infoBg,
     },
     filterPillText: {
       fontSize: 13,
-      fontWeight: "600",
-      color: isDark ? "#D4D4D8" : "#3F3F46",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.textSecondary,
     },
     filterPillTextActive: {
-      color: "#C05278",
+      color: C.main,
     },
     /* List Header */
     listHeaderRow: {
@@ -660,13 +661,13 @@ function buildStyles(isDark) {
     },
     salonsCountText: {
       fontSize: 15,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     mapViewBtn: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#2A1B22" : "#FDF0F2",
+      backgroundColor: isDark ? C.surface : C.infoBg,
       borderWidth: 1,
       borderColor: "rgba(192, 82, 120, 0.3)",
       paddingHorizontal: 12,
@@ -675,19 +676,19 @@ function buildStyles(isDark) {
     },
     mapViewBtnText: {
       fontSize: 12,
-      fontWeight: "700",
-      color: "#C05278",
+      fontFamily: "Oswald_700Bold",
+      color: C.main,
     },
     /* Salon Cards */
     salonCard: {
       flexDirection: "row",
-      backgroundColor: isDark ? "#1E1E24" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderRadius: 18,
       padding: 12,
       marginBottom: 14,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#F4F4F6",
-      shadowColor: "#000",
+      borderColor: C.border,
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.04,
       shadowRadius: 6,
@@ -716,8 +717,8 @@ function buildStyles(isDark) {
     },
     salonName: {
       fontSize: 15,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       flexShrink: 1,
     },
     ratingRow: {
@@ -727,14 +728,14 @@ function buildStyles(isDark) {
     },
     ratingScore: {
       fontSize: 12,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       marginLeft: 4,
       marginRight: 3,
     },
     ratingCount: {
       fontSize: 12,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
     },
     locationRow: {
       flexDirection: "row",
@@ -743,7 +744,7 @@ function buildStyles(isDark) {
     },
     locationText: {
       fontSize: 11,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
       marginLeft: 3,
       flexShrink: 1,
     },
@@ -752,7 +753,7 @@ function buildStyles(isDark) {
       flexWrap: "wrap",
     },
     tagPill: {
-      backgroundColor: isDark ? "#27272A" : "#F4F4F6",
+      backgroundColor: C.border,
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 8,
@@ -761,8 +762,8 @@ function buildStyles(isDark) {
     },
     tagText: {
       fontSize: 10,
-      fontWeight: "500",
-      color: isDark ? "#D4D4D8" : "#52525B",
+      fontFamily: "Oswald_500Medium",
+      color: isDark ? C.textSecondary : C.muted,
     },
     rightActions: {
       alignItems: "flex-end",
@@ -773,7 +774,7 @@ function buildStyles(isDark) {
       padding: 4,
     },
     bookNowBtn: {
-      backgroundColor: isDark ? "#2A1B22" : "#FDF0F2",
+      backgroundColor: isDark ? C.surface : C.infoBg,
       paddingHorizontal: 12,
       paddingVertical: 7,
       borderRadius: 12,
@@ -781,14 +782,14 @@ function buildStyles(isDark) {
     },
     bookNowText: {
       fontSize: 12,
-      fontWeight: "700",
-      color: isDark ? "#F9A8C4" : "#7A0026",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.crimsonLight : C.main,
     },
     /* Consultation Banner */
     ctaBanner: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#20171B" : "#FDF0F2",
+      backgroundColor: isDark ? C.ink : C.infoBg,
       borderRadius: 18,
       padding: 14,
       marginTop: 10,
@@ -809,26 +810,26 @@ function buildStyles(isDark) {
     },
     ctaTitle: {
       fontSize: 13,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     ctaSub: {
       fontSize: 11,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
       marginTop: 2,
     },
     chatNowBtn: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#3A1B27" : "#FAD4E0",
+      backgroundColor: isDark ? C.ink : C.crimsonTint,
       paddingHorizontal: 12,
       paddingVertical: 7,
       borderRadius: 14,
     },
     chatNowText: {
       fontSize: 12,
-      fontWeight: "700",
-      color: isDark ? "#F9A8C4" : "#7A0026",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.crimsonLight : C.main,
     },
     loadingBox: {
       alignItems: "center",
@@ -836,7 +837,7 @@ function buildStyles(isDark) {
     },
     loadingText: {
       fontSize: 13,
-      color: "#71717A",
+      color: C.muted,
       marginTop: 8,
     },
     emptyBox: {
@@ -845,13 +846,13 @@ function buildStyles(isDark) {
     },
     emptyTitle: {
       fontSize: 16,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       marginTop: 10,
     },
     emptySub: {
       fontSize: 12,
-      color: "#71717A",
+      color: C.muted,
       marginTop: 4,
       textAlign: "center",
     },
@@ -862,12 +863,12 @@ function buildStyles(isDark) {
       paddingHorizontal: 18,
       height: 40,
       borderRadius: 12,
-      backgroundColor: "#C05278",
+      backgroundColor: C.main,
     },
     retryBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 13,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
   });
 }

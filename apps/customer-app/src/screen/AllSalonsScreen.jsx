@@ -22,6 +22,7 @@ import { browseService } from "../services/browseService";
 import { cleanCityName } from "../services/locationService";
 import { useLocationStore } from "../store/useLocationStore";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { C } from "../theme";
 
 const PAGE_SIZE = 7;
 // The API caps a page at 100; fetch the whole city in one go and paginate on the client
@@ -211,7 +212,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
   }, [filters.serviceType, selectedCategory]);
 
   const styles = useMemo(() => buildStyles(isDark, insets), [isDark, insets]);
-  const iconColor = isDark ? "#FFFFFF" : "#18181B";
+  const iconColor = C.ink;
   const hasActiveFilterOrSearch = Boolean(
     debouncedSearch.trim() || effectiveCategory || filters.minRating !== "all" || filters.priceRange !== "all"
   );
@@ -232,24 +233,24 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
       {/* Search & Filter Bar */}
       <View style={styles.searchRow}>
         <View style={styles.searchInputContainer}>
-          <Ionicons name="search-outline" size={20} color="#9999A0" style={{ marginRight: 10 }} />
+          <Ionicons name="search-outline" size={20} color={C.muted} style={{ marginRight: 10 }} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search salons by name..."
-            placeholderTextColor="#9999A0"
+            placeholderTextcolor={C.muted}
             value={search}
             onChangeText={setSearch}
             returnKeyType="search"
           />
           {search.length > 0 ? (
             <TouchableOpacity onPress={() => setSearch("")} style={{ padding: 4 }}>
-              <Ionicons name="close-circle" size={18} color="#9999A0" />
+              <Ionicons name="close-circle" size={18} color={C.muted} />
             </TouchableOpacity>
           ) : null}
         </View>
 
         <TouchableOpacity style={styles.filterBtn} onPress={() => setFilterModalVisible(true)} activeOpacity={0.85}>
-          <Ionicons name="options-outline" size={20} color="#FFFFFF" />
+          <Ionicons name="options-outline" size={20} color={C.textLight} />
         </TouchableOpacity>
       </View>
 
@@ -271,7 +272,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
               activeOpacity={0.8}
             >
               <View style={[styles.catIconWrap, isSelected && styles.catIconWrapActive]}>
-                <Ionicons name={cat.iconName} size={15} color={isSelected ? "#FFFFFF" : "#7A0026"} />
+                <Ionicons name={cat.iconName} size={15} color={isSelected ? C.textLight : C.main} />
               </View>
               <Text style={[styles.catText, isSelected ? styles.catTextActive : styles.catTextInactive]}>
                 {cat.label}
@@ -302,7 +303,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
     if (loading) {
       return (
         <View style={styles.centerBlock}>
-          <ActivityIndicator size="small" color="#7A0026" />
+          <ActivityIndicator size="small" color={C.main} />
           <Text style={styles.loadingText}>Loading partner studios in {selectedCity}...</Text>
         </View>
       );
@@ -319,7 +320,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
     if (error) {
       return (
         <View style={styles.centerBlock}>
-          <Ionicons name="cloud-offline-outline" size={28} color="#71717A" />
+          <Ionicons name="cloud-offline-outline" size={28} color={C.muted} />
           <Text style={styles.emptyTitle}>Unable to load salons</Text>
           <Text style={styles.emptySub}>{error}</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={() => fetchSalons(false)}>
@@ -330,7 +331,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
     }
     return (
       <View style={styles.centerBlock}>
-        <Ionicons name="search-outline" size={28} color="#71717A" />
+        <Ionicons name="search-outline" size={28} color={C.muted} />
         <Text style={styles.emptyTitle}>{hasActiveFilterOrSearch ? "No salons match" : "No salons yet"}</Text>
         <Text style={styles.emptySub}>
           {hasActiveFilterOrSearch
@@ -354,7 +355,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#121212" : "#FAFAFB"} />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={C.bg} />
 
       <FlatList
         data={loading ? [] : displayedSalons}
@@ -362,7 +363,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
         contentContainerStyle={styles.flatListContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#7A0026" colors={["#7A0026"]} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={C.main} colors={[C.main]} />}
         ListHeaderComponent={listHeader}
         ListEmptyComponent={renderEmpty}
         ListFooterComponent={listFooter}
@@ -394,7 +395,7 @@ function buildStyles(isDark, insets) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#121212" : "#FAFAFB",
+      backgroundColor: C.bg,
     },
     flatListContent: {
       paddingTop: Math.max(insets?.top || 20, 20) + 12,
@@ -416,7 +417,7 @@ function buildStyles(isDark, insets) {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: isDark ? "#1E1E24" : "#F4F4F6",
+      backgroundColor: C.lifted,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 16,
@@ -430,7 +431,7 @@ function buildStyles(isDark, insets) {
       flex: 1,
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1E1E24" : "#F4F4F6",
+      backgroundColor: C.lifted,
       height: 48,
       borderRadius: 24,
       paddingHorizontal: 16,
@@ -439,17 +440,17 @@ function buildStyles(isDark, insets) {
     searchInput: {
       flex: 1,
       fontSize: 14,
-      color: isDark ? "#FFFFFF" : "#18181B",
+      color: C.ink,
       paddingVertical: 0,
     },
     filterBtn: {
       width: 44,
       height: 44,
       borderRadius: 22,
-      backgroundColor: "#7A0026",
+      backgroundColor: C.main,
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#7A0026",
+      shadowColor: C.main,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.3,
       shadowRadius: 6,
@@ -470,18 +471,18 @@ function buildStyles(isDark, insets) {
       marginRight: 10,
     },
     catPillActive: {
-      backgroundColor: "#7A0026",
+      backgroundColor: C.main,
     },
     catPillInactive: {
-      backgroundColor: isDark ? "#18181B" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#E4E4E7",
+      borderColor: C.border,
     },
     catIconWrap: {
       width: 24,
       height: 24,
       borderRadius: 12,
-      backgroundColor: "#FDF0F2",
+      backgroundColor: C.infoBg,
       alignItems: "center",
       justifyContent: "center",
       marginRight: 8,
@@ -491,13 +492,13 @@ function buildStyles(isDark, insets) {
     },
     catText: {
       fontSize: 14,
-      fontWeight: "600",
+      fontFamily: "Oswald_600SemiBold",
     },
     catTextActive: {
-      color: "#FFFFFF",
+      color: C.textLight,
     },
     catTextInactive: {
-      color: isDark ? "#FAFAFA" : "#3F3F46",
+      color: isDark ? C.lifted : C.textSecondary,
     },
     resultsHeaderRow: {
       flexDirection: "row",
@@ -507,8 +508,8 @@ function buildStyles(isDark, insets) {
     },
     resultsCountText: {
       fontSize: 13,
-      color: isDark ? "#A1A1AA" : "#71717A",
-      fontWeight: "500",
+      color: C.muted,
+      fontFamily: "Oswald_500Medium",
     },
     sortBtn: {
       flexDirection: "row",
@@ -516,8 +517,8 @@ function buildStyles(isDark, insets) {
     },
     sortBtnText: {
       fontSize: 13,
-      fontWeight: "600",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.ink,
     },
     centerBlock: {
       padding: 32,
@@ -528,34 +529,34 @@ function buildStyles(isDark, insets) {
     },
     loadingText: {
       fontSize: 14,
-      color: "#71717A",
+      color: C.muted,
       marginTop: 8,
     },
     emptyTitle: {
       fontSize: 16,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     emptySub: {
       fontSize: 13,
-      color: "#71717A",
+      color: C.muted,
       textAlign: "center",
     },
     retryBtn: {
-      backgroundColor: "#7A0026",
+      backgroundColor: C.main,
       paddingHorizontal: 20,
       paddingVertical: 10,
       borderRadius: 20,
       marginTop: 8,
     },
     retryText: {
-      color: "#FFFFFF",
-      fontWeight: "600",
+      color: C.textLight,
+      fontFamily: "Oswald_600SemiBold",
       fontSize: 14,
     },
     loadMoreBtn: {
       alignSelf: "center",
-      backgroundColor: isDark ? "#1E1E24" : "#F4F4F6",
+      backgroundColor: C.lifted,
       paddingHorizontal: 18,
       paddingVertical: 10,
       borderRadius: 20,
@@ -563,8 +564,8 @@ function buildStyles(isDark, insets) {
     },
     loadMoreBtnText: {
       fontSize: 13,
-      color: "#7A0026",
-      fontWeight: "700",
+      color: C.main,
+      fontFamily: "Oswald_700Bold",
     },
   });
 }

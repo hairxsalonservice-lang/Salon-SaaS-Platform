@@ -1,5 +1,6 @@
 // src/services/mapService.js
 import { Platform } from "react-native";
+import { C } from "../theme";
 
 /**
  * Get map tile layer URL based on environment keys and theme.
@@ -14,10 +15,8 @@ export function getTileUrl(isDark = false) {
     }/{z}/{x}/{y}.png?api_key=${olaApiKey.trim()}`;
   }
 
-  // Premium CartoDB/Esri basemaps (no API key needed)
-  return isDark
-    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
-    : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
+  // Always use the same light basemap — dark mode is handled by CSS filter inversion
+  return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}";
 }
 
 /**
@@ -42,8 +41,12 @@ export function generateMapHtml({
   userLng = 84.7941,
 }) {
   const tileUrl = getTileUrl(isDark);
-  const isFallbackMap = tileUrl.includes("openstreetmap.org");
-  const bgColor = isDark ? "#121216" : "#EAEAEA";
+  const bgColor = isDark ? "#141218" : "#EAEAEA";
+
+  // Theme tokens for the map HTML
+  const t = isDark
+    ? { surface: "#1D1B20", ink: "#E6E0E9", muted: "#938F99", hairline: C.muted, chipBg: C.surface, pinBorder: C.muted, popupShadow: "rgba(0,0,0,0.4)" }
+    : { surface: "#FFFFFF", ink: C.ink, muted: C.muted, hairline: C.border, chipBg: "#F3F4F6", pinBorder: "#FFFFFF", popupShadow: "rgba(0,0,0,0.12)" };
 
   // Sanitize coordinates to guarantee valid finite numbers for Leaflet
   const validLat = Number.isFinite(Number(centerLat)) ? Number(centerLat) : 19.3150;
@@ -84,7 +87,7 @@ export function generateMapHtml({
           background: ${bgColor};
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-        ${isDark && isFallbackMap ? `
+        ${isDark ? `
         .leaflet-tile-pane {
           filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
         }
@@ -110,10 +113,10 @@ export function generateMapHtml({
         }
 
         .leaflet-popup-content-wrapper {
-          background: #FFFFFF;
+          background: ${t.surface};
           border-radius: 12px;
           padding: 0;
-          box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+          box-shadow: 0 8px 24px ${t.popupShadow};
           overflow: hidden;
         }
         .leaflet-popup-content {
@@ -121,7 +124,7 @@ export function generateMapHtml({
           width: 250px !important;
         }
         .leaflet-popup-tip {
-          background: #FFFFFF;
+          background: ${t.surface};
         }
         .custom-leaflet-popup {
           display: flex;
@@ -136,7 +139,7 @@ export function generateMapHtml({
           border-radius: 8px;
           background-size: cover;
           background-position: center;
-          background-color: #EFEFF4;
+          background-color: ${isDark ? C.surface : C.border};
         }
         .popup-content {
           flex: 1;
@@ -147,7 +150,7 @@ export function generateMapHtml({
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           font-size: 13px;
           font-weight: 700;
-          color: #18181B;
+          color: ${t.ink};
           margin-bottom: 2px;
           white-space: nowrap;
           overflow: hidden;
@@ -157,7 +160,7 @@ export function generateMapHtml({
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           font-size: 11px;
           font-weight: 500;
-          color: #71717A;
+          color: ${t.muted};
           display: flex;
           align-items: center;
         }
@@ -165,7 +168,7 @@ export function generateMapHtml({
           width: 24px;
           height: 24px;
           border-radius: 12px;
-          background: #F3F4F6;
+          background: ${t.chipBg};
           display: flex;
           align-items: center;
           justify-content: center;
@@ -214,12 +217,12 @@ export function generateMapHtml({
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          background: #762237;
-          box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+          background: ${C.main};
+          box-shadow: 0 4px 10px ${isDark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.2)"};
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid #FFFFFF;
+          border: 2px solid ${t.pinBorder};
           box-sizing: border-box;
           transition: all 0.2s ease;
           position: relative;
@@ -232,7 +235,7 @@ export function generateMapHtml({
           height: 0;
           border-left: 6px solid transparent;
           border-right: 6px solid transparent;
-          border-top: 6px solid #FFFFFF;
+          border-top: 6px solid ${t.pinBorder};
         }
         .salon-pin-bubble::before {
           content: "";
@@ -242,7 +245,7 @@ export function generateMapHtml({
           height: 0;
           border-left: 4px solid transparent;
           border-right: 4px solid transparent;
-          border-top: 5px solid #762237;
+          border-top: 5px solid ${C.main};
           z-index: 2;
         }
         .salon-pin-wrapper.active {
@@ -335,13 +338,13 @@ export function generateMapHtml({
                               '<div class="popup-title">' + (s.name || 'Salon') + '</div>' +
                               '<div class="popup-subtitle">' +
                                 '<span style="color: #F59E0B; margin-right: 3px;">★</span> ' +
-                                '<span style="font-weight: 700; color: #18181B; margin-right: 2px;">' + s.ratingText + '</span>' +
+                                '<span style="font-weight: 700; color: ${t.ink}; margin-right: 2px;">' + s.ratingText + '</span>' +
                                 (s.distanceText
-                                  ? '<span style="margin: 0 4px; color: #D1D5DB">•</span><span>' + s.distanceText + '</span>'
+                                  ? '<span style="margin: 0 4px; color: ${t.hairline}">•</span><span>' + s.distanceText + '</span>'
                                   : '') +
                               '</div>' +
                             '</div>' +
-                            '<div class="popup-chevron-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#18181B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>' +
+                            '<div class="popup-chevron-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${t.ink}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>' +
                           '</div>';
 
           marker.bindPopup(popupHtml, {

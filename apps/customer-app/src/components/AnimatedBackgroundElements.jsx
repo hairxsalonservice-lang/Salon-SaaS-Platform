@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { View, Text, StyleSheet, Animated, Easing, Platform } from "react-native";
 import { BlurView } from "expo-blur";
 
+import { C } from "../theme";
 export default function AnimatedBackgroundElements() {
   const orb1Scale = useRef(new Animated.Value(1)).current;
   const orb1Y = useRef(new Animated.Value(0)).current;
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     width: 290,
     height: 290,
     backgroundColor: "rgba(212, 175, 55, 0.45)",
-    shadowColor: "#D4AF37",
+    shadowColor: C.warning,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 40,
@@ -228,7 +229,7 @@ const styles = StyleSheet.create({
     width: 320,
     height: 320,
     backgroundColor: "rgba(243, 229, 171, 0.55)",
-    shadowColor: "#F3E5AB",
+    shadowColor: C.warningBg,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.6,
     shadowRadius: 45,
@@ -255,11 +256,11 @@ const styles = StyleSheet.create({
   },
   sparkleIcon: {
     fontSize: 16,
-    color: "#D4AF37",
+    color: C.warning,
   },
   sparkleIconSmall: {
     fontSize: 14,
-    color: "#D4AF37",
-    fontWeight: "900",
+    color: C.warning,
+    fontFamily: "Oswald_700Bold",
   },
 });

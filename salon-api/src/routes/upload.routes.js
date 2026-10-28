@@ -2,10 +2,12 @@ const express = require("express");
 const router = express.Router();
 const authenticate = require("../middleware/authenticate");
 const { uploadSingle, uploadMultiple } = require("../middleware/upload.middleware");
+const { uploadLimiter } = require("../middleware/rateLimiter.middleware");
 const uploadController = require("../controllers/upload.controller");
 
-// All upload routes require authentication
+// All upload routes require authentication and are rate limited per user.
 router.use(authenticate);
+router.use(uploadLimiter);
 
 /**
  * @route   POST /api/v1/upload/single

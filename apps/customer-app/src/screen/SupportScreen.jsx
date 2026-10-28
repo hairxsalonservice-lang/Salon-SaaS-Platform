@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { C, FF } from "../theme";
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -67,7 +68,7 @@ export default function SupportScreen({ goBack }) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>FAQs</Text>
         <TouchableOpacity onPress={goBack} style={styles.closeBtn} activeOpacity={0.7}>
-          <Ionicons name="close" size={22} color={isDark ? "#FFFFFF" : "#18181B"} />
+          <Ionicons name="close" size={22} color={C.ink} />
         </TouchableOpacity>
       </View>
 
@@ -86,7 +87,7 @@ export default function SupportScreen({ goBack }) {
                   <Ionicons
                     name={isExpanded ? "remove" : "add"}
                     size={20}
-                    color={isExpanded ? (isDark ? "#9999A0" : "#8E8E93") : (isDark ? "#66666E" : "#C7C7CC")}
+                    color={isExpanded ? (C.muted) : (C.muted)}
                   />
                 </TouchableOpacity>
 
@@ -108,7 +109,7 @@ function getStyles(isDark) {
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#121216" : "#FFFFFF",
+      backgroundColor: C.bg,
     },
     header: {
       flexDirection: "row",
@@ -118,13 +119,13 @@ function getStyles(isDark) {
       paddingHorizontal: 24,
       paddingBottom: 16,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#2A2A34" : "#EFEFF4",
+      borderBottomColor: C.border,
     },
     headerTitle: {
+      fontFamily: FF.displayBold,
       fontSize: 22,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#18181B",
-      letterSpacing: -0.3,
+      color: C.ink,
+      letterSpacing: 0.2,
     },
     closeBtn: {
       padding: 4,
@@ -140,7 +141,7 @@ function getStyles(isDark) {
     faqRow: {
       paddingVertical: 18,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#2A2A34" : "#F4F4F6",
+      borderBottomColor: C.border,
     },
     faqQuestionRow: {
       flexDirection: "row",
@@ -150,8 +151,8 @@ function getStyles(isDark) {
     faqQuestionText: {
       flex: 1,
       fontSize: 15,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       marginRight: 16,
       lineHeight: 21,
     },
@@ -161,8 +162,8 @@ function getStyles(isDark) {
     },
     answerText: {
       fontSize: 13.5,
-      fontWeight: "400",
-      color: isDark ? "#9999A0" : "#71717A",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
       lineHeight: 20,
     },
   });

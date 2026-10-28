@@ -52,7 +52,7 @@ const authenticate = async (req, res, next) => {
     // we only hit the DB here to verify the token hasn't been revoked
     // this is the ONLY DB call in the auth chain
     const user = await User.findById(decoded.userId)
-      .select('_id name email role salonId branchId tokenVersion isActive')
+      .select('_id name email role salonId branchId tokenVersion isActive isEmailVerified')
       .lean() // .lean() returns plain JS object instead of mongoose document
     // faster for reads — we don't need mongoose methods here
 
@@ -87,7 +87,8 @@ const authenticate = async (req, res, next) => {
       role: roleName,            // "owner", "manager", "staff", "customer"
       salonId: user.salonId,     // null for customer
       branchId: user.branchId,   // null for owner + customer
-      tokenVersion: user.tokenVersion
+      tokenVersion: user.tokenVersion,
+      isEmailVerified: user.isEmailVerified !== false
     }
 
     logger.info(`Authenticated: ${user.email} [${roleName}]`)

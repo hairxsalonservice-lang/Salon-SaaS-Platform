@@ -4,91 +4,107 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   Platform,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { C } from "../theme";
+
+const isIOS = Platform.OS === "ios";
 
 export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const bottomInset = Math.max(insets.bottom, 10);
+  const bottomInset = Math.max(insets.bottom, isIOS ? 10 : 8);
 
-  const barBg = theme.tabBg || (isDark ? "#18181C" : "#FFFFFF");
-  const tabActiveColor = theme.tabActive || "#B3261E";
-  const tabActiveTint = theme.tabActiveTint || "#FCE8E8";
-  const tabCenterBtn = theme.tabCenterBtn || "#8C1D2A";
-  const inactiveColor = isDark ? "#8E8E93" : "#8E8E93";
+  const tabActiveColor = theme.tabActive || C.main;
+  const inactiveColor = C.muted;
+  const borderColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
 
-  return (
-    <View
-      style={[
-        styles.bottomBarContainer,
-        {
-          backgroundColor: barBg,
-          paddingBottom: bottomInset,
-        },
-      ]}
-    >
-      <View style={styles.tabsRow}>
-        {tabs.map((tab) => {
-          const isSelected = currentTab === tab.id;
-          const isCenter = tab.id === "Map";
-
-          if (isCenter) {
-            return (
-              <TouchableOpacity
-                key={tab.id}
-                activeOpacity={0.85}
-                onPress={() => onSelectTab(tab.id)}
-                style={styles.centerTabItem}
-              >
-                <View style={[styles.centerButtonOuter, { backgroundColor: barBg }]}>
-                  <View style={[styles.centerButtonInner, { backgroundColor: tabCenterBtn, shadowColor: tabCenterBtn }]}>
-                    <Ionicons name="location" size={28} color="#FFFFFF" />
-                  </View>
-                </View>
-                <View style={styles.centerLabelContainer}>
-                  <Text style={[styles.tabLabel, { color: isSelected ? tabCenterBtn : inactiveColor, fontWeight: isSelected ? "700" : "500" }]}>
+  // ── iOS: glassmorphism tab bar ──────────────────────────────
+  if (isIOS) {
+    return (
+      <View style={styles.iosBarContainer}>
+        <BlurView
+          intensity={80}
+          tint={isDark ? "dark" : "light"}
+          style={StyleSheet.absoluteFill}
+        />
+        <View style={[styles.iosInner, { paddingBottom: bottomInset }]}>
+          <View style={[styles.topBorder, { backgroundColor: borderColor }]} />
+          <View style={styles.tabsRow}>
+            {tabs.map((tab) => {
+              const isSelected = currentTab === tab.id;
+              const iconColor = isSelected ? tabActiveColor : inactiveColor;
+              return (
+                <TouchableOpacity
+                  key={tab.id}
+                  activeOpacity={0.6}
+                  onPress={() => onSelectTab(tab.id)}
+                  style={styles.iosTabItem}
+                >
+                  <Ionicons
+                    name={isSelected ? (tab.iconActive || tab.icon) : (tab.iconInactive || tab.icon)}
+                    size={22}
+                    color={iconColor}
+                  />
+                  <Text
+                    style={[
+                      styles.iosTabLabel,
+                      { color: iconColor, fontFamily: isSelected ? "Oswald_600SemiBold" : "Oswald_400Regular" },
+                    ]}
+                  >
                     {tab.label}
                   </Text>
-                  {isSelected && <View style={[styles.activeDot, { backgroundColor: tabCenterBtn }]} />}
-                </View>
-              </TouchableOpacity>
-            );
-          }
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </View>
+      </View>
+    );
+  }
 
+  // ── Android: Material You elevated surface bar ──────────────
+  const androidBg = isDark ? C.surface : C.bg;
+  const androidActiveBg = isDark ? "rgba(255,96,130,0.12)" : "rgba(255,96,130,0.10)";
+
+  return (
+    <View style={[styles.androidBarContainer, { backgroundColor: androidBg, paddingBottom: bottomInset, borderTopColor: borderColor }]}>
+      <View style={styles.androidTabsRow}>
+        {tabs.map((tab) => {
+          const isSelected = currentTab === tab.id;
           const iconColor = isSelected ? tabActiveColor : inactiveColor;
-
           return (
-            <TouchableOpacity
+            <Pressable
               key={tab.id}
-              activeOpacity={0.75}
               onPress={() => onSelectTab(tab.id)}
-              style={styles.tabItem}
+              android_ripple={{ color: "rgba(255,96,130,0.12)", borderless: true }}
+              style={styles.androidTabItem}
             >
-              <View style={[styles.iconWrapper, isSelected && { backgroundColor: tabActiveTint }]}>
+              <View style={[styles.androidIndicator, isSelected && { backgroundColor: androidActiveBg }]}>
                 <Ionicons
                   name={isSelected ? (tab.iconActive || tab.icon) : (tab.iconInactive || tab.icon)}
-                  size={24}
+                  size={22}
                   color={iconColor}
                 />
               </View>
               <Text
                 style={[
-                  styles.tabLabel,
+                  styles.androidTabLabel,
                   {
                     color: iconColor,
-                    fontWeight: isSelected ? "700" : "500",
+                    fontFamily: isSelected ? "Oswald_600SemiBold" : "Oswald_400Regular",
                   },
                 ]}
               >
                 {tab.label}
               </Text>
-              {isSelected && <View style={[styles.activeDot, { backgroundColor: tabActiveColor }]} />}
-            </TouchableOpacity>
+            </Pressable>
           );
         })}
       </View>
@@ -97,97 +113,78 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
 }
 
 const styles = StyleSheet.create({
-  bottomBarContainer: {
+  // ── iOS styles ─────────────────────────────────
+  iosBarContainer: {
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
     zIndex: 999,
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    paddingTop: 12,
-    elevation: 20,
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
+    overflow: "hidden",
+  },
+  iosInner: {
+    paddingTop: 6,
+  },
+  topBorder: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: StyleSheet.hairlineWidth,
   },
   tabsRow: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-around",
-    paddingHorizontal: 8,
-  },
-  tabItem: {
-    flex: 1,
     alignItems: "center",
-    justifyContent: "flex-end",
-    paddingBottom: 8,
-    minHeight: 64,
+    justifyContent: "space-around",
+    paddingHorizontal: 4,
   },
-  iconWrapper: {
-    height: 36,
-    width: 60,
+  iosTabItem: {
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 18,
-    marginBottom: 4,
+    paddingVertical: 6,
+    minHeight: 48,
   },
-  activeIconWrapper: {
-    backgroundColor: "#FCE8E8", // Light pink/red background
-  },
-  tabLabel: {
+  iosTabLabel: {
     fontSize: 10,
-    letterSpacing: -0.2,
-    marginBottom: 4,
+    letterSpacing: 0.1,
+    marginTop: 2,
   },
-  activeDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#B3261E",
+
+  // ── Android Material You styles ────────────────
+  androidBarContainer: {
     position: "absolute",
-    bottom: -2,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 999,
+    elevation: 4,
+    borderTopWidth: StyleSheet.hairlineWidth,
   },
-  centerTabItem: {
+  androidTabsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    paddingHorizontal: 8,
+    paddingTop: 8,
+  },
+  androidTabItem: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "flex-end",
-    paddingBottom: 8,
-    minHeight: 64,
-    position: 'relative',
+    justifyContent: "center",
+    minHeight: 52,
   },
-  centerButtonOuter: {
-    position: 'absolute',
-    top: -32,
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    alignItems: 'center',
-    justifyContent: 'center',
-    // Fake the cutout shadow effect
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 10,
+  androidIndicator: {
+    paddingHorizontal: 18,
+    paddingVertical: 4,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 2,
   },
-  centerButtonInner: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: '#8C1D2A',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: "#8C1D2A",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 8,
-    elevation: 8,
+  androidTabLabel: {
+    fontSize: 11,
+    letterSpacing: 0.3,
+    marginTop: 2,
   },
-  centerLabelContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 14,
-  }
 });

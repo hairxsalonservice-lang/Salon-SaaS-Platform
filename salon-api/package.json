@@ -10,6 +10,7 @@
     "seed": "node src/utils/seeder.js",
     "seed:sample": "node src/utils/seedSampleData.js",
     "seed:master": "node src/utils/seedMasterData.js",
+    "migrate:staff-booking": "node src/utils/grantStaffBookingPermission.js",
     "clean:db": "node src/utils/wipeAllDataExceptSuperadmin.js"
   },
   "keywords": [],
@@ -52,6 +53,7 @@
     "jest": "^30.4.2",
     "mongodb-memory-server": "^11.2.0",
     "nodemon": "^3.1.14",
+    "socket.io-client": "^4.8.4",
     "supertest": "^7.2.2"
   }
 }

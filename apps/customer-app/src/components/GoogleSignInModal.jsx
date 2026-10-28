@@ -213,11 +213,11 @@ function getStyles() {
   logoText: {
     color: C.bg,
     fontSize: 22,
-    fontWeight: FW.bold,
+    fontFamily: "Oswald_700Bold",
   },
   title: {
     fontSize: FS.titleSm,
-    fontWeight: FW.semiBold,
+    fontFamily: "Oswald_600SemiBold",
     color: C.ink,
   },
   subtitle: {
@@ -243,7 +243,7 @@ function getStyles() {
   },
   infoTitle: {
     fontSize: FS.bodySm,
-    fontWeight: FW.semiBold,
+    fontFamily: "Oswald_600SemiBold",
     color: C.ink,
   },
   infoText: {
@@ -264,7 +264,7 @@ function getStyles() {
   },
   warningTitle: {
     fontSize: FS.bodySm,
-    fontWeight: FW.semiBold,
+    fontFamily: "Oswald_600SemiBold",
     color: C.info,
   },
   warningText: {
@@ -294,7 +294,7 @@ function getStyles() {
   googleText: {
     color: C.bg,
     fontSize: FS.bodySm,
-    fontWeight: FW.semiBold,
+    fontFamily: "Oswald_600SemiBold",
   },
   topAccentBar: {
     height: 4,

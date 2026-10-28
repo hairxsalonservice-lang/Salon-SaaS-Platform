@@ -50,7 +50,7 @@ export default function ErrorCardModal({
               {/* Redesigned Alert Logo / Icon Badge */}
               <View style={styles.iconWrapper}>
                 <View style={styles.iconCircle}>
-                  <Ionicons name="alert-circle-outline" size={34} color="#EF4444" />
+                  <Ionicons name="alert-circle-outline" size={34} color={C.error} />
                 </View>
               </View>
 
@@ -76,7 +76,7 @@ export default function ErrorCardModal({
 }
 
 function getStyles(theme, isDark) {
-  const primaryAccent = C.purple || "#6C5CE7";
+  const primaryAccent = C.main;
 
   return StyleSheet.create({
     overlay: {
@@ -89,13 +89,13 @@ function getStyles(theme, isDark) {
     cardContainer: {
       width: "100%",
       maxWidth: 340,
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: C.surface,
       borderRadius: 28,
       padding: 24,
       alignItems: "center",
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
-      shadowColor: "#000",
+      borderColor: isDark ? C.lifted : C.border,
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.25,
       shadowRadius: 20,
@@ -109,13 +109,13 @@ function getStyles(theme, isDark) {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#2A2A2C" : "#F0F1F5",
+      backgroundColor: isDark ? C.lifted : C.border,
       justifyContent: "center",
       alignItems: "center",
       zIndex: 10,
     },
     closeIconColor: {
-      color: isDark ? "#94A3B8" : "#64748B",
+      color: C.mutedSoft,
     },
     iconWrapper: {
       marginBottom: 16,
@@ -133,16 +133,16 @@ function getStyles(theme, isDark) {
     },
     title: {
       fontSize: 20,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       textAlign: "center",
       marginBottom: 8,
-      letterSpacing: -0.4,
+      letterSpacing: 0.15,
     },
     message: {
       fontSize: 14,
-      fontWeight: "400",
-      color: isDark ? "#94A3B8" : "#71717A",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
       textAlign: "center",
       lineHeight: 20,
       marginBottom: 24,
@@ -164,9 +164,9 @@ function getStyles(theme, isDark) {
     },
     actionBtnText: {
       fontSize: 16,
-      fontWeight: "700",
-      color: "#FFFFFF",
-      letterSpacing: -0.2,
+      fontFamily: "Oswald_700Bold",
+      color: C.textLight,
+      letterSpacing: 0.1,
     },
   });
 }

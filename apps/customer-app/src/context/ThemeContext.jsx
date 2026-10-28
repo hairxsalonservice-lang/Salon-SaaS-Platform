@@ -4,98 +4,97 @@ import { Animated, Easing, Platform, useColorScheme, Appearance } from "react-na
 import * as NavigationBar from "expo-navigation-bar";
 import { storage } from "../services/storage";
 import { applyTheme } from "../theme";
+import { isAndroid, MATERIAL_COLORS } from "../theme/platform";
 
 const THEME_MODE_KEY = "@salon_app_theme_mode";
 
-// ── Light Tokens (Luxe Cream & Gold Accent) ───────────────
 export const LIGHT = {
   isDark: false,
-  canvas: "#FBFBF9",
-  canvasSoft: "#F5F5F0",
+  canvas: "#FFFFFF",
+  canvasSoft: "#F7F3F4",
   surface: "#FFFFFF",
-  ink: "#121212",
-  body: "#4A4A4A",
-  muted: "#8E8E8A",
-  mutedSoft: "#A0A09C",
-  primary: "#B3261E",
-  primaryActive: "#8C1D2A",
+  ink: "#1A1A2E",
+  body: "#3D3D52",
+  muted: "#8A8A9A",
+  mutedSoft: "#8A8A9A",
+  primary: "#FF6082",
+  primaryActive: "#E54D6D",
   onPrimary: "#FFFFFF",
-  price: "#B3261E",
-  button: "#B3261E",
-  crimson: "#B3261E",
-  highlight: "#B3261E",
-  hairline: "#E8E8E0",
-  hairlineSoft: "#F0F0EB",
-  hairlineStrong: "#D0D0C8",
-  surfaceStrong: "#F5F5F0",
-  thinking: "rgba(179, 38, 30, 0.15)",
-  grep: "#E8E8E0",
-  read: "#E8E8E0",
-  edit: "#E8E8E0",
-  done: "#B3261E",
-  error: "#B3261E",
-  errorBg: "rgba(179, 38, 30, 0.08)",
-  success: "#121212",
-  successBg: "rgba(18, 18, 18, 0.06)",
+  price: "#FF6082",
+  button: "#FF6082",
+  crimson: "#FF6082",
+  highlight: "#FF6082",
+  hairline: "#E8E0E2",
+  hairlineSoft: "#F7F3F4",
+  hairlineStrong: "#D0C8CA",
+  surfaceStrong: "#F7F3F4",
+  thinking: "rgba(255, 96, 130, 0.12)",
+  grep: "#F7F3F4",
+  read: "#F7F3F4",
+  edit: "#F7F3F4",
+  done: "#FF6082",
+  error: "#D32F2F",
+  errorBg: "rgba(211, 47, 47, 0.08)",
+  success: "#2E7D32",
+  successBg: "rgba(46, 125, 50, 0.08)",
   tabBg: "#FFFFFF",
-  tabBorder: "#E8E8E0",
-  tabActive: "#B3261E",
-  tabActiveTint: "#FCE8E8",
-  tabCenterBtn: "#8C1D2A",
+  tabBorder: "#E8E0E2",
+  tabActive: "#FF6082",
+  tabActiveTint: "rgba(255, 96, 130, 0.10)",
+  tabCenterBtn: "#FF6082",
   statusBar: "dark-content",
-  navBarColor: "#FBFBF9",
+  navBarColor: "#FFFFFF",
   navBarButtonStyle: "dark",
 };
 
-// ── Dark Tokens (Rose/Magenta Pink Accent) ─────────────
 export const DARK = {
   isDark: true,
-  canvas: "#0D0D0D",
-  canvasSoft: "#141416",
-  surface: "#1C1C1E",
-  ink: "#F4F4F2",
-  body: "#B0B0AC",
-  muted: "#787874",
-  mutedSoft: "#686864",
-  primary: "#E63973",
-  primaryActive: "#D91C5C",
+  canvas: "#121218",
+  canvasSoft: "#1C1C26",
+  surface: "#1C1C26",
+  ink: "#F0EDF0",
+  body: "#C8C4CC",
+  muted: "#908C96",
+  mutedSoft: "#5A5662",
+  primary: "#FF7A9A",
+  primaryActive: "#FF6082",
   onPrimary: "#FFFFFF",
-  hairline: "#2A2A2C",
-  hairlineSoft: "#222224",
-  hairlineStrong: "#38383C",
-  surfaceStrong: "#2A2A2C",
-  thinking: "rgba(212, 155, 69, 0.25)",
-  grep: "#2A2A2C",
-  read: "#2A2A2C",
-  edit: "#2A2A2C",
-  done: "#D49B45",
-  error: "#D49B45",
-  errorBg: "rgba(212, 155, 69, 0.15)",
-  success: "#F4F4F2",
-  successBg: "rgba(244, 244, 242, 0.1)",
-  tabBg: "#1C1C1E",
-  tabBorder: "#2A2A2C",
-  tabActive: "#E63973",
-  tabActiveTint: "rgba(230, 57, 115, 0.18)",
-  tabCenterBtn: "#D91C5C",
+  hairline: "#2E2E3A",
+  hairlineSoft: "#262630",
+  hairlineStrong: "#3E3E4A",
+  surfaceStrong: "#262630",
+  thinking: "rgba(255, 122, 154, 0.20)",
+  grep: "#262630",
+  read: "#262630",
+  edit: "#262630",
+  done: "#FF7A9A",
+  error: "#FF6B6B",
+  errorBg: "rgba(255, 107, 107, 0.15)",
+  success: "#66BB6A",
+  successBg: "rgba(102, 187, 106, 0.15)",
+  tabBg: "#1C1C26",
+  tabBorder: "#2E2E3A",
+  tabActive: "#FF7A9A",
+  tabActiveTint: "rgba(255, 122, 154, 0.18)",
+  tabCenterBtn: "#FF7A9A",
   statusBar: "light-content",
-  navBarColor: "#0D0D0D",
+  navBarColor: "#121218",
   navBarButtonStyle: "light",
 };
 
 const ThemeContext = createContext({
   theme: LIGHT,
   isDark: false,
-  themeMode: "system", // "light" | "dark" | "system"
+  themeMode: "system",
   setThemeMode: () => { },
   toggleTheme: () => { },
   toggleAnim: null,
 });
 
 export function ThemeProvider({ children }) {
-  const systemColorScheme = useColorScheme(); // "dark" | "light"
+  const systemColorScheme = useColorScheme();
   const [deviceScheme, setDeviceScheme] = useState(Appearance.getColorScheme() || "light");
-  const [themeMode, setThemeModeState] = useState("system"); // "light" | "dark" | "system"
+  const [themeMode, setThemeModeState] = useState("system");
 
   useEffect(() => {
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
@@ -109,7 +108,6 @@ export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(activeSystemDark);
   const toggleAnim = useRef(new Animated.Value(0)).current;
 
-  // Resolve actual boolean isDark based on themeMode and system preference
   useEffect(() => {
     let activeIsDark = false;
     if (themeMode === "dark") {
@@ -125,17 +123,16 @@ export function ThemeProvider({ children }) {
     toggleAnim.setValue(activeIsDark ? 1 : 0);
 
     if (Platform.OS === "android") {
-      const activeTheme = activeIsDark ? DARK : LIGHT;
+      const mc = activeIsDark ? MATERIAL_COLORS.dark : MATERIAL_COLORS.light;
       if (NavigationBar && typeof NavigationBar.setBackgroundColorAsync === 'function') {
-        NavigationBar.setBackgroundColorAsync(activeTheme.navBarColor).catch(() => { });
+        NavigationBar.setBackgroundColorAsync(mc.canvas).catch(() => { });
       }
       if (NavigationBar && typeof NavigationBar.setButtonStyleAsync === 'function') {
-        NavigationBar.setButtonStyleAsync(activeTheme.navBarButtonStyle).catch(() => { });
+        NavigationBar.setButtonStyleAsync(activeIsDark ? "light" : "dark").catch(() => { });
       }
     }
   }, [themeMode, activeSystemDark]);
 
-  // Load saved theme mode on startup
   useEffect(() => {
     const loadThemeMode = async () => {
       try {
@@ -143,7 +140,6 @@ export function ThemeProvider({ children }) {
         if (savedMode && ["light", "dark", "system"].includes(savedMode)) {
           setThemeModeState(savedMode);
         } else {
-          // Default to system if no mode saved
           setThemeModeState("system");
         }
       } catch (e) { }
@@ -177,7 +173,10 @@ export function ThemeProvider({ children }) {
     await setThemeMode(nextMode);
   };
 
-  const theme = isDark ? DARK : LIGHT;
+  const baseTheme = isDark ? DARK : LIGHT;
+  const theme = isAndroid
+    ? { ...baseTheme, ...(isDark ? MATERIAL_COLORS.dark : MATERIAL_COLORS.light) }
+    : baseTheme;
 
   return (
     <ThemeContext.Provider

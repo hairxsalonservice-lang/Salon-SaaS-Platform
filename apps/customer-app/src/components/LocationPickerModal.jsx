@@ -16,6 +16,7 @@ import { getCurrentLocation, searchLocations, cleanCityName } from "../services/
 import { storage } from "../services/storage";
 import { useLocationStore } from "../store/useLocationStore";
 import AppleBottomSheet from "./AppleBottomSheet";
+import { C } from "../theme";
 
 const RECENT_KEY = "@recent_locations_v2";
 
@@ -217,7 +218,7 @@ export default function LocationPickerModal({
           </View>
 
           <TouchableOpacity style={styles.closeBtn} onPress={onClose} activeOpacity={0.7}>
-            <Ionicons name="close" size={18} color={isDark ? "#FFFFFF" : "#18181B"} />
+            <Ionicons name="close" size={18} color={C.ink} />
           </TouchableOpacity>
         </View>
 
@@ -230,9 +231,9 @@ export default function LocationPickerModal({
         >
           <View style={styles.gpsIconCircle}>
             {isDetecting ? (
-              <ActivityIndicator size="small" color="#C05278" />
+              <ActivityIndicator size="small" color={C.main} />
             ) : (
-              <Ionicons name="disc-outline" size={20} color="#C05278" />
+              <Ionicons name="disc-outline" size={20} color={C.main} />
             )}
           </View>
           <View style={styles.gpsTextInfo}>
@@ -247,24 +248,24 @@ export default function LocationPickerModal({
                 : "Tap to detect your current location"}
             </Text>
           </View>
-          <Ionicons name="chevron-forward" size={16} color="#A1A1AA" />
+          <Ionicons name="chevron-forward" size={16} color={C.muted} />
         </TouchableOpacity>
 
         {/* Search Bar Input Box */}
         <View style={styles.searchPill}>
-          <Ionicons name="search-outline" size={18} color="#9999A0" style={{ marginRight: 10 }} />
+          <Ionicons name="search-outline" size={18} color={C.muted} style={{ marginRight: 10 }} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search Indian city, area or pincode..."
-            placeholderTextColor="#9999A0"
+            placeholderTextcolor={C.muted}
             value={search}
             onChangeText={setSearch}
           />
           {isSearching ? (
-            <ActivityIndicator size="small" color="#C05278" />
+            <ActivityIndicator size="small" color={C.main} />
           ) : search ? (
             <TouchableOpacity onPress={() => setSearch("")} style={{ padding: 4 }}>
-              <Ionicons name="close-circle" size={18} color="#9999A0" />
+              <Ionicons name="close-circle" size={18} color={C.muted} />
             </TouchableOpacity>
           ) : null}
         </View>
@@ -285,7 +286,7 @@ export default function LocationPickerModal({
                 activeOpacity={0.85}
               >
                 <View style={styles.currentLocIconCircle}>
-                  <Ionicons name="location-sharp" size={20} color={isDark ? "#F9A8C4" : "#7A0026"} />
+                  <Ionicons name="location-sharp" size={20} color={isDark ? C.crimsonLight : C.main} />
                 </View>
                 <View style={styles.currentLocTextWrap}>
                   <Text style={styles.currentLocCity}>
@@ -301,7 +302,7 @@ export default function LocationPickerModal({
                 </View>
 
                 <View style={styles.checkCircle}>
-                  <Ionicons name="checkmark" size={14} color="#FFFFFF" />
+                  <Ionicons name="checkmark" size={14} color={C.textLight} />
                 </View>
               </TouchableOpacity>
             </View>
@@ -319,13 +320,13 @@ export default function LocationPickerModal({
                   activeOpacity={0.8}
                 >
                   <View style={styles.cityIconWrap}>
-                    <Ionicons name="time-outline" size={20} color="#C05278" />
+                    <Ionicons name="time-outline" size={20} color={C.main} />
                   </View>
                   <View style={styles.cityInfo}>
                     <Text style={styles.cityName}>{place.name}</Text>
                     <Text style={styles.cityArea} numberOfLines={1}>{place.area}</Text>
                   </View>
-                  <Ionicons name="chevron-forward" size={18} color="#A1A1AA" />
+                  <Ionicons name="chevron-forward" size={18} color={C.muted} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -344,13 +345,13 @@ export default function LocationPickerModal({
                     activeOpacity={0.8}
                   >
                     <View style={styles.cityIconWrap}>
-                      <Ionicons name="location-outline" size={20} color="#C05278" />
+                      <Ionicons name="location-outline" size={20} color={C.main} />
                     </View>
                     <View style={styles.cityInfo}>
                       <Text style={styles.cityName}>{place.name}</Text>
                       <Text style={styles.cityArea} numberOfLines={1}>{place.area}</Text>
                     </View>
-                    <Ionicons name="chevron-forward" size={18} color="#A1A1AA" />
+                    <Ionicons name="chevron-forward" size={18} color={C.muted} />
                   </TouchableOpacity>
                 ))
               ) : !isSearching ? (
@@ -368,7 +369,7 @@ function getStyles(isDark) {
   return StyleSheet.create({
     sheetInner: {
       flex: 1,
-      backgroundColor: isDark ? "#181820" : "#FFFFFF",
+      backgroundColor: C.surface,
       paddingHorizontal: 20,
       paddingTop: 10,
       paddingBottom: Platform.OS === "ios" ? 28 : 16,
@@ -384,40 +385,40 @@ function getStyles(isDark) {
     },
     title: {
       fontSize: 20,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
-      letterSpacing: -0.3,
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
+      letterSpacing: 0.15,
     },
     subtitle: {
       fontSize: 13,
-      fontWeight: "400",
-      color: isDark ? "#A1A1AA" : "#71717A",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
       marginTop: 2,
     },
     closeBtn: {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: isDark ? "#282834" : "#F4F4F6",
+      backgroundColor: C.border,
       alignItems: "center",
       justifyContent: "center",
     },
     gpsCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#22222D" : "#FAFAFB",
+      backgroundColor: isDark ? C.surface : C.lifted,
       paddingVertical: 12,
       paddingHorizontal: 14,
       borderRadius: 16,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#F4F4F6",
+      borderColor: C.border,
     },
     gpsIconCircle: {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : C.infoBg,
       alignItems: "center",
       justifyContent: "center",
       marginRight: 12,
@@ -427,18 +428,18 @@ function getStyles(isDark) {
     },
     gpsTitle: {
       fontSize: 14,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     gpsSub: {
       fontSize: 12,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
       marginTop: 2,
     },
     searchPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#22222D" : "#F4F4F6",
+      backgroundColor: isDark ? C.surface : C.lifted,
       borderRadius: 20,
       paddingHorizontal: 14,
       height: 46,
@@ -447,7 +448,7 @@ function getStyles(isDark) {
     searchInput: {
       flex: 1,
       fontSize: 14,
-      color: isDark ? "#FFFFFF" : "#18181B",
+      color: C.ink,
       paddingVertical: 0,
     },
     scrollBody: {
@@ -458,25 +459,25 @@ function getStyles(isDark) {
     },
     eyebrow: {
       fontSize: 11,
-      fontWeight: "700",
-      color: isDark ? "#A1A1AA" : "#71717A",
+      fontFamily: "Oswald_700Bold",
+      color: C.muted,
       letterSpacing: 0.5,
       marginBottom: 10,
     },
     currentLocCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : C.infoBg,
       padding: 14,
       borderRadius: 16,
       borderWidth: 1.5,
-      borderColor: "#C05278",
+      borderColor: C.main,
     },
     currentLocIconCircle: {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : C.infoBg,
       alignItems: "center",
       justifyContent: "center",
       marginRight: 12,
@@ -486,16 +487,16 @@ function getStyles(isDark) {
     },
     currentLocCity: {
       fontSize: 15,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     currentLocSub: {
       fontSize: 12,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
       marginTop: 2,
     },
     currentBadge: {
-      backgroundColor: isDark ? "#2A2A2C" : "#FFFFFF",
+      backgroundColor: C.surface,
       paddingHorizontal: 10,
       paddingVertical: 4,
       borderRadius: 12,
@@ -503,14 +504,14 @@ function getStyles(isDark) {
     },
     currentBadgeText: {
       fontSize: 11,
-      fontWeight: "600",
-      color: isDark ? "#F9A8C4" : "#7A0026",
+      fontFamily: "Oswald_600SemiBold",
+      color: isDark ? C.crimsonLight : C.main,
     },
     checkCircle: {
       width: 22,
       height: 22,
       borderRadius: 11,
-      backgroundColor: "#C05278",
+      backgroundColor: C.main,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -522,28 +523,28 @@ function getStyles(isDark) {
     },
     seeAllText: {
       fontSize: 12,
-      fontWeight: "600",
-      color: "#C05278",
+      fontFamily: "Oswald_600SemiBold",
+      color: C.main,
     },
     cityCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1E1E24" : "#FFFFFF",
+      backgroundColor: C.surface,
       padding: 12,
       borderRadius: 16,
       marginBottom: 10,
       borderWidth: 1,
-      borderColor: isDark ? "#27272A" : "#F4F4F6",
+      borderColor: C.border,
     },
     cityCardSelected: {
-      borderColor: "#C05278",
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      borderColor: C.main,
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : C.infoBg,
     },
     cityIconWrap: {
       width: 48,
       height: 48,
       borderRadius: 12,
-      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : "#FDF0F2",
+      backgroundColor: isDark ? "rgba(192, 82, 120, 0.18)" : C.infoBg,
       alignItems: "center",
       justifyContent: "center",
       marginRight: 14,
@@ -553,17 +554,17 @@ function getStyles(isDark) {
     },
     cityName: {
       fontSize: 15,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
     },
     cityArea: {
       fontSize: 12,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
       marginTop: 2,
     },
     noResultsText: {
       fontSize: 13,
-      color: isDark ? "#A1A1AA" : "#71717A",
+      color: C.muted,
       fontStyle: "italic",
       paddingVertical: 10,
     },

@@ -33,9 +33,9 @@ export default StyleSheet.create({
     },
 
     city: {
-        color: "#fff",
+        color: C.textLight,
         fontSize: 17,
-        fontWeight: "800"
+        fontFamily: "Oswald_700Bold"
     },
 
     subCity: {
@@ -68,9 +68,9 @@ export default StyleSheet.create({
     },
 
     tagline: {
-        color: "#fff",
+        color: C.textLight,
         fontSize: 36,
-        fontWeight: "900"
+        fontFamily: "Oswald_700Bold"
     },
 
     subtitle: {

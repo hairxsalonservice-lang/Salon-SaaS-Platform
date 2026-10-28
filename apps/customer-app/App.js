@@ -12,16 +12,12 @@ let fontMap = {};
 try {
   const fontModule = require("expo-font");
   useFonts = fontModule.useFonts;
-  const fraunces = require("@expo-google-fonts/fraunces");
-  const inter = require("@expo-google-fonts/inter");
+  const oswald = require("@expo-google-fonts/oswald");
   fontMap = {
-    Fraunces_600SemiBold: fraunces.Fraunces_600SemiBold,
-    Fraunces_500Medium: fraunces.Fraunces_500Medium,
-    Fraunces_700Bold: fraunces.Fraunces_700Bold,
-    Inter_400Regular: inter.Inter_400Regular,
-    Inter_500Medium: inter.Inter_500Medium,
-    Inter_600SemiBold: inter.Inter_600SemiBold,
-    Inter_700Bold: inter.Inter_700Bold,
+    Oswald_400Regular: oswald.Oswald_400Regular,
+    Oswald_500Medium: oswald.Oswald_500Medium,
+    Oswald_600SemiBold: oswald.Oswald_600SemiBold,
+    Oswald_700Bold: oswald.Oswald_700Bold,
   };
 } catch (e) {
   console.log("[Fonts] Safe fallback active:", e?.message);

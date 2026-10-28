@@ -11,7 +11,7 @@ import {
   Linking,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { C } from "../theme";
+import { C, FF } from "../theme";
 import { appointmentService } from "../services/appointmentService";
 import { paiseToINR } from "../services/apiClient";
 import { useAuth } from "../context/AuthContext";
@@ -33,12 +33,12 @@ const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "Ju
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const STATUS_META = {
-  PENDING: { label: "Awaiting confirmation", color: "#B7791F", bg: "rgba(214, 158, 46, 0.14)", icon: "time-outline" },
-  CONFIRMED: { label: "Confirmed", color: "#059669", bg: "rgba(16, 185, 129, 0.14)", icon: "checkmark-circle-outline" },
-  IN_PROGRESS: { label: "In service", color: "#4F46E5", bg: "rgba(99, 102, 241, 0.14)", icon: "cut-outline" },
-  COMPLETED: { label: "Completed", color: "#6B7280", bg: "rgba(107, 114, 128, 0.12)", icon: "checkmark-done-outline" },
-  CANCELLED: { label: "Cancelled", color: "#DC2626", bg: "rgba(239, 68, 68, 0.12)", icon: "close-circle-outline" },
-  NO_SHOW: { label: "Missed", color: "#DC2626", bg: "rgba(239, 68, 68, 0.12)", icon: "alert-circle-outline" },
+  PENDING: { label: "Awaiting confirmation", color: C.warning, bg: "rgba(214, 158, 46, 0.14)", icon: "time-outline" },
+  CONFIRMED: { label: "Confirmed", color: C.success, bg: "rgba(16, 185, 129, 0.14)", icon: "checkmark-circle-outline" },
+  IN_PROGRESS: { label: "In service", color: C.info, bg: "rgba(99, 102, 241, 0.14)", icon: "cut-outline" },
+  COMPLETED: { label: "Completed", color: C.muted, bg: "rgba(107, 114, 128, 0.12)", icon: "checkmark-done-outline" },
+  CANCELLED: { label: "Cancelled", color: C.error, bg: "rgba(239, 68, 68, 0.12)", icon: "close-circle-outline" },
+  NO_SHOW: { label: "Missed", color: C.error, bg: "rgba(239, 68, 68, 0.12)", icon: "alert-circle-outline" },
 };
 
 // ---------- appointment field helpers (API populates salonId/branchId/services) ----------
@@ -153,7 +153,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
   const { isAuthenticated, user } = useAuth();
   const { theme, isDark } = useTheme();
   const styles = useMemo(() => getStyles(theme, isDark), [theme, isDark]);
-  const brand = C.purple || "#B3261E";
+  const brand = C.main;
 
   const [activeTab, setActiveTab] = useState("Upcoming");
   const [appointments, setAppointments] = useState([]);
@@ -449,7 +449,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
       <TouchableOpacity style={styles.heroCard} activeOpacity={0.94} onPress={() => setSelectedAppt(a)}>
         <View style={styles.heroTopRow}>
           <View style={styles.heroCountdownPill}>
-            <Ionicons name="hourglass-outline" size={12} color="#FFFFFF" style={{ marginRight: 5 }} />
+            <Ionicons name="hourglass-outline" size={12} color={C.textLight} style={{ marginRight: 5 }} />
             <Text style={styles.heroCountdownText}>{getCountdownText(getStartDate(a), status)}</Text>
           </View>
           {renderStatusChip(status, true)}
@@ -491,17 +491,17 @@ export default function BookingsScreen({ navigate, onScroll }) {
 
         <View style={styles.heroActions}>
           <TouchableOpacity style={styles.heroPrimaryBtn} activeOpacity={0.85} onPress={() => openDirections(a)}>
-            <Ionicons name="navigate" size={15} color="#18181B" style={{ marginRight: 6 }} />
+            <Ionicons name="navigate" size={15} color={C.ink} style={{ marginRight: 6 }} />
             <Text style={styles.heroPrimaryBtnText}>Directions</Text>
           </TouchableOpacity>
           {canModify ? (
             <>
               <TouchableOpacity style={styles.heroIconBtn} activeOpacity={0.8} onPress={() => setRescheduleAppt(a)}>
-                <Ionicons name="calendar-outline" size={17} color="#FFFFFF" />
+                <Ionicons name="calendar-outline" size={17} color={C.textLight} />
                 <Text style={styles.heroIconBtnText}>Reschedule</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.heroIconBtn} activeOpacity={0.8} onPress={() => setCancelApptModal(a)}>
-                <Ionicons name="close" size={17} color="#FFFFFF" />
+                <Ionicons name="close" size={17} color={C.textLight} />
                 <Text style={styles.heroIconBtnText}>Cancel</Text>
               </TouchableOpacity>
             </>
@@ -530,7 +530,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
               {typeof a.pricePaid === "number" ? <Text style={styles.cardPrice}>{paiseToINR(a.pricePaid)}</Text> : null}
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={16} color={isDark ? "#52525B" : "#C4C4CC"} />
+          <Ionicons name="chevron-forward" size={16} color={isDark ? C.muted : C.muted} />
         </View>
 
       </TouchableOpacity>
@@ -549,7 +549,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
           : "Your completed and cancelled appointments will show up here."}
       </Text>
       <TouchableOpacity style={[styles.emptyCta, { backgroundColor: brand }]} activeOpacity={0.88} onPress={() => navigate && navigate("Home")}>
-        <Ionicons name="search" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+        <Ionicons name="search" size={16} color={C.textLight} style={{ marginRight: 6 }} />
         <Text style={styles.emptyCtaText}>Find a salon</Text>
       </TouchableOpacity>
     </View>
@@ -564,7 +564,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
       <Text style={styles.emptyTitle}>Couldn't load your bookings</Text>
       <Text style={styles.emptySub}>Check your internet connection and try again.</Text>
       <TouchableOpacity style={[styles.emptyCta, { backgroundColor: brand }]} activeOpacity={0.88} onPress={() => fetchAppointments(false, false)}>
-        <Ionicons name="refresh" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+        <Ionicons name="refresh" size={16} color={C.textLight} style={{ marginRight: 6 }} />
         <Text style={styles.emptyCtaText}>Try again</Text>
       </TouchableOpacity>
     </View>
@@ -632,7 +632,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
             {isCompleted ? (
               ratedScore ? (
                 <View style={styles.historyLink}>
-                  <Ionicons name="star" size={12} color="#F59E0B" />
+                  <Ionicons name="star" size={12} color={C.warning} />
                   <Text style={styles.historyRated}>{ratedScore}/5</Text>
                 </View>
               ) : (
@@ -693,7 +693,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
                 activeOpacity={0.8}
                 onPress={() => setPastFilter(f.key)}
               >
-                <Text style={[styles.filterChipText, isActive && { color: "#FFFFFF" }]}>
+                <Text style={[styles.filterChipText, isActive && { color: C.textLight }]}>
                   {f.key} · {f.count}
                 </Text>
               </TouchableOpacity>
@@ -724,7 +724,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
       : `${upcoming.length} upcoming ${upcoming.length === 1 ? "visit" : "visits"}`;
 
   const pillWidth = segmentWidth > 0 ? (segmentWidth - 8) / TABS.length : 0;
-  const toastColor = { success: "#10B981", warning: "#F59E0B", info: "#6366F1" }[statusToast?.type] || brand;
+  const toastColor = { success: C.success, warning: C.warning, info: C.info }[statusToast?.type] || brand;
 
   return (
     <View style={styles.container}>
@@ -787,7 +787,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
             <Text style={styles.toastMessage}>{statusToast.message}</Text>
           </View>
           <TouchableOpacity style={styles.toastCloseBtn} onPress={() => setStatusToast(null)}>
-            <Ionicons name="close" size={16} color="#FFFFFF" />
+            <Ionicons name="close" size={16} color={C.textLight} />
           </TouchableOpacity>
         </View>
       ) : null}
@@ -816,7 +816,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
                 <Text style={[styles.segmentText, isSelected && styles.segmentTextActive]}>{tab}</Text>
                 {!loading && count > 0 ? (
                   <View style={[styles.segmentCount, isSelected && { backgroundColor: brand }]}>
-                    <Text style={[styles.segmentCountText, isSelected && { color: "#FFFFFF" }]}>{count}</Text>
+                    <Text style={[styles.segmentCountText, isSelected && { color: C.textLight }]}>{count}</Text>
                   </View>
                 ) : null}
               </TouchableOpacity>
@@ -889,12 +889,12 @@ function GuestView({ styles, brand, navigate }) {
 }
 
 function getStyles(theme = {}, isDark = false) {
-  const bg = isDark ? "#0A0A0C" : "#FAFAF8";
-  const surface = isDark ? "#18181B" : "#FFFFFF";
-  const border = isDark ? "#27272A" : "#EEEEEC";
-  const text = isDark ? "#FAFAFA" : "#18181B";
-  const muted = isDark ? "#A1A1AA" : "#71717A";
-  const brand = C.purple || "#B3261E";
+  const bg = isDark ? C.ink : C.bg;
+  const surface = C.surface;
+  const border = isDark ? C.border : C.border;
+  const text = isDark ? C.lifted : C.ink;
+  const muted = C.muted;
+  const brand = C.main;
 
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: bg },
@@ -902,13 +902,13 @@ function getStyles(theme = {}, isDark = false) {
 
     /* Header */
     header: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 12, backgroundColor: bg },
-    title: { fontSize: 30, fontWeight: "800", color: text, letterSpacing: -0.8 },
+    title: { fontFamily: FF.displayBold, fontSize: 30, color: text, letterSpacing: 0.3 },
     subTitle: { fontSize: 14, color: muted, marginTop: 2, marginBottom: 16 },
 
     /* Segmented control */
     segment: {
       flexDirection: "row",
-      backgroundColor: isDark ? "#18181B" : "#EFEFEC",
+      backgroundColor: isDark ? C.ink : C.lifted,
       borderRadius: 14,
       padding: 4,
     },
@@ -918,58 +918,58 @@ function getStyles(theme = {}, isDark = false) {
       bottom: 4,
       left: 4,
       borderRadius: 10,
-      backgroundColor: isDark ? "#3F3F46" : "#FFFFFF",
-      shadowColor: "#000",
+      backgroundColor: C.surface,
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 1 },
       shadowOpacity: isDark ? 0 : 0.08,
       shadowRadius: 3,
       elevation: 2,
     },
     segmentBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 10 },
-    segmentText: { fontSize: 14, fontWeight: "600", color: muted },
-    segmentTextActive: { color: text, fontWeight: "700" },
+    segmentText: { fontSize: 14, fontFamily: "Oswald_600SemiBold", color: muted },
+    segmentTextActive: { color: text, fontFamily: "Oswald_700Bold" },
     segmentCount: {
       marginLeft: 6,
       minWidth: 20,
       height: 20,
       paddingHorizontal: 6,
       borderRadius: 10,
-      backgroundColor: isDark ? "#27272A" : "#E4E4E0",
+      backgroundColor: isDark ? C.border : C.border,
       alignItems: "center",
       justifyContent: "center",
     },
-    segmentCountText: { fontSize: 11, fontWeight: "700", color: muted },
+    segmentCountText: { fontSize: 11, fontFamily: "Oswald_700Bold", color: muted },
 
     contentContainer: { paddingHorizontal: 20, paddingTop: 8, paddingBottom: 120 },
-    sectionLabel: { fontSize: 11, fontWeight: "700", color: muted, letterSpacing: 1.2, marginBottom: 10 },
+    sectionLabel: { fontSize: 11, fontFamily: "Oswald_700Bold", color: muted, letterSpacing: 1.2, marginBottom: 10 },
 
     /* Status chip */
     statusChip: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", paddingHorizontal: 9, paddingVertical: 5, borderRadius: 999 },
     statusChipCompact: { paddingHorizontal: 8, paddingVertical: 3 },
-    statusChipText: { fontSize: 12, fontWeight: "700" },
+    statusChipText: { fontSize: 12, fontFamily: "Oswald_700Bold" },
 
     /* Date tile */
     dateTile: {
       width: 56,
       paddingVertical: 8,
       borderRadius: 14,
-      backgroundColor: isDark ? "#27272A" : "#F6F2EF",
+      backgroundColor: isDark ? C.border : C.lifted,
       alignItems: "center",
     },
     dateTileLarge: { width: 72, paddingVertical: 10, borderRadius: 18, backgroundColor: "rgba(255,255,255,0.1)" },
-    dateTileMonth: { fontSize: 10, fontWeight: "800", color: brand, letterSpacing: 0.8 },
-    dateTileMonthLarge: { fontSize: 11, color: "#FCA5A5" },
-    dateTileDay: { fontSize: 22, fontWeight: "800", color: text, lineHeight: 26 },
-    dateTileDayLarge: { fontSize: 30, color: "#FFFFFF", lineHeight: 34 },
-    dateTileWeekday: { fontSize: 11, fontWeight: "600", color: muted },
+    dateTileMonth: { fontSize: 10, fontFamily: "Oswald_700Bold", color: brand, letterSpacing: 0.8 },
+    dateTileMonthLarge: { fontSize: 11, color: C.error },
+    dateTileDay: { fontSize: 22, fontFamily: "Oswald_700Bold", color: text, lineHeight: 26},
+    dateTileDayLarge: { fontSize: 30, color: C.textLight, lineHeight: 34},
+    dateTileWeekday: { fontSize: 11, fontFamily: "Oswald_600SemiBold", color: muted },
     dateTileWeekdayLarge: { fontSize: 12, color: "rgba(255,255,255,0.7)" },
 
     /* Next-visit hero */
     heroCard: {
-      backgroundColor: isDark ? "#1F1215" : "#1C1416",
+      backgroundColor: isDark ? C.ink : C.ink,
       borderRadius: 24,
       padding: 18,
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 10 },
       shadowOpacity: 0.18,
       shadowRadius: 20,
@@ -984,9 +984,9 @@ function getStyles(theme = {}, isDark = false) {
       paddingVertical: 5,
       borderRadius: 999,
     },
-    heroCountdownText: { color: "#FFFFFF", fontSize: 12, fontWeight: "700" },
+    heroCountdownText: { color: C.textLight, fontSize: 12, fontFamily: "Oswald_700Bold" },
     heroBody: { flexDirection: "row", alignItems: "center" },
-    heroSalon: { fontSize: 19, fontWeight: "800", color: "#FFFFFF", letterSpacing: -0.3, marginBottom: 6 },
+    heroSalon: { fontSize: 19, fontFamily: "Oswald_700Bold", color: C.textLight, letterSpacing: 0.15, marginBottom: 6 },
     heroMuted: { fontSize: 13, color: "rgba(255,255,255,0.7)", marginLeft: 5, flexShrink: 1 },
     heroServices: {
       marginTop: 16,
@@ -995,11 +995,11 @@ function getStyles(theme = {}, isDark = false) {
       borderTopColor: "rgba(255,255,255,0.18)",
     },
     heroServiceRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 },
-    heroServiceName: { flex: 1, fontSize: 14, fontWeight: "600", color: "#FFFFFF", marginRight: 12 },
+    heroServiceName: { flex: 1, fontSize: 14, fontFamily: "Oswald_600SemiBold", color: C.textLight, marginRight: 12 },
     heroServiceMeta: { fontSize: 12, color: "rgba(255,255,255,0.6)" },
     heroTotalRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 6 },
     heroTotalLabel: { fontSize: 12, color: "rgba(255,255,255,0.6)" },
-    heroTotalValue: { fontSize: 17, fontWeight: "800", color: "#FFFFFF" },
+    heroTotalValue: { fontSize: 17, fontFamily: "Oswald_700Bold", color: C.textLight },
     heroActions: { flexDirection: "row", alignItems: "center", marginTop: 18, gap: 10 },
     heroPrimaryBtn: {
       flex: 1,
@@ -1008,9 +1008,9 @@ function getStyles(theme = {}, isDark = false) {
       justifyContent: "center",
       height: 46,
       borderRadius: 14,
-      backgroundColor: "#FFFFFF",
+      backgroundColor: C.textLight,
     },
-    heroPrimaryBtnText: { fontSize: 14, fontWeight: "700", color: "#18181B" },
+    heroPrimaryBtnText: { fontSize: 14, fontFamily: "Oswald_700Bold", color: C.ink },
     heroIconBtn: {
       height: 46,
       paddingHorizontal: 12,
@@ -1019,7 +1019,7 @@ function getStyles(theme = {}, isDark = false) {
       alignItems: "center",
       justifyContent: "center",
     },
-    heroIconBtnText: { fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.85)", marginTop: 2 },
+    heroIconBtnText: { fontSize: 10, fontFamily: "Oswald_600SemiBold", color: "rgba(255,255,255,0.85)", marginTop: 2 },
 
     /* Compact card */
     card: {
@@ -1032,11 +1032,11 @@ function getStyles(theme = {}, isDark = false) {
     },
     cardRow: { flexDirection: "row", alignItems: "center" },
     cardInfo: { flex: 1, marginLeft: 14, marginRight: 6 },
-    cardSalon: { fontSize: 15, fontWeight: "700", color: text },
+    cardSalon: { fontSize: 15, fontFamily: "Oswald_700Bold", color: text },
     cardMeta: { fontSize: 12.5, color: muted, marginTop: 2 },
-    cardServices: { fontSize: 12.5, color: isDark ? "#D4D4D8" : "#3F3F46", marginTop: 4 },
+    cardServices: { fontSize: 12.5, color: C.textSecondary, marginTop: 4 },
     cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 },
-    cardPrice: { fontSize: 13, fontWeight: "700", color: text },
+    cardPrice: { fontSize: 13, fontFamily: "Oswald_700Bold", color: text },
 
     /* History (Past tab) */
     statsCard: {
@@ -1051,9 +1051,9 @@ function getStyles(theme = {}, isDark = false) {
     },
     statCell: { flex: 1, alignItems: "center", paddingHorizontal: 8 },
     statDivider: { width: StyleSheet.hairlineWidth, alignSelf: "stretch", backgroundColor: border },
-    statValue: { fontSize: 20, fontWeight: "800", color: text, letterSpacing: -0.4, textAlign: "center" },
-    statValueSmall: { fontSize: 14, letterSpacing: 0, lineHeight: 18 },
-    statLabel: { fontSize: 11.5, fontWeight: "600", color: muted, marginTop: 4 },
+    statValue: { fontSize: 20, fontFamily: "Oswald_700Bold", color: text, letterSpacing: 0.15, textAlign: "center" },
+    statValueSmall: { fontSize: 14, letterSpacing: 0, lineHeight: 18},
+    statLabel: { fontSize: 11.5, fontFamily: "Oswald_600SemiBold", color: muted, marginTop: 4 },
     filterRow: { flexDirection: "row", gap: 8, marginBottom: 18 },
     filterChip: {
       paddingHorizontal: 14,
@@ -1063,7 +1063,7 @@ function getStyles(theme = {}, isDark = false) {
       borderColor: border,
       backgroundColor: surface,
     },
-    filterChipText: { fontSize: 13, fontWeight: "600", color: text },
+    filterChipText: { fontSize: 13, fontFamily: "Oswald_600SemiBold", color: text },
     filterEmpty: { fontSize: 14, color: muted, textAlign: "center", paddingVertical: 32 },
     historyGroup: {
       backgroundColor: surface,
@@ -1075,20 +1075,20 @@ function getStyles(theme = {}, isDark = false) {
     historyRow: { flexDirection: "row", paddingVertical: 14 },
     historyRowDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: border },
     historyDate: { width: 40, alignItems: "center", marginRight: 12, paddingTop: 1 },
-    historyDay: { fontSize: 20, fontWeight: "800", color: text, lineHeight: 24 },
-    historyMonth: { fontSize: 11, fontWeight: "700", color: muted, textTransform: "uppercase" },
+    historyDay: { fontSize: 20, fontFamily: "Oswald_700Bold", color: text, lineHeight: 24},
+    historyMonth: { fontSize: 11, fontFamily: "Oswald_700Bold", color: muted, textTransform: "uppercase" },
     historyInfo: { flex: 1 },
     historyTitleRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-    historySalon: { flex: 1, fontSize: 15, fontWeight: "700", color: text, marginRight: 10 },
-    historyPrice: { fontSize: 14, fontWeight: "700", color: text },
+    historySalon: { flex: 1, fontSize: 15, fontFamily: "Oswald_700Bold", color: text, marginRight: 10 },
+    historyPrice: { fontSize: 14, fontFamily: "Oswald_700Bold", color: text },
     historyPriceVoid: { color: muted, textDecorationLine: "line-through" },
     historyServices: { fontSize: 13, color: muted, marginTop: 2 },
     historyMetaRow: { flexDirection: "row", alignItems: "center", flexWrap: "wrap", marginTop: 8 },
     statusDot: { width: 6, height: 6, borderRadius: 3, marginRight: 5 },
-    historyStatus: { fontSize: 12, fontWeight: "700" },
+    historyStatus: { fontSize: 12, fontFamily: "Oswald_700Bold" },
     historyLink: { flexDirection: "row", alignItems: "center", marginLeft: 14 },
-    historyLinkText: { fontSize: 12, fontWeight: "700", marginLeft: 3 },
-    historyRated: { fontSize: 12, fontWeight: "700", color: muted, marginLeft: 3 },
+    historyLinkText: { fontSize: 12, fontFamily: "Oswald_700Bold", marginLeft: 3 },
+    historyRated: { fontSize: 12, fontFamily: "Oswald_700Bold", color: muted, marginLeft: 3 },
 
     /* Empty / loading */
     emptyBox: { alignItems: "center", paddingTop: 48, paddingHorizontal: 12 },
@@ -1101,7 +1101,7 @@ function getStyles(theme = {}, isDark = false) {
       justifyContent: "center",
       marginBottom: 16,
     },
-    emptyTitle: { fontSize: 19, fontWeight: "800", color: text, textAlign: "center", letterSpacing: -0.3 },
+    emptyTitle: { fontSize: 19, fontFamily: "Oswald_700Bold", color: text, textAlign: "center", letterSpacing: 0.15 },
     emptySub: { fontSize: 14, color: muted, textAlign: "center", lineHeight: 20, marginTop: 6, maxWidth: 300 },
     emptyCta: {
       flexDirection: "row",
@@ -1112,8 +1112,8 @@ function getStyles(theme = {}, isDark = false) {
       borderRadius: 14,
       marginTop: 22,
     },
-    emptyCtaText: { color: "#FFFFFF", fontSize: 15, fontWeight: "700" },
-    skeleton: { backgroundColor: isDark ? "#18181B" : "#EFEFEC" },
+    emptyCtaText: { color: C.textLight, fontSize: 15, fontFamily: "Oswald_700Bold" },
+    skeleton: { backgroundColor: isDark ? C.ink : C.lifted },
 
     /* Guest */
     guestContent: { alignItems: "center", paddingHorizontal: 20, paddingTop: 32, paddingBottom: 120 },
@@ -1136,12 +1136,12 @@ function getStyles(theme = {}, isDark = false) {
       justifyContent: "center",
       marginRight: 12,
     },
-    guestFeatureTitle: { fontSize: 14, fontWeight: "700", color: text },
+    guestFeatureTitle: { fontSize: 14, fontFamily: "Oswald_700Bold", color: text },
     guestFeatureSub: { fontSize: 12.5, color: muted, marginTop: 1 },
     guestCta: { alignSelf: "stretch" },
     guestSignUpRow: { flexDirection: "row", alignItems: "center", paddingVertical: 14 },
     guestSignUpMuted: { fontSize: 13.5, color: muted },
-    guestSignUpLink: { fontSize: 13.5, fontWeight: "700" },
+    guestSignUpLink: { fontSize: 13.5, fontFamily: "Oswald_700Bold" },
 
     /* Toast */
     toastBanner: {
@@ -1150,21 +1150,21 @@ function getStyles(theme = {}, isDark = false) {
       left: 16,
       right: 16,
       zIndex: 9999,
-      backgroundColor: "#18181B",
+      backgroundColor: C.ink,
       borderRadius: 14,
       borderLeftWidth: 4,
       paddingHorizontal: 14,
       paddingVertical: 12,
       flexDirection: "row",
       alignItems: "center",
-      shadowColor: "#000",
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 6 },
       shadowOpacity: 0.25,
       shadowRadius: 12,
       elevation: 8,
     },
-    toastTitle: { fontSize: 13, fontWeight: "700" },
-    toastMessage: { color: "#FFFFFF", fontSize: 12.5, marginTop: 2 },
+    toastTitle: { fontSize: 13, fontFamily: "Oswald_700Bold" },
+    toastMessage: { color: C.textLight, fontSize: 12.5, marginTop: 2 },
     toastCloseBtn: { padding: 4, marginLeft: 8 },
   });
 }

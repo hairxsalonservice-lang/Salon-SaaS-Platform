@@ -11,7 +11,7 @@ import {
   ImageBackground,
   Dimensions,
 } from "react-native";
-import { C, S, FS, FW, R, TYPO } from "../theme";
+import { C, S, FS, FW, FF, R, TYPO, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import SalonCard from "../components/SalonCard";
@@ -436,7 +436,7 @@ function HomeScreen({ navigate, onScroll }) {
                                   {tagText ? <Text style={styles.heroEyebrow}>{tagText}</Text> : null}
                                   {banner.promoCode ? (
                                     <View style={styles.promoCodeBadge}>
-                                      <Ionicons name="pricetag" size={10} color="#FFFFFF" style={{ marginRight: 3 }} />
+                                      <Ionicons name="pricetag" size={10} color={C.textLight} style={{ marginRight: 3 }} />
                                       <Text style={styles.promoCodeBadgeText}>Code: {banner.promoCode}</Text>
                                     </View>
                                   ) : null}
@@ -446,7 +446,7 @@ function HomeScreen({ navigate, onScroll }) {
 
                                 <View style={styles.heroBookBtn}>
                                   <Text style={styles.heroBookBtnText}>{ctaText}</Text>
-                                  <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                                  <Ionicons name="arrow-forward" size={16} color={C.textLight} style={{ marginLeft: 6 }} />
                                 </View>
                               </View>
 
@@ -497,7 +497,7 @@ function HomeScreen({ navigate, onScroll }) {
             <Text style={styles.emptyTitle}>Couldn't load salons</Text>
             <Text style={styles.emptyText}>Check your internet connection and try again.</Text>
             <TouchableOpacity style={styles.retryBtn} onPress={() => loadData(false)} activeOpacity={0.85}>
-              <Ionicons name="refresh" size={15} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Ionicons name="refresh" size={15} color={C.textLight} style={{ marginRight: 6 }} />
               <Text style={styles.retryBtnText}>Try again</Text>
             </TouchableOpacity>
           </View>
@@ -516,12 +516,12 @@ function HomeScreen({ navigate, onScroll }) {
               </View>
               <TouchableOpacity style={styles.seeAllBtn} onPress={() => navigate && navigate("AllSalons", { city: selectedCity })}>
                 <Text style={styles.seeAllText}>See All</Text>
-                <Ionicons name="arrow-forward" size={14} color={palette.ink} style={{ marginLeft: 4 }} />
+                <Ionicons name="arrow-forward" size={14} color={palette.primary} style={{ marginLeft: 4 }} />
               </TouchableOpacity>
             </View>
 
             {topRatedSalons.length > 0 ? (
-              <SalonCarousel salons={topRatedSalons} onSalonPress={handleSalonPress} styles={styles} />
+              <SalonVerticalList salons={topRatedSalons} onSalonPress={handleSalonPress} styles={styles} />
             ) : null}
 
             {/* THANK YOU LETTER */}
@@ -570,23 +570,23 @@ export default memo(HomeScreen);
 
 // Category tile tints — pastel on light, translucent on dark so icons stay readable
 const CATEGORY_TINTS = {
-  haircut: ["#FCE8E8", "rgba(230, 57, 115, 0.16)"],
-  facial: ["#FEF1E6", "rgba(245, 158, 11, 0.16)"],
-  makeup: ["#F1EBFC", "rgba(139, 92, 246, 0.18)"],
-  massage: ["#E9F8F1", "rgba(16, 185, 129, 0.16)"],
-  nails: ["#FDF0F3", "rgba(236, 72, 153, 0.16)"],
+  haircut: [C.infoBg, "rgba(230, 57, 115, 0.16)"],
+  facial: [C.warningBg, "rgba(245, 158, 11, 0.16)"],
+  makeup: [C.infoBg, "rgba(139, 92, 246, 0.18)"],
+  massage: [C.successBg, "rgba(16, 185, 129, 0.16)"],
+  nails: [C.crimsonTint, "rgba(236, 72, 153, 0.16)"],
 };
 
 function getPalette(theme = {}, isDark = false) {
   return {
-    canvas: theme.canvas || (isDark ? "#0D0D0D" : "#FBFBF9"),
-    header: isDark ? theme.canvas || "#0D0D0D" : "#FFFFFF",
-    surface: theme.surface || (isDark ? "#1C1C1E" : "#FFFFFF"),
-    ink: theme.ink || (isDark ? "#F4F4F2" : "#1E1E1E"),
-    body: isDark ? "#D0D0CB" : "#333333",
-    muted: isDark ? "#A0A09C" : "#666666",
-    hairline: theme.hairline || (isDark ? "#2A2A2C" : "#EEEEEE"),
-    primary: theme.primary || (isDark ? "#E63973" : "#B3261E"),
+    canvas: theme.canvas || (C.bg),
+    header: isDark ? C.bg : C.bg,
+    surface: theme.surface || (C.surface),
+    ink: theme.ink || (C.ink),
+    body: isDark ? C.textSecondary : C.textSecondary,
+    muted: C.muted,
+    hairline: C.border,
+    primary: theme.primary || (C.main),
   };
 }
 
@@ -616,19 +616,19 @@ function buildStyles(theme, isDark) {
       flex: 1,
     },
     sectionTitle: {
+      fontFamily: FF.displayBold,
       fontSize: FS.titleLg,
-      fontWeight: "700",
       color: p.ink,
-      letterSpacing: -0.32,
+      letterSpacing: 0.2,
     },
     seeAllBtn: {
       flexDirection: "row",
       alignItems: "center",
     },
     seeAllText: {
+      fontFamily: FF.bodySemiBold,
       fontSize: 13,
-      fontWeight: "600",
-      color: p.ink,
+      color: p.primary,
     },
 
     // Header
@@ -637,8 +637,8 @@ function buildStyles(theme, isDark) {
       justifyContent: "space-between",
       alignItems: "center",
       paddingHorizontal: 16,
-      paddingTop: 54,
-      paddingBottom: 16,
+      paddingTop: 56,
+      paddingBottom: 12,
       backgroundColor: p.header,
     },
     headerLocation: {
@@ -647,7 +647,7 @@ function buildStyles(theme, isDark) {
     },
     headerCityText: {
       fontSize: 16,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: p.ink,
     },
     headerSubtitleText: {
@@ -672,17 +672,17 @@ function buildStyles(theme, isDark) {
       width: 6,
       height: 6,
       borderRadius: 3,
-      backgroundColor: "#FF3B30",
+      backgroundColor: C.error,
     },
 
     // Hero banner — ImageBackground handles cross-platform image + content stacking
     heroBannerContainer: {
       marginHorizontal: 16,
-      borderRadius: 16,
+      borderRadius: PLATFORM_RADIUS.card,
       overflow: "hidden",
-      height: 220,
-      backgroundColor: isDark ? p.surface : "#F3EBE1",
-      marginBottom: 24,
+      height: 200,
+      backgroundColor: isDark ? p.surface : C.border,
+      marginBottom: 20,
     },
     heroBannerImage: {
       width: "100%",
@@ -691,10 +691,10 @@ function buildStyles(theme, isDark) {
     // Overlay is now a normal flex child inside ImageBackground — no z-index needed
     heroBannerOverlay: {
       flex: 1,
-      backgroundColor: isDark ? "rgba(10, 10, 12, 0.72)" : "rgba(10, 8, 6, 0.52)",
+      backgroundColor: isDark ? "rgba(0, 0, 0, 0.55)" : "rgba(0, 0, 0, 0.35)",
       justifyContent: "space-between",
-      padding: 20,
-      paddingBottom: 16,
+      padding: 16,
+      paddingBottom: 14,
     },
     heroBannerContent: {
       flex: 1,
@@ -702,7 +702,7 @@ function buildStyles(theme, isDark) {
     },
     heroEyebrow: {
       fontSize: 10,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: "rgba(255, 255, 255, 0.85)",
       letterSpacing: 1.5,
       marginBottom: 0,
@@ -711,7 +711,7 @@ function buildStyles(theme, isDark) {
       textShadowRadius: 3,
     },
     promoCodeBadge: {
-      backgroundColor: "rgba(179, 38, 30, 0.90)",
+      backgroundColor: p.primary,
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 6,
@@ -720,20 +720,20 @@ function buildStyles(theme, isDark) {
       marginLeft: 8,
     },
     promoCodeBadgeText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 10,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       letterSpacing: 0.5,
     },
     heroTitle: {
-      fontSize: 26,
-      fontWeight: "800",
-      color: "#FFFFFF",
-      lineHeight: 32,
-      marginBottom: 8,
-      textShadowColor: "rgba(0,0,0,0.5)",
+      fontSize: 22,
+      fontFamily: "Oswald_700Bold",
+      color: C.textLight,
+      lineHeight: 28,
+      marginBottom: 6,
+      textShadowColor: "rgba(0,0,0,0.4)",
       textShadowOffset: { width: 0, height: 1 },
-      textShadowRadius: 4,
+      textShadowRadius: 3,
     },
     heroSubtitle: {
       fontSize: 12,
@@ -745,20 +745,18 @@ function buildStyles(theme, isDark) {
       textShadowRadius: 3,
     },
     heroBookBtn: {
-      backgroundColor: "rgba(255, 255, 255, 0.22)",
-      borderWidth: 1,
-      borderColor: "rgba(255, 255, 255, 0.60)",
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      borderRadius: 24,
+      backgroundColor: p.primary,
+      paddingHorizontal: 18,
+      paddingVertical: 9,
+      borderRadius: 20,
       flexDirection: "row",
       alignItems: "center",
       alignSelf: "flex-start",
     },
     heroBookBtnText: {
-      color: "#FFFFFF",
-      fontSize: 13,
-      fontWeight: "600",
+      color: C.textLight,
+      fontSize: 14,
+      fontFamily: "Oswald_600SemiBold",
     },
 
 
@@ -775,52 +773,52 @@ function buildStyles(theme, isDark) {
       alignItems: "center",
     },
     categoryIconCircle: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
+      width: 52,
+      height: 52,
+      borderRadius: 26,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 8,
+      marginBottom: 6,
     },
     categoryLabel: {
-      fontSize: 12,
+      fontSize: 11,
       color: p.body,
-      fontWeight: "500",
+      fontFamily: "Oswald_500Medium",
       textAlign: "center",
     },
 
     // "A note from us" card
     noteCard: {
       marginHorizontal: 16,
-      marginTop: 16,
-      minHeight: 140,
-      borderRadius: 16,
+      marginTop: 20,
+      borderRadius: PLATFORM_RADIUS.card,
       padding: 20,
       justifyContent: "center",
-      backgroundColor: isDark ? "#1F1A16" : "#F3EBE1",
-      borderWidth: isDark ? 1 : 0,
-      borderColor: isDark ? "#2E2620" : "transparent",
+      backgroundColor: C.surface,
+      borderWidth: 1,
+      borderColor: p.hairline,
     },
     noteEyebrow: {
-      fontSize: 14,
-      fontWeight: "700",
-      color: isDark ? "#C9A68E" : "#6D554D",
-      letterSpacing: 1.5,
-      marginBottom: 12,
+      fontSize: 12,
+      fontFamily: "Oswald_600SemiBold",
+      color: p.muted,
+      letterSpacing: 0.8,
+      marginBottom: 10,
       textAlign: "center",
+      textTransform: "uppercase",
     },
     noteQuote: {
-      fontSize: 18,
+      fontSize: 16,
       fontStyle: "italic",
       color: p.ink,
-      lineHeight: 26,
+      lineHeight: 24,
       textAlign: "center",
-      marginBottom: 12,
+      marginBottom: 10,
     },
     noteSignature: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: isDark ? "#D9B8A8" : "#5D3B3E",
+      fontSize: 13,
+      fontFamily: "Oswald_600SemiBold",
+      color: p.muted,
       textAlign: "center",
     },
 
@@ -845,7 +843,7 @@ function buildStyles(theme, isDark) {
     },
     emptyTitle: {
       fontSize: FS.body,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: p.ink,
       textAlign: "center",
     },
@@ -864,9 +862,9 @@ function buildStyles(theme, isDark) {
       backgroundColor: p.primary,
     },
     retryBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 14,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
     },
   });
 }

@@ -33,6 +33,8 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: userKeyGenerator,
   validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
+  // Fail open: if Redis is down or out of quota, don't turn requests into 500s.
+  passOnStoreError: true,
   store: createRedisStore("api"),
   message: {
     success: false,
@@ -48,6 +50,8 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: userKeyGenerator,
   validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
+  // Fail open: if Redis is down or out of quota, don't turn requests into 500s.
+  passOnStoreError: true,
   store: createRedisStore("auth"),
   message: {
     success: false,
@@ -63,10 +67,46 @@ const bookingLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: userKeyGenerator,
   validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
+  // Fail open: if Redis is down or out of quota, don't turn requests into 500s.
+  passOnStoreError: true,
   store: createRedisStore("booking"),
   message: {
     success: false,
     message: "Too many booking requests. Please wait a moment before trying again.",
+  },
+});
+
+// Location proxy limiter — these endpoints call paid Google Maps APIs and are
+// intentionally available to signed-out browsing, so they need a tighter
+// per-IP budget than the global limiter.
+const locationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isDev ? 10000 : 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.ip,
+  validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
+  passOnStoreError: true,
+  store: createRedisStore("location"),
+  message: {
+    success: false,
+    message: "Too many location requests. Please try again later.",
+  },
+});
+
+// Upload rate limiter for object-storage endpoints (60 requests per 15 mins in prod, 10000 in dev)
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: isDev ? 10000 : 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: userKeyGenerator,
+  validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
+  passOnStoreError: true,
+  store: createRedisStore("upload"),
+  message: {
+    success: false,
+    message: "Too many upload requests. Please try again later.",
   },
 });
 
@@ -78,6 +118,8 @@ const adminLimiter = rateLimit({
   legacyHeaders: false,
   keyGenerator: userKeyGenerator,
   validate: { xForwardedForHeader: false, keyGeneratorIpFallback: false },
+  // Fail open: if Redis is down or out of quota, don't turn requests into 500s.
+  passOnStoreError: true,
   store: createRedisStore("admin"),
   message: {
     success: false,
@@ -89,6 +131,8 @@ module.exports = {
   apiLimiter,
   authLimiter,
   bookingLimiter,
+  locationLimiter,
+  uploadLimiter,
   adminLimiter,
 };
 

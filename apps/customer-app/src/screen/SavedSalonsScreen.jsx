@@ -125,7 +125,7 @@ export default function SavedSalonsScreen({ navigate, onBack }) {
                 onPress={() => navigate && navigate("Explore")}
                 activeOpacity={0.85}
               >
-                <Ionicons name="sparkles-outline" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Ionicons name="sparkles-outline" size={16} color={C.textLight} style={{ marginRight: 6 }} />
                 <Text style={styles.exploreBtnText}>Explore Luxury Salons</Text>
               </TouchableOpacity>
             </View>
@@ -192,9 +192,9 @@ function getStyles(theme, isDark) {
     title: {
       fontFamily: FONT_FAMILY.serif,
       fontSize: 24,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       color: C.ink,
-      letterSpacing: -0.3,
+      letterSpacing: 0.15,
       marginTop: 2,
     },
     countBadge: {
@@ -207,7 +207,7 @@ function getStyles(theme, isDark) {
     },
     countBadgeText: {
       fontSize: 11,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       color: C.main,
       letterSpacing: 0.5,
     },
@@ -249,7 +249,7 @@ function getStyles(theme, isDark) {
     },
     emptyTitle: {
       fontSize: FS.h3,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
       color: C.ink,
       marginBottom: S.xs,
     },
@@ -270,9 +270,9 @@ function getStyles(theme, isDark) {
       borderRadius: R.button,
     },
     exploreBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: FS.bodySm,
-      fontWeight: FW.bold,
+      fontFamily: "Oswald_700Bold",
     },
     cardWrapper: {
       marginBottom: S.xs,
@@ -289,7 +289,7 @@ function getStyles(theme, isDark) {
     },
     removeBarText: {
       fontSize: 11.5,
-      fontWeight: FW.medium,
+      fontFamily: "Oswald_500Medium",
       color: C.herat || C.error,
     },
   });

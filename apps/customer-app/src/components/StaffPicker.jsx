@@ -126,7 +126,7 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
                     <Ionicons
                       name="sparkles"
                       size={28}
-                      color={isSelected ? "#6C5CE7" : isDark ? "#94A3B8" : "#64748B"}
+                      color={isSelected ? C.main : C.mutedSoft}
                     />
                   </View>
                 ) : (
@@ -153,7 +153,7 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
                     <Ionicons
                       name={gender === "male" ? "male" : "female"}
                       size={10}
-                      color="#FFFFFF"
+                      color={C.textLight}
                     />
                   </View>
                 )}
@@ -178,7 +178,7 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.main;
 
   return StyleSheet.create({
     container: {
@@ -192,9 +192,9 @@ function getStyles(theme, isDark) {
     },
     sectionTitle: {
       fontSize: 16,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
-      letterSpacing: -0.3,
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
+      letterSpacing: 0.15,
     },
     scrollContent: {
       paddingRight: 16,
@@ -202,16 +202,16 @@ function getStyles(theme, isDark) {
     },
     staffCard: {
       width: 104,
-      backgroundColor: isDark ? "#1C1C1E" : (C.bg || "#FAFAFC"),
+      backgroundColor: isDark ? C.surface : (C.bg || C.lifted),
       borderRadius: 22,
       padding: 10,
       alignItems: "center",
       borderWidth: 2,
-      borderColor: isDark ? "#1C1C1E" : (C.bg || "#FAFAFC"),
+      borderColor: isDark ? C.surface : (C.bg || C.lifted),
     },
     staffCardSelected: {
       borderColor: accentColor,
-      backgroundColor: isDark ? "rgba(108, 92, 231, 0.15)" : "#F4F2FF",
+      backgroundColor: isDark ? "rgba(108, 92, 231, 0.15)" : C.infoBg,
     },
     avatarWrapper: {
       position: "relative",
@@ -221,7 +221,7 @@ function getStyles(theme, isDark) {
       width: 72,
       height: 72,
       borderRadius: 18,
-      backgroundColor: isDark ? "#2A2A2C" : "#E2E8F0",
+      backgroundColor: isDark ? C.lifted : C.border,
     },
     genderBadge: {
       position: "absolute",
@@ -233,31 +233,31 @@ function getStyles(theme, isDark) {
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 2,
-      borderColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      shadowColor: "#000",
+      borderColor: C.surface,
+      shadowColor: C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.15,
       shadowRadius: 3,
       elevation: 3,
     },
     maleBadge: {
-      backgroundColor: "#3B82F6", // Bright male blue
+      backgroundColor: C.info, // Bright male blue
     },
     femaleBadge: {
-      backgroundColor: "#EC4899", // Bright female pink
+      backgroundColor: C.main, // Bright female pink
     },
     anyAvatar: {
-      backgroundColor: isDark ? "#2A2A2C" : "#EDEBF9",
+      backgroundColor: isDark ? C.lifted : C.infoBg,
       alignItems: "center",
       justifyContent: "center",
     },
     anyAvatarSelected: {
-      backgroundColor: isDark ? "rgba(108, 92, 231, 0.25)" : "#E4E0FF",
+      backgroundColor: isDark ? "rgba(108, 92, 231, 0.25)" : C.infoBg,
     },
     name: {
       fontSize: 13,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
       textAlign: "center",
     },
     nameSelected: {
@@ -265,8 +265,8 @@ function getStyles(theme, isDark) {
     },
     title: {
       fontSize: 11,
-      fontWeight: "500",
-      color: isDark ? "#94A3B8" : "#8A8A9E",
+      fontFamily: "Oswald_500Medium",
+      color: C.muted,
       textAlign: "center",
       marginTop: 2,
     },

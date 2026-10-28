@@ -13,6 +13,10 @@ import {
 import { BlurView } from "expo-blur";
 import { useTheme } from "../context/ThemeContext";
 import { APPLE_SPRINGS, triggerHaptic } from "../theme/appleMotion";
+import { PLATFORM_RADIUS } from "../theme/platform";
+import { C } from "../theme";
+
+const isIOS = Platform.OS === "ios";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
@@ -109,9 +113,9 @@ export default function AppleBottomSheet({
 
   if (!visible) return null;
 
-  const sheetBg = isDark ? "#181820" : "#FFFFFF";
-  const sheetBorder = isDark ? "#282834" : "#EFEFF4";
-  const handleColor = isDark ? "rgba(255, 255, 255, 0.3)" : "rgba(0, 0, 0, 0.2)";
+  const sheetBg = C.surface;
+  const sheetBorder = isDark ? C.border : C.border;
+  const handleColor = isDark ? "rgba(255, 255, 255, 0.3)" : C.muted;
 
   return (
     <Modal
@@ -128,7 +132,7 @@ export default function AppleBottomSheet({
             {Platform.OS === "ios" ? (
               <BlurView intensity={30} style={StyleSheet.absoluteFill} tint={isDark ? "dark" : "light"} />
             ) : null}
-            <View style={[styles.scrimDim, { backgroundColor: isDark ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.5)" }]} />
+            <View style={[styles.scrimDim, { backgroundColor: isDark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.3)" }]} />
           </Animated.View>
         </TouchableWithoutFeedback>
 
@@ -169,25 +173,24 @@ const styles = StyleSheet.create({
   },
   sheetContainer: {
     width: "100%",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    borderWidth: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -8 },
-    shadowOpacity: 0.25,
-    shadowRadius: 16,
+    borderTopLeftRadius: PLATFORM_RADIUS.sheet,
+    borderTopRightRadius: PLATFORM_RADIUS.sheet,
+    borderWidth: isIOS ? 1 : 0,
+    ...(isIOS
+      ? { shadowColor: C.ink, shadowOffset: { width: 0, height: -8 }, shadowOpacity: 0.25, shadowRadius: 16 }
+      : {}),
     elevation: 24,
     overflow: "hidden",
   },
   dragHandleContainer: {
     width: "100%",
-    height: 28,
+    height: isIOS ? 28 : 32,
     alignItems: "center",
     justifyContent: "center",
   },
   dragHandleBar: {
-    width: 38,
-    height: 5,
+    width: isIOS ? 36 : 32,
+    height: isIOS ? 5 : 4,
     borderRadius: 3,
   },
   content: {

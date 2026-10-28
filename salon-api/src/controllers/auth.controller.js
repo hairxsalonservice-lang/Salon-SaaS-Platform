@@ -373,9 +373,12 @@ const refresh = async (req, res, next) => {
 // frontend should delete the access token from memory
 const logout = async (req, res, next) => {
   try {
-    // req.user is set by authenticate middleware
+    // req.user is set by authenticate middleware.
+    // Clearing the refresh token stops renewal, and bumping tokenVersion
+    // immediately invalidates the access token that was used for this call.
     await User.findByIdAndUpdate(req.user.userId, {
       refreshToken: null,
+      $inc: { tokenVersion: 1 },
     });
 
     res.status(200).json({
@@ -638,10 +641,23 @@ const googleLogin = async (req, res, next) => {
 // ================================
 const appleLogin = async (req, res, next) => {
   try {
-    const { identityToken, user: appleUserId, fullName, email: providedEmail } = req.body;
+    const { identityToken, fullName } = req.body;
 
     if (!identityToken) {
       return next(new AppError("Apple identityToken is required", 400));
+    }
+
+    // Fail closed if the audience is not configured. Without this check a
+    // token issued for any other Apple client would be accepted.
+    const appleAudiences = (process.env.APPLE_CLIENT_ID || "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter(Boolean);
+
+    if (appleAudiences.length === 0) {
+      return next(
+        new AppError("Apple sign-in is not configured. Please contact support.", 503),
+      );
     }
 
     let decoded;
@@ -650,10 +666,8 @@ const appleLogin = async (req, res, next) => {
         const verifyOptions = {
           algorithms: ["RS256"],
           issuer: "https://appleid.apple.com",
+          audience: appleAudiences.length === 1 ? appleAudiences[0] : appleAudiences,
         };
-        if (process.env.APPLE_CLIENT_ID) {
-          verifyOptions.audience = process.env.APPLE_CLIENT_ID;
-        }
         jwt.verify(
           identityToken,
           getAppleSigningKey,
@@ -668,30 +682,66 @@ const appleLogin = async (req, res, next) => {
       return next(new AppError("Invalid Apple identity token: " + err.message, 400));
     }
 
-    const appleId = appleUserId || decoded.sub;
-    const email = (providedEmail || decoded.email || `${appleId}@privaterelay.appleid.com`).toLowerCase();
+    // Identity MUST come from the verified token, never from request-body
+    // fields. Those fields can be set by the caller and were previously used
+    // to select an arbitrary account.
+    const appleId = decoded.sub;
+    if (!appleId) {
+      return next(new AppError("Apple identity token is missing a subject", 400));
+    }
+
+    const verifiedEmail = decoded.email
+      ? String(decoded.email).trim().toLowerCase()
+      : null;
+
+    if (
+      verifiedEmail &&
+      (decoded.email_verified === false || decoded.email_verified === "false")
+    ) {
+      return next(new AppError("Apple account email is not verified", 401));
+    }
 
     let name = "Apple User";
     if (fullName) {
       const parts = [fullName.givenName, fullName.familyName].filter(Boolean);
-      if (parts.length > 0) name = parts.join(" ");
+      if (parts.length > 0) {
+        name = parts.join(" ").trim().slice(0, 50);
+      }
     }
+    if (!name) name = "Apple User";
 
     const targetRole = await Role.findOne({ name: "customer" });
     if (!targetRole) {
       return next(new AppError("Customer role not found. Please run database seeder.", 500));
     }
 
-    let user = await User.findOne({
-      $or: [{ appleId }, { email }],
-    }).populate("role", "name");
+    // Match the stable Apple subject first. Only fall back to the verified
+    // email from the token, and never take over an account that is already
+    // linked to a different Apple subject.
+    let user = await User.findOne({ appleId }).populate("role", "name");
+
+    if (!user && verifiedEmail) {
+      user = await User.findOne({ email: verifiedEmail }).populate("role", "name");
+
+      if (user?.appleId && user.appleId !== appleId) {
+        return next(
+          new AppError("This email is already linked to a different Apple account", 409),
+        );
+      }
+    }
 
     if (!user) {
+      if (!verifiedEmail) {
+        return next(
+          new AppError("Apple did not provide an email for this account", 400),
+        );
+      }
+
       user = await User.create({
         name,
-        email,
+        email: verifiedEmail,
         appleId,
-        role: customerRole._id,
+        role: targetRole._id,
         isEmailVerified: true,
       });
 
@@ -709,6 +759,13 @@ const appleLogin = async (req, res, next) => {
       }
       if (!user.appleId) {
         user.appleId = appleId;
+      }
+      if (
+        verifiedEmail &&
+        user.email === verifiedEmail &&
+        !user.isEmailVerified
+      ) {
+        user.isEmailVerified = true;
       }
     }
 

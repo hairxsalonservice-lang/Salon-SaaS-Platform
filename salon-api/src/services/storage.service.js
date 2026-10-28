@@ -9,6 +9,7 @@ const path = require("path");
 const { s3Client, bucketName, publicDomain, isConfigured } = require("../config/r2.config");
 const logger = require("../utils/logger");
 const UploadedFile = require("../models/uploadedFile.model");
+const Salon = require("../models/salon.model");
 const sharp = require("sharp");
 
 class StorageService {
@@ -172,7 +173,13 @@ class StorageService {
   static async deleteFile(fileUrlOrKey, options = {}) {
     if (!fileUrlOrKey) return { success: false, message: "No file URL or key provided" };
 
-    const { userId, allowedRoles = ["owner", "admin", "manager"], role } = options;
+    const {
+      userId,
+      role,
+      salonId,
+      branchId,
+      allowedRoles = ["owner", "manager", "superadmin"],
+    } = options;
 
     // Extract key if a full URL was provided
     let key = fileUrlOrKey;
@@ -185,23 +192,59 @@ class StorageService {
       }
     }
 
-    // Verify ownership before deletion
+    // Verify ownership AND tenant scope before deletion. Elevated roles are
+    // not a blank cheque: an owner/manager from salon A must never be able to
+    // delete salon B's media.
     if (userId) {
       const fileRecord = await UploadedFile.findOne({ key });
-      if (fileRecord) {
-        const isOwner = fileRecord.uploadedBy.toString() === userId.toString();
-        const hasElevatedRole = allowedRoles.includes(role);
+      const isSuperadmin = role === "superadmin";
 
-        if (!isOwner && !hasElevatedRole) {
-          logger.warn(`🚫 Unauthorized deletion attempt: user ${userId} (role: ${role}) tried to delete file ${key} owned by ${fileRecord.uploadedBy}`);
-          return { success: false, message: "Unauthorized: You can only delete files you uploaded", code: "UNAUTHORIZED" };
-        }
-      } else {
-        // File not tracked in DB - could be a legacy file or external file
-        // For safety, only allow elevated roles to delete untracked files
-        if (!allowedRoles.includes(role)) {
+      if (!isSuperadmin) {
+        if (!fileRecord) {
+          // Untracked/legacy files cannot be attributed to a tenant, so only a
+          // platform superadmin may remove them.
           logger.warn(`🚫 Unauthorized deletion attempt: user ${userId} (role: ${role}) tried to delete untracked file ${key}`);
           return { success: false, message: "Unauthorized: File ownership cannot be verified", code: "UNAUTHORIZED" };
+        }
+
+        const isUploader = fileRecord.uploadedBy.toString() === userId.toString();
+
+        if (!isUploader) {
+          if (!allowedRoles.includes(role)) {
+            logger.warn(`🚫 Unauthorized deletion attempt: user ${userId} (role: ${role}) tried to delete file ${key} owned by ${fileRecord.uploadedBy}`);
+            return { success: false, message: "Unauthorized: You can only delete files you uploaded", code: "UNAUTHORIZED" };
+          }
+
+          let tenantAllowed = false;
+
+          if (role === "owner") {
+            tenantAllowed = Boolean(
+              salonId &&
+              fileRecord.salonId &&
+              fileRecord.salonId.toString() === salonId.toString(),
+            );
+
+            // Supports owners who manage more than one salon.
+            if (!tenantAllowed && fileRecord.salonId) {
+              tenantAllowed = Boolean(
+                await Salon.exists({ _id: fileRecord.salonId, owner: userId }),
+              );
+            }
+          } else if (role === "manager") {
+            tenantAllowed = Boolean(
+              salonId &&
+              branchId &&
+              fileRecord.salonId &&
+              fileRecord.branchId &&
+              fileRecord.salonId.toString() === salonId.toString() &&
+              fileRecord.branchId.toString() === branchId.toString(),
+            );
+          }
+
+          if (!tenantAllowed) {
+            logger.warn(`🚫 Cross-tenant deletion blocked: user ${userId} (role: ${role}, salon ${salonId || "none"}, branch ${branchId || "none"}) tried to delete file ${key}`);
+            return { success: false, message: "Unauthorized: This file belongs to another salon or branch", code: "UNAUTHORIZED" };
+          }
         }
       }
     }
@@ -235,10 +278,32 @@ class StorageService {
   /**
    * Generate a Presigned Upload URL for direct client-to-R2 uploads
    */
-  static async generatePresignedUploadUrl({ fileName, fileType, folder = "uploads", expiresIn = 900, uploadedBy, salonId, branchId }) {
-    const ext = this._getExtension(fileName, fileType);
+  static async generatePresignedUploadUrl({ fileName, fileType, fileSize, folder = "uploads", expiresIn = 900, uploadedBy, salonId, branchId }) {
+    const { validatePresignedUpload } = require("../utils/uploadValidation");
+    const validation = validatePresignedUpload({ fileName, fileType, fileSize });
+
+    if (!validation.valid) {
+      const error = new Error(validation.message);
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const normalizedType = validation.fileType;
+    const normalizedSize = validation.fileSize;
+    const ext = this._getExtension(fileName, normalizedType);
     const uniqueHash = crypto.randomBytes(8).toString("hex");
-    const key = `${folder}/${Date.now()}-${uniqueHash}.${ext}`;
+    // Defense in depth: callers must not be able to inject path segments into
+    // the object key, regardless of whether they passed through the controller.
+    const safeFolder =
+      String(folder || "")
+        .replace(/[^a-zA-Z0-9_-]/g, "")
+        .substring(0, 50) || "uploads";
+    const tenantPrefix = salonId
+      ? `salons/${salonId}`
+      : uploadedBy
+        ? `users/${uploadedBy}`
+        : "general";
+    const key = `${tenantPrefix}/${safeFolder}/${Date.now()}-${uniqueHash}.${ext}`;
 
     if (!isConfigured || !s3Client) {
       logger.warn(`[StorageService] R2 not configured. Mocking presigned URL for key '${key}'.`);
@@ -254,9 +319,9 @@ class StorageService {
           key,
           url: mockResult.publicUrl,
           originalName: fileName,
-          mimeType: fileType,
-          size: 0,
-          folder,
+          mimeType: normalizedType,
+          size: normalizedSize,
+          folder: safeFolder,
           uploadedBy,
           salonId,
           branchId,
@@ -270,7 +335,9 @@ class StorageService {
       const command = new PutObjectCommand({
         Bucket: bucketName,
         Key: key,
-        ContentType: fileType,
+        ContentType: normalizedType,
+        // Signed into the URL: the client must upload exactly this many bytes.
+        ContentLength: normalizedSize,
       });
 
       const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn });
@@ -291,9 +358,9 @@ class StorageService {
           key,
           url: publicUrl,
           originalName: fileName,
-          mimeType: fileType,
-          size: 0,
-          folder,
+          mimeType: normalizedType,
+          size: normalizedSize,
+          folder: safeFolder,
           uploadedBy,
           salonId,
           branchId,

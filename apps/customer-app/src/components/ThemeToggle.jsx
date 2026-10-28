@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   label: {
     flex: 1,
     fontSize: 14,
-    fontWeight: "500",
+    fontFamily: "Oswald_500Medium",
   },
   // Pill track: 52×28
   track: {

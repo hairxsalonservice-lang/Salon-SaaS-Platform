@@ -2,7 +2,8 @@
 import React from "react";
 import Svg, { Path } from "react-native-svg";
 
-export default function VerifiedBadge({ size = 16, color = "#BD4444", style }) {
+import { C } from "../theme";
+export default function VerifiedBadge({ size = 16, color = C.error, style }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={style}>
       {/* 12-point scalloped starburst badge */}
@@ -13,7 +14,7 @@ export default function VerifiedBadge({ size = 16, color = "#BD4444", style }) {
       {/* Checkmark */}
       <Path
         d="M9.8 15.8l-3.6-3.6 1.4-1.4 2.2 2.2 6.4-6.4 1.4 1.4-7.8 7.8z"
-        fill="#FFFFFF"
+        fill={C.textLight}
       />
     </Svg>
   );

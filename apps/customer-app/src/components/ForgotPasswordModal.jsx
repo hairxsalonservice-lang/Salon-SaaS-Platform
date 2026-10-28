@@ -170,7 +170,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
                 hapticType="medium"
               >
                 {loading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={C.textLight} size="small" />
                 ) : (
                   <Text style={styles.purpleBtnText}>Send link</Text>
                 )}
@@ -182,7 +182,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
           {subStep === 2 && (
             <View style={styles.popupContainer}>
               <View style={styles.iconCircleMail}>
-                <Ionicons name="mail-outline" size={42} color={isDark ? "#FFFFFF" : "#1A1A24"} />
+                <Ionicons name="mail-outline" size={42} color={C.ink} />
               </View>
 
               <Text style={styles.popupTitle}>Code has been sent</Text>
@@ -266,7 +266,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
                 hapticType="medium"
               >
                 {loading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={C.textLight} size="small" />
                 ) : (
                   <Text style={styles.purpleBtnText}>Change password</Text>
                 )}
@@ -278,7 +278,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
           {subStep === 4 && (
             <View style={styles.popupContainer}>
               <View style={styles.iconCircleSuccess}>
-                <Ionicons name="checkmark" size={36} color="#22C55E" />
+                <Ionicons name="checkmark" size={36} color={C.success} />
               </View>
 
               <Text style={styles.popupTitle}>Password Reset</Text>
@@ -303,7 +303,7 @@ export default function ForgotPasswordModal({ visible, onClose }) {
 }
 
 function getStyles(theme, isDark) {
-  const accentColor = C.purple || "#6C5CE7";
+  const accentColor = C.main;
 
   return StyleSheet.create({
     modalOverlay: {
@@ -312,7 +312,7 @@ function getStyles(theme, isDark) {
       justifyContent: "flex-end",
     },
     sheetCard: {
-      backgroundColor: isDark ? "#121214" : "#FFFFFF",
+      backgroundColor: isDark ? C.ink : C.textLight,
       borderTopLeftRadius: 32,
       borderTopRightRadius: 32,
       paddingHorizontal: 24,
@@ -334,7 +334,7 @@ function getStyles(theme, isDark) {
       width: 38,
       height: 38,
       borderRadius: 19,
-      backgroundColor: isDark ? "#1C1C1E" : "#F0F1F5",
+      backgroundColor: isDark ? C.surface : C.border,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -343,40 +343,40 @@ function getStyles(theme, isDark) {
     },
     titleText: {
       fontSize: 30,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
-      letterSpacing: -0.5,
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
+      letterSpacing: 0.2,
       marginBottom: 8,
     },
     subtitleText: {
       fontSize: 15,
-      fontWeight: "400",
-      color: isDark ? "#94A3B8" : "#9498A4",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
       lineHeight: 22,
       marginBottom: 24,
     },
     placeholderColor: {
-      color: isDark ? "#64748B" : "#B0B4C0",
+      color: isDark ? C.mutedSoft : C.muted,
     },
     errorText: {
-      color: "#EF4444",
+      color: C.error,
       backgroundColor: "rgba(239, 68, 68, 0.1)",
       padding: 12,
       borderRadius: 14,
       fontSize: 14,
-      fontWeight: "500",
+      fontFamily: "Oswald_500Medium",
       marginBottom: 16,
     },
     inputPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
+      backgroundColor: C.surface,
       borderRadius: 20,
       paddingHorizontal: 18,
       height: 56,
       marginBottom: 16,
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#EBECEF",
+      borderColor: isDark ? C.lifted : C.border,
     },
     inputIcon: {
       marginRight: 14,
@@ -385,8 +385,8 @@ function getStyles(theme, isDark) {
       flex: 1,
       height: "100%",
       fontSize: 15,
-      color: isDark ? "#FFFFFF" : "#1A1A24",
-      fontWeight: "500",
+      color: C.ink,
+      fontFamily: "Oswald_500Medium",
     },
     eyeBtn: {
       padding: 6,
@@ -405,10 +405,10 @@ function getStyles(theme, isDark) {
       elevation: 6,
     },
     purpleBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 17,
-      fontWeight: "700",
-      letterSpacing: -0.2,
+      fontFamily: "Oswald_700Bold",
+      letterSpacing: 0.1,
     },
     // Popup Modal Screens (Image 1 Right & Image 2 Right)
     popupContainer: {
@@ -421,7 +421,7 @@ function getStyles(theme, isDark) {
       width: 72,
       height: 72,
       borderRadius: 24,
-      backgroundColor: isDark ? "#1C1C1E" : "#F4F5F8",
+      backgroundColor: C.surface,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 24,
@@ -432,23 +432,23 @@ function getStyles(theme, isDark) {
       borderRadius: 36,
       backgroundColor: "rgba(34, 197, 94, 0.12)",
       borderWidth: 2,
-      borderColor: "#22C55E",
+      borderColor: C.success,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 24,
     },
     popupTitle: {
       fontSize: 26,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#1A1A24",
-      letterSpacing: -0.4,
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
+      letterSpacing: 0.15,
       marginBottom: 10,
       textAlign: "center",
     },
     popupSubtitle: {
       fontSize: 15,
-      fontWeight: "400",
-      color: isDark ? "#94A3B8" : "#9498A4",
+      fontFamily: "Oswald_400Regular",
+      color: C.muted,
       lineHeight: 22,
       textAlign: "center",
       maxWidth: 280,
@@ -528,8 +528,8 @@ function OtpBoxInput({ length = 6, value = "", onChangeOtp, onComplete, isDark }
             style={[
               otpStyles.box,
               {
-                backgroundColor: isDark ? "#2C2C2E" : "#F5F6F8",
-                borderColor: isFilled ? "#5CD65C" : isDark ? "#3A3A3C" : "#E4E4E8",
+                backgroundColor: isDark ? C.lifted : C.lifted,
+                borderColor: isFilled ? C.success : isDark ? C.borderDark : C.border,
               },
             ]}
           >
@@ -537,7 +537,7 @@ function OtpBoxInput({ length = 6, value = "", onChangeOtp, onComplete, isDark }
               ref={(ref) => (inputRefs.current[i] = ref)}
               style={[
                 otpStyles.boxText,
-                { color: isDark ? "#FFFFFF" : "#18181B" },
+                { color: C.ink },
               ]}
               keyboardType="number-pad"
               maxLength={i === 0 ? length : 1}
@@ -571,7 +571,7 @@ const otpStyles = StyleSheet.create({
   },
   boxText: {
     fontSize: 20,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     textAlign: "center",
     width: "100%",
     padding: 0,

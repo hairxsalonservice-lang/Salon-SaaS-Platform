@@ -76,4 +76,35 @@ const refreshValidator = [
     .notEmpty().withMessage('Refresh token is required'),
 ]
 
-module.exports = { registerValidator, ownerRegisterValidator, loginValidator, refreshValidator }
+const appleLoginValidator = [
+  body('identityToken')
+    .isString().withMessage('identityToken must be a string')
+    .trim()
+    .notEmpty().withMessage('identityToken is required')
+    .isLength({ max: 10000 }).withMessage('identityToken is too large'),
+
+  // Display name only. Identity claims come from the verified token.
+  body('fullName')
+    .optional()
+    .isObject().withMessage('fullName must be an object'),
+
+  body('fullName.givenName')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 50 }),
+
+  body('fullName.familyName')
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ max: 50 }),
+]
+
+module.exports = {
+  registerValidator,
+  ownerRegisterValidator,
+  loginValidator,
+  refreshValidator,
+  appleLoginValidator,
+}

@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import AppleBottomSheet from "./AppleBottomSheet";
 import AppleTouchable from "./AppleTouchable";
+import { C } from "../theme";
 
 const RATING_OPTIONS = [
   { id: "all", label: "Any Rating" },
@@ -115,7 +116,7 @@ export default function FilterModal({
             onPress={onClose}
             activeOpacity={0.7}
           >
-            <Ionicons name="close" size={20} color={isDark ? "#FFFFFF" : "#18181B"} />
+            <Ionicons name="close" size={20} color={C.ink} />
           </TouchableOpacity>
         </View>
 
@@ -234,7 +235,7 @@ export default function FilterModal({
                     <Ionicons
                       name={opt.icon}
                       size={14}
-                      color={isSelected ? "#FFFFFF" : theme.primary}
+                      color={isSelected ? C.textLight : theme.primary}
                       style={{ marginRight: 6 }}
                     />
                     <Text
@@ -259,7 +260,7 @@ export default function FilterModal({
             onPress={handleApply}
             activeOpacity={0.88}
           >
-            <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" style={{ marginRight: 8 }} />
+            <Ionicons name="checkmark-circle" size={20} color={C.textLight} style={{ marginRight: 8 }} />
             <Text style={styles.applyBtnText}>
               Apply Filters {activeCount > 0 ? `(${activeCount})` : ""}
             </Text>
@@ -271,11 +272,11 @@ export default function FilterModal({
 }
 
 function getStyles(theme, isDark) {
-  const primaryColor = theme?.primary || "#C48B36";
+  const primaryColor = theme?.primary || C.main;
   return StyleSheet.create({
     sheetInner: {
       flex: 1,
-      backgroundColor: isDark ? "#181820" : "#FFFFFF",
+      backgroundColor: C.surface,
       paddingHorizontal: 20,
       paddingTop: 12,
       paddingBottom: Platform.OS === "ios" ? 28 : 16,
@@ -285,20 +286,20 @@ function getStyles(theme, isDark) {
       alignItems: "center",
       paddingBottom: 16,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#282834" : "#EFEFF4",
+      borderBottomColor: isDark ? C.border : C.border,
     },
     eyebrow: {
       fontSize: 10,
-      fontWeight: "800",
+      fontFamily: "Oswald_700Bold",
       color: primaryColor,
       letterSpacing: 1.2,
       marginBottom: 2,
     },
     title: {
       fontSize: 22,
-      fontWeight: "800",
-      color: isDark ? "#FFFFFF" : "#18181B",
-      letterSpacing: -0.3,
+      fontFamily: "Oswald_700Bold",
+      color: C.ink,
+      letterSpacing: 0.15,
     },
     resetBtn: {
       paddingHorizontal: 12,
@@ -309,14 +310,14 @@ function getStyles(theme, isDark) {
     },
     resetBtnText: {
       fontSize: 12,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       color: primaryColor,
     },
     closeBtn: {
       width: 36,
       height: 36,
       borderRadius: 18,
-      backgroundColor: isDark ? "#282834" : "#F4F4F6",
+      backgroundColor: C.border,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -332,8 +333,8 @@ function getStyles(theme, isDark) {
     },
     sectionTitle: {
       fontSize: 10,
-      fontWeight: "800",
-      color: isDark ? "#8E8E9A" : "#8E8E93",
+      fontFamily: "Oswald_700Bold",
+      color: isDark ? C.muted : C.muted,
       letterSpacing: 1,
       marginBottom: 4,
     },
@@ -358,25 +359,25 @@ function getStyles(theme, isDark) {
       elevation: 3,
     },
     chipUnselected: {
-      backgroundColor: isDark ? "#22222D" : "#F7F7FA",
+      backgroundColor: isDark ? C.surface : C.lifted,
       borderWidth: 1,
-      borderColor: isDark ? "#323242" : "#E5E5EA",
+      borderColor: isDark ? C.surface : C.border,
     },
     chipText: {
       fontSize: 13,
     },
     chipTextSelected: {
-      color: "#FFFFFF",
-      fontWeight: "700",
+      color: C.textLight,
+      fontFamily: "Oswald_700Bold",
     },
     chipTextUnselected: {
-      color: isDark ? "#E0E0E6" : "#2C2C34",
-      fontWeight: "600",
+      color: isDark ? C.border : C.surface,
+      fontFamily: "Oswald_600SemiBold",
     },
     footer: {
       paddingTop: 12,
       borderTopWidth: StyleSheet.hairlineWidth,
-      borderTopColor: isDark ? "#282834" : "#EFEFF4",
+      borderTopColor: isDark ? C.border : C.border,
     },
     applyBtn: {
       backgroundColor: primaryColor,
@@ -392,9 +393,9 @@ function getStyles(theme, isDark) {
       elevation: 4,
     },
     applyBtnText: {
-      color: "#FFFFFF",
+      color: C.textLight,
       fontSize: 15,
-      fontWeight: "700",
+      fontFamily: "Oswald_700Bold",
       letterSpacing: 0.2,
     },
   });

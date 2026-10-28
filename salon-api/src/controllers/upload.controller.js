@@ -1,4 +1,5 @@
 const StorageService = require("../services/storage.service");
+const { validatePresignedUpload } = require("../utils/uploadValidation");
 const logger = require("../utils/logger");
 
 const sanitizeFolder = (folder) => {
@@ -105,19 +106,22 @@ const uploadMultiple = async (req, res, next) => {
 const getPresignedUrl = async (req, res, next) => {
   try {
     const { fileName, fileType, folder } = req.body;
+    const fileSize = req.body.fileSize ?? req.body.size;
 
-    if (!fileName || !fileType) {
+    const validation = validatePresignedUpload({ fileName, fileType, fileSize });
+    if (!validation.valid) {
       return res.status(400).json({
         success: false,
-        message: "Mandatory fields 'fileName' and 'fileType' are required",
+        message: validation.message,
       });
     }
 
-    const { userId, role, salonId, branchId } = req.user;
+    const { userId, salonId, branchId } = req.user;
 
     const result = await StorageService.generatePresignedUploadUrl({
       fileName,
-      fileType,
+      fileType: validation.fileType,
+      fileSize: validation.fileSize,
       folder: sanitizeFolder(folder),
       uploadedBy: userId,
       salonId,
@@ -142,7 +146,7 @@ const getPresignedUrl = async (req, res, next) => {
 const deleteFile = async (req, res, next) => {
   try {
     const fileUrl = req.body.fileUrl || req.body.key || req.query.fileUrl || req.query.key;
-    const { userId, role } = req.user;
+    const { userId, role, salonId, branchId } = req.user;
 
     if (!fileUrl) {
       return res.status(400).json({
@@ -151,7 +155,12 @@ const deleteFile = async (req, res, next) => {
       });
     }
 
-    const result = await StorageService.deleteFile(fileUrl, { userId, role });
+    const result = await StorageService.deleteFile(fileUrl, {
+      userId,
+      role,
+      salonId,
+      branchId,
+    });
 
     if (!result.success && result.code === "UNAUTHORIZED") {
       return res.status(403).json({

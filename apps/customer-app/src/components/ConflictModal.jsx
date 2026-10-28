@@ -144,7 +144,7 @@ function getStyles() {
   },
   title: {
     fontSize: 20,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
     marginBottom: 6,
     textAlign: "center",
@@ -183,7 +183,7 @@ function getStyles() {
   },
   cardHeaderTitle: {
     fontSize: 10,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
     color: C.main,
     letterSpacing: 1,
   },
@@ -194,20 +194,20 @@ function getStyles() {
   },
   infoLabel: {
     fontSize: 12,
-    fontWeight: "600",
+    fontFamily: "Oswald_600SemiBold",
     color: C.textMuted,
     width: 58,
     marginLeft: 6,
   },
   infoValue: {
     fontSize: 12,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
     flex: 1,
   },
   highlightTime: {
     color: C.main,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
   },
   btnContainer: {
     width: "100%",
@@ -225,7 +225,7 @@ function getStyles() {
   primaryBtnText: {
     color: C.bg,
     fontSize: 14,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
   },
   secondaryBtn: {
     width: "100%",
@@ -239,7 +239,7 @@ function getStyles() {
   secondaryBtnText: {
     color: C.textMuted,
     fontSize: 13,
-    fontWeight: "600",
+    fontFamily: "Oswald_600SemiBold",
   },
   });
 }

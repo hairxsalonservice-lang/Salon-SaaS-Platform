@@ -331,6 +331,7 @@ export interface Appointment {
   branch: string | Branch;
   salon: string | Salon;
   status: AppointmentStatus;
+  paymentMethod?: "cash" | "card" | "upi" | "other" | "not_recorded";
   customerNotes?: string;
   rating?: number;
   ratingComment?: string;
@@ -341,7 +342,56 @@ export interface Appointment {
     rescheduledAt: string;
   }[];
   createdAt: string;
-  updatedAt: string;
+
+  // Server-side (populated) fields. The panel uses these for the bookings
+  // table and detail drawer; `customer` above remains for older responses.
+  customerId?: string | BackendUser | null;
+  customerSnapshot?: CustomerSnapshot | null;
+  source?: AppointmentSource;
+  createdBy?: string | { _id: string; name: string } | null;
+  staffId?: string | Staff;
+  serviceId?: string | Service;
+  services?: (string | Service)[];
+  branchId?: string | Branch;
+  salonId?: string | Salon;
+  slotId?: string | Slot;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  pricePaid?: number;
+  emailSent?: boolean;
+  updatedAt?: string;
+}
+
+export type AppointmentSource = "APP" | "WALK_IN" | "PHONE";
+
+export interface CustomerSnapshot {
+  name?: string | null;
+  phone?: string | null;
+  email?: string | null;
+}
+
+export interface GuestCustomerPayload {
+  name: string;
+  phone: string;
+  email?: string;
+}
+
+export interface StaffBookingPayload {
+  slotId: string;
+  serviceId?: string;
+  serviceIds?: string[];
+  branchId?: string;
+  staffId?: string;
+  customerId?: string;
+  customer?: GuestCustomerPayload;
+  customerNotes?: string;
+  guests?: number;
+  source?: "WALK_IN" | "PHONE";
+}
+
+export interface StaffCustomerLookup {
+  customer: { _id: string; name: string } | null;
 }
 
 export interface BookAppointmentPayload {
@@ -354,6 +404,7 @@ export interface UpdateStatusPayload {
   status: AppointmentStatus;
   reason?: string;
   note?: string;
+  paymentMethod?: "cash" | "card" | "upi" | "other";
 }
 
 export interface ReschedulePayload {

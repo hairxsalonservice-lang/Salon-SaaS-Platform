@@ -4,43 +4,42 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   StyleSheet,
   Image,
   Dimensions,
   Platform,
   Modal,
-  LayoutAnimation,
-  UIManager,
   Animated,
   Easing,
   Linking,
-  Share,
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from "@expo/vector-icons";
-import VerifiedBadge from "../components/VerifiedBadge";
-import { C, S, FS, FW, R, TYPO, FONT_FAMILY } from "../theme";
+import { C, FF } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { BlurView } from 'expo-blur';
-import CategoryAccordionList from "../components/CategoryAccordionList";
+import { LinearGradient } from 'expo-linear-gradient';
 import SpringTouchable from "../components/SpringTouchable";
 import ServiceCard from "../components/ServiceCard";
 import ErrorCardModal from "../components/ErrorCardModal";
 import ReviewsSection from "../components/ReviewsSection";
-import { ServiceCardSkeleton } from "../components/SkeletonLoader";
+import { SkeletonBox } from "../components/SkeletonLoader";
 import { browseService } from "../services/browseService";
 import { appointmentService } from "../services/appointmentService";
+import { shareSalon } from "../services/shareService";
 import { paiseToINR } from "../services/apiClient";
 import { useFavorites } from "../context/FavoritesContext";
 import { useAuth } from "../context/AuthContext";
 import VerifyEmailModal from "../components/VerifyEmailModal";
 import ComboServiceModal from "../components/ComboServiceModal";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Highlight accent reserved for rating & premium touches — used sparingly
-const GOLD = C.main;
+const COMPACT_HEADER_HEIGHT = 58;
+const TABS_HEIGHT = 46;
+const HERO_HEIGHT = 268;
+
+const GOLD = C.warning;
 
 const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1000&auto=format&fit=crop",
@@ -65,40 +64,103 @@ function formatDuration(totalMins) {
   return [h ? `${h} hr` : null, m ? `${m} mins` : null].filter(Boolean).join(" ");
 }
 
-function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
+function formatReviewCount(count) {
+  const value = Number(count) || 0;
+  if (value >= 1000) return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}k`;
+  return String(value);
+}
+
+function titleCase(value) {
+  return String(value || "")
+    .replace(/[-_]/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function getBranchLabel(branch, salonName) {
+  const raw = String(branch?.branchName || branch?.name || "").trim();
+  if (!raw) {
+    return branch?.address?.locality || branch?.address?.city || "Main location";
+  }
+
+  let label = raw;
+  const salon = String(salonName || "").trim();
+  if (salon && label.toLowerCase().startsWith(salon.toLowerCase())) {
+    label = label.slice(salon.length).replace(/^[\s\-–—|,]+/, "").trim();
+  }
+
+  if (label === raw && /\s[-–—]\s/.test(raw)) {
+    const parts = raw.split(/\s+[-–—]\s+/).filter(Boolean);
+    if (parts.length > 1) label = parts.slice(1).join(" - ").trim();
+  }
+
+  if (!label || label.toLowerCase() === salon.toLowerCase()) {
+    return branch?.address?.locality || branch?.address?.city || "Main location";
+  }
+
+  return label;
+}
+
+function formatPhoneDisplay(phone) {
+  const raw = String(phone || "").trim();
+  const digits = raw.replace(/[^\d+]/g, "");
+  if (/^\+91\d{10}$/.test(digits)) {
+    return `+91 ${digits.slice(3, 8)} ${digits.slice(8)}`;
+  }
+  return raw;
+}
+
+function getAddressParts(address) {
+  if (!address) return { street: "", cityLine: "" };
+  if (typeof address === "string") return { street: address, cityLine: "" };
+
+  return {
+    street:
+      address.street ||
+      address.line1 ||
+      address.addressLine1 ||
+      address.address ||
+      "",
+    cityLine: [address.city, address.state, address.pincode || address.zip]
+      .filter(Boolean)
+      .join(", "),
+  };
+}
+
+function SalonDetailScreen({ salon, initialSalonId, initialBranchId, goBack, navigate, onScroll }) {
   const { theme, isDark } = useTheme();
-  const styles = useMemo(() => getStyles(isDark), [isDark]);
+  const styles = useMemo(() => getStyles(theme, isDark), [theme, isDark]);
   const insets = useSafeAreaInsets();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [selectedBranch, setSelectedBranch] = useState(null);
+  const [requestedBranchId, setRequestedBranchId] = useState(initialBranchId || null);
   const [services, setServices] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [loading, setLoading] = useState(true);
-  const [salonData, setSalonData] = useState(salon);
+  const [salonData, setSalonData] = useState(
+    salon || (initialSalonId ? { _id: initialSalonId } : null)
+  );
   const MAIN_TABS = useMemo(() => ["Services", "About", "Reviews"], []);
   const [activeMainTab, setActiveMainTab] = useState("Services");
-  const [tabRowWidth, setTabRowWidth] = useState(0);
-  const [containerWidth, setContainerWidth] = useState(SCREEN_WIDTH);
-  const tabIndicatorAnim = useRef(new Animated.Value(0)).current;
-
-  const handleTabChange = useCallback((tab) => {
-    if (tab === activeMainTab) return;
-    const nextIndex = MAIN_TABS.indexOf(tab);
-    setActiveMainTab(tab);
-
-    Animated.spring(tabIndicatorAnim, {
-      toValue: nextIndex,
-      useNativeDriver: true,
-      tension: 62,
-      friction: 11,
-    }).start();
-  }, [activeMainTab, MAIN_TABS, tabIndicatorAnim]);
   const [error, setError] = useState(null);
   const [reviewsList, setReviewsList] = useState([]);
   const { user, isAuthenticated } = useAuth();
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [activeComboService, setActiveComboService] = useState(null);
+  const [showBranchPicker, setShowBranchPicker] = useState(false);
+  const [showAllHours, setShowAllHours] = useState(false);
+  const [galleryVisible, setGalleryVisible] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [stickyTabsY, setStickyTabsY] = useState(null);
+  const [showCompactHeader, setShowCompactHeader] = useState(false);
+
+  const scrollRef = useRef(null);
+  const galleryScrollRef = useRef(null);
+  const compactHeaderAnim = useRef(new Animated.Value(0)).current;
+  const barAnim = useRef(new Animated.Value(selectedServices.length > 0 ? 1 : 0)).current;
 
   const totalPrice = useMemo(() => {
     return selectedServices.reduce((sum, s) => sum + (s.price || 0), 0);
@@ -109,15 +171,16 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
   }, [selectedServices]);
 
   const handleGetDirections = useCallback(() => {
-    // Use the branch's stored coordinates when present, otherwise search by name + address
     const coords = selectedBranch?.address?.coordinates;
     const hasCoords = Number.isFinite(coords?.lat) && Number.isFinite(coords?.lng);
     const addr = selectedBranch?.address;
     const addressQuery = [
       salonData?.name,
       typeof addr === "string" ? addr : addr?.street,
-      typeof addr === "object" ? addr?.city : null,
-      typeof addr === "object" ? addr?.state : null,
+      typeof addr === "string" ? null : addr?.locality,
+      typeof addr === "string" ? null : addr?.city,
+      typeof addr === "string" ? null : addr?.state,
+      typeof addr === "string" ? null : addr?.pincode,
     ].filter(Boolean).join(", ");
 
     if (!hasCoords && !addressQuery) {
@@ -130,84 +193,85 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     });
   }, [selectedBranch, salonData]);
 
+  const phoneNumber =
+    selectedBranch?.contactPhone ||
+    selectedBranch?.phone ||
+    salonData?.contactPhone ||
+    salonData?.phone ||
+    "";
+
   const handleCallSalon = useCallback(() => {
-    const phone = selectedBranch?.contactPhone || selectedBranch?.phone || salonData?.contactPhone;
-    if (!phone) {
+    if (!phoneNumber) {
       setError("This salon hasn't added a phone number yet.");
       return;
     }
-    Linking.openURL(`tel:${String(phone).replace(/\s+/g, "")}`).catch(() => {
+    Linking.openURL(`tel:${String(phoneNumber).replace(/\s+/g, "")}`).catch(() => {
       setError("Couldn't start a call on this device.");
     });
-  }, [selectedBranch, salonData]);
-
-  const animVal = useRef(new Animated.Value(selectedServices.length > 0 ? 1 : 0)).current;
+  }, [phoneNumber]);
 
   useEffect(() => {
-    Animated.spring(animVal, {
+    Animated.spring(barAnim, {
       toValue: selectedServices.length > 0 ? 1 : 0,
       tension: 65,
       friction: 9,
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
-  }, [selectedServices]);
+  }, [selectedServices.length, barAnim]);
 
-  const priceWidth = animVal.interpolate({
+  useEffect(() => {
+    Animated.timing(compactHeaderAnim, {
+      toValue: showCompactHeader ? 1 : 0,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+  }, [showCompactHeader, compactHeaderAnim]);
+
+  const barTranslateY = barAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, 115],
-  });
-
-  const priceOpacity = animVal.interpolate({
-    inputRange: [0, 0.3, 1],
-    outputRange: [0, 0, 1],
-  });
-
-  const priceTranslateX = animVal.interpolate({
-    inputRange: [0, 1],
-    outputRange: [-20, 0],
-  });
-
-  const pricePaddingLeft = animVal.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 10],
-  });
-
-  const activeBgOpacity = animVal;
-
-  const disabledBgOpacity = animVal.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, 0],
-  });
-
-  const slideUpY = animVal.interpolate({
-    inputRange: [0, 1],
-    outputRange: [160, 0],
+    outputRange: [150, 0],
   });
 
   const salonId = salonData?._id || salonData?.id;
   const favorited = isFavorite(salonId);
 
   const coverImage = salonData?.coverImage || salonData?.image || HERO_IMAGES[0];
-  const carouselImages = salonData?.images?.length ? salonData.images : [coverImage];
+  const rawImages = Array.isArray(salonData?.images) ? salonData.images.filter(Boolean) : [];
+  const carouselImages = rawImages.length ? rawImages : [coverImage];
+  const galleryImages = carouselImages;
 
   const displayRating = useMemo(() => {
-    const rawAvg = salonData?.rating?.avgScore || salonData?.rating?.score || (typeof salonData?.rating === "number" ? salonData.rating : null) || salonData?.avgScore;
-    if (typeof rawAvg === "number" && !isNaN(rawAvg) && rawAvg > 0) return rawAvg.toFixed(1);
+    const rawAvg =
+      salonData?.rating?.avgScore ||
+      salonData?.rating?.score ||
+      (typeof salonData?.rating === "number" ? salonData.rating : null) ||
+      salonData?.avgScore;
+    const numeric = Number(rawAvg);
+    if (Number.isFinite(numeric) && numeric > 0) return numeric.toFixed(1);
+
     if (reviewsList.length > 0) {
-      const total = reviewsList.reduce((sum, r) => sum + (r.score || r.rating || 0), 0);
-      return (total / reviewsList.length).toFixed(1);
+      const scored = reviewsList.filter((r) => Number.isFinite(Number(r.score ?? r.rating)));
+      if (scored.length > 0) {
+        const total = scored.reduce((sum, r) => sum + Number(r.score ?? r.rating), 0);
+        return (total / scored.length).toFixed(1);
+      }
     }
-    return "5.0";
+    return null;
   }, [salonData, reviewsList]);
 
   const displayReviewCount = useMemo(() => {
-    const rawCount = salonData?.totalReviews ?? salonData?.reviewsCount ?? salonData?.reviewCount ?? salonData?.rating?.totalReviews;
-    if (typeof rawCount === "number") return rawCount;
+    const rawCount =
+      salonData?.totalReviews ??
+      salonData?.reviewsCount ??
+      salonData?.reviewCount ??
+      salonData?.rating?.totalReviews ??
+      salonData?.rating?.reviewsCount;
+    if (typeof rawCount === "number" && rawCount > 0) return rawCount;
     if (reviewsList.length > 0) return reviewsList.length;
-    return 0;
+    return typeof rawCount === "number" ? rawCount : 0;
   }, [salonData, reviewsList]);
 
-  // null when the branch hasn't published hours — shown as "Hours not available" rather than invented times
   const weeklySchedule = useMemo(() => {
     const workingHours = selectedBranch?.workingHours || salonData?.workingHours;
     if (!Array.isArray(workingHours) || workingHours.length === 0) return null;
@@ -231,19 +295,32 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     if (goBack) goBack();
   }, [goBack]);
 
-  const routeSalonId = salon?._id || salon?.id;
+  const handleToggleFavorite = useCallback(() => {
+    toggleFavorite(salonData);
+  }, [toggleFavorite, salonData]);
+
+  const routeSalonId = salon?._id || salon?.id || initialSalonId;
 
   useEffect(() => {
     if (!routeSalonId) return;
     let cancelled = false;
 
     // Opening a different salon on the same screen must not keep the previous one's state
-    setSalonData(salon);
+    setSalonData(salon || (routeSalonId ? { _id: routeSalonId } : null));
     setSelectedBranch(null);
+    setRequestedBranchId(initialBranchId || null);
     setSelectedServices([]);
     setServices([]);
     setReviewsList([]);
     setSelectedCategory("all");
+    setActiveMainTab("Services");
+    setLoading(true);
+    setShowBranchPicker(false);
+    setShowAllHours(false);
+    setShowCompactHeader(false);
+    setStickyTabsY(null);
+    compactHeaderAnim.setValue(0);
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
 
     const cachedSalonRes = browseService.getCachedSalonById(routeSalonId);
     if (cachedSalonRes) {
@@ -263,19 +340,32 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     };
     fetchSalon();
     return () => { cancelled = true; };
-  }, [routeSalonId]);
+  }, [routeSalonId, initialBranchId]);
 
   const branches = salonData?.branches || [];
 
-  // Pick the first branch, and swap a partial branch object for the full one once it arrives
+  // Prefer the branch from a deep link, then the first branch; swap in a full branch object once it arrives
   useEffect(() => {
-    if (branches.length === 0) return;
+    if (branches.length === 0) {
+      // A salon with no branch cannot have a service menu; don't leave the list in a skeleton state.
+      setLoading(false);
+      return;
+    }
     setSelectedBranch((prev) => {
-      if (!prev) return branches[0];
-      const prevId = prev._id || prev.id;
-      return branches.find((b) => (b._id || b.id) === prevId) || branches[0];
+      const prevId = prev?._id || prev?.id;
+      if (prevId) {
+        const kept = branches.find((b) => String(b._id || b.id) === String(prevId));
+        if (kept) return kept;
+      }
+      if (requestedBranchId) {
+        const requested = branches.find(
+          (b) => String(b._id || b.id) === String(requestedBranchId)
+        );
+        if (requested) return requested;
+      }
+      return branches[0];
     });
-  }, [branches]);
+  }, [branches, requestedBranchId]);
 
   const selectedBranchId = selectedBranch?._id || selectedBranch?.id || null;
 
@@ -352,6 +442,37 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     );
   }, [services, selectedCategory]);
 
+  const specialities = useMemo(() => {
+    const source =
+      (Array.isArray(salonData?.specialities) && salonData.specialities) ||
+      (Array.isArray(salonData?.specialties) && salonData.specialties) ||
+      (Array.isArray(salonData?.categories) && salonData.categories.length > 0 && salonData.categories) ||
+      categories.filter((cat) => cat !== "all");
+
+    const seen = new Set();
+    return source
+      .map((item) => titleCase(item))
+      .filter((item) => {
+        if (!item) return false;
+        const key = item.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
+      .slice(0, 6);
+  }, [salonData?.specialities, salonData?.specialties, salonData?.categories, categories]);
+
+  const eyebrow = specialities.length > 0
+    ? specialities.slice(0, 2).join(" · ")
+    : "Hair & beauty";
+
+  const minServicePrice = useMemo(() => {
+    const prices = filteredServices
+      .map((service) => Number(service.price))
+      .filter((price) => Number.isFinite(price) && price > 0);
+    return prices.length > 0 ? Math.min(...prices) : null;
+  }, [filteredServices]);
+
   const isOpenStatus = useMemo(() => {
     const target = selectedBranch || salonData;
     if (!target) return { isOpen: true };
@@ -411,23 +532,130 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     return { isOpen: true, closeTime: formatClock(todayWorking?.closeTime) };
   }, [selectedBranch, salonData]);
 
+  const hasWorkingHours = Boolean(weeklySchedule);
+  const todaySchedule = weeklySchedule?.find((day) => day.isToday) || weeklySchedule?.[0] || null;
+  const branchLabel = getBranchLabel(selectedBranch, salonData?.name);
+  const addressParts = getAddressParts(selectedBranch?.address);
+  const hasAddress = Boolean(addressParts.street || addressParts.cityLine);
+  const shareAddress = [addressParts.street, addressParts.cityLine].filter(Boolean).join(", ");
+  const shareImageUrl = salonData?.coverImage || salonData?.image || rawImages[0] || null;
+
+  const handleShare = useCallback(async () => {
+    const salonName = salonData?.name || "this salon";
+    const ratingLine = [
+      displayRating ? `${displayRating}★` : null,
+      displayReviewCount > 0
+        ? `${formatReviewCount(displayReviewCount)} ${displayReviewCount === 1 ? "review" : "reviews"}`
+        : null,
+    ].filter(Boolean).join(" · ");
+    const link = routeSalonId
+      ? `stcut://salon/${encodeURIComponent(routeSalonId)}${
+          selectedBranchId ? `?branchId=${encodeURIComponent(selectedBranchId)}` : ""
+        }`
+      : null;
+    const message = [
+      salonName,
+      [selectedBranch ? branchLabel : null, ratingLine].filter(Boolean).join(" · "),
+      shareAddress,
+      link ? `Book on HairX: ${link}` : null,
+    ].filter(Boolean).join("\n");
+
+    try {
+      await shareSalon({
+        title: salonName,
+        message,
+        imageUrl: shareImageUrl,
+      });
+    } catch (shareError) {
+      console.log(shareError.message);
+    }
+  }, [
+    branchLabel,
+    displayRating,
+    displayReviewCount,
+    routeSalonId,
+    salonData?.name,
+    selectedBranch,
+    selectedBranchId,
+    shareAddress,
+    shareImageUrl,
+  ]);
+
+  const distanceValue = selectedBranch?.distance ?? salonData?.distance;
+  const distanceLabel = distanceValue !== undefined && distanceValue !== null
+    ? `${distanceValue} km`
+    : "";
+
+  const statusLabel = hasWorkingHours ? (isOpenStatus.isOpen ? "Open" : "Closed") : "Hours not available";
+  const rawStatusDetail = !isOpenStatus.isOpen ? (isOpenStatus.nextOpenText || "") : "";
+  const statusDetail = rawStatusDetail && !/^closed/i.test(rawStatusDetail)
+    ? rawStatusDetail.replace(/\.$/, "")
+    : (isOpenStatus.isOpen && isOpenStatus.closeTime ? `Closes at ${isOpenStatus.closeTime}` : "");
+  const statusOpenColor = isDark ? C.success : C.success;
+  const statusClosedColor = isDark ? C.error : C.error;
+
   const handleSelectService = useCallback((svc) => {
     setSelectedServices((prev) => {
       const currentId = svc?._id || svc?.id;
       const exists = prev.some((item) => (item._id || item.id) === currentId);
       if (exists) {
         return prev.filter((item) => (item._id || item.id) !== currentId);
-      } else {
-        return [...prev, svc];
       }
+      return [...prev, svc];
     });
   }, []);
 
-  const handleBranchChange = useCallback((b) => {
-    setSelectedBranch(b);
+  const handleBranchChange = useCallback((branch) => {
+    setShowBranchPicker(false);
+    setShowAllHours(false);
+    setSelectedBranch(branch);
     setSelectedServices([]);
     setServices([]);
     setReviewsList([]);
+    setSelectedCategory("all");
+  }, []);
+
+  const handleToggleBranchPicker = useCallback(() => {
+    if (branches.length < 2) return;
+    setShowBranchPicker((prev) => !prev);
+  }, [branches.length]);
+
+  const handleSelectBranch = useCallback((branch) => {
+    const nextId = branch?._id || branch?.id;
+    if (nextId === selectedBranchId) {
+      setShowBranchPicker(false);
+      return;
+    }
+    handleBranchChange(branch);
+  }, [selectedBranchId, handleBranchChange]);
+
+  const stickyThreshold = stickyTabsY !== null
+    ? Math.max(stickyTabsY - insets.top - COMPACT_HEADER_HEIGHT, 0)
+    : null;
+
+  const handleTabChange = useCallback((tab) => {
+    if (tab === activeMainTab) return;
+    if (showCompactHeader && stickyThreshold !== null && scrollRef.current) {
+      scrollRef.current.scrollTo({ y: stickyThreshold, animated: false });
+    }
+    setActiveMainTab(tab);
+  }, [activeMainTab, showCompactHeader, stickyThreshold]);
+
+  const handleScroll = useCallback((event) => {
+    if (onScroll) onScroll(event);
+    const y = event.nativeEvent.contentOffset.y;
+
+    if (stickyThreshold === null) return;
+    if (!showCompactHeader && y >= stickyThreshold) {
+      setShowCompactHeader(true);
+    } else if (showCompactHeader && y < stickyThreshold - 2) {
+      setShowCompactHeader(false);
+    }
+  }, [onScroll, stickyThreshold, showCompactHeader]);
+
+  const handleTabsLayout = useCallback((event) => {
+    const y = event.nativeEvent.layout.y;
+    setStickyTabsY((prev) => (prev === null || Math.abs(prev - y) > 0.5 ? y : prev));
   }, []);
 
   const handleBookNow = useCallback(() => {
@@ -441,7 +669,9 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     const targetServices = selectedServices;
     if (targetServices.length === 0) return;
     if (navigate) {
-      const currentRating = displayRating && displayRating !== "0.0" ? parseFloat(displayRating) : (salonData?.rating?.avgScore || salonData?.rating || 5.0);
+      const currentRating = displayRating && displayRating !== "0.0"
+        ? parseFloat(displayRating)
+        : (salonData?.rating?.avgScore || salonData?.rating || 5.0);
       const currentReviewCount = displayReviewCount || reviewsList?.length || salonData?.reviewCount || salonData?.totalReviews || 0;
 
       navigate("Booking", {
@@ -455,7 +685,7 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
         selectedServices: targetServices,
       });
     }
-  }, [selectedServices, services, selectedBranch, navigate, salonData, user, displayRating, displayReviewCount, reviewsList]);
+  }, [selectedServices, selectedBranch, navigate, salonData, user, displayRating, displayReviewCount, reviewsList]);
 
   // Reviews are ratings on the customer's own completed visit, so find one at this salon to attach it to.
   // Throwing keeps the typed review in the box when it can't be saved.
@@ -492,15 +722,28 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
     }
   }, [isAuthenticated, navigate, salonId, selectedBranchId]);
 
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: `Check out ${salonData?.name || 'this salon'} on our app! It's amazing.`,
-      });
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
+  const renderTabsRow = (onLayout) => (
+    <View style={styles.tabsRow} onLayout={onLayout}>
+      {MAIN_TABS.map((tab) => {
+        const isSelected = activeMainTab === tab;
+        return (
+          <TouchableOpacity
+            key={tab}
+            style={styles.tabBtn}
+            onPress={() => handleTabChange(tab)}
+            activeOpacity={0.75}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: isSelected }}
+          >
+            <Text style={[styles.tabLabel, isSelected && styles.tabLabelActive]}>
+              {tab}
+            </Text>
+            <View style={[styles.tabUnderline, isSelected && styles.tabUnderlineActive]} />
+          </TouchableOpacity>
+        );
+      })}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
@@ -512,376 +755,651 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
       />
 
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
-        onScroll={onScroll}
+        onScroll={handleScroll}
         scrollEventThrottle={16}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        contentInsetAdjustmentBehavior="never"
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingBottom: Math.max(insets.bottom + 80, 100) },
+          {
+            paddingBottom: selectedServices.length > 0
+              ? Math.max(insets.bottom, 12) + 108
+              : Math.max(insets.bottom, 16) + 28,
+          },
         ]}
       >
-        <View style={styles.heroCardContainer}>
+        <View style={styles.hero}>
           <Image
             source={{ uri: carouselImages[0] }}
-            style={[styles.heroImage, { width: SCREEN_WIDTH }]}
+            style={styles.heroImage}
             resizeMode="cover"
           />
 
-          <View style={styles.heroScrim} pointerEvents="none" />
+          <LinearGradient
+            colors={["rgba(20,17,22,0.36)", "rgba(20,17,22,0)"]}
+            style={styles.heroShadeTop}
+            pointerEvents="none"
+          />
+          <LinearGradient
+            colors={["rgba(20,17,22,0)", "rgba(20,17,22,0.28)"]}
+            style={styles.heroShadeBottom}
+            pointerEvents="none"
+          />
 
-          {/* Top Actions Row */}
-          <View style={[styles.topActionsRow, { top: Math.max(insets.top, 20) + 10 }]}>
-            <TouchableOpacity style={styles.circleBtn} onPress={handleBack} activeOpacity={0.8}>
-              <Ionicons name="arrow-back" size={22} color="#1E1E1E" />
+          <View style={[styles.heroActions, { top: insets.top + 12 }]}>
+            <TouchableOpacity
+              style={styles.glassBtn}
+              onPress={handleBack}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Go back"
+            >
+              <Ionicons name="arrow-back" size={19} color={theme.ink} />
             </TouchableOpacity>
 
-
-          </View>
-
-        </View>
-
-        <View style={styles.titleSection}>
-          <View style={styles.titleRow}>
-            <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
-              <Text style={[styles.salonTitle, { flexShrink: 1 }]} numberOfLines={1}>{selectedBranch?.name || salonData?.name}</Text>
-              {salonData?.isVerified ? <VerifiedBadge size={20} color={C.verified} /> : null}
-            </View>
-            <View style={styles.headerRatingBlock}>
-              <Ionicons name="star" size={16} color="#FBBF24" />
-              <Text style={styles.headerRatingText}>{displayReviewCount > 0 ? displayRating : "New"}</Text>
-            </View>
-          </View>
-
-          <View style={styles.locationRow}>
-            <View style={styles.locationBlock}>
-              <Ionicons name="location-outline" size={14} color="#666666" />
-              <Text style={styles.locationText} numberOfLines={1}>
-                {selectedBranch?.address?.city || selectedBranch?.name}
-                {selectedBranch?.distance ? ` • ${selectedBranch.distance} km` : salonData?.distance ? ` • ${salonData.distance} km` : ""}
-              </Text>
-            </View>
-            <Text style={styles.headerReviewCount}>
-              {displayReviewCount === 0
-                ? "No reviews yet"
-                : `(${displayReviewCount >= 1000
-                    ? (displayReviewCount / 1000).toFixed(1).replace(/\.0$/, '') + "k"
-                    : displayReviewCount} ${displayReviewCount === 1 ? "review" : "reviews"})`}
-            </Text>
-          </View>
-
-          <View style={styles.statusRow}>
-            <View style={[styles.statusDot, { backgroundColor: isOpenStatus.isOpen ? "#10B981" : "#EF4444" }]} />
-            <Text style={styles.statusText}>
-              <Text style={{ color: isOpenStatus.isOpen ? "#10B981" : "#EF4444" }}>
-                {isOpenStatus.isOpen ? "Open" : "Closed"}
-              </Text>
-              {isOpenStatus.isOpen && isOpenStatus.closeTime ? ` • Closes at ${isOpenStatus.closeTime}` : ""}
-              {!isOpenStatus.isOpen && isOpenStatus.nextOpenText ? ` • ${isOpenStatus.nextOpenText}` : ""}
-            </Text>
-          </View>
-
-          {/* Action Buttons Row */}
-          <View style={styles.actionButtonsRow}>
-            <TouchableOpacity style={styles.actionBtnContainer} onPress={handleCallSalon}>
-              <View style={styles.actionIconCircle}>
-                <Ionicons name="call" size={20} color="#1E1E1E" />
-              </View>
-              <Text style={styles.actionBtnLabel}>Call</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionBtnContainer} onPress={handleGetDirections}>
-              <View style={styles.actionIconCircle}>
-                <Ionicons name="location" size={20} color="#1E1E1E" />
-              </View>
-              <Text style={styles.actionBtnLabel}>Directions</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionBtnContainer} onPress={() => toggleFavorite(salonData)}>
-              <View style={styles.actionIconCircle}>
+            <View style={styles.heroActionsRight}>
+              <TouchableOpacity
+                style={styles.glassBtn}
+                onPress={handleToggleFavorite}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={favorited ? "Remove from saved salons" : "Save salon"}
+              >
                 <Ionicons
                   name={favorited ? "heart" : "heart-outline"}
-                  size={20}
-                  color={favorited ? C.main : "#1E1E1E"}
+                  size={19}
+                  color={favorited ? theme.primary : theme.ink}
                 />
-              </View>
-              <Text style={styles.actionBtnLabel}>Save</Text>
-            </TouchableOpacity>
+              </TouchableOpacity>
 
-            <TouchableOpacity style={styles.actionBtnContainer} onPress={handleShare}>
-              <View style={styles.actionIconCircle}>
-                <Ionicons name="share-outline" size={20} color="#1E1E1E" />
-              </View>
-              <Text style={styles.actionBtnLabel}>Share</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.glassBtn}
+                onPress={handleShare}
+                activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel="Share salon"
+              >
+                <Ionicons name="share-outline" size={19} color={theme.ink} />
+              </TouchableOpacity>
+            </View>
           </View>
+
+          <TouchableOpacity
+            style={styles.photoChip}
+            onPress={() => {
+              setGalleryIndex(0);
+              setGalleryVisible(true);
+            }}
+            activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={`View ${galleryImages.length} photos`}
+          >
+            <Ionicons name="camera-outline" size={13} color={theme.ink} />
+            <Text style={styles.photoChipText}>
+              {galleryImages.length} {galleryImages.length === 1 ? "photo" : "photos"}
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* <View style={styles.hairline} /> */}
+        <View style={styles.identityCard}>
+          <View style={styles.eyebrowRow}>
+            <Text style={styles.eyebrow} numberOfLines={1}>{eyebrow}</Text>
+            {salonData?.isVerified ? (
+              <View style={styles.verifiedPill}>
+                <View style={styles.verifiedDot}>
+                  <Ionicons name="checkmark" size={8} color={theme.onPrimary} />
+                </View>
+                <Text style={styles.verifiedText}>Verified</Text>
+              </View>
+            ) : null}
+          </View>
 
+          <Text style={styles.salonName} numberOfLines={2}>
+            {salonData?.name || "Salon"}
+          </Text>
 
-        {/* Select Branch */}
-        {(salonData?.branches || []).length > 1 ? (
-          <View style={styles.sectionBlock}>
-            <Text style={styles.sectionLabel}>Select location</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.branchRow}>
-              {(salonData?.branches || []).map((b) => {
-                const isSelected = (b._id || b.id) === (selectedBranch?._id || selectedBranch?.id);
-                const rawName = b.name || "Main Branch";
-                const displayTitle = rawName.includes(" — ")
-                  ? rawName.split(" — ")[1] || rawName
-                  : rawName.includes(" - ")
-                    ? rawName.split(" - ")[1] || rawName
-                    : rawName;
+          <View style={styles.metaRow}>
+            {displayRating ? (
+              <>
+                <View style={styles.ratingInline}>
+                  <Ionicons name="star" size={13} color={GOLD} />
+                  <Text style={styles.ratingValue}>{displayRating}</Text>
+                </View>
+                <View style={styles.metaDot} />
+                <Text style={styles.metaText}>
+                  {displayReviewCount > 0
+                    ? `${formatReviewCount(displayReviewCount)} ${displayReviewCount === 1 ? "review" : "reviews"}`
+                    : "No reviews yet"}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.metaText}>New on HairX</Text>
+            )}
 
+            <View style={styles.metaDot} />
+
+            <TouchableOpacity
+              style={styles.locationInline}
+              onPress={handleToggleBranchPicker}
+              disabled={branches.length < 2}
+              activeOpacity={0.7}
+              accessibilityRole={branches.length > 1 ? "button" : undefined}
+              accessibilityLabel={branches.length > 1 ? "Change salon location" : undefined}
+            >
+              <Ionicons name="location-outline" size={12} color={theme.muted} />
+              <Text style={styles.locationText} numberOfLines={1}>
+                {branchLabel}{distanceLabel ? ` · ${distanceLabel}` : ""}
+              </Text>
+              {branches.length > 1 ? (
+                <Ionicons
+                  name={showBranchPicker ? "chevron-up" : "chevron-down"}
+                  size={11}
+                  color={theme.muted}
+                />
+              ) : null}
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.statusLine}>
+            {hasWorkingHours ? (
+              <>
+                <View
+                  style={[
+                    styles.statusDot,
+                    { backgroundColor: isOpenStatus.isOpen ? statusOpenColor : statusClosedColor },
+                  ]}
+                />
+                <Text style={styles.statusText} numberOfLines={2}>
+                  <Text style={{ color: isOpenStatus.isOpen ? statusOpenColor : statusClosedColor }}>
+                    {statusLabel}
+                  </Text>
+                  {statusDetail ? ` · ${statusDetail}` : ""}
+                </Text>
+              </>
+            ) : (
+              <>
+                <Ionicons name="time-outline" size={12} color={theme.muted} />
+                <Text style={styles.statusText}>Hours not available</Text>
+              </>
+            )}
+          </View>
+
+          {showBranchPicker && branches.length > 1 ? (
+            <View style={styles.branchPicker}>
+              <Text style={styles.branchPickerLabel}>Choose location</Text>
+              {branches.map((branch) => {
+                const branchId = branch._id || branch.id;
+                const isSelected = branchId === selectedBranchId;
+                const shortName = getBranchLabel(branch, salonData?.name);
+                const city = branch?.address?.city || branch?.address?.street || "";
                 return (
                   <TouchableOpacity
-                    key={b._id || b.id}
-                    style={[styles.branchPill, isSelected && styles.branchPillSelected]}
-                    onPress={() => handleBranchChange(b)}
-                    activeOpacity={0.88}
+                    key={branchId}
+                    style={[styles.branchOption, isSelected && styles.branchOptionSelected]}
+                    onPress={() => handleSelectBranch(branch)}
+                    activeOpacity={0.8}
                   >
-                    <Text style={[styles.branchTitle, isSelected && styles.branchTitleSelected]} numberOfLines={1}>
-                      {displayTitle}
-                    </Text>
-                    {b.address?.city || b.address?.street ? (
-                      <Text style={[styles.branchCity, isSelected && styles.branchCitySelected]} numberOfLines={1}>
-                        {b.address?.city || b.address?.street}
-                      </Text>
+                    <View style={styles.softIconSmall}>
+                      <Ionicons
+                        name="location-outline"
+                        size={14}
+                        color={theme.primaryActive}
+                      />
+                    </View>
+                    <View style={styles.branchOptionCopy}>
+                      <Text style={styles.branchOptionTitle} numberOfLines={1}>{shortName}</Text>
+                      {city ? (
+                        <Text style={styles.branchOptionSub} numberOfLines={1}>{city}</Text>
+                      ) : null}
+                    </View>
+                    {isSelected ? (
+                      <Ionicons name="checkmark-circle" size={17} color={theme.primary} />
                     ) : null}
                   </TouchableOpacity>
                 );
               })}
-            </ScrollView>
+            </View>
+          ) : null}
+
+          <View style={styles.cardActions}>
+            <TouchableOpacity
+              style={styles.secondaryAction}
+              onPress={handleCallSalon}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`Call ${salonData?.name || "salon"}`}
+            >
+              <Ionicons name="call-outline" size={14} color={theme.primaryActive} />
+              <Text style={styles.secondaryActionText}>Call</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryAction}
+              onPress={handleGetDirections}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={`Get directions to ${salonData?.name || "salon"}`}
+            >
+              <Ionicons name="navigate-outline" size={14} color={theme.primaryActive} />
+              <Text style={styles.secondaryActionText}>Directions</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View onLayout={handleTabsLayout}>
+          {renderTabsRow()}
+        </View>
+
+        {activeMainTab === "Services" ? (
+          <View style={styles.tabPage}>
+            {categories.length > 1 ? (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.categoryScroll}
+                contentContainerStyle={styles.categoryContent}
+              >
+                {categories.map((cat) => {
+                  const isCatSelected = selectedCategory === cat;
+                  return (
+                    <TouchableOpacity
+                      key={cat}
+                      style={[styles.categoryPill, isCatSelected && styles.categoryPillActive]}
+                      onPress={() => setSelectedCategory(cat)}
+                      activeOpacity={0.82}
+                      accessibilityRole="button"
+                      accessibilityState={{ selected: isCatSelected }}
+                    >
+                      <Text style={[
+                        styles.categoryPillText,
+                        isCatSelected && styles.categoryPillTextActive,
+                      ]}>
+                        {titleCase(cat)}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            ) : null}
+
+            {loading ? (
+              <View style={styles.serviceList}>
+                {[0, 1, 2].map((item) => (
+                  <View key={item} style={styles.serviceSkeletonCard}>
+                    <SkeletonBox width="62%" height={15} style={{ marginBottom: 9 }} />
+                    <SkeletonBox width="34%" height={12} style={{ marginBottom: 11 }} />
+                    <SkeletonBox width="88%" height={11} />
+                  </View>
+                ))}
+              </View>
+            ) : filteredServices.length === 0 ? (
+              <View style={styles.emptyCard}>
+                <View style={styles.emptyIcon}>
+                  <Ionicons name="cut-outline" size={22} color={theme.primary} />
+                </View>
+                <Text style={styles.emptyTitle}>
+                  {services.length === 0 ? "No services listed yet" : "Nothing in this category"}
+                </Text>
+                <Text style={styles.emptyCopy}>
+                  {services.length === 0
+                    ? "This location hasn't published its service menu yet."
+                    : "Try another category to see what this salon offers."}
+                </Text>
+              </View>
+            ) : (
+              <>
+                <View style={styles.listMeta}>
+                  <Text style={styles.listMetaText}>
+                    {filteredServices.length} {filteredServices.length === 1 ? "service" : "services"}
+                  </Text>
+                  {minServicePrice !== null ? (
+                    <Text style={styles.listMetaText}>
+                      From {paiseToINR(minServicePrice)}
+                    </Text>
+                  ) : null}
+                </View>
+
+                <View style={styles.serviceList}>
+                  {filteredServices.map((service) => (
+                    <ServiceCard
+                      key={service._id || service.id}
+                      service={service}
+                      selected={selectedServices.some(
+                        (selected) => (selected._id || selected.id) === (service._id || service.id)
+                      )}
+                      onSelect={handleSelectService}
+                      onViewCombo={setActiveComboService}
+                    />
+                  ))}
+                </View>
+              </>
+            )}
           </View>
         ) : null}
 
-        {/* Main Tabs Row */}
-        {(() => {
-          const segmentWidth = tabRowWidth ? tabRowWidth / MAIN_TABS.length : 0;
-          const indicatorTranslateX = tabIndicatorAnim.interpolate({
-            inputRange: [0, 1, 2],
-            outputRange: [0, segmentWidth, segmentWidth * 2],
-          });
+        {activeMainTab === "About" ? (
+          <View style={styles.aboutPage}>
+            <Text style={styles.sectionKicker}>THE STUDIO</Text>
+            <Text style={styles.aboutLead}>
+              {selectedBranch?.description || salonData?.description ||
+                "This salon hasn't added a description yet."}
+            </Text>
 
-          return (
-            <View
-              style={styles.mainTabsRow}
-              onLayout={(e) => setTabRowWidth(e.nativeEvent.layout.width)}
-            >
-              {MAIN_TABS.map((tab) => {
-                const isSelected = activeMainTab === tab;
-                return (
-                  <TouchableOpacity
-                    key={tab}
-                    style={styles.mainTabBtn}
-                    onPress={() => handleTabChange(tab)}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={[styles.mainTabLabel, isSelected && styles.mainTabLabelActive]}>
-                      {tab}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-              {segmentWidth > 0 && (
-                <Animated.View
-                  style={[
-                    styles.animatedUnderline,
-                    {
-                      width: segmentWidth,
-                      transform: [{ translateX: indicatorTranslateX }],
-                    },
-                  ]}
-                />
-              )}
-            </View>
-          );
-        })()}
-
-        {/* Smooth 3-Page Synchronized Sliding Tab Content Container */}
-        {(() => {
-          const cWidth = containerWidth || SCREEN_WIDTH;
-          const contentTranslateX = tabIndicatorAnim.interpolate({
-            inputRange: [0, 1, 2],
-            outputRange: [0, -cWidth, -cWidth * 2],
-          });
-
-          return (
-            <View
-              style={{ overflow: "hidden", width: "100%" }}
-              onLayout={(e) => {
-                const w = e.nativeEvent?.layout?.width;
-                if (w && w !== containerWidth) setContainerWidth(w);
-              }}
-            >
-              <Animated.View
-                style={{
-                  flexDirection: "row",
-                  width: cWidth * 3,
-                  alignItems: "flex-start",
-                  transform: [{ translateX: contentTranslateX }],
-                }}
-              >
-                {/* Page 0: Services */}
-                <View style={{ width: cWidth, height: activeMainTab === "Services" ? undefined : 0, overflow: "hidden" }}>
-                  {/* Category Pills */}
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryPillsScroll} contentContainerStyle={{ paddingHorizontal: 16, alignItems: "center" }}>
-                    {categories.map((cat, idx) => {
-                      const isCatSelected = selectedCategory === cat;
-                      return (
-                        <TouchableOpacity
-                          key={idx}
-                          style={[styles.categoryPill, isCatSelected ? styles.categoryPillActive : styles.categoryPillInactive]}
-                          onPress={() => {
-                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                            setSelectedCategory(cat);
-                          }}
-                        >
-                          <Text style={[styles.categoryPillText, isCatSelected ? styles.categoryPillTextActive : styles.categoryPillTextInactive]}>
-                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </ScrollView>
-
-                  <ScrollView
-                    nestedScrollEnabled={true}
-                    showsVerticalScrollIndicator={true}
-                    style={styles.servicesScrollBox}
-                    contentContainerStyle={styles.servicesListContainer}
-                  >
-                    {loading ? (
-                      <View style={{ gap: 12 }}>
-                        <ServiceCardSkeleton />
-                        <ServiceCardSkeleton />
-                      </View>
-                    ) : (
-                      <>
-                        {filteredServices.length === 0 ? (
-                          <Text style={[styles.aboutText, { textAlign: "center", paddingVertical: 24 }]}>
-                            {services.length === 0
-                              ? "This location hasn't listed any services yet."
-                              : "No services in this category."}
-                          </Text>
-                        ) : null}
-                        {filteredServices.map(svc => (
-                          <ServiceCard
-                            key={svc._id || svc.id}
-                            service={svc}
-                            selected={selectedServices.some(s => (s._id || s.id) === (svc._id || svc.id))}
-                            onSelect={handleSelectService}
-                            onViewCombo={setActiveComboService}
-                          />
-                        ))}
-                      </>
-                    )}
-                  </ScrollView>
+            {specialities.length > 0 ? (
+              <View style={styles.aboutBlock}>
+                <Text style={styles.smallLabel}>SPECIALITIES</Text>
+                <View style={styles.specialityWrap}>
+                  {specialities.map((speciality) => (
+                    <View key={speciality} style={styles.specialityChip}>
+                      <Text style={styles.specialityText}>{speciality}</Text>
+                    </View>
+                  ))}
                 </View>
+              </View>
+            ) : null}
 
-                {/* Page 1: About */}
-                <View style={{ width: cWidth, height: activeMainTab === "About" ? undefined : 0, overflow: "hidden" }}>
-                  {/* About Description */}
-                  <View style={styles.sectionBlock}>
-                    <Text style={styles.aboutText}>
-                      {selectedBranch?.description || salonData?.description ||
-                        "This salon hasn't added a description yet."}
+            {galleryImages.length > 1 ? (
+              <View style={styles.aboutBlock}>
+                <View style={styles.galleryHead}>
+                  <Text style={styles.smallLabel}>INSIDE THE STUDIO</Text>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setGalleryIndex(0);
+                      setGalleryVisible(true);
+                    }}
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="View all salon photos"
+                  >
+                    <Text style={styles.galleryLink}>View gallery</Text>
+                  </TouchableOpacity>
+                </View>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.galleryScroll}
+                  contentContainerStyle={styles.galleryContent}
+                >
+                  {galleryImages.map((image, index) => (
+                    <TouchableOpacity
+                      key={`${image}-${index}`}
+                      onPress={() => {
+                        setGalleryIndex(index);
+                        setGalleryVisible(true);
+                      }}
+                      activeOpacity={0.85}
+                      accessibilityRole="button"
+                      accessibilityLabel={`View photo ${index + 1}`}
+                    >
+                      <Image source={{ uri: image }} style={styles.galleryPhoto} resizeMode="cover" />
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : null}
+
+            {hasAddress ? (
+              <TouchableOpacity
+                style={[styles.infoCard, styles.locationCard]}
+                onPress={handleGetDirections}
+                activeOpacity={0.82}
+                accessibilityRole="button"
+                accessibilityLabel={`Get directions to ${branchLabel || salonData?.name || "the salon"}`}
+              >
+                <View style={styles.softIcon}>
+                  <Ionicons name="location-outline" size={16} color={theme.primaryActive} />
+                </View>
+                <View style={styles.infoCopy}>
+                  <Text style={styles.infoTitle}>{branchLabel}</Text>
+                  {addressParts.street ? (
+                    <Text style={styles.infoDetail}>{addressParts.street}</Text>
+                  ) : null}
+                  {addressParts.cityLine ? (
+                    <Text style={styles.infoDetail}>{addressParts.cityLine}</Text>
+                  ) : null}
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={theme.mutedSoft} style={styles.infoChevron} />
+              </TouchableOpacity>
+            ) : null}
+
+            <View style={styles.hoursCard}>
+              <View style={styles.hoursHead}>
+                <Text style={styles.hoursTitle}>Opening hours</Text>
+                {hasWorkingHours ? (
+                  <View style={[
+                    styles.statusChip,
+                    isOpenStatus.isOpen ? styles.statusChipOpen : styles.statusChipClosed,
+                  ]}>
+                    <View style={[
+                      styles.statusChipDot,
+                      { backgroundColor: isOpenStatus.isOpen ? statusOpenColor : statusClosedColor },
+                    ]} />
+                    <Text style={[
+                      styles.statusChipText,
+                      { color: isOpenStatus.isOpen ? statusOpenColor : statusClosedColor },
+                    ]}>
+                      {isOpenStatus.isOpen ? "Open now" : "Closed now"}
                     </Text>
                   </View>
+                ) : null}
+              </View>
 
-                  {/* Opening Hours Schedule */}
-                  <View style={[styles.sectionBlock, { marginTop: 20 }]}>
-                    <Text style={styles.sectionLabel}>Opening Hours</Text>
-                    <View style={styles.workingHoursCard}>
-                      {!weeklySchedule ? (
-                        <Text style={[styles.timeText, { paddingVertical: 12, textAlign: "center" }]}>
-                          Hours not available
-                        </Text>
-                      ) : null}
-                      {(weeklySchedule || []).map((item, idx) => (
-                        <View key={idx} style={[styles.hoursRow, item.isToday && styles.hoursRowToday]}>
-                          <View style={styles.dayCol}>
-                            <Text style={[styles.dayText, item.isToday && styles.dayTextToday]}>
-                              {item.dayName}
-                            </Text>
-                            {item.isToday && (
-                              <View style={styles.todayBadge}>
-                                <Text style={styles.todayBadgeText}>Today</Text>
-                              </View>
-                            )}
-                          </View>
-                          <Text style={[styles.timeText, !item.isOpen && styles.timeClosedText]}>
-                            {item.isOpen ? `${item.openTime} - ${item.closeTime}` : "Closed"}
-                          </Text>
+              {!hasWorkingHours ? (
+                <Text style={styles.hoursEmpty}>Hours not available</Text>
+              ) : showAllHours ? (
+                weeklySchedule.map((day) => (
+                  <View
+                    key={day.dayName}
+                    style={[styles.hoursRow, day.isToday && styles.hoursRowToday]}
+                  >
+                    <View style={styles.dayLeft}>
+                      <Text style={styles.dayName}>{day.dayName}</Text>
+                      {day.isToday ? (
+                        <View style={styles.todayPill}>
+                          <Text style={styles.todayPillText}>TODAY</Text>
                         </View>
-                      ))}
+                      ) : null}
+                    </View>
+                    <Text style={[
+                      styles.hoursTime,
+                      day.isToday && styles.hoursTimeToday,
+                      !day.isOpen && styles.hoursTimeClosed,
+                    ]}>
+                      {day.isOpen ? `${day.openTime} – ${day.closeTime}` : "Closed"}
+                    </Text>
+                  </View>
+                ))
+              ) : todaySchedule ? (
+                <View style={[styles.hoursRow, styles.hoursRowToday]}>
+                  <View style={styles.dayLeft}>
+                    <Text style={styles.dayName}>{todaySchedule.dayName}</Text>
+                    <View style={styles.todayPill}>
+                      <Text style={styles.todayPillText}>TODAY</Text>
                     </View>
                   </View>
-
+                  <Text style={[styles.hoursTime, styles.hoursTimeToday, !todaySchedule.isOpen && styles.hoursTimeClosed]}>
+                    {todaySchedule.isOpen
+                      ? `${todaySchedule.openTime} – ${todaySchedule.closeTime}`
+                      : "Closed"}
+                  </Text>
                 </View>
+              ) : null}
 
-                {/* Page 2: Reviews */}
-                <View style={{ width: cWidth, paddingHorizontal: 16, height: activeMainTab === "Reviews" ? undefined : 0, overflow: "hidden" }}>
-                  <ReviewsSection
-                    reviews={reviewsList}
-                    overallRating={displayRating}
-                    totalReviews={displayReviewCount}
-                    onSubmitReview={handleSubmitReview}
+              {hasWorkingHours ? (
+                <TouchableOpacity
+                  style={styles.hoursMore}
+                  onPress={() => setShowAllHours((prev) => !prev)}
+                  activeOpacity={0.75}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: showAllHours }}
+                >
+                  <Text style={styles.hoursMoreText}>
+                    {showAllHours ? "Show less" : "Show all 7 days"}
+                  </Text>
+                  <Ionicons
+                    name={showAllHours ? "chevron-up" : "chevron-down"}
+                    size={12}
+                    color={theme.primaryActive}
                   />
-                </View>
-              </Animated.View>
+                </TouchableOpacity>
+              ) : null}
             </View>
-          );
-        })()}
+
+            {phoneNumber ? (
+              <TouchableOpacity
+                style={styles.infoCard}
+                onPress={handleCallSalon}
+                activeOpacity={0.82}
+                accessibilityRole="button"
+                accessibilityLabel={`Call ${salonData?.name || "the salon"}`}
+              >
+                <View style={styles.softIcon}>
+                  <Ionicons name="call-outline" size={16} color={theme.primaryActive} />
+                </View>
+                <View style={styles.infoCopy}>
+                  <Text style={styles.infoTitle}>Call the salon</Text>
+                  <Text style={styles.infoDetail}>{formatPhoneDisplay(phoneNumber)}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={theme.mutedSoft} style={styles.infoChevron} />
+              </TouchableOpacity>
+            ) : null}
+
+            <View style={styles.aboutFooterSpace} />
+          </View>
+        ) : null}
+
+        {activeMainTab === "Reviews" ? (
+          <View style={styles.reviewsPage}>
+            <ReviewsSection
+              reviews={reviewsList}
+              overallRating={displayRating}
+              totalReviews={displayReviewCount}
+              onSubmitReview={handleSubmitReview}
+            />
+          </View>
+        ) : null}
       </ScrollView>
 
-
-      {/* Floating Bottom Booking Action Bar — Hidden when 0 services, slides up smoothly when >= 1 service selected */}
+      {/* Compact header — appears as the identity card scrolls away */}
       <Animated.View
+        pointerEvents={showCompactHeader ? "auto" : "none"}
         style={[
-          styles.floatingBottomBarWrapper,
-          { transform: [{ translateY: slideUpY }] },
+          styles.stickyHeader,
+          {
+            paddingTop: insets.top,
+            opacity: compactHeaderAnim,
+            transform: [{
+              translateY: compactHeaderAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-10, 0],
+              }),
+            }],
+          },
         ]}
+      >
+        <View style={styles.compactHeaderRow}>
+          <TouchableOpacity
+            style={styles.compactBackBtn}
+            onPress={handleBack}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel="Go back"
+          >
+            <Ionicons name="arrow-back" size={19} color={theme.ink} />
+          </TouchableOpacity>
+
+          <Image source={{ uri: carouselImages[0] }} style={styles.compactThumb} resizeMode="cover" />
+
+          <View style={styles.compactCopy}>
+            <Text style={styles.compactTitle} numberOfLines={1}>
+              {salonData?.name || "Salon"}
+            </Text>
+            <View style={styles.compactSubRow}>
+              {displayRating ? <Ionicons name="star" size={10} color={GOLD} /> : null}
+              <Text style={styles.compactSubText} numberOfLines={1}>
+                {displayRating ? `${displayRating} · ` : ""}
+                {displayReviewCount > 0
+                  ? `${formatReviewCount(displayReviewCount)} ${displayReviewCount === 1 ? "review" : "reviews"}`
+                  : "New"}
+                {branchLabel ? ` · ${branchLabel}` : ""}
+              </Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={styles.compactHeart}
+            onPress={handleToggleFavorite}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel={favorited ? "Remove from saved salons" : "Save salon"}
+          >
+            <Ionicons
+              name={favorited ? "heart" : "heart-outline"}
+              size={19}
+              color={favorited ? theme.primary : theme.ink}
+            />
+          </TouchableOpacity>
+        </View>
+
+        {renderTabsRow()}
+      </Animated.View>
+
+      {/* Floating booking bar — hidden until a service is selected */}
+      <Animated.View
+        style={[styles.floatingBottomBarWrapper, { transform: [{ translateY: barTranslateY }] }]}
         pointerEvents={selectedServices.length > 0 ? "auto" : "none"}
       >
-        {/* Floating Bottom Booking Action Bar */}
-        <BlurView
-          intensity={Platform.OS === "ios" ? 40 : 60}
-          tint={isDark ? "dark" : "light"}
-          style={[styles.floatingBottomBar, { paddingBottom: Math.max(insets.bottom, 20) + 12 }]}
-        >
-          {/* Solid tint on top of the blur — hides content bleed-through, gives that frosted-white look */}
-          <View
-            style={[
-              styles.floatingBottomBarTint,
-              { backgroundColor: isDark ? "rgba(20,20,18,0.55)" : "rgba(255,255,255,0.85)" },
-            ]}
-            pointerEvents="none"
+        {Platform.OS === "ios" ? (
+          <BlurView
+            intensity={40}
+            tint={isDark ? "dark" : "light"}
+            style={StyleSheet.absoluteFill}
           />
+        ) : null}
+        <View
+          style={[
+            styles.floatingBottomBar,
+            { paddingBottom: Math.max(insets.bottom, 12) + 8 },
+            Platform.OS === "android" && { backgroundColor: isDark ? C.surface : C.bg },
+          ]}
+        >
+          {Platform.OS === "ios" ? (
+            <View
+              style={[
+                styles.floatingBottomBarTint,
+                { backgroundColor: isDark ? "rgba(18,18,24,0.72)" : "rgba(255,255,255,0.9)" },
+              ]}
+              pointerEvents="none"
+            />
+          ) : null}
 
           <View style={styles.bookRow}>
             <View style={styles.totalBlock}>
-              <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalAmount}>
-                {selectedServices.length > 0 ? paiseToINR(totalPrice) : "₹0.00"}
+              <Text style={styles.bookingLabel} numberOfLines={1}>
+                {selectedServices.length} {selectedServices.length === 1 ? "service" : "services"}
+                {totalDuration ? ` · ${formatDuration(totalDuration)}` : ""}
               </Text>
-              <View style={styles.totalDurationRow}>
-                <Ionicons name="time-outline" size={12} color="#666666" />
-                <Text style={styles.totalDurationText}>{formatDuration(totalDuration)}</Text>
+              <View style={styles.priceRow}>
+                <Text style={styles.totalAmount}>{paiseToINR(totalPrice)}</Text>
+                <Text style={styles.totalSuffix}>total</Text>
               </View>
             </View>
 
             <SpringTouchable
               onPress={handleBookNow}
-              style={styles.animatedBookBtn}
-              scaleTo={0.95}
+              style={styles.bookBtn}
               hapticType="medium"
+              accessibilityRole="button"
+              accessibilityLabel="Book now"
             >
-              <Text style={styles.animatedBookBtnText}>Book Now</Text>
-              <Ionicons name="arrow-forward" size={18} color="#FFFFFF" />
+              <Text style={styles.bookBtnText}>Book now</Text>
+              <Ionicons name="arrow-forward" size={18} color={theme.onPrimary} />
             </SpringTouchable>
           </View>
-        </BlurView>
+        </View>
       </Animated.View>
 
       <VerifyEmailModal
@@ -897,750 +1415,836 @@ function SalonDetailScreen({ salon, goBack, navigate, onScroll }) {
         isSelected={
           activeComboService
             ? selectedServices.some(
-              (s) =>
-                (s._id || s.id) === (activeComboService._id || activeComboService.id)
+              (selected) =>
+                (selected._id || selected.id) === (activeComboService._id || activeComboService.id)
             )
             : false
         }
         onClose={() => setActiveComboService(null)}
         onSelectService={handleSelectService}
       />
+
+      <Modal
+        visible={galleryVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setGalleryVisible(false)}
+        onShow={() => {
+          galleryScrollRef.current?.scrollTo({
+            x: galleryIndex * SCREEN_WIDTH,
+            animated: false,
+          });
+        }}
+        statusBarTranslucent
+      >
+        <View style={styles.galleryModal}>
+          <View style={[styles.galleryTop, { paddingTop: insets.top + 10 }]}>
+            <TouchableOpacity
+              style={styles.galleryCloseBtn}
+              onPress={() => setGalleryVisible(false)}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel="Close gallery"
+            >
+              <Ionicons name="close" size={22} color={C.textLight} />
+            </TouchableOpacity>
+            <Text style={styles.galleryCount}>
+              {Math.min(galleryIndex + 1, galleryImages.length)} / {galleryImages.length}
+            </Text>
+          </View>
+
+          <ScrollView
+            ref={galleryScrollRef}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            style={styles.galleryScroller}
+            contentOffset={{ x: galleryIndex * SCREEN_WIDTH, y: 0 }}
+            onScroll={(event) => {
+              const rawIndex = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+              const nextIndex = Math.max(0, Math.min(galleryImages.length - 1, rawIndex));
+              if (nextIndex !== galleryIndex) setGalleryIndex(nextIndex);
+            }}
+            scrollEventThrottle={32}
+          >
+            {galleryImages.map((image, index) => (
+              <View key={`${image}-${index}`} style={styles.gallerySlide}>
+                <Image source={{ uri: image }} style={styles.galleryImage} resizeMode="contain" />
+              </View>
+            ))}
+          </ScrollView>
+
+          <View style={[styles.galleryBottom, { paddingBottom: insets.bottom + 18 }]}>
+            <Text style={styles.galleryHint}>Swipe to explore the studio</Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
 export default memo(SalonDetailScreen);
 
-function getStyles(isDark) {
+function getStyles(theme, isDark) {
+  const pinkTint = isDark ? "rgba(255,122,154,0.12)" : C.crimsonTint;
+  const pinkTintStrong = isDark ? "rgba(255,122,154,0.2)" : C.crimsonTint;
+  const pinkLine = isDark ? "rgba(255,122,154,0.28)" : C.crimsonTint;
+  const softCard = isDark ? theme.surfaceStrong : C.bg;
+
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: C.bg,
+      backgroundColor: theme.canvas,
     },
     scrollContent: {
       flexGrow: 1,
     },
-    heroCardContainer: {
-      height: 320,
+
+    // Hero
+    hero: {
+      height: HERO_HEIGHT,
       width: "100%",
       position: "relative",
-      borderBottomLeftRadius: 32,
-      borderBottomRightRadius: 32,
       overflow: "hidden",
-      backgroundColor: C.lifted,
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+      backgroundColor: theme.surfaceStrong,
     },
     heroImage: {
       width: "100%",
       height: "100%",
     },
-    heroScrim: {
+    heroShadeTop: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      top: 0,
+      height: 120,
+    },
+    heroShadeBottom: {
       position: "absolute",
       left: 0,
       right: 0,
       bottom: 0,
-      height: "0%",
-      backgroundColor: "rgba(0, 0, 0, 0.45)",
+      height: 120,
     },
-    circleBackBtn: {
+    heroActions: {
       position: "absolute",
-      top: Platform.OS === "android" ? 44 : 52,
-      left: S.md,
-      width: 36,
-      height: 36,
-      borderRadius: R.md,
-      backgroundColor: "rgba(255, 255, 255, 0.7)",
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1,
-      borderColor: "rgba(255,255,255,0.22)",
-    },
-    circleHeartBtn: {
-      position: "absolute",
-      top: Platform.OS === "android" ? 44 : 52,
-      right: S.md,
-      width: 36,
-      height: 36,
-      borderRadius: R.md,
-      backgroundColor: "rgba(255, 255, 255, 0.7)",
-      alignItems: "center",
-      justifyContent: "center",
-      borderWidth: 1,
-      borderColor: "rgba(255,255,255,0.22)",
-    },
-    heroStatusBadgePill: {
-      position: "absolute",
-      top: Platform.OS === "android" ? 44 : 52,
-      right: 58,
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "rgba(255, 255, 255, 0.95)",
-      paddingHorizontal: 9,
-      paddingVertical: 7,
-      borderRadius: 20,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.15,
-      shadowRadius: 6,
-      elevation: 4,
-      zIndex: 10,
-    },
-    heroStatusOpen: {
-      backgroundColor: "rgba(255, 255, 255, 0.95)",
-      borderWidth: 1,
-      borderColor: "rgba(34, 197, 94, 0.35)",
-    },
-    heroStatusClosed: {
-      backgroundColor: "rgba(255, 255, 255, 0.95)",
-      borderWidth: 1,
-      borderColor: "rgba(239, 68, 68, 0.35)",
-    },
-    heroStatusDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-    },
-    heroDotOpen: {
-      backgroundColor: "#22C55E",
-    },
-    heroDotClosed: {
-      backgroundColor: "#EF4444",
-    },
-    heroStatusText: {
-      fontSize: 10.5,
-      fontWeight: "800",
-      letterSpacing: 0.6,
-    },
-    heroTextOpen: {
-      color: "#15803D",
-    },
-    heroTextClosed: {
-      color: "#B91C1C",
-    },
-    topActionsRow: {
-      position: "absolute",
-      top: Platform.OS === 'ios' ? 50 : 20,
       left: 16,
       right: 16,
       flexDirection: "row",
-      justifyContent: "space-between",
       alignItems: "center",
+      justifyContent: "space-between",
       zIndex: 10,
     },
-    circleBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: "#FFFFFF",
-      justifyContent: "center",
-      alignItems: "center",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-    },
-    bottomPillsRow: {
-      position: "absolute",
-      bottom: 16,
-      left: 16,
-      right: 16,
+    heroActionsRight: {
       flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-    },
-    mediaPill: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: "rgba(0, 0, 0, 0.6)",
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 20,
-      gap: 6,
-    },
-    mediaPillText: {
-      color: "#FFFFFF",
-      fontSize: 12,
-      fontWeight: "600",
-    },
-    titleSection: {
-      paddingHorizontal: S.md,
-      marginTop: S.lg,
-      marginBottom: S.md,
-    },
-    titleRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 8,
-    },
-    salonTitle: {
-      fontSize: 22,
-      fontWeight: "700",
-      color: "#1E1E1E",
-    },
-    headerRatingBlock: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-    },
-    headerRatingText: {
-      fontSize: 16,
-      fontWeight: "700",
-      color: "#1E1E1E",
-    },
-    locationRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 6,
-    },
-    locationBlock: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-    },
-    locationText: {
-      fontSize: 13,
-      color: "#666666",
-    },
-    headerReviewCount: {
-      fontSize: 12,
-      color: "#666666",
-    },
-    statusRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 6,
-      marginBottom: 16,
-    },
-    statusDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-    },
-    statusText: {
-      fontSize: 13,
-      color: "#666666",
-    },
-    actionButtonsRow: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginTop: 8,
-      paddingHorizontal: 8,
-    },
-    actionBtnContainer: {
       alignItems: "center",
       gap: 8,
     },
-    actionIconCircle: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      backgroundColor: "#F5F5F5",
+    glassBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      alignItems: "center",
       justifyContent: "center",
-      alignItems: "center",
-    },
-    actionBtnLabel: {
-      fontSize: 12,
-      fontWeight: "500",
-      color: "#333333",
-    },
-    mainTabsRow: {
-      flexDirection: "row",
-      borderBottomWidth: 1,
-      borderBottomColor: "#F0F0F0",
-      position: "relative",
-    },
-    mainTabBtn: {
-      flex: 1,
-      paddingVertical: 14,
-      alignItems: "center",
-    },
-    mainTabLabel: {
-      fontSize: 14,
-      fontWeight: "600",
-      color: "#666666",
-    },
-    mainTabLabelActive: {
-      color: C.main,
-      fontWeight: "700",
-    },
-    animatedUnderline: {
-      position: "absolute",
-      bottom: 0,
-      left: 0,
-      height: 2.5,
-      borderRadius: 1.5,
-      backgroundColor: C.main,
-    },
-    categoryPillsScroll: {
-      marginTop: 16,
-      marginBottom: 12,
-      flexGrow: 0,
-      height: 40,
-    },
-    categoryPill: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 20,
-      marginRight: 8,
-      height: 34,
-      alignSelf: "flex-start",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    categoryPillActive: {
-      backgroundColor: C.main,
-    },
-    categoryPillInactive: {
-      backgroundColor: "#F5F5F5",
-    },
-    categoryPillText: {
-      fontSize: 13,
-      fontWeight: "600",
-    },
-    categoryPillTextActive: {
-      color: "#FFFFFF",
-    },
-    categoryPillTextInactive: {
-      color: "#666666",
-    },
-    servicesScrollBox: {
-      maxHeight: 580,
-      marginHorizontal: 16,
-      borderRadius: 16,
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
+      backgroundColor: isDark ? "rgba(28,28,38,0.88)" : "rgba(255,255,255,0.94)",
       borderWidth: 1,
-      borderColor: isDark ? "#2A2A2C" : "#F0F0F0",
-      paddingHorizontal: 12,
-      paddingVertical: 4,
+      borderColor: isDark ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.85)",
+      shadowColor: C.bg,
+      shadowOffset: { width: 0, height: 5 },
+      shadowOpacity: 0.16,
+      shadowRadius: 10,
+      elevation: 5,
     },
-    servicesListContainer: {
-      paddingBottom: 20,
-    },
-    viewAllServicesBtn: {
+    photoChip: {
+      position: "absolute",
+      right: 16,
+      bottom: 38,
+      height: 28,
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "#FCE8E8",
-      paddingHorizontal: 20,
-      paddingVertical: 10,
-      borderRadius: 20,
+      gap: 5,
+      paddingHorizontal: 10,
+      borderRadius: 14,
+      backgroundColor: isDark ? "rgba(28,28,38,0.88)" : "rgba(255,255,255,0.94)",
+      borderWidth: 1,
+      borderColor: isDark ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.85)",
+      shadowColor: C.bg,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 9,
+      elevation: 4,
+    },
+    photoChipText: {
+      fontSize: 10.5,
+      fontFamily: FF.bodyMedium,
+      color: theme.ink,
+      letterSpacing: 0.1,
+    },
+
+    // Identity
+    identityCard: {
+      position: "relative",
+      zIndex: 3,
+      marginTop: -26,
+      marginHorizontal: 16,
+      paddingTop: 15,
+      paddingHorizontal: 17,
+      paddingBottom: 14,
+      borderRadius: 22,
+      backgroundColor: theme.surface,
+      borderWidth: 1,
+      borderColor: theme.hairline,
+      shadowColor: C.ink,
+      shadowOffset: { width: 0, height: 18 },
+      shadowOpacity: isDark ? 0.32 : 0.14,
+      shadowRadius: 26,
+      elevation: 8,
+    },
+    eyebrowRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 10,
+    },
+    eyebrow: {
+      flex: 1,
+      fontSize: 12,
+      fontFamily: FF.bodySemiBold,
+      letterSpacing: 1.55,
+      textTransform: "uppercase",
+      color: theme.muted,
+    },
+    verifiedPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    verifiedDot: {
+      width: 13,
+      height: 13,
+      borderRadius: 7,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme.primary,
+    },
+    verifiedText: {
+      fontSize: 22,
+      fontFamily: FF.bodyMedium,
+      color: theme.primaryActive,
+      letterSpacing: 0.1,
+    },
+    salonName: {
+      marginTop: 5,
+      fontSize: 16,
+      lineHeight: 21,
+      fontFamily: FF.display,
+      color: theme.ink,
+      letterSpacing: 0.1,
+    },
+    metaRow: {
+      marginTop: 8,
+      flexDirection: "row",
+      alignItems: "center",
+      flexWrap: "wrap",
+    },
+    ratingInline: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+    },
+    ratingValue: {
+      fontSize: 13,
+      fontFamily: FF.display,
+      color: theme.ink,
+      letterSpacing: 0.1,
+    },
+    metaText: {
+      fontSize: 12,
+      fontFamily: FF.body,
+      color: theme.muted,
+    },
+    metaDot: {
+      width: 3,
+      height: 3,
+      borderRadius: 2,
+      backgroundColor: isDark ? C.muted : C.muted,
+      marginHorizontal: 7,
+    },
+    locationInline: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+      maxWidth: "100%",
+    },
+    locationText: {
+      fontSize: 13,
+      fontFamily: FF.body,
+      color: theme.muted,
+      flexShrink: 1,
+    },
+    statusLine: {
+      marginTop: 7,
+      flexDirection: "row",
+      alignItems: "center",
       gap: 6,
     },
-    viewAllServicesText: {
-      fontSize: 13,
-      fontWeight: "700",
-      color: "#8C1D2A",
-    },
-    statusBadgePill: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 8,
-      paddingVertical: 4,
-      borderRadius: R.pill,
-      gap: 5,
-    },
-    statusBadgeOpen: {
-      backgroundColor: isDark ? "rgba(34, 197, 94, 0.16)" : "#E8F8EE",
-      borderWidth: 1,
-      borderColor: isDark ? "rgba(34, 197, 94, 0.3)" : "#C3F0D3",
-    },
-    statusBadgeClosed: {
-      backgroundColor: isDark ? "rgba(239, 68, 68, 0.16)" : "#FEE2E2",
-      borderWidth: 1,
-      borderColor: isDark ? "rgba(239, 68, 68, 0.3)" : "#FECACA",
-    },
-    statusBadgeDot: {
+    statusDot: {
       width: 6,
       height: 6,
       borderRadius: 3,
     },
-    statusDotOpen: {
-      backgroundColor: "#22C55E",
-    },
-    statusDotClosed: {
-      backgroundColor: "#EF4444",
-    },
-    statusBadgeText: {
-      fontSize: 10,
-      fontWeight: "700",
-      letterSpacing: 0.5,
-    },
-    statusTextOpen: {
-      color: isDark ? "#4ADE80" : "#15803D",
-    },
-    statusTextClosed: {
-      color: isDark ? "#FCA5A5" : "#B91C1C",
-    },
-    closedAlertBanner: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: isDark ? "rgba(255, 59, 48, 0.14)" : "#FFF2F2",
-      borderWidth: 1,
-      borderColor: isDark ? "rgba(255, 59, 48, 0.35)" : "#FFCACA",
-      borderRadius: 16,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      marginTop: 14,
-      marginBottom: 4,
-      gap: 12,
-    },
-    closedAlertIconCircle: {
-      width: 36,
-      height: 36,
-      borderRadius: 18,
-      backgroundColor: isDark ? "rgba(255, 59, 48, 0.22)" : "#FFE5E5",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    closedAlertTextStack: {
-      flex: 1,
-    },
-    closedAlertTitle: {
-      fontSize: 13.5,
-      fontWeight: "700",
-      color: "#FF3B30",
-      letterSpacing: -0.1,
-    },
-    closedAlertSub: {
+    statusText: {
+      flexShrink: 1,
       fontSize: 12,
-      fontWeight: "500",
-      color: isDark ? "#E5E5EA" : "#555555",
-      marginTop: 2,
-      lineHeight: 16,
-    },
-    locationBlock: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      flex: 1,
-      paddingRight: S.sm,
-    },
-    locationText: {
-      fontSize: FS.sub,
-      color: C.muted,
-      fontWeight: FW.regular,
-    },
-    ratingBlock: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      backgroundColor: C.surface,
-      paddingHorizontal: 10,
-      paddingVertical: 5,
-      borderRadius: R.pill,
-      borderWidth: 1,
-      borderColor: C.border,
-    },
-    ratingText: {
-      fontSize: FS.bodySm,
-      fontWeight: FW.bold,
-      color: C.ink,
-    },
-    ratingSubtext: {
-      fontSize: 11,
-      color: C.muted,
-    },
-    hairline: {
-      height: StyleSheet.hairlineWidth,
-      backgroundColor: C.border,
-      marginHorizontal: S.md,
-      marginBottom: S.md,
-    },
-    sectionBlock: {
-      paddingHorizontal: S.md,
-      // marginBottom: S.lg + 2,
-    },
-    sectionLabel: {
-      fontFamily: FONT_FAMILY.serif,
-      fontSize: 18,
-      fontWeight: "700",
-      color: C.ink,
-      letterSpacing: -0.2,
-      marginBottom: S.sm + 2,
-    },
-    addressHeaderTitle: {
-      fontFamily: FONT_FAMILY.serif,
-      fontSize: 18,
-      fontWeight: "700",
-      color: C.ink,
-      letterSpacing: -0.2,
-      marginBottom: 4,
-    },
-    addressBodyText: {
-      fontSize: 13.5,
-      fontWeight: "500",
-      color: C.muted,
       lineHeight: 20,
-      marginBottom: 12,
+      fontFamily: FF.body,
+      color: theme.muted,
     },
-    addressMapCard: {
-      height: 185,
-      borderRadius: 24,
-      overflow: "hidden",
-      position: "relative",
+    cardActions: {
+      flexDirection: "row",
+      gap: 8,
+      marginTop: 12,
+    },
+    secondaryAction: {
+      flex: 1,
+      height: 39,
+      borderRadius: 12,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C34" : "#E5E5EB",
-    },
-    addressMapOverlay: {
-      ...StyleSheet.absoluteFillObject,
-      backgroundColor: isDark ? "rgba(18,18,22,0.35)" : "rgba(240,240,245,0.1)",
-    },
-    addressMapPinCenter: {
-      position: "absolute",
-      top: "38%",
-      left: "44%",
-      alignItems: "center",
-    },
-    addressPinBadge: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: "#6C5CE7",
+      borderColor: theme.hairline,
+      backgroundColor: softCard,
+      flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      shadowColor: "#6C5CE7",
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.4,
-      shadowRadius: 8,
-      elevation: 6,
-      borderWidth: 2.5,
-      borderColor: "#FFFFFF",
+      gap: 7,
     },
-    tapToNavigatePill: {
-      position: "absolute",
-      bottom: 12,
-      right: 12,
+    secondaryActionText: {
+      fontSize: 14,
+      fontFamily: FF.bodyMedium,
+      color: theme.ink,
+    },
+
+    // Branch picker
+    branchPicker: {
+      marginTop: 12,
+      paddingTop: 10,
+      borderTopWidth: 1,
+      borderTopColor: theme.hairlineSoft,
+    },
+    branchPickerLabel: {
+      fontSize: 13,
+      fontFamily: FF.bodySemiBold,
+      letterSpacing: 1.2,
+      textTransform: "uppercase",
+      color: theme.muted,
+      marginBottom: 4,
+    },
+    branchOption: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: "rgba(24, 24, 27, 0.85)",
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 14,
-      gap: 5,
+      gap: 9,
+      paddingVertical: 8,
+      paddingHorizontal: 8,
+      borderRadius: 12,
     },
-    tapToNavigateText: {
-      color: "#FFFFFF",
-      fontSize: 11.5,
-      fontWeight: "600",
+    branchOptionSelected: {
+      backgroundColor: pinkTint,
     },
-    amenitiesContainer: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "flex-start",
-      paddingTop: 8,
+    softIconSmall: {
+      width: 28,
+      height: 28,
+      borderRadius: 9,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: pinkTint,
     },
-    amenityItem: {
+    branchOptionCopy: {
       flex: 1,
+      minWidth: 0,
+    },
+    branchOptionTitle: {
+      fontSize: 13,
+      fontFamily: FF.display,
+      color: theme.ink,
+    },
+    branchOptionSub: {
+      marginTop: 1,
+      fontSize: 10,
+      fontFamily: FF.body,
+      color: theme.muted,
+    },
+
+    // Tabs
+    tabsRow: {
+      height: TABS_HEIGHT,
+      flexDirection: "row",
+      position: "relative",
+      backgroundColor: theme.canvas,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.hairlineSoft,
+    },
+    tabBtn: {
+      flex: 1,
+      height: TABS_HEIGHT,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    tabLabel: {
+      fontSize: 13.5,
+      fontFamily: FF.bodyMedium,
+      color: theme.muted,
+      letterSpacing: 0.1,
+    },
+    tabLabelActive: {
+      fontFamily: FF.display,
+      color: theme.primaryActive,
+    },
+    tabUnderline: {
+      position: "absolute",
+      bottom: -1,
+      width: 22,
+      height: 2.5,
+      borderRadius: 2,
+      backgroundColor: theme.primary,
+      opacity: 0,
+    },
+    tabUnderlineActive: {
+      opacity: 1,
+    },
+
+    // Services
+    tabPage: {
+      paddingTop: 0,
+    },
+    categoryScroll: {
+      marginTop: 13,
+      flexGrow: 0,
+    },
+    categoryContent: {
+      paddingHorizontal: 16,
+      paddingBottom: 2,
       alignItems: "center",
     },
-    amenityIconCircle: {
+    categoryPill: {
+      height: 33,
+      paddingHorizontal: 15,
+      borderRadius: 17,
+      marginRight: 7,
+      borderWidth: 1,
+      borderColor: theme.hairline,
+      backgroundColor: theme.surface,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    categoryPillActive: {
+      backgroundColor: theme.primary,
+      borderColor: theme.primary,
+      shadowColor: theme.primary,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.22,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    categoryPillText: {
+      fontSize: 12,
+      fontFamily: FF.bodyMedium,
+      color: theme.body,
+    },
+    categoryPillTextActive: {
+      fontFamily: FF.display,
+      color: theme.onPrimary,
+    },
+    listMeta: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 17,
+      paddingTop: 14,
+      paddingBottom: 8,
+    },
+    listMetaText: {
+      fontSize: 11,
+      fontFamily: FF.bodyMedium,
+      letterSpacing: 1.2,
+      textTransform: "uppercase",
+      color: theme.muted,
+    },
+    serviceList: {
+      paddingHorizontal: 16,
+      paddingBottom: 16,
+      gap: 9,
+    },
+    serviceSkeletonCard: {
+      padding: 14,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: theme.hairline,
+      backgroundColor: theme.surface,
+    },
+    emptyCard: {
+      marginHorizontal: 16,
+      marginTop: 16,
+      paddingVertical: 28,
+      paddingHorizontal: 24,
+      alignItems: "center",
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: theme.hairline,
+      backgroundColor: theme.surface,
+    },
+    emptyIcon: {
       width: 48,
       height: 48,
       borderRadius: 24,
-      backgroundColor: isDark ? "#22222D" : C.surface,
       alignItems: "center",
       justifyContent: "center",
-      borderWidth: 1,
-      borderColor: isDark ? "#2A2A36" : C.border,
-      marginBottom: 6,
+      backgroundColor: pinkTint,
+      marginBottom: 12,
     },
-    moreAmenityCircle: {
-      backgroundColor: isDark ? "#3F3F46" : C.ink,
-      borderColor: isDark ? "#3F3F46" : C.ink,
-    },
-    amenityLabel: {
-      fontSize: 11,
-      color: isDark ? "#A1A1AA" : C.body,
-      fontWeight: FW.medium,
+    emptyTitle: {
+      fontSize: 18,
+      fontFamily: FF.display,
+      color: theme.ink,
       textAlign: "center",
     },
-    moreAmenityText: {
-      fontSize: FS.bodySm,
-      fontWeight: FW.semiBold,
-      color: "#FFFFFF",
-    },
-    aboutText: {
-      fontSize: FS.bodySm,
-      color: C.body,
+    emptyCopy: {
+      marginTop: 6,
+      fontSize: 18,
       lineHeight: 22,
-      marginBottom: S.xs,
-      marginTop: S.xs,
+      fontFamily: FF.body,
+      color: theme.muted,
+      textAlign: "center",
     },
-    workingHoursCard: {
-      backgroundColor: isDark ? "#1E1E24" : "#F9F9FB",
-      borderRadius: 20,
-      padding: 16,
+
+    // About
+    aboutPage: {
+      paddingHorizontal: 16,
+      paddingTop: 17,
+    },
+    sectionKicker: {
+      fontSize: 13.5,
+      fontFamily: FF.bodySemiBold,
+      letterSpacing: 1.5,
+      textTransform: "uppercase",
+      color: theme.primaryActive,
+    },
+    aboutLead: {
+      marginTop: 7,
+      fontSize: 11.5,
+      lineHeight: 21,
+      fontFamily: FF.body,
+      color: theme.body,
+    },
+    aboutBlock: {
+      marginTop: 20,
+    },
+    smallLabel: {
+      fontSize: 11,
+      fontFamily: FF.bodySemiBold,
+      letterSpacing: 1.4,
+      textTransform: "uppercase",
+      color: theme.muted,
+    },
+    specialityWrap: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 6,
+      marginTop: 9,
+    },
+    specialityChip: {
+      height: 29,
+      paddingHorizontal: 12,
+      borderRadius: 15,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: isDark ? theme.surface : C.lifted,
       borderWidth: 1,
-      borderColor: isDark ? "#2C2C34" : "#EAEAEA",
+      borderColor: theme.hairlineSoft,
+    },
+    specialityText: {
+      fontSize: 13.5,
+      fontFamily: FF.bodyMedium,
+      color: theme.body,
+    },
+    galleryHead: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+    galleryLink: {
+      fontSize: 10,
+      fontFamily: FF.bodyMedium,
+      color: theme.primaryActive,
+    },
+    galleryScroll: {
+      marginTop: 8,
+      marginHorizontal: -16,
+    },
+    galleryContent: {
+      paddingHorizontal: 16,
+      gap: 8,
+    },
+    galleryPhoto: {
+      width: 175,
+      height: 94,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: theme.hairlineSoft,
+      backgroundColor: theme.surfaceStrong,
+    },
+    infoCard: {
+      marginTop: 12,
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 10,
+      paddingVertical: 12,
+      paddingHorizontal: 13,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: theme.hairline,
+      backgroundColor: theme.surface,
+    },
+    locationCard: {
+      marginTop: 16,
+    },
+    softIcon: {
+      width: 33,
+      height: 33,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: pinkTint,
+    },
+    infoCopy: {
+      flex: 1,
+      minWidth: 0,
+      paddingTop: 1,
+    },
+    infoTitle: {
+      fontSize: 13,
+      lineHeight: 21,
+      fontFamily: FF.display,
+      color: theme.ink,
+    },
+    infoDetail: {
+      marginTop: 3,
+      fontSize: 15,
+      lineHeight: 21,
+      fontFamily: FF.body,
+      color: theme.muted,
+    },
+    infoChevron: {
+      alignSelf: "center",
+    },
+    hoursCard: {
+      marginTop: 12,
+      borderRadius: 15,
+      borderWidth: 1,
+      borderColor: theme.hairline,
+      backgroundColor: theme.surface,
+      overflow: "hidden",
+    },
+    hoursHead: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingTop: 12,
+      paddingHorizontal: 13,
+      paddingBottom: 9,
+    },
+    hoursTitle: {
+      fontSize: 12,
+      fontFamily: FF.display,
+      color: theme.ink,
+    },
+    statusChip: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 4,
+      paddingHorizontal: 7,
+      paddingVertical: 3,
+      borderRadius: 5,
+    },
+    statusChipOpen: {
+      backgroundColor: isDark ? "rgba(74,222,128,0.14)" : C.successBg,
+    },
+    statusChipClosed: {
+      backgroundColor: isDark ? "rgba(248,113,113,0.14)" : C.crimsonTint,
+    },
+    statusChipDot: {
+      width: 4,
+      height: 4,
+      borderRadius: 2,
+    },
+    statusChipText: {
+      fontSize: 13,
+      fontFamily: FF.bodyMedium,
+      letterSpacing: 0.2,
     },
     hoursRow: {
       flexDirection: "row",
-      justifyContent: "space-between",
       alignItems: "center",
-      paddingVertical: 9,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#2C2C34" : "#EBEBEB",
+      justifyContent: "space-between",
+      paddingHorizontal: 13,
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: theme.hairlineSoft,
     },
     hoursRowToday: {
-      backgroundColor: isDark ? "rgba(179, 38, 30, 0.15)" : "rgba(179, 38, 30, 0.06)",
-      marginHorizontal: -8,
-      paddingHorizontal: 8,
-      borderRadius: 10,
+      backgroundColor: pinkTint,
+      borderTopColor: pinkLine,
+      borderBottomWidth: 1,
+      borderBottomColor: pinkLine,
     },
-    dayCol: {
+    dayLeft: {
       flexDirection: "row",
       alignItems: "center",
-      gap: 8,
     },
-    dayText: {
-      fontSize: 13.5,
-      fontWeight: "500",
-      color: isDark ? "#D4D4D8" : "#3F3F46",
+    dayName: {
+      fontSize: 12,
+      fontFamily: FF.bodySemiBold,
+      color: theme.ink,
     },
-    dayTextToday: {
-      fontWeight: "700",
-      color: C.main,
-    },
-    todayBadge: {
-      backgroundColor: C.main,
-      paddingHorizontal: 8,
+    todayPill: {
+      marginLeft: 6,
+      paddingHorizontal: 5,
       paddingVertical: 2,
-      borderRadius: 8,
+      borderRadius: 4,
+      backgroundColor: pinkTintStrong,
     },
-    todayBadgeText: {
-      fontSize: 10,
-      fontWeight: "700",
-      color: "#FFFFFF",
+    todayPillText: {
+      fontSize: 24,
+      fontFamily: FF.display,
+      letterSpacing: 0.35,
+      color: theme.primaryActive,
     },
-    timeText: {
-      fontSize: 13,
-      fontWeight: "600",
-      color: isDark ? "#E4E4E7" : "#18181B",
+    hoursTime: {
+      fontSize: 12,
+      fontFamily: FF.bodyMedium,
+      color: theme.ink,
     },
-    timeClosedText: {
-      color: isDark ? "#71717A" : "#A1A1AA",
-      fontWeight: "400",
+    hoursTimeToday: {
+      fontFamily: FF.display,
     },
-    galleryScroll: {
-      marginTop: S.xs,
+    hoursTimeClosed: {
+      color: theme.muted,
     },
-    galleryThumbWrap: {
-      borderRadius: R.md + 2,
-      marginRight: S.sm,
-    },
-    galleryThumb: {
-      width: 100,
-      height: 72,
-      borderRadius: R.md + 2,
-      backgroundColor: C.bone,
-    },
-    loadingBox: {
-      padding: S.xl,
-      alignItems: "center",
-    },
-    branchRow: {
+    hoursMore: {
+      height: 36,
       flexDirection: "row",
-    },
-    branchPill: {
-      backgroundColor: C.surface,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 16,
-      marginRight: 10,
-      borderWidth: 1,
-      borderColor: C.border,
-      minWidth: 120,
-      maxWidth: 240,
-    },
-    branchPillSelected: {
-      backgroundColor: C.ink,
-      borderColor: C.ink,
-    },
-    branchPillHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginBottom: 8,
-    },
-    branchCheckDot: {
-      width: 16,
-      height: 16,
-      borderRadius: 8,
-      backgroundColor: GOLD,
       alignItems: "center",
       justifyContent: "center",
+      gap: 4,
+      borderTopWidth: 1,
+      borderTopColor: theme.hairlineSoft,
     },
-    branchTitle: {
-      fontSize: 15,
-      fontWeight: "700",
-      color: C.ink,
-      letterSpacing: -0.2,
+    hoursMoreText: {
+      fontSize: 16,
+      fontFamily: FF.bodyMedium,
+      color: theme.primaryActive,
     },
-    branchTitleSelected: {
-      color: C.bg,
+    hoursEmpty: {
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      fontSize: 20,
+      fontFamily: FF.body,
+      color: theme.muted,
+      textAlign: "center",
     },
-    branchCity: {
-      fontSize: 12,
-      color: C.muted,
-      marginTop: 3,
+    aboutFooterSpace: {
+      height: 20,
     },
-    branchCitySelected: {
-      color: C.bg,
-    },
-    catTabRow: {
-      flexDirection: "row",
-      marginBottom: S.md,
-    },
-    catTabPill: {
+
+    // Reviews
+    reviewsPage: {
       paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 14,
-      marginRight: 6,
+      paddingTop: 16,
     },
-    catTabText: {
-      fontSize: 13,
-      letterSpacing: 0.1,
-    },
-    emptyCard: {
-      padding: S.lg,
-      backgroundColor: C.surface,
-      borderRadius: R.lg,
-      alignItems: "center",
-      borderWidth: 1,
-      borderColor: C.border,
-    },
-    emptyText: {
-      color: C.muted,
-      fontSize: FS.bodySm,
-    },
-    // Outer wrapper carries the shadow — NOT clipped, so Android elevation renders cleanly
-    // Outer wrapper carries the shadow — NOT clipped, so Android elevation renders cleanly
-    // Outer wrapper carries the shadow — NOT clipped, so Android elevation renders cleanly
-    floatingBottomBarWrapper: {
+
+    // Sticky compact header
+    stickyHeader: {
       position: "absolute",
-      bottom: 0,
+      top: 0,
       left: 0,
       right: 0,
-      zIndex: 999,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: -4 },
-      shadowOpacity: 0.05,
-      shadowRadius: 10,
-      elevation: 10,
+      zIndex: 60,
+      backgroundColor: theme.canvas,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.hairlineSoft,
+      shadowColor: C.ink,
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: isDark ? 0.28 : 0.08,
+      shadowRadius: 14,
+      elevation: 12,
     },
-    // Inner container matching BookingScreen bottom bar design
-    floatingBottomBar: {
-      paddingHorizontal: 24,
-      paddingTop: 16,
-      paddingBottom: Platform.OS === "ios" ? 28 : 20,
-      backgroundColor: isDark ? "#1C1C1E" : "#FFFFFF",
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      borderTopWidth: 1,
-      borderTopColor: isDark ? "#2A2A2C" : "#F0F1F5",
+    compactHeaderRow: {
+      height: COMPACT_HEADER_HEIGHT,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 9,
+      paddingHorizontal: 16,
+    },
+    compactBackBtn: {
+      width: 30,
+      height: 30,
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: -6,
+    },
+    compactThumb: {
+      width: 30,
+      height: 30,
+      borderRadius: 9,
+      borderWidth: 1,
+      borderColor: theme.hairlineSoft,
+      backgroundColor: theme.surfaceStrong,
+    },
+    compactCopy: {
+      flex: 1,
+      minWidth: 0,
+    },
+    compactTitle: {
+      fontSize: 12.5,
+      lineHeight: 21,
+      fontFamily: FF.display,
+      color: theme.ink,
+      letterSpacing: 0.05,
+    },
+    compactSubRow: {
+      marginTop: 2,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 3,
+    },
+    compactSubText: {
+      flexShrink: 1,
+      fontSize: 15,
+      fontFamily: FF.body,
+      color: theme.muted,
+    },
+    compactHeart: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      alignItems: "center",
+      justifyContent: "center",
+      marginLeft: 2,
+    },
+
+    // Booking bar
+    floatingBottomBarWrapper: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 40,
       overflow: "hidden",
+    },
+    floatingBottomBar: {
+      borderTopWidth: 1,
+      borderTopColor: theme.hairlineSoft,
+      elevation: 6,
     },
     floatingBottomBarTint: {
       ...StyleSheet.absoluteFillObject,
@@ -1649,183 +2253,117 @@ function getStyles(isDark) {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      zIndex: 1, // sit above the tint layer
+      gap: 14,
+      paddingHorizontal: 18,
+      paddingTop: 14,
     },
     totalBlock: {
       flex: 1,
-      marginRight: 12,
-      justifyContent: "center",
+      minWidth: 0,
     },
-    totalLabel: {
-      fontSize: 12,
-      color: "#666666",
-      marginBottom: 2,
+    bookingLabel: {
+      fontSize: 13,
+      fontFamily: FF.body,
+      color: theme.muted,
+      letterSpacing: 0.2,
+    },
+    priceRow: {
+      marginTop: 2,
+      flexDirection: "row",
+      alignItems: "baseline",
+      gap: 6,
     },
     totalAmount: {
-      fontSize: 24,
-      fontWeight: "700",
-      color: C.price,
+      fontSize: 22,
+      fontFamily: FF.displayBold,
+      color: theme.ink,
+      letterSpacing: 0.2,
     },
-    totalDurationRow: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 4,
-      marginTop: 2,
+    totalSuffix: {
+      fontSize: 14,
+      fontFamily: FF.body,
+      color: theme.muted,
+      letterSpacing: 0.2,
     },
-    totalDurationText: {
-      fontSize: 12,
-      color: "#666666",
-    },
-    animatedBookBtn: {
-      height: 52,
+    bookBtn: {
+      height: 48,
       paddingHorizontal: 24,
-      borderRadius: 26,
-      backgroundColor: C.button,
+      borderRadius: 24,
+      backgroundColor: theme.primary,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
-      gap: 6,
-      shadowColor: C.button,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
-      shadowRadius: 8,
-      elevation: 6,
+      gap: 8,
+      elevation: 3,
     },
-    animatedBookBtnText: {
-      color: "#FFFFFF",
+    bookBtnText: {
       fontSize: 16,
-      fontWeight: "700",
+      fontFamily: FF.displayBold,
+      color: theme.onPrimary,
+      letterSpacing: 0.3,
     },
-    modalOverlay: {
+
+    // Gallery
+    galleryModal: {
       flex: 1,
-      justifyContent: "flex-end",
-      backgroundColor: "rgba(0, 0, 0, 0.55)",
+      backgroundColor: C.ink,
     },
-    modalBackdropTouch: {
-      ...StyleSheet.absoluteFillObject,
-    },
-    amenitiesSheetContainer: {
-      backgroundColor: C.surface,
-      borderTopLeftRadius: 28,
-      borderTopRightRadius: 28,
-      paddingHorizontal: S.lg,
-      paddingTop: S.md,
-      paddingBottom: Platform.OS === "ios" ? 36 : 24,
-      maxHeight: "82%",
-      borderWidth: 1,
-      borderColor: C.border,
-    },
-    dragHandle: {
-      width: 38,
-      height: 4,
-      borderRadius: 2,
-      backgroundColor: C.border,
-      alignSelf: "center",
-      marginBottom: S.md,
-    },
-    amenitiesHeaderRow: {
+    galleryTop: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 10,
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: S.md,
+      paddingHorizontal: 16,
+      paddingBottom: 10,
+      backgroundColor: "rgba(11,10,13,0.55)",
     },
-    amenitiesModalTitle: {
-      fontSize: 20,
-      fontWeight: "700",
-      color: C.ink,
-      letterSpacing: -0.4,
-    },
-    amenitiesModalSub: {
-      fontSize: 12.5,
-      color: C.muted,
-      marginTop: 2,
-    },
-    modalCloseBtn: {
-      width: 34,
-      height: 34,
-      borderRadius: 17,
-      backgroundColor: C.bg,
+    galleryCloseBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
       alignItems: "center",
       justifyContent: "center",
-      borderWidth: 1,
-      borderColor: C.border,
+      backgroundColor: "rgba(255,255,255,0.14)",
     },
-    amenitiesListScroll: {
-      marginBottom: S.md,
+    galleryCount: {
+      fontSize: 10.5,
+      fontFamily: FF.bodyMedium,
+      color: C.textLight,
+      letterSpacing: 0.6,
     },
-    amenityRowCard: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: C.bg,
-      padding: S.md,
-      borderRadius: 16,
-      marginBottom: S.xs + 2,
-      borderWidth: 1,
-      borderColor: C.border,
-    },
-    amenityRowIconCircle: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: C.surface,
-      alignItems: "center",
-      justifyContent: "center",
-      marginRight: S.md,
-      borderWidth: 1,
-      borderColor: C.border,
-    },
-    amenityRowTextContent: {
+    galleryScroller: {
       flex: 1,
-      marginRight: S.sm,
     },
-    amenityRowTitle: {
-      fontSize: 15,
-      fontWeight: "600",
-      color: C.ink,
-    },
-    amenityRowDesc: {
-      fontSize: 12,
-      color: C.muted,
-      marginTop: 2,
-      lineHeight: 16,
-    },
-    amenitiesGotItBtn: {
-      backgroundColor: C.ink,
-      borderRadius: 18,
-      paddingVertical: 14,
+    gallerySlide: {
+      width: SCREEN_WIDTH,
+      height: SCREEN_HEIGHT,
       alignItems: "center",
       justifyContent: "center",
     },
-    amenitiesGotItBtnText: {
-      color: C.bg,
-      fontSize: 15,
-      fontWeight: "600",
+    galleryImage: {
+      width: SCREEN_WIDTH - 24,
+      height: SCREEN_HEIGHT * 0.68,
+      borderRadius: 10,
     },
-    quickActionsRow: {
-      flexDirection: "row",
+    galleryBottom: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
       alignItems: "center",
-      gap: 10,
-      marginTop: S.sm,
+      paddingTop: 14,
+      backgroundColor: "rgba(11,10,13,0.55)",
     },
-    quickActionBtn: {
-      flex: 1,
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: C.surface,
-      borderRadius: 14,
-      paddingVertical: 12,
-      gap: 7,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.06,
-      shadowRadius: 6,
-      elevation: 2,
-    },
-    quickActionText: {
-      fontSize: 13,
-      fontWeight: FW.semiBold,
-      color: C.ink,
+    galleryHint: {
+      fontSize: 10.5,
+      fontFamily: FF.body,
+      letterSpacing: 0.9,
+      textTransform: "uppercase",
+      color: "rgba(255,255,255,0.6)",
     },
   });
 }

@@ -5,56 +5,62 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  ActivityIndicator,
   RefreshControl,
   StyleSheet,
   Platform,
   StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { FONT_FAMILY } from "../theme";
+import { C, FONT_FAMILY } from "../theme";
 import { customerService } from "../services/customerService";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import SwipeableNotificationItem from "../components/SwipeableNotificationItem";
+import { SkeletonBox } from "../components/SkeletonLoader";
 import { useAuth } from "../context/AuthContext";
 
-function formatTimestamp(dateStr) {
-  if (!dateStr) return "Just now";
-  try {
-    const d = new Date(dateStr);
-    if (Number.isNaN(d.getTime())) return "";
-    const now = new Date();
-    const diffMs = now - d;
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
+function getDateBucket(dateStr) {
+  const date = new Date(dateStr);
+  if (Number.isNaN(date.getTime())) return "Earlier";
 
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return diffHours === 1 ? "1 hour ago" : `${diffHours} hours ago`;
-    if (diffDays === 1) return "1 day ago";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-  } catch (e) {
-    return dateStr;
-  }
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfToday.getDate() - 1);
+
+  if (date >= startOfToday) return "Today";
+  if (date >= startOfYesterday) return "Yesterday";
+  return "Earlier";
+}
+
+function groupNotifications(list) {
+  const buckets = { Today: [], Yesterday: [], Earlier: [] };
+  list.forEach((item) => {
+    buckets[getDateBucket(item.createdAt)].push(item);
+  });
+
+  return ["Today", "Yesterday", "Earlier"]
+    .filter((label) => buckets[label].length > 0)
+    .map((label) => ({ label, items: buckets[label] }));
 }
 
 export default function NotificationCenterScreen({ navigate, onBack }) {
   const { isDark } = useTheme();
   const { isAuthenticated } = useAuth();
-  const styles = getStyles(isDark);
   const insets = useSafeAreaInsets();
+  const styles = getStyles(isDark);
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadFailed, setLoadFailed] = useState(false);
 
-  const unreadCount = useMemo(() => {
-    return notifications.filter((n) => !n.isRead).length;
-  }, [notifications]);
+  const unreadCount = useMemo(
+    () => notifications.filter((notification) => !notification.isRead).length,
+    [notifications]
+  );
+
+  const sections = useMemo(() => groupNotifications(notifications), [notifications]);
 
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) {
@@ -91,7 +97,7 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
   const handleMarkAllRead = async () => {
     if (unreadCount === 0) return;
     const previous = notifications;
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setNotifications((prev) => prev.map((notification) => ({ ...notification, isRead: true })));
     try {
       await customerService.markAllNotificationsRead();
     } catch (e) {
@@ -101,17 +107,41 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
     }
   };
 
-  const handleToggleRead = async (item) => {
+  const handleOpenNotification = (item) => {
     const id = item._id || item.id;
+
     if (!item.isRead) {
       setNotifications((prev) =>
-        prev.map((n) => ((n._id || n.id) === id ? { ...n, isRead: true } : n))
+        prev.map((notification) =>
+          (notification._id || notification.id) === id
+            ? { ...notification, isRead: true }
+            : notification
+        )
       );
-      customerService.markNotificationRead(id).catch((e) => console.warn("Failed to mark read:", e?.message));
+      customerService
+        .markNotificationRead(id)
+        .catch((e) => console.warn("Failed to mark read:", e?.message));
     }
+
     const type = typeof item.type === "string" ? item.type.toLowerCase() : "";
+    const title = typeof item.title === "string" ? item.title.toLowerCase() : "";
     const body = typeof item.body === "string" ? item.body.toLowerCase() : "";
-    if (navigate && (type.includes("appointment") || body.includes("appointment"))) {
+    const actionText = typeof item.actionText === "string" ? item.actionText.toLowerCase() : "";
+    const text = `${title} ${body} ${actionText}`;
+
+    if (!navigate) return;
+
+    if (actionText.includes("profile") || text.includes("complete profile")) {
+      navigate("Profile");
+      return;
+    }
+    if (
+      type.includes("appointment") ||
+      type.includes("booking") ||
+      item?.data?.appointmentId ||
+      text.includes("appointment") ||
+      text.includes("booking")
+    ) {
       navigate("Bookings");
     }
   };
@@ -120,8 +150,8 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
     const id = item._id || item.id;
     let removedIndex = -1;
     setNotifications((prev) => {
-      removedIndex = prev.findIndex((n) => (n._id || n.id) === id);
-      return prev.filter((n) => (n._id || n.id) !== id);
+      removedIndex = prev.findIndex((notification) => (notification._id || notification.id) === id);
+      return prev.filter((notification) => (notification._id || notification.id) !== id);
     });
     try {
       await customerService.deleteNotification(id);
@@ -129,7 +159,7 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
       // Restore it in place; otherwise it silently reappears on the next refresh
       console.warn("Failed to delete notification:", e.message);
       setNotifications((prev) => {
-        if (prev.some((n) => (n._id || n.id) === id)) return prev;
+        if (prev.some((notification) => (notification._id || notification.id) === id)) return prev;
         const next = [...prev];
         next.splice(removedIndex >= 0 ? removedIndex : next.length, 0, item);
         return next;
@@ -142,114 +172,168 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
     else if (navigate) navigate("Home");
   };
 
-  const topInset = Math.max(insets.top, Platform.OS === "android" ? (StatusBar.currentHeight || 24) : 12);
-  const bottomInset = Math.max(insets.bottom, 24) + 20;
+  const topInset = Math.max(
+    insets.top,
+    Platform.OS === "android" ? StatusBar.currentHeight || 24 : 12
+  );
+  const bottomInset = Math.max(insets.bottom, 20) + 28;
 
-  const renderRichBody = (item) => {
-    const text = item.body || item.title || "";
-    const actionStr = item.actionText || (text.toLowerCase().includes("complete profile") ? "Complete Profile" : null);
+  const headerSubtitle = !isAuthenticated
+    ? "Sign in to keep track of bookings and salon updates."
+    : loadFailed
+      ? "We couldn't fetch your latest updates. Pull down to retry."
+      : unreadCount > 0
+        ? "Here's what's new since your last visit."
+        : notifications.length > 0
+          ? "You're all caught up. New updates will appear here."
+          : "Booking updates and reminders will appear here.";
 
-    let baseText = text;
-    if (actionStr && baseText.includes(actionStr)) {
-      baseText = baseText.replace(actionStr, "").trim();
-    }
-
-    const words = baseText.split(" ");
-    const boldKeywords = ["appointment", "password", "profile", "booking", "confirmed", "rescheduled"];
-
-    return (
-      <Text style={styles.itemTextBody}>
-        {words.map((word, i) => {
-          const clean = word.replace(/[^a-zA-Z]/g, "").toLowerCase();
-          const isBold = boldKeywords.includes(clean) || (item.highlightWord && clean === item.highlightWord.toLowerCase());
-
-          return (
-            <Text key={i} style={isBold ? styles.boldWord : styles.normalWord}>
-              {word}{" "}
-            </Text>
-          );
-        })}
-        {actionStr ? (
-          <Text style={styles.actionTextLink} onPress={() => navigate && navigate("Profile")}>
-            {actionStr}
-          </Text>
-        ) : null}
-      </Text>
-    );
-  };
+  const emptyIcon = !isAuthenticated
+    ? "log-in-outline"
+    : loadFailed
+      ? "cloud-offline-outline"
+      : "checkmark-done-outline";
+  const emptyTitle = !isAuthenticated
+    ? "Sign in to see notifications"
+    : loadFailed
+      ? "Couldn't load notifications"
+      : "You're all caught up";
+  const emptySubtitle = !isAuthenticated
+    ? "Booking confirmations, reminders, and salon updates will live here once you're signed in."
+    : loadFailed
+      ? "Check your connection, then pull down or tap retry."
+      : "New booking updates and reminders will appear here as soon as they happen.";
 
   return (
     <View style={[styles.container, { paddingTop: topInset }]}>
-      {/* Top Header Card Container */}
-      <View style={styles.headerCard}>
-        <View style={styles.titleRow}>
-          <Text style={styles.screenTitle}>Notifications</Text>
-          <TouchableOpacity style={styles.closeBtn} onPress={handleClose} activeOpacity={0.75}>
-            <Ionicons name="close" size={22} color={isDark ? "#D1D1D6" : "#3A3A3C"} />
-          </TouchableOpacity>
-        </View>
+      <View style={styles.header}>
+        <View style={styles.headerTopRow}>
+          <View style={styles.headerTitleBlock}>
+            <Text style={styles.eyebrow}>INBOX</Text>
+            <Text style={styles.screenTitle} accessibilityRole="header">Notifications</Text>
+          </View>
 
-        {/* Enhanced Sub-Header Actions Bar */}
-        <View style={styles.actionsBar}>
           <TouchableOpacity
-            style={[styles.markAllBtn, unreadCount === 0 && { opacity: 0.4 }]}
-            onPress={handleMarkAllRead}
-            disabled={unreadCount === 0}
-            activeOpacity={0.7}
+            style={styles.closeBtn}
+            onPress={handleClose}
+            activeOpacity={0.75}
+            accessibilityRole="button"
+            accessibilityLabel="Close notifications"
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           >
-            <Ionicons name="checkmark-done-sharp" size={15} color={isDark ? "#FF5252" : "#B3261E"} style={{ marginRight: 4 }} />
-            <Text style={styles.markAllReadText}>Mark all as read</Text>
+            <Ionicons name="close" size={20} color={isDark ? C.muted : C.textSecondary} />
           </TouchableOpacity>
-
-          {unreadCount > 0 && (
-            <View style={styles.unreadPill}>
-              <Text style={styles.unreadPillText}>{unreadCount} unread</Text>
-            </View>
-          )}
         </View>
 
-        {/* Hairline Divider */}
-        <View style={styles.divider} />
+        <Text style={styles.headerSubtitle}>{headerSubtitle}</Text>
+
+        {unreadCount > 0 ? (
+          <View style={styles.actionsRow}>
+            <View style={styles.unreadPill}>
+              <View style={styles.unreadPillDot} />
+              <Text style={styles.unreadPillText}>
+                {unreadCount} unread
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={styles.markAllBtn}
+              onPress={handleMarkAllRead}
+              activeOpacity={0.75}
+              accessibilityRole="button"
+              accessibilityLabel="Mark all notifications as read"
+              hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+            >
+              <Ionicons
+                name="checkmark-done"
+                size={15}
+                color={isDark ? C.lifted : C.textSecondary}
+                style={styles.markAllIcon}
+              />
+              <Text style={styles.markAllText}>Mark all read</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
       </View>
 
-      {/* Notification List Scroll */}
       {loading ? (
-        <View style={styles.loadingCenter}>
-          <ActivityIndicator size="large" color={isDark ? "#FF5252" : "#B3261E"} />
+        <View style={styles.loadingList}>
+          {[0, 1, 2].map((index) => (
+            <View key={index} style={styles.skeletonCard}>
+              <SkeletonBox width={42} height={42} borderRadius={14} />
+              <View style={styles.skeletonContent}>
+                <SkeletonBox
+                  width={index === 1 ? "46%" : "62%"}
+                  height={13}
+                  style={{ marginBottom: 10 }}
+                />
+                <SkeletonBox
+                  width={index === 2 ? "64%" : "92%"}
+                  height={11}
+                  style={{ marginBottom: 7 }}
+                />
+                <SkeletonBox width="78%" height={11} style={{ marginBottom: 13 }} />
+                <SkeletonBox width={64} height={9} />
+              </View>
+            </View>
+          ))}
         </View>
       ) : !isAuthenticated || notifications.length === 0 ? (
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
+          showsVerticalScrollIndicator={false}
           refreshControl={
             isAuthenticated ? (
-              <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={isDark ? "#FF5252" : "#B3261E"} />
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                tintColor={isDark ? C.main : C.main}
+                colors={[isDark ? C.main : C.main]}
+              />
             ) : undefined
           }
         >
-          <View style={styles.emptyContainer}>
+          <View style={[styles.emptyContainer, { paddingBottom: bottomInset }]}>
             <View style={styles.emptyIconCircle}>
               <Ionicons
-                name={!isAuthenticated ? "log-in-outline" : loadFailed ? "cloud-offline-outline" : "notifications-off-outline"}
-                size={32}
-                color={isDark ? "#FF5252" : "#B3261E"}
+                name={emptyIcon}
+                size={34}
+                color={isDark ? C.main : C.main}
               />
             </View>
-            <Text style={styles.emptyTitle}>
-              {!isAuthenticated ? "Sign in to see notifications" : loadFailed ? "Couldn't load notifications" : "No Notifications"}
-            </Text>
-            <Text style={styles.emptySubtitle}>
-              {!isAuthenticated
-                ? "Booking confirmations and reminders will show up here once you're signed in."
-                : loadFailed
-                  ? "Check your connection and pull down to try again."
-                  : "You're all caught up! When you have new alerts, they will show up here."}
-            </Text>
+            <Text style={styles.emptyTitle}>{emptyTitle}</Text>
+            <Text style={styles.emptySubtitle}>{emptySubtitle}</Text>
+
             {!isAuthenticated ? (
-              <TouchableOpacity style={styles.emptyCta} activeOpacity={0.85} onPress={() => navigate && navigate("Login")}>
+              <TouchableOpacity
+                style={styles.emptyCta}
+                activeOpacity={0.85}
+                onPress={() => navigate && navigate("Login")}
+                accessibilityRole="button"
+              >
                 <Text style={styles.emptyCtaText}>Sign in</Text>
+                <Ionicons name="arrow-forward" size={15} color={C.textLight} style={{ marginLeft: 6 }} />
               </TouchableOpacity>
-            ) : null}
+            ) : loadFailed ? (
+              <TouchableOpacity
+                style={styles.emptyCta}
+                activeOpacity={0.85}
+                onPress={handleRefresh}
+                accessibilityRole="button"
+              >
+                <Text style={styles.emptyCtaText}>Try again</Text>
+                <Ionicons name="refresh" size={15} color={C.textLight} style={{ marginLeft: 6 }} />
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.emptyHint}>
+                <Ionicons
+                  name="arrow-down"
+                  size={12}
+                  color={isDark ? C.muted : C.muted}
+                />
+                <Text style={styles.emptyHintText}>Pull down to refresh</Text>
+              </View>
+            )}
           </View>
         </ScrollView>
       ) : (
@@ -257,23 +341,44 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
           style={styles.scrollView}
           contentContainerStyle={[styles.scrollContent, { paddingBottom: bottomInset }]}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={isDark ? "#FF5252" : "#B3261E"} />}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={handleRefresh}
+              tintColor={isDark ? C.main : C.main}
+              colors={[isDark ? C.main : C.main]}
+            />
+          }
         >
-          {notifications.map((item, index) => {
-            const isLast = index === notifications.length - 1;
+          {sections.map((section, sectionIndex) => (
+            <View
+              key={section.label}
+              style={sectionIndex === 0 ? undefined : styles.sectionSpacing}
+            >
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionLabel}>{section.label}</Text>
+                <View style={styles.sectionRule} />
+              </View>
 
-            return (
-              <SwipeableNotificationItem
-                key={item._id || item.id || index}
-                item={item}
-                isLast={isLast}
-                onPress={handleToggleRead}
-                onDelete={handleDeleteNotification}
-                renderRichBody={renderRichBody}
-                formatTimestamp={formatTimestamp}
-              />
-            );
-          })}
+              {section.items.map((item, index) => (
+                <SwipeableNotificationItem
+                  key={item._id || item.id || `${section.label}-${index}`}
+                  item={item}
+                  onPress={handleOpenNotification}
+                  onDelete={handleDeleteNotification}
+                />
+              ))}
+            </View>
+          ))}
+
+          <View style={styles.swipeTip}>
+            <Ionicons
+              name="trash-outline"
+              size={12}
+              color={isDark ? C.muted : C.muted}
+            />
+            <Text style={styles.swipeTipText}>Swipe a notification left to delete</Text>
+          </View>
         </ScrollView>
       )}
     </View>
@@ -281,175 +386,227 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
 }
 
 function getStyles(isDark) {
+  const bg = isDark ? C.bg : C.bg;
+  const surface = C.surface;
+  const ink = isDark ? C.lifted : C.ink;
+  const muted = isDark ? C.muted : C.muted;
+  const hairline = isDark ? C.border : C.lifted;
+  const accent = isDark ? C.main : C.main;
+  const accentTint = isDark ? "rgba(255, 122, 154, 0.14)" : "rgba(255, 96, 130, 0.09)";
+
   return StyleSheet.create({
-    emptyCta: {
-      marginTop: 18,
-      paddingHorizontal: 24,
-      height: 44,
-      borderRadius: 12,
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: isDark ? "#FF5252" : "#B3261E",
-    },
-    emptyCtaText: {
-      color: "#FFFFFF",
-      fontSize: 14,
-      fontWeight: "700",
-    },
     container: {
       flex: 1,
-      backgroundColor: isDark ? "#121216" : "#FFFFFF",
+      backgroundColor: bg,
     },
-    headerCard: {
-      paddingHorizontal: 22,
-      paddingTop: 12,
-      backgroundColor: isDark ? "#121216" : "#FFFFFF",
+    header: {
+      paddingHorizontal: 20,
+      paddingTop: 10,
+      paddingBottom: 14,
+      backgroundColor: bg,
     },
-    titleRow: {
+    headerTopRow: {
       flexDirection: "row",
-      alignItems: "center",
+      alignItems: "flex-start",
       justifyContent: "space-between",
-      marginBottom: 16,
+    },
+    headerTitleBlock: {
+      flex: 1,
+      paddingRight: 12,
+    },
+    eyebrow: {
+      fontSize: 14,
+      fontFamily: FONT_FAMILY.bodyBold,
+      letterSpacing: 1.7,
+      color: accent,
     },
     screenTitle: {
-      fontFamily: FONT_FAMILY.serif,
+      marginTop: 2,
       fontSize: 24,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
-      letterSpacing: -0.4,
+      lineHeight: 20,
+      letterSpacing: 0.2,
+      fontFamily: FONT_FAMILY.displayBold,
+      color: ink,
     },
     closeBtn: {
-      width: 34,
-      height: 34,
-      borderRadius: 17,
-      backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F4F4F6",
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      marginTop: 4,
       alignItems: "center",
       justifyContent: "center",
+      backgroundColor: surface,
+      borderWidth: 1,
+      borderColor: hairline,
     },
-    actionsBar: {
+    headerSubtitle: {
+      marginTop: 5,
+      fontSize: 13.5,
+      lineHeight: 20,
+      fontFamily: FONT_FAMILY.body,
+      color: muted,
+    },
+    actionsRow: {
       flexDirection: "row",
       alignItems: "center",
       justifyContent: "space-between",
-      marginBottom: 14,
+      marginTop: 14,
+    },
+    unreadPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderRadius: 999,
+      paddingHorizontal: 11,
+      paddingVertical: 6,
+      backgroundColor: accentTint,
+    },
+    unreadPillDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      marginRight: 7,
+      backgroundColor: accent,
+    },
+    unreadPillText: {
+      fontSize: 12,
+      fontFamily: FONT_FAMILY.bodySemiBold,
+      color: accent,
     },
     markAllBtn: {
       flexDirection: "row",
       alignItems: "center",
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 999,
+      backgroundColor: surface,
+      borderWidth: 1,
+      borderColor: hairline,
     },
-    markAllReadText: {
-      fontSize: 13.5,
-      fontWeight: "600",
-      color: isDark ? "#FF5252" : "#B3261E",
+    markAllIcon: {
+      marginRight: 5,
     },
-    unreadPill: {
-      backgroundColor: isDark ? "rgba(179, 38, 30, 0.22)" : "rgba(179, 38, 30, 0.10)",
-      paddingHorizontal: 10,
-      paddingVertical: 3,
-      borderRadius: 12,
-    },
-    unreadPillText: {
-      fontSize: 12,
-      fontWeight: "600",
-      color: isDark ? "#FF5252" : "#B3261E",
-    },
-    divider: {
-      height: StyleSheet.hairlineWidth,
-      backgroundColor: isDark ? "#2C2C34" : "#EBECEF",
-      marginHorizontal: -22,
+    markAllText: {
+      fontSize: 14,
+      fontFamily: FONT_FAMILY.bodySemiBold,
+      color: ink,
     },
     scrollView: {
       flex: 1,
     },
     scrollContent: {
-      paddingHorizontal: 0,
-      paddingTop: 6,
+      paddingHorizontal: 20,
+      paddingTop: 8,
     },
-    loadingCenter: {
+    sectionSpacing: {
+      marginTop: 12,
+    },
+    sectionHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+      marginTop: 6,
+    },
+    sectionLabel: {
+      fontSize: 12,
+      fontFamily: FONT_FAMILY.bodyBold,
+      letterSpacing: 1.4,
+      color: muted,
+    },
+    sectionRule: {
       flex: 1,
+      height: StyleSheet.hairlineWidth,
+      marginLeft: 10,
+      backgroundColor: hairline,
+    },
+    swipeTip: {
+      flexDirection: "row",
       alignItems: "center",
       justifyContent: "center",
+      marginTop: 10,
+      paddingVertical: 8,
     },
-    notificationRow: {
+    swipeTipText: {
+      marginLeft: 6,
+      fontSize: 18,
+      fontFamily: FONT_FAMILY.body,
+      color: muted,
+    },
+    loadingList: {
+      paddingHorizontal: 20,
+      paddingTop: 8,
+    },
+    skeletonCard: {
       flexDirection: "row",
       alignItems: "flex-start",
-      paddingVertical: 16,
+      padding: 14,
+      marginBottom: 10,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: hairline,
+      backgroundColor: surface,
     },
-    rowBorderBottom: {
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: isDark ? "#26262E" : "#EFEFF4",
-    },
-    indicatorWrap: {
-      width: 22,
-      paddingTop: 5,
-      alignItems: "flex-start",
-    },
-    unreadPurpleDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      backgroundColor: isDark ? "#FF5252" : "#B3261E",
-    },
-    readHollowRing: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      borderWidth: 1.5,
-      borderColor: isDark ? "#55555E" : "#C7C7CC",
-      backgroundColor: "transparent",
-    },
-    contentColumn: {
+    skeletonContent: {
       flex: 1,
-    },
-    itemTextBody: {
-      fontSize: 14,
-      lineHeight: 20,
-      color: isDark ? "#D1D1D6" : "#3A3A3C",
-    },
-    normalWord: {
-      fontWeight: "400",
-      color: isDark ? "#CCCCCC" : "#48484A",
-    },
-    boldWord: {
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
-    },
-    actionTextLink: {
-      fontWeight: "700",
-      color: isDark ? "#FF5252" : "#B3261E",
-    },
-    timestampText: {
-      fontSize: 12,
-      color: isDark ? "#7C7C82" : "#A0A0A5",
-      marginTop: 4,
-      fontWeight: "400",
+      marginLeft: 12,
     },
     emptyContainer: {
-      flex: 1,
+      flexGrow: 1,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 36,
       paddingVertical: 60,
     },
     emptyIconCircle: {
-      width: 72,
-      height: 72,
-      borderRadius: 36,
-      backgroundColor: isDark ? "rgba(179, 38, 30, 0.20)" : "rgba(179, 38, 30, 0.08)",
+      width: 80,
+      height: 80,
+      borderRadius: 40,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 18,
+      backgroundColor: accentTint,
+      borderWidth: 1,
+      borderColor: isDark ? "rgba(255, 122, 154, 0.18)" : "rgba(255, 96, 130, 0.14)",
     },
     emptyTitle: {
-      fontSize: 18,
-      fontWeight: "700",
-      color: isDark ? "#FFFFFF" : "#18181B",
-      marginBottom: 8,
+      marginTop: 20,
+      fontSize: 13.5,
+      fontFamily: FONT_FAMILY.displayBold,
+      letterSpacing: 0.1,
+      color: ink,
+      textAlign: "center",
     },
     emptySubtitle: {
-      fontSize: 13.5,
+      marginTop: 8,
+      fontSize: 14,
       lineHeight: 20,
-      color: isDark ? "#8E8E93" : "#6E6E73",
+      fontFamily: FONT_FAMILY.body,
+      color: muted,
       textAlign: "center",
+    },
+    emptyCta: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 22,
+      height: 46,
+      paddingHorizontal: 24,
+      borderRadius: 23,
+      backgroundColor: accent,
+    },
+    emptyCtaText: {
+      color: C.textLight,
+      fontSize: 14,
+      fontFamily: FONT_FAMILY.bodyBold,
+    },
+    emptyHint: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginTop: 24,
+    },
+    emptyHintText: {
+      marginLeft: 6,
+      fontSize: 14,
+      fontFamily: FONT_FAMILY.body,
+      color: muted,
     },
   });
 }

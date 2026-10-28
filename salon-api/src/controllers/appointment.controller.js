@@ -16,6 +16,9 @@ const { getCache, setCache, delCachePattern } = require("../services/cache.servi
 const redis = require("../config/redis");
 const { sendPushToUser } = require("../services/push.service");
 const { notifyUser } = require("../services/notification.service");
+const { createAppointment } = require("../services/appointment.service");
+const { buildAppointmentEventPayload } = require("../utils/appointmentPayload");
+const { cleanPhone, isValidPhone, phoneVariants } = require("../utils/phone");
 const {
   sendBookingConfirmationEmail,
   sendAppointmentStatusEmail,
@@ -56,8 +59,25 @@ const buildStatusPush = (appointment, serviceName = "appointment", salonName = "
 // ================================
 const bookAppointment = async (req, res, next) => {
   try {
+    if (req.user.role !== "customer") {
+      return next(
+        new AppError(
+          "Use the staff booking endpoint to create appointments for customers.",
+          403,
+        ),
+      );
+    }
+
     const { slotId, serviceId, serviceIds, customerNotes, guests } = req.body;
     const { userId } = req.user;
+
+    // Server-side counterpart to the app's verification gate: an unverified
+    // email must not be able to create bookings by calling the API directly.
+    if (req.user.isEmailVerified === false) {
+      return next(
+        new AppError("Please verify your email address before booking an appointment.", 403),
+      );
+    }
 
     // --------------------------------
     // Idempotency Key Check
@@ -96,409 +116,26 @@ const bookAppointment = async (req, res, next) => {
       });
     }
 
-    const guestCount = Math.min(Math.max(parseInt(guests, 10) || 1, 1), 10);
-
-    // --------------------------------
-    // Step 1 — validate slot
-    // --------------------------------
-    const slot = await Slot.findById(slotId);
-    if (!slot) {
-      return next(new AppError("Slot not found", 404));
-    }
-
-    // Allow slot if AVAILABLE, or if RESERVED/BOOKED by current user, or if RESERVED over 10 minutes ago
-    const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
-    const isSlotAvailable =
-      slot.status === "AVAILABLE" ||
-      (slot.reservedBy && slot.reservedBy.toString() === userId.toString() && ["RESERVED", "BOOKED"].includes(slot.status)) ||
-      (slot.status === "RESERVED" && slot.reservedAt && slot.reservedAt < tenMinsAgo && !slot.appointmentId);
-
-    if (!isSlotAvailable) {
-      return next(new AppError("This slot is no longer available", 409));
-    }
-
-    // --------------------------------
-    // Step 1b — staff availability (leave) check
-    // a slot may still be AVAILABLE in DB but the staff is on leave
-    // for this window — never allow a hard conflict
-    // --------------------------------
-    const staffLeaves = await getActiveStaffLeaves({
-      staffId: slot.staffId,
-      startDate: slot.date,
-      endDate: slot.date,
-    });
-
-    if (
-      staffLeaves.length > 0 &&
-      slotOverlapsLeave(slot.startTime, slot.endTime, staffLeaves, slot.date)
-    ) {
-      return next(
-        new AppError(
-          "This staff member is not available at that time. Please pick another slot.",
-          400,
-        ),
-      );
-    }
-
-    const slotDateTime = dayjs(`${slot.date} ${slot.startTime}`);
-    if (slotDateTime.isBefore(dayjs())) {
-      return next(new AppError("Cannot book a slot in the past", 400));
-    }
-
-    // --------------------------------
-    // Distributed Lock — prevent race conditions on slot booking
-    // --------------------------------
-    const lockKey = `lock:slot:${slotId}`;
-    const lockValue = `${userId}:${Date.now()}`;
-    const lockAcquired = await redis.set(lockKey, lockValue, "NX", "EX", 10);
-    if (!lockAcquired) {
-      return next(new AppError("Slot is being processed by another request. Please try again.", 409));
-    }
-
-    // Ensure lock is released
-    const releaseLock = async () => {
-      const script = `
-        if redis.call("get", KEYS[1]) == ARGV[1] then
-          return redis.call("del", KEYS[1])
-        else
-          return 0
-        end
-      `;
-      try {
-        await redis.eval(script, 1, lockKey, lockValue);
-      } catch (e) {
-        console.warn("Lock release failed:", e.message);
-      }
-    };
-
-    // --------------------------------
-    // Step 2 — validate service(s)
-    // Supports single serviceId or array of serviceIds for multi-service selection
-    // --------------------------------
-    const requestedServiceIds = Array.isArray(serviceIds) && serviceIds.length > 0
-      ? serviceIds
-      : (serviceId ? [serviceId] : []);
-
-    if (requestedServiceIds.length === 0) {
-      return next(new AppError("At least one service is required", 400));
-    }
-
-    const services = await Service.find({
-      _id: { $in: requestedServiceIds },
-    });
-
-    if (!services || services.length === 0) {
-      return next(new AppError("Selected service(s) not found", 404));
-    }
-
-    const primaryService = services[0];
-    let totalPricePaid = 0;
-
-    for (const svc of services) {
-      if (!svc.isActive) {
-        return next(new AppError(`Service "${svc.name}" is not available`, 400));
-      }
-
-      if (svc.branchId.toString() !== slot.branchId.toString()) {
-        return next(new AppError(`Service "${svc.name}" does not belong to this branch`, 400));
-      }
-
-      if (
-        svc.eligibleStaff &&
-        svc.eligibleStaff.length > 0 &&
-        !svc.eligibleStaff
-          .map((id) => id.toString())
-          .includes(slot.staffId.toString())
-      ) {
-        return next(
-          new AppError(
-            `This staff member cannot perform the selected service "${svc.name}"`,
-            400,
-          ),
-        );
-      }
-
-      totalPricePaid += (svc.price ?? 0);
-    }
-
-    const serviceIdList = services.map((s) => s._id);
-
-    // --------------------------------
-    // Step 3 — check customer conflict
-    // --------------------------------
-    const conflict = await Appointment.findOne({
+    // Delegate the booking core to the shared service so customer bookings
+    // and staff-created walk-ins use the same slot, leave, and conflict rules.
+    const { appointment, slot, primaryService: service } = await createAppointment({
+      actorId: userId,
+      actorRole: req.user.role || "customer",
       customerId: userId,
-      date: slot.date,
-      startTime: slot.startTime,
-      status: { $in: ["PENDING", "CONFIRMED", "IN_PROGRESS"] },
-    })
-      .populate("salonId", "name")
-      .populate("serviceId", "name")
-      .populate("staffId", "name");
-
-    if (conflict) {
-      const err = new AppError("You already have an appointment at this time", 400);
-      err.conflictAppointment = {
-        _id: conflict._id,
-        salonName: conflict.salonId?.name || "Salon Luxe",
-        serviceName: conflict.serviceId?.name || "Service",
-        staffName: conflict.staffId?.name || "Specialist",
-        date: conflict.date,
-        startTime: conflict.startTime,
-        endTime: conflict.endTime,
-        status: conflict.status,
-      };
-      return next(err);
-    }
-
-    // Calculate total service duration in minutes
-    let totalServiceDurationMinutes = 0;
-    for (const svc of services) {
-      totalServiceDurationMinutes += (svc.durationMinutes || svc.duration || 30);
-    }
-    if (totalServiceDurationMinutes < 30) totalServiceDurationMinutes = 30;
-
-    // Calculate start time in minutes & target end time
-    const startMins = (() => {
-      const [h, m] = slot.startTime.split(":").map(Number);
-      return h * 60 + m;
-    })();
-    const targetEndMins = startMins + totalServiceDurationMinutes;
-    const computedEndTime = `${String(Math.floor(targetEndMins / 60) % 24).padStart(2, "0")}:${String(targetEndMins % 60).padStart(2, "0")}`;
-
-    // Find all consecutive slots required to cover totalServiceDurationMinutes
-    const consecutiveStaffSlots = await Slot.find({
-      staffId: slot.staffId,
-      date: slot.date,
-    }).sort({ startTime: 1 });
-
-    const requiredSlots = consecutiveStaffSlots.filter((s) => {
-      const [sh, sm] = s.startTime.split(":").map(Number);
-      const sMins = sh * 60 + sm;
-      return sMins >= startMins && sMins < targetEndMins;
+      source: "APP",
+      status: "PENDING",
+      slotId,
+      serviceIds:
+        Array.isArray(serviceIds) && serviceIds.length > 0
+          ? serviceIds
+          : serviceId
+            ? [serviceId]
+            : [],
+      customerNotes,
+      guests,
+      allowPastSlot: false,
+      allowBookedByActor: true,
     });
-
-    const requiredSlotIds = requiredSlots.map((s) => s._id);
-    if (requiredSlotIds.length === 0) {
-      requiredSlotIds.push(slot._id);
-    }
-
-    // --------------------------------
-    // Step 4 — atomic multi-slot acquisition
-    // Uses findOneAndUpdate per slot with status condition inside a transaction
-    // to prevent race conditions on consecutive slot booking.
-    // --------------------------------
-    let appointment;
-    const slotAcquireFilter = {
-      $or: [
-        { status: "AVAILABLE" },
-        { reservedBy: userId, status: { $in: ["RESERVED", "BOOKED"] } },
-        { status: "RESERVED", reservedAt: { $lt: tenMinsAgo }, appointmentId: null },
-      ],
-    };
-
-    let session = null;
-    try {
-      session = await mongoose.startSession();
-    } catch (sErr) {
-      session = null;
-    }
-
-    const acquireSlotsAtomically = async (sess) => {
-      const acquiredSlotIds = [];
-      try {
-        // Atomically acquire each required slot with conditional update
-        for (const slotId of requiredSlotIds) {
-          const acquired = await Slot.findOneAndUpdate(
-            { _id: slotId, ...slotAcquireFilter },
-            { status: "BOOKED", reservedBy: userId, reservedAt: new Date() },
-            { new: true, session: sess },
-          );
-          if (!acquired) {
-            throw new AppError("Required consecutive slot was just booked by another customer", 409);
-          }
-          acquiredSlotIds.push(acquired._id);
-        }
-
-        const created = await Appointment.create(
-          [
-            {
-              salonId: slot.salonId,
-              branchId: slot.branchId,
-              customerId: userId,
-              staffId: slot.staffId,
-              serviceId: primaryService._id,
-              services: serviceIdList,
-              slotId,
-              date: slot.date,
-              startTime: slot.startTime,
-              endTime: computedEndTime,
-              pricePaid: totalPricePaid,
-              currency: primaryService.currency || "INR",
-              customerNotes,
-              guests: guestCount,
-              status: "PENDING",
-              history: [
-                {
-                  status: "PENDING",
-                  changedBy: userId,
-                  changedAt: new Date(),
-                  note: "Appointment booked by customer",
-                },
-              ],
-            },
-          ],
-          { session: sess },
-        );
-
-        appointment = created[0];
-
-        // Link all acquired slots to the appointment
-        await Slot.updateMany(
-          { _id: { $in: acquiredSlotIds } },
-          { appointmentId: appointment._id },
-          { session: sess },
-        );
-      } catch (err) {
-        // Rollback any slots acquired in this attempt
-        if (acquiredSlotIds.length > 0) {
-          await Slot.updateMany(
-            { _id: { $in: acquiredSlotIds } },
-            { status: "AVAILABLE", reservedBy: null, reservedAt: null, appointmentId: null },
-            { session: sess },
-          );
-        }
-        throw err;
-      }
-    };
-
-    if (session && typeof session.withTransaction === "function") {
-      try {
-        await session.withTransaction(acquireSlotsAtomically);
-      } catch (txError) {
-        if (txError.status === 409 || txError.message?.includes("booked by another customer")) {
-          return next(new AppError("Slot was just booked by another customer", 409));
-        }
-        session = null;
-      } finally {
-        if (session) session.endSession();
-      }
-    }
-
-    // Single-node or fallback atomic slot booking (no transaction)
-    if (!appointment) {
-      const acquiredSlotIds = [];
-      try {
-        for (const slotId of requiredSlotIds) {
-          const acquired = await Slot.findOneAndUpdate(
-            { _id: slotId, ...slotAcquireFilter },
-            { status: "BOOKED", reservedBy: userId, reservedAt: new Date() },
-            { new: true },
-          );
-          if (!acquired) {
-            throw new AppError("Required consecutive slot was just booked by another customer", 409);
-          }
-          acquiredSlotIds.push(acquired._id);
-        }
-
-        appointment = await Appointment.create({
-          salonId: slot.salonId,
-          branchId: slot.branchId,
-          customerId: userId,
-          staffId: slot.staffId,
-          serviceId: primaryService._id,
-          services: serviceIdList,
-          slotId,
-          date: slot.date,
-          startTime: slot.startTime,
-          endTime: computedEndTime,
-          pricePaid: totalPricePaid,
-          currency: primaryService.currency || "INR",
-          customerNotes,
-          guests: guestCount,
-          status: "PENDING",
-          history: [
-            {
-              status: "PENDING",
-              changedBy: userId,
-              changedAt: new Date(),
-              note: "Appointment booked by customer",
-            },
-          ],
-        });
-
-        await Slot.updateMany(
-          { _id: { $in: acquiredSlotIds } },
-          { appointmentId: appointment._id }
-        );
-      } catch (createErr) {
-        // Rollback any slots acquired in this attempt
-        if (acquiredSlotIds.length > 0) {
-          await Slot.updateMany(
-            { _id: { $in: acquiredSlotIds } },
-            { status: "AVAILABLE", reservedBy: null, reservedAt: null, appointmentId: null }
-          );
-        }
-        throw createErr;
-      }
-    }
-
-    // Invalidate Redis slot caches for this branch/date only.
-    // NOTE: we deliberately do NOT flush `initial_load:*` here — nuking
-    // the whole city's cached dataset on every booking forced a full slow
-    // rebuild for every subsequent request. The 300s TTL keeps it fresh
-    // enough, and the next customer that books this branch still sees the
-    // just-invalidated slots on the booking screen.
-    delCachePattern(`branch:slots:${slot.branchId}:${slot.date}:*`);
-
-    // Selectively invalidate the initial_load cache for THIS branch's city
-    // (instead of flushing every city) so the home screen shows fresh
-    // slot availability without a full rebuild of all cities.
-    try {
-      const branchForCache = await Branch.findById(slot.branchId)
-        .select("citySlug")
-        .lean();
-      if (branchForCache?.citySlug) {
-        delCachePattern(`initial_load:${branchForCache.citySlug}:*`);
-      }
-    } catch (e) {
-      console.log("initial_load invalidation error:", e.message);
-    }
-
-    // Emit real-time WebSocket event for new appointment
-    try {
-      const io = getIO();
-      if (io) {
-        const customerIdStr = String(appointment.customerId);
-        const branchIdStr = String(appointment.branchId);
-        const salonIdStr = String(appointment.salonId);
-
-        const populatedAppt = await Appointment.findById(appointment._id)
-          .populate("customerId", "name email phone")
-          .populate("serviceId", "name durationMinutes price")
-          .populate("staffId", "name")
-          .populate("branchId", "name")
-          .populate("salonId", "name");
-
-        const eventData = {
-          appointmentId: appointment._id,
-          status: appointment.status,
-          appointment: populatedAppt || appointment,
-        };
-
-        console.log(`⚡ [SOCKET EMIT] Emitting new appointment (${appointment._id}) to branch_${branchIdStr}`);
-        io.to(`customer_${customerIdStr}`).emit("appointment_created", eventData);
-        io.to(`customer_${customerIdStr}`).emit("appointment_status_changed", eventData);
-        io.to(`branch_${branchIdStr}`).emit("appointment_created", eventData);
-        io.to(`branch_${branchIdStr}`).emit("appointment_updated", eventData);
-        if (salonIdStr) {
-          io.to(`salon_${salonIdStr}`).emit("appointment_created", eventData);
-          io.to(`salon_${salonIdStr}`).emit("appointment_updated", eventData);
-        }
-      }
-    } catch (e) {
-      console.log("WebSocket emit error:", e.message);
-    }
 
     // send the customer a push notification for the new booking
     try {
@@ -615,6 +252,292 @@ const bookAppointment = async (req, res, next) => {
 };
 
 // ================================
+// POST /api/v1/appointments/staff
+// owner / manager / staff — create an appointment for a walk-in or phone
+// customer. The customer either has an app account known to this salon or is
+// stored as a guest snapshot on the appointment.
+// ================================
+const createStaffAppointment = async (req, res, next) => {
+  try {
+    const {
+      role,
+      userId,
+      salonId: actorSalonId,
+      branchId: actorBranchId,
+    } = req.user;
+    const {
+      slotId,
+      serviceId,
+      serviceIds,
+      staffId,
+      customerId,
+      customer,
+      customerNotes,
+      guests,
+      source,
+    } = req.body;
+
+    if (!["owner", "manager", "staff"].includes(role)) {
+      return next(
+        new AppError(
+          "Only salon staff can create appointments for customers.",
+          403,
+        ),
+      );
+    }
+
+    const branchId = role === "owner" ? req.body.branchId : actorBranchId;
+    if (!branchId) {
+      return next(new AppError("Branch is required", 400));
+    }
+
+    if (
+      role !== "owner" &&
+      req.body.branchId &&
+      String(req.body.branchId) !== String(actorBranchId)
+    ) {
+      return next(
+        new AppError("Access denied. This branch is not assigned to you.", 403),
+      );
+    }
+
+    const slot = await Slot.findById(slotId);
+    if (!slot) {
+      return next(new AppError("Slot not found", 404));
+    }
+
+    if (actorSalonId && String(slot.salonId) !== String(actorSalonId)) {
+      return next(
+        new AppError("Access denied. This slot is not in your salon.", 403),
+      );
+    }
+
+    if (String(slot.branchId) !== String(branchId)) {
+      return next(
+        new AppError("Selected slot does not belong to this branch", 400),
+      );
+    }
+
+    if (staffId && String(slot.staffId) !== String(staffId)) {
+      return next(
+        new AppError("Selected staff member does not match the slot", 400),
+      );
+    }
+
+    const staff = await User.findById(slot.staffId)
+      .populate("role", "name")
+      .select("name role branchId salonId isActive")
+      .lean();
+
+    if (!staff || !staff.isActive || staff.role?.name !== "staff") {
+      return next(
+        new AppError("Selected staff member is not available", 400),
+      );
+    }
+
+    if (
+      String(staff.branchId) !== String(branchId) ||
+      (staff.salonId &&
+        actorSalonId &&
+        String(staff.salonId) !== String(actorSalonId))
+    ) {
+      return next(
+        new AppError(
+          "Selected staff member does not belong to this branch",
+          400,
+        ),
+      );
+    }
+
+    let linkedCustomerId = null;
+    let customerSnapshot = null;
+
+    if (customerId) {
+      const customerUser = await User.findById(customerId)
+        .populate("role", "name")
+        .select("name phone email role isActive")
+        .lean();
+
+      if (
+        !customerUser ||
+        !customerUser.isActive ||
+        customerUser.role?.name !== "customer"
+      ) {
+        return next(new AppError("Customer account not found", 404));
+      }
+
+      // Only link customers already known to this salon. This prevents a
+      // staff member from pulling another salon's customer into a booking
+      // just by guessing an ObjectId.
+      const knownToSalon = await Appointment.exists({
+        salonId: slot.salonId,
+        customerId: customerUser._id,
+      });
+
+      if (!knownToSalon) {
+        return next(
+          new AppError(
+            "This customer is not known to your salon. Create the booking as a guest instead.",
+            400,
+          ),
+        );
+      }
+
+      linkedCustomerId = customerUser._id;
+    } else {
+      const guestName = String(customer?.name || "").trim();
+      const guestPhone = cleanPhone(customer?.phone);
+
+      if (!guestName || !guestPhone) {
+        return next(
+          new AppError(
+            "Customer name and phone are required for a guest booking",
+            400,
+          ),
+        );
+      }
+
+      if (!isValidPhone(guestPhone)) {
+        return next(new AppError("Please provide a valid phone number", 400));
+      }
+
+      customerSnapshot = {
+        name: guestName,
+        phone: guestPhone,
+        email: customer?.email
+          ? String(customer.email).trim().toLowerCase()
+          : null,
+      };
+    }
+
+    const { appointment, primaryService } = await createAppointment({
+      actorId: userId,
+      actorRole: role,
+      customerId: linkedCustomerId,
+      customerSnapshot,
+      source: source === "PHONE" ? "PHONE" : "WALK_IN",
+      status: "CONFIRMED",
+      slotId,
+      serviceIds:
+        Array.isArray(serviceIds) && serviceIds.length > 0
+          ? serviceIds
+          : serviceId
+            ? [serviceId]
+            : [],
+      customerNotes,
+      guests,
+      allowPastSlot: true,
+      allowBookedByActor: false,
+    });
+
+    // A linked app customer should still see the booking the salon created
+    // for them, even though no customer-facing request was made.
+    if (linkedCustomerId) {
+      try {
+        await notifyUser({
+          recipientId: linkedCustomerId,
+          type: "appointment.created",
+          title: "Appointment booked",
+          body: `Your ${primaryService?.name || "appointment"} at the salon has been booked for ${appointment.date} at ${appointment.startTime}.`,
+          data: { appointmentId: appointment._id, status: appointment.status },
+          branchId: appointment.branchId,
+          salonId: appointment.salonId,
+        });
+      } catch (e) {
+        console.log("In-app notification save error:", e.message);
+      }
+
+      try {
+        await sendPushToUser({
+          userId: linkedCustomerId,
+          title: "Appointment booked",
+          body: `Your ${primaryService?.name || "appointment"} has been booked for ${appointment.date} at ${appointment.startTime}.`,
+          data: {
+            appointmentId: String(appointment._id),
+            status: appointment.status,
+            type: "appointment.status",
+          },
+        });
+      } catch (e) {
+        console.log("Push notification error:", e.message);
+      }
+    }
+
+    res.status(201).json({
+      success: true,
+      message: "Appointment created successfully",
+      data: { appointment },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ================================
+// GET /api/v1/appointments/staff/customer-lookup
+// Exact-phone match, scoped to customers already known to this salon.
+// Returns the minimum needed to confirm the match — never a browseable list.
+// ================================
+const lookupCustomerForStaff = async (req, res, next) => {
+  try {
+    const { phone } = req.query;
+    const { salonId } = req.user;
+
+    if (!phone || !isValidPhone(phone)) {
+      return next(
+        new AppError("A valid phone number is required", 400),
+      );
+    }
+
+    if (!salonId) {
+      return next(new AppError("Salon scope is required", 403));
+    }
+
+    const candidates = await User.find({
+      phone: { $in: phoneVariants(phone) },
+      isActive: true,
+    })
+      .populate("role", "name")
+      .select("name phone role")
+      .limit(5)
+      .lean();
+
+    const customer = candidates.find((u) => u.role?.name === "customer");
+
+    if (!customer) {
+      return res.status(200).json({
+        success: true,
+        data: { customer: null },
+      });
+    }
+
+    const knownToSalon = await Appointment.exists({
+      salonId,
+      customerId: customer._id,
+    });
+
+    if (!knownToSalon) {
+      return res.status(200).json({
+        success: true,
+        data: { customer: null },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        customer: {
+          _id: customer._id,
+          name: customer.name,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ================================
 // GET /api/v1/appointments
 // filtered by role:
 //   customer  → their own appointments
@@ -634,7 +557,9 @@ const getAppointments = async (req, res, next) => {
     if (role === "customer") {
       filter.customerId = userId;
     } else if (role === "staff") {
-      filter.staffId = userId;
+      // Staff see their own schedule plus any booking they created for a
+      // colleague at the front desk.
+      filter.$or = [{ staffId: userId }, { createdBy: userId }];
       // staff defaults to today if no date given
       filter.date = date || dayjs().format("YYYY-MM-DD");
     } else if (role === "manager") {
@@ -645,6 +570,10 @@ const getAppointments = async (req, res, next) => {
       if (queryBranchId) {
         filter.branchId = queryBranchId;
       }
+    } else {
+      // Fail closed: never run an unscoped appointment query for an
+      // unrecognized role.
+      return next(new AppError("Access denied. Role not authorized.", 403));
     }
 
     // optional filters
@@ -655,6 +584,7 @@ const getAppointments = async (req, res, next) => {
       Appointment.find(filter)
         .populate("customerId", "name phone email")
         .populate("staffId", "name")
+        .populate("createdBy", "name")
         .populate("serviceId", "name price durationMinutes category")
         .populate("services", "name price durationMinutes category")
         .populate("branchId", "name address contactPhone")
@@ -694,6 +624,7 @@ const getAppointment = async (req, res, next) => {
     const appointment = await Appointment.findById(appointmentId)
       .populate("customerId", "name phone email")
       .populate("staffId", "name")
+      .populate("createdBy", "name")
       .populate("serviceId", "name price durationMinutes category")
       .populate("services", "name price durationMinutes category")
       .populate("branchId", "name address contactPhone")
@@ -704,22 +635,34 @@ const getAppointment = async (req, res, next) => {
       return next(new AppError("Appointment not found", 404));
     }
 
-    // scope checks
+    // scope checks — guest appointments have a null customerId, so every
+    // comparison is guarded instead of assuming a populated account exists.
+    const appointmentCustomerId =
+      appointment.customerId?._id || appointment.customerId;
+    const appointmentStaffId =
+      appointment.staffId?._id || appointment.staffId;
+    const appointmentBranchId =
+      appointment.branchId?._id || appointment.branchId;
+    const appointmentCreatedBy =
+      appointment.createdBy?._id || appointment.createdBy;
+
     if (
       role === "customer" &&
-      appointment.customerId._id.toString() !== userId.toString()
+      (!appointmentCustomerId ||
+        appointmentCustomerId.toString() !== userId.toString())
     ) {
       return next(new AppError("Access denied", 403));
     }
     if (
       role === "staff" &&
-      appointment.staffId._id.toString() !== userId.toString()
+      appointmentStaffId?.toString() !== userId.toString() &&
+      appointmentCreatedBy?.toString() !== userId.toString()
     ) {
       return next(new AppError("Access denied", 403));
     }
     if (
       role === "manager" &&
-      appointment.branchId._id.toString() !== branchId.toString()
+      appointmentBranchId?.toString() !== branchId.toString()
     ) {
       return next(new AppError("Access denied", 403));
     }
@@ -740,7 +683,7 @@ const getAppointment = async (req, res, next) => {
 const updateAppointmentStatus = async (req, res, next) => {
   try {
     const { appointmentId } = req.params;
-    const { status, note } = req.body;
+    const { status, note, paymentMethod } = req.body;
     const { userId, role, branchId } = req.user;
 
     const appointment = await Appointment.findById(appointmentId);
@@ -794,15 +737,16 @@ const updateAppointmentStatus = async (req, res, next) => {
       return next(new AppError("Access denied", 403));
     }
 
-    // customer can only cancel their own
+    // customer can only cancel their own (guests have no account)
     if (
       role === "customer" &&
-      appointment.customerId.toString() !== userId.toString()
+      (!appointment.customerId ||
+        appointment.customerId.toString() !== userId.toString())
     ) {
       return next(new AppError("Access denied", 403));
     }
 
-    // staff can only update their own appointments
+    // staff can only update appointments assigned to them
     if (
       role === "staff" &&
       appointment.staffId.toString() !== userId.toString()
@@ -929,6 +873,14 @@ const updateAppointmentStatus = async (req, res, next) => {
           }
         }
 
+        // record payment method when completing
+        if (status === "COMPLETED" && paymentMethod) {
+          const allowed = ["cash", "card", "upi", "other"];
+          if (allowed.includes(paymentMethod)) {
+            appointment.paymentMethod = paymentMethod;
+          }
+        }
+
         // update status — pre-save hook records it in statusHistory
         appointment.status = status;
         appointment.statusHistory.push({
@@ -957,11 +909,8 @@ const updateAppointmentStatus = async (req, res, next) => {
 
         console.log(`⚡ [SOCKET EMIT] Emitting status change (${appointment.status}) to room customer_${customerIdStr} & branch_${branchIdStr}`);
 
-        const eventPayload = {
-          appointmentId: appointment._id,
-          status: appointment.status,
-          appointment,
-        };
+        const eventPayload =
+          buildAppointmentEventPayload(appointment);
 
         io.to(`customer_${customerIdStr}`).emit("appointment_status_changed", eventPayload);
         io.to(`branch_${branchIdStr}`).emit("appointment_updated", eventPayload);
@@ -981,7 +930,7 @@ const updateAppointmentStatus = async (req, res, next) => {
           appointment.serviceId?.name || "appointment",
           appointment.salonId?.name || "Salon",
         );
-        if (push) await sendPushToUser(push);
+        if (push?.userId) await sendPushToUser(push);
       }
     } catch (e) {
       console.log("Push notification error:", e.message);
@@ -1035,21 +984,23 @@ const updateAppointmentStatus = async (req, res, next) => {
       console.log("Email dispatch error:", e.message);
     }
 
-    // save persistent in-app notification for customer
+    // save persistent in-app notification for customer (guests have no inbox)
     try {
       const custId = appointment.customerId?._id || appointment.customerId;
       const salonName = appointment.salonId?.name || "Salon";
       const serviceName = appointment.serviceId?.name || "Service";
 
-      await notifyUser({
-        recipientId: custId,
-        type: `appointment.${appointment.status.toLowerCase()}`,
-        title: `Appointment ${appointment.status}`,
-        body: `Your ${serviceName} booking at ${salonName} status has been updated to ${appointment.status}.`,
-        data: { appointmentId: appointment._id, status: appointment.status },
-        branchId: appointment.branchId?._id || appointment.branchId,
-        salonId: appointment.salonId?._id || appointment.salonId,
-      });
+      if (custId) {
+        await notifyUser({
+          recipientId: custId,
+          type: `appointment.${appointment.status.toLowerCase()}`,
+          title: `Appointment ${appointment.status}`,
+          body: `Your ${serviceName} booking at ${salonName} status has been updated to ${appointment.status}.`,
+          data: { appointmentId: appointment._id, status: appointment.status },
+          branchId: appointment.branchId?._id || appointment.branchId,
+          salonId: appointment.salonId?._id || appointment.salonId,
+        });
+      }
     } catch (e) {
       console.log("In-app notification save error:", e.message);
     }
@@ -1079,7 +1030,10 @@ const rateAppointment = async (req, res, next) => {
       return next(new AppError("Appointment not found", 404));
     }
 
-    if (appointment.customerId.toString() !== userId.toString()) {
+    if (
+      !appointment.customerId ||
+      appointment.customerId.toString() !== userId.toString()
+    ) {
       return next(new AppError("Access denied", 403));
     }
 
@@ -1145,10 +1099,11 @@ const rescheduleAppointment = async (req, res, next) => {
     // Step 2 — scope checks
     // --------------------------------
 
-    // customer can only reschedule their own
+    // customer can only reschedule their own (guests have no account)
     if (
       role === "customer" &&
-      appointment.customerId.toString() !== userId.toString()
+      (!appointment.customerId ||
+        appointment.customerId.toString() !== userId.toString())
     ) {
       return next(
         new AppError("Access denied. This is not your appointment.", 403),
@@ -1349,17 +1304,15 @@ const rescheduleAppointment = async (req, res, next) => {
         const salonIdStr = String(appointment.salonId?._id || appointment.salonId);
 
         const populatedAppt = await Appointment.findById(appointment._id)
-          .populate("customerId", "name email phone")
-          .populate("serviceId", "name durationMinutes price")
+          .populate("customerId", "name")
+          .populate("serviceId", "name price")
           .populate("staffId", "name")
           .populate("branchId", "name")
           .populate("salonId", "name");
 
-        const eventData = {
-          appointmentId: appointment._id,
-          status: appointment.status,
-          appointment: populatedAppt || appointment,
-        };
+        const eventData =
+          buildAppointmentEventPayload(populatedAppt) ||
+          buildAppointmentEventPayload(appointment);
 
         console.log(`⚡ [SOCKET EMIT] Emitting rescheduled appointment (${appointment._id}) to branch_${branchIdStr}`);
         io.to(`customer_${customerIdStr}`).emit("appointment_updated", eventData);
@@ -1385,7 +1338,7 @@ const rescheduleAppointment = async (req, res, next) => {
           type: "appointment.status",
         },
       };
-      await sendPushToUser(reschedulePush);
+      if (reschedulePush.userId) await sendPushToUser(reschedulePush);
     } catch (e) {
       console.log("Push notification error:", e.message);
     }
@@ -1414,18 +1367,20 @@ const rescheduleAppointment = async (req, res, next) => {
       console.log("Email dispatch error:", e.message);
     }
 
-    // save persistent in-app notification for customer
+    // save persistent in-app notification for customer (guests have no inbox)
     try {
       const custId = appointment.customerId?._id || appointment.customerId;
-      await notifyUser({
-        recipientId: custId,
-        type: "appointment.rescheduled",
-        title: "Appointment Rescheduled",
-        body: `Your appointment moved to ${newSlot.date} at ${newSlot.startTime}.`,
-        data: { appointmentId: appointment._id, status: appointment.status },
-        branchId: appointment.branchId?._id || appointment.branchId,
-        salonId: appointment.salonId?._id || appointment.salonId,
-      });
+      if (custId) {
+        await notifyUser({
+          recipientId: custId,
+          type: "appointment.rescheduled",
+          title: "Appointment Rescheduled",
+          body: `Your appointment moved to ${newSlot.date} at ${newSlot.startTime}.`,
+          data: { appointmentId: appointment._id, status: appointment.status },
+          branchId: appointment.branchId?._id || appointment.branchId,
+          salonId: appointment.salonId?._id || appointment.salonId,
+        });
+      }
     } catch (e) {
       console.log("In-app notification save error:", e.message);
     }
@@ -1571,10 +1526,13 @@ const getMyAppointmentHistory = async (req, res, next) => {
 
 module.exports = {
   bookAppointment,
+  createStaffAppointment,
+  lookupCustomerForStaff,
   getAppointments,
   getAppointment,
   updateAppointmentStatus,
   rateAppointment,
   rescheduleAppointment,
   getMyAppointmentHistory,
+  buildAppointmentEventPayload,
 };

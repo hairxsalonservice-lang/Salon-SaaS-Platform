@@ -221,13 +221,13 @@ function getStyles() {
   },
   title: {
     fontSize: 11,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
     color: C.main,
     letterSpacing: 1.1,
   },
   subtitle: {
     fontSize: 14,
-    fontWeight: "700",
+    fontFamily: "Oswald_700Bold",
     color: C.ink,
     marginTop: 2,
   },
@@ -248,7 +248,7 @@ function getStyles() {
   loaderText: {
     fontSize: 12,
     color: C.textMuted,
-    fontWeight: "600",
+    fontFamily: "Oswald_600SemiBold",
   },
   errorBox: {
     backgroundColor: C.errorBg,
@@ -261,7 +261,7 @@ function getStyles() {
   errorText: {
     color: C.errorText,
     fontSize: 12,
-    fontWeight: "600",
+    fontFamily: "Oswald_600SemiBold",
     textAlign: "center",
   },
   confirmBtn: {
@@ -277,7 +277,7 @@ function getStyles() {
   confirmBtnText: {
     color: C.bg,
     fontSize: 15,
-    fontWeight: "800",
+    fontFamily: "Oswald_700Bold",
   },
 });
 }
