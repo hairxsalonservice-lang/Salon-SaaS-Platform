@@ -34,18 +34,24 @@ const CATEGORY_CAPSULE_COLORS: Record<string, string> = {
   other: "bg-slate-100 text-slate-700 border-slate-200/80",
 };
 
-function getPhone(field: unknown, fallback = "9692358823"): string {
+function getPhone(field: unknown, fallback = "—"): string {
   if (typeof field === "object" && field !== null && "phone" in field) {
     return (field as { phone?: string }).phone || fallback;
   }
   return fallback;
 }
 
-function getEmail(field: unknown, fallback = "cv33om@gmail.com"): string {
+function getEmail(field: unknown, fallback = "—"): string {
   if (typeof field === "object" && field !== null && "email" in field) {
     return (field as { email?: string }).email || fallback;
   }
   return fallback;
+}
+
+function getSourceLabel(source?: string): string | null {
+  if (source === "WALK_IN") return "Walk-in";
+  if (source === "PHONE") return "Phone booking";
+  return null;
 }
 
 function formatDuration(mins: number): string {
@@ -57,7 +63,7 @@ function formatDuration(mins: number): string {
 }
 
 function formatPriceDisplay(pricePaise: number): string {
-  const price = pricePaise || 30000;
+  const price = pricePaise || 0;
   return `₹${(price / 100).toFixed(2)}`;
 }
 
@@ -74,9 +80,16 @@ export default function BookingDrawer({
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const a2 = a as any;
 
-  const clientName = getName(a2.customerId, "om prasad");
-  const clientEmail = getEmail(a2.customerId, "cv33om@gmail.com");
-  const clientPhone = getPhone(a2.customerId, "9692358823");
+  const clientName = a2.customerId
+    ? getName(a2.customerId, "Guest")
+    : a2.customerSnapshot?.name || "Guest";
+  const clientEmail = a2.customerId
+    ? getEmail(a2.customerId, a2.customerSnapshot?.email || "—")
+    : a2.customerSnapshot?.email || "—";
+  const clientPhone = a2.customerId
+    ? getPhone(a2.customerId, a2.customerSnapshot?.phone || "—")
+    : a2.customerSnapshot?.phone || "—";
+  const sourceLabel = getSourceLabel(a2.source);
   const servicesList: any[] =
     Array.isArray(a2.services) && a2.services.length > 0
       ? a2.services
@@ -85,12 +98,12 @@ export default function BookingDrawer({
   const serviceName = servicesList.length > 0
     ? servicesList.map((s) => getName(s, "Service")).join(", ")
     : getName(a2.serviceId, "Facial");
-  const staffName = getName(a2.staffId, "Rajesh Patro");
-  const branchName = getName(a2.branchId, "Ramesh salon");
+  const staffName = getName(a2.staffId, "Specialist");
+  const branchName = getName(a2.branchId, "—");
 
-  const dateStr = a2.date || "2026-09-11";
-  const startTime = a2.startTime || "09:30 AM";
-  const endTime = a2.endTime || "10:00 AM";
+  const dateStr = a2.date || "—";
+  const startTime = a2.startTime || "—";
+  const endTime = a2.endTime || "—";
   const timeRange = `${startTime} — ${endTime}`;
 
   const durationMins = servicesList.length > 0
@@ -113,7 +126,14 @@ export default function BookingDrawer({
           {/* Header */}
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Booking Details</h2>
+              <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">Booking Details</h2>
+                {sourceLabel && (
+                  <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wide text-amber-700">
+                    {sourceLabel}
+                  </span>
+                )}
+              </div>
               <p className="text-xs font-medium text-slate-400 mt-0.5">
                 Here are the complete details of this booking.
               </p>
@@ -223,10 +243,15 @@ export default function BookingDrawer({
               <h3 className="text-sm font-black text-slate-900 ml-2.5">Client Information</h3>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 border-t border-slate-100 pt-3.5 mt-3">
+            <div className="grid grid-cols-2 gap-3 border-t border-slate-100 pt-3.5 mt-3">
               <div>
                 <p className="text-[11px] font-medium text-slate-400">Name</p>
                 <p className="text-xs font-bold text-slate-900 mt-0.5">{clientName}</p>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-medium text-slate-400">Phone</p>
+                <p className="text-xs font-bold text-slate-900 mt-0.5">{clientPhone}</p>
               </div>
 
               <div>
@@ -295,23 +320,29 @@ export default function BookingDrawer({
             </div>
           </div>
 
-          {/* Email Notification Sent Banner */}
-          <div className="bg-[#ecfdf5] border border-[#a7f3d0] rounded-2xl p-3.5 flex items-center justify-between mb-4 shadow-2xs">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#d1fae5] text-[#059669] flex items-center justify-center shrink-0">
-                <Mail size={18} strokeWidth={2.2} />
+          {/* Email Notification Banner — guests without an email have no banner */}
+          {clientEmail !== "—" && (
+            <div className="bg-[#ecfdf5] border border-[#a7f3d0] rounded-2xl p-3.5 flex items-center justify-between mb-4 shadow-2xs">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#d1fae5] text-[#059669] flex items-center justify-center shrink-0">
+                  <Mail size={18} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-[#047857]">
+                    {a2.emailSent === false ? "Email notification pending" : "Email Notification Sent"}
+                  </p>
+                  <p className="text-[11px] font-medium text-[#059669]/90 mt-0.5">
+                    {a2.emailSent === false
+                      ? `Will be sent to ${clientEmail}`
+                      : `Dispatched to ${clientEmail}`}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-xs font-bold text-[#047857]">Email Notification Sent</p>
-                <p className="text-[11px] font-medium text-[#059669]/90 mt-0.5">
-                  Dispatched to {clientEmail}
-                </p>
-              </div>
+              <span className="bg-[#a7f3d0] text-[#047857] px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase shrink-0">
+                {a2.emailSent === false ? "QUEUED" : "DISPATCHED"}
+              </span>
             </div>
-            <span className="bg-[#a7f3d0] text-[#047857] px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider uppercase shrink-0">
-              DISPATCHED
-            </span>
-          </div>
+          )}
 
           {/* Manager / Staff Actions */}
           {canManage && status === "PENDING" && (

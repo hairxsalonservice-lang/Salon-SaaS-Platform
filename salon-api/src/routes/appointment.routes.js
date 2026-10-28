@@ -2,6 +2,8 @@ const router = require('express').Router()
 
 const {
   bookAppointment,
+  createStaffAppointment,
+  lookupCustomerForStaff,
   getAppointments,
   getAppointment,
   updateAppointmentStatus,
@@ -15,9 +17,9 @@ const { requireAppointmentScope } = require('../middleware/checkScope')
 const idempotency = require('../middleware/idempotency')
 
 const validate = require('../middleware/validate')
-const { bookAppointmentValidator } = require('../validators/appointment.validator')
+const { bookAppointmentValidator, staffBookingValidator } = require('../validators/appointment.validator')
 
-const { bookingLimiter } = require('../middleware/rateLimiter.middleware')
+const { apiLimiter, bookingLimiter } = require('../middleware/rateLimiter.middleware')
 
 router.use(authenticate)
 
@@ -28,6 +30,26 @@ router.post('/',
   validate,
   idempotency,
   bookAppointment
+)
+
+// Staff front-desk booking for walk-in / phone customers.
+// Declared before the /:appointmentId routes so the static paths win.
+router.post('/staff',
+  bookingLimiter,
+  checkPermission('appointment:create'),
+  staffBookingValidator,
+  validate,
+  idempotency,
+  createStaffAppointment
+)
+
+// Exact-phone customer lookup. Rate-limited even though it only answers for
+// customers already known to the caller's salon — that keeps it useless as a
+// phone-number enumeration oracle.
+router.get('/staff/customer-lookup',
+  apiLimiter,
+  checkPermission('appointment:create'),
+  lookupCustomerForStaff
 )
 
 router.get('/',

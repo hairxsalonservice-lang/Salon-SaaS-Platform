@@ -304,35 +304,38 @@ appointmentSchema.index(
 // Pre-validate hook — an appointment must identify a customer
 // either by account reference or by a guest snapshot.
 // ================================
-appointmentSchema.pre('validate', function (next) {
-  if (this.customerId) return next()
+appointmentSchema.pre('validate', function () {
+  if (this.customerId) return
 
   const name = this.customerSnapshot?.name
   const phone = this.customerSnapshot?.phone
 
   if (!name || !phone) {
-    return next(
-      new Error(
-        'Customer is required. Provide a customerId or a guest name and phone number.',
-      ),
+    throw new Error(
+      'Customer is required. Provide a customerId or a guest name and phone number.',
     )
   }
-
-  next()
 })
 
 // ================================
 // Pre-save hook — auto-record status changes
 // Creation history is written explicitly by the booking service so it can
-// include the actor and the booking source. Only append on later changes.
+// include the actor and the booking source. On later changes, callers often
+// push a detailed entry (actor + note) before saving, so only add a fallback
+// entry when the new status is not already the last one recorded.
 // ================================
 appointmentSchema.pre('save', function () {
-  if (!this.isNew && this.isModified('status')) {
-    this.statusHistory.push({
-      status: this.status,
-      changedAt: new Date()
-    })
-  }
+  if (!this.isModified('status')) return
+
+  const history = this.statusHistory || []
+  const last = history[history.length - 1]
+
+  if (last && last.status === this.status) return
+
+  this.statusHistory.push({
+    status: this.status,
+    changedAt: new Date()
+  })
 })
 appointmentSchema.plugin(tenantPlugin)
 module.exports = mongoose.model('Appointment', appointmentSchema)

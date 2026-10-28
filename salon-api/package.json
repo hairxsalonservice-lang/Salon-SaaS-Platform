@@ -10,6 +10,7 @@
     "seed": "node src/utils/seeder.js",
     "seed:sample": "node src/utils/seedSampleData.js",
     "seed:master": "node src/utils/seedMasterData.js",
+    "migrate:staff-booking": "node src/utils/grantStaffBookingPermission.js",
     "clean:db": "node src/utils/wipeAllDataExceptSuperadmin.js"
   },
   "keywords": [],

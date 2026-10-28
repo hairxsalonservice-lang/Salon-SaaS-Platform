@@ -59,6 +59,15 @@ const buildStatusPush = (appointment, serviceName = "appointment", salonName = "
 // ================================
 const bookAppointment = async (req, res, next) => {
   try {
+    if (req.user.role !== "customer") {
+      return next(
+        new AppError(
+          "Use the staff booking endpoint to create appointments for customers.",
+          403,
+        ),
+      );
+    }
+
     const { slotId, serviceId, serviceIds, customerNotes, guests } = req.body;
     const { userId } = req.user;
 
@@ -267,6 +276,15 @@ const createStaffAppointment = async (req, res, next) => {
       guests,
       source,
     } = req.body;
+
+    if (!["owner", "manager", "staff"].includes(role)) {
+      return next(
+        new AppError(
+          "Only salon staff can create appointments for customers.",
+          403,
+        ),
+      );
+    }
 
     const branchId = role === "owner" ? req.body.branchId : actorBranchId;
     if (!branchId) {
@@ -566,6 +584,7 @@ const getAppointments = async (req, res, next) => {
       Appointment.find(filter)
         .populate("customerId", "name phone email")
         .populate("staffId", "name")
+        .populate("createdBy", "name")
         .populate("serviceId", "name price durationMinutes category")
         .populate("services", "name price durationMinutes category")
         .populate("branchId", "name address contactPhone")
@@ -605,6 +624,7 @@ const getAppointment = async (req, res, next) => {
     const appointment = await Appointment.findById(appointmentId)
       .populate("customerId", "name phone email")
       .populate("staffId", "name")
+      .populate("createdBy", "name")
       .populate("serviceId", "name price durationMinutes category")
       .populate("services", "name price durationMinutes category")
       .populate("branchId", "name address contactPhone")
@@ -1010,7 +1030,10 @@ const rateAppointment = async (req, res, next) => {
       return next(new AppError("Appointment not found", 404));
     }
 
-    if (appointment.customerId.toString() !== userId.toString()) {
+    if (
+      !appointment.customerId ||
+      appointment.customerId.toString() !== userId.toString()
+    ) {
       return next(new AppError("Access denied", 403));
     }
 
@@ -1503,6 +1526,8 @@ const getMyAppointmentHistory = async (req, res, next) => {
 
 module.exports = {
   bookAppointment,
+  createStaffAppointment,
+  lookupCustomerForStaff,
   getAppointments,
   getAppointment,
   updateAppointmentStatus,

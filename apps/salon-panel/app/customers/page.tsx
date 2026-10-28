@@ -35,6 +35,7 @@ interface CustomerData {
   name: string;
   email: string;
   phone: string;
+  isGuest?: boolean;
   totalVisits: number;
   completedVisits: number;
   totalSpent: number;
@@ -106,16 +107,27 @@ function extractCustomers(appointments: any[]): CustomerData[] {
 
   appointments.forEach((a) => {
     const customer = a.customerId;
-    if (!customer || typeof customer !== "object") return;
+    const snapshot = a.customerSnapshot || null;
+    const hasAccount = customer && typeof customer === "object";
+    const isGuest = !hasAccount;
 
-    const id = customer._id;
+    if (isGuest && !snapshot?.name && !snapshot?.phone) return;
+
+    const id = isGuest
+      ? `guest:${String(snapshot.phone || snapshot.name || "")
+          .replace(/\D/g, "")
+          .slice(-10) || String(snapshot.name || "")}`
+      : customer._id;
+
+    if (!id) return;
 
     if (!map[id]) {
       map[id] = {
         _id: id,
-        name: customer.name || "Customer",
-        email: customer.email || "",
-        phone: customer.phone || "",
+        name: isGuest ? snapshot.name || "Guest" : customer.name || "Customer",
+        email: isGuest ? snapshot.email || "" : customer.email || "",
+        phone: isGuest ? snapshot.phone || "" : customer.phone || "",
+        isGuest,
         totalVisits: 0,
         completedVisits: 0,
         totalSpent: 0,
@@ -414,8 +426,13 @@ export default function CustomersPage() {
                               {getInitials(c.name)}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs font-extrabold text-slate-900 group-hover:text-[#0071e3] transition-colors truncate">
+                              <p className="text-xs font-extrabold text-slate-900 group-hover:text-[#0071e3] transition-colors truncate inline-flex items-center gap-1.5">
                                 {c.name}
+                                {c.isGuest && (
+                                  <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-amber-700">
+                                    Guest
+                                  </span>
+                                )}
                               </p>
                               <p className="text-[11px] font-medium text-slate-400 truncate">
                                 {c.email || "No email"}
@@ -568,6 +585,11 @@ function CustomerDrawer({
             </div>
             <div>
               <h3 className="font-extrabold text-base text-slate-900">{c.name}</h3>
+              {c.isGuest && (
+                <span className="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-amber-700 mt-1">
+                  Walk-in guest
+                </span>
+              )}
               {c.avgRating ? (
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 mt-0.5">
                   <Star size={12} className="fill-amber-400 text-amber-400" />

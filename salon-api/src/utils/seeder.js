@@ -96,15 +96,16 @@ const ROLE_PERMISSIONS = {
     'staff:create', 'staff:read', 'staff:update', 'staff:delete',
     'service:create', 'service:read', 'service:update', 'service:delete',
     'slot:create', 'slot:read', 'slot:update', 'slot:delete',
-    'appointment:read', 'appointment:update',
+    'appointment:create', 'appointment:read', 'appointment:update',
     'report:read'
   ],
 
-  // staff can only see their schedule and update appointment progress
+  // staff can see their schedule, create front-desk bookings for their branch,
+  // and update appointment progress
   staff: [
     'service:read',
     'slot:read',
-    'appointment:read', 'appointment:update'
+    'appointment:create', 'appointment:read', 'appointment:update'
   ],
 
   // customer can only book and view their own appointments
