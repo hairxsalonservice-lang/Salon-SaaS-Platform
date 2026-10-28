@@ -37,6 +37,8 @@ export const APPLE_SPRINGS = {
 };
 
 // 2. Apple Typography System (§6)
+// Display: Oswald (headlines, titles, prices)
+// Body: DM Sans (descriptions, metadata, UI text)
 export const APPLE_TYPO = {
   heroTitle: {
     fontFamily: FONT_FAMILY.displayBold,
@@ -52,9 +54,9 @@ export const APPLE_TYPO = {
   },
   bodyText: {
     fontFamily: FONT_FAMILY.body,
-    fontSize: 16,
+    fontSize: 15,
     letterSpacing: 0.1,
-    lineHeight: 23,
+    lineHeight: 22,
   },
   metadata: {
     fontFamily: FONT_FAMILY.body,
