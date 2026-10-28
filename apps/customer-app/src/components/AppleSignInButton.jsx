@@ -35,8 +35,6 @@ export default function AppleSignInButton({ onSuccess, onError, variant = "full"
         ],
       });
 
-      console.log("[Apple SignIn Credential]", credential);
-
       const res = await loginWithApple({
         identityToken: credential.identityToken,
         user: credential.user,
