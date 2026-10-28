@@ -267,37 +267,6 @@ export default function ProfileScreen({ navigate, onScroll }) {
             <Ionicons name="chevron-forward" size={16} color={C.muted} />
           </TouchableOpacity>
 
-          {/* 2. Payment Methods */}
-          <TouchableOpacity
-            style={styles.menuCard}
-            onPress={() => (navigate ? navigate("SavedAddresses") : Alert.alert("Payment Methods", "Manage payment methods."))}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(59, 130, 246, 0.15)" : C.infoBg }]}>
-              <Ionicons name="card-outline" size={20} color={C.info} />
-            </View>
-            <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>Payment Methods</Text>
-              <Text style={styles.menuSub}>Save and manage your payment options</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color={C.muted} />
-          </TouchableOpacity>
-
-          {/* 3. Payment History */}
-          <TouchableOpacity
-            style={styles.menuCard}
-            onPress={() => navigate && navigate("Bookings")}
-            activeOpacity={0.7}
-          >
-            <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(16, 185, 129, 0.15)" : C.successBg }]}>
-              <Ionicons name="time-outline" size={20} color={C.success} />
-            </View>
-            <View style={styles.menuTextCol}>
-              <Text style={styles.menuTitle}>Payment History</Text>
-              <Text style={styles.menuSub}>View past transactions</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={16} color={C.muted} />
-          </TouchableOpacity>
 
           {/* 4. Change Password */}
           <TouchableOpacity
