@@ -331,6 +331,7 @@ export interface Appointment {
   branch: string | Branch;
   salon: string | Salon;
   status: AppointmentStatus;
+  paymentMethod?: "cash" | "card" | "upi" | "other" | "not_recorded";
   customerNotes?: string;
   rating?: number;
   ratingComment?: string;
@@ -354,6 +355,7 @@ export interface UpdateStatusPayload {
   status: AppointmentStatus;
   reason?: string;
   note?: string;
+  paymentMethod?: "cash" | "card" | "upi" | "other";
 }
 
 export interface ReschedulePayload {

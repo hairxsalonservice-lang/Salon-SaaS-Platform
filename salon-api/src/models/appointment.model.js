@@ -13,10 +13,50 @@ const appointmentSchema = new mongoose.Schema(
     // ================================
 
     // who booked
+    // Null for walk-in / phone bookings where the customer has no app account.
     customerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'Customer is required']
+      default: null
+    },
+
+    // Snapshot of an unregistered customer. Kept on the appointment so a
+    // walk-in never needs a fake User account (email is required/unique).
+    customerSnapshot: {
+      name: {
+        type: String,
+        trim: true,
+        maxlength: [100, 'Customer name cannot exceed 100 characters'],
+        default: null
+      },
+      phone: {
+        type: String,
+        trim: true,
+        maxlength: [30, 'Customer phone cannot exceed 30 characters'],
+        default: null
+      },
+      email: {
+        type: String,
+        trim: true,
+        lowercase: true,
+        maxlength: [254, 'Customer email cannot exceed 254 characters'],
+        default: null
+      }
+    },
+
+    // How the appointment entered the system.
+    source: {
+      type: String,
+      enum: ['APP', 'WALK_IN', 'PHONE'],
+      default: 'APP'
+    },
+
+    // Staff member who created the booking. Null when the customer
+    // booked through the app themselves.
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
     },
 
     // at which branch
@@ -131,6 +171,15 @@ const appointmentSchema = new mongoose.Schema(
     },
 
     // ================================
+    // Payment tracking
+    // ================================
+    paymentMethod: {
+      type: String,
+      enum: ['cash', 'card', 'upi', 'other', 'not_recorded'],
+      default: 'not_recorded'
+    },
+
+    // ================================
     // Notes & Feedback
     // ================================
     guests: {
@@ -229,6 +278,9 @@ appointmentSchema.index({ customerId: 1, date: -1 })
 // stats aggregation: filter by customerId only
 appointmentSchema.index({ customerId: 1 })
 
+// match a returning walk-in guest by phone within one salon
+appointmentSchema.index({ salonId: 1, 'customerSnapshot.phone': 1 })
+
 // staff views their schedule
 appointmentSchema.index({ staffId: 1, date: 1 })
 
@@ -249,10 +301,33 @@ appointmentSchema.index(
 )
 
 // ================================
+// Pre-validate hook — an appointment must identify a customer
+// either by account reference or by a guest snapshot.
+// ================================
+appointmentSchema.pre('validate', function (next) {
+  if (this.customerId) return next()
+
+  const name = this.customerSnapshot?.name
+  const phone = this.customerSnapshot?.phone
+
+  if (!name || !phone) {
+    return next(
+      new Error(
+        'Customer is required. Provide a customerId or a guest name and phone number.',
+      ),
+    )
+  }
+
+  next()
+})
+
+// ================================
 // Pre-save hook — auto-record status changes
+// Creation history is written explicitly by the booking service so it can
+// include the actor and the booking source. Only append on later changes.
 // ================================
 appointmentSchema.pre('save', function () {
-  if (this.isModified('status')) {
+  if (!this.isNew && this.isModified('status')) {
     this.statusHistory.push({
       status: this.status,
       changedAt: new Date()

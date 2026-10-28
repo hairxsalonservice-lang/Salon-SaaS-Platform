@@ -299,16 +299,16 @@ export default function BookingsPage() {
   const displayList = filtered.length > 0 ? filtered : (appointments.length === 0 && !loading ? demoFallbackList : []);
   const activeTotalItems = totalItems > 0 ? totalItems : displayList.length;
 
-  async function handleUpdateStatus(id: string, status: AppointmentStatus, note?: string) {
+  async function handleUpdateStatus(id: string, status: AppointmentStatus, note?: string, paymentMethod?: string) {
     setUpdatingId(id);
     try {
-      await updateAppointmentStatus(id, { status, note });
+      await updateAppointmentStatus(id, { status, note, paymentMethod: paymentMethod as any });
       invalidateCache("bookings_");
       setAppointments((prev) =>
-        prev.map((a: any) => (a._id === id ? { ...a, status, cancellation: note ? { reason: note } : a.cancellation } : a)),
+        prev.map((a: any) => (a._id === id ? { ...a, status, paymentMethod: paymentMethod || a.paymentMethod, cancellation: note ? { reason: note } : a.cancellation } : a)),
       );
       setSelected((prev: any) =>
-        prev?._id === id ? { ...prev, status } : prev,
+        prev?._id === id ? { ...prev, status, paymentMethod: paymentMethod || prev?.paymentMethod } : prev,
       );
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Failed to update status";

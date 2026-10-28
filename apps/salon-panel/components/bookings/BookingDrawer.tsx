@@ -1,14 +1,16 @@
 "use client";
 
-import { X, User, Calendar, Mail, Clock, Check, Play, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { X, User, Calendar, Mail, Clock, Check, Play, ArrowRight, Banknote, CreditCard, Smartphone, MoreHorizontal } from "lucide-react";
 import { paiseToINR } from "@/lib/api";
 import type { Appointment, AppointmentStatus } from "@/lib/api";
+import PaymentMethodModal from "./PaymentMethodModal";
 
 interface BookingDrawerProps {
   appointment: Appointment;
   canManage: boolean;
   isStaff: boolean;
-  onUpdateStatus: (id: string, status: AppointmentStatus) => void;
+  onUpdateStatus: (id: string, status: AppointmentStatus, note?: string, paymentMethod?: string) => void;
   onOpenCancelModal?: (appt: any) => void;
   updatingId: string | null;
   onClose: () => void;
@@ -69,6 +71,7 @@ export default function BookingDrawer({
   onClose,
 }: BookingDrawerProps) {
   const isUpdating = updatingId === a._id;
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const a2 = a as any;
 
   const clientName = getName(a2.customerId, "om prasad");
@@ -159,6 +162,15 @@ export default function BookingDrawer({
                 <p className="text-xs font-bold text-emerald-600">
                   {status === "COMPLETED" ? "Service completed successfully." : "Appointment confirmed."}
                 </p>
+                {status === "COMPLETED" && a2.paymentMethod && a2.paymentMethod !== "not_recorded" && (
+                  <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 border border-emerald-200">
+                    {a2.paymentMethod === "cash" && <Banknote size={11} />}
+                    {a2.paymentMethod === "card" && <CreditCard size={11} />}
+                    {a2.paymentMethod === "upi" && <Smartphone size={11} />}
+                    {a2.paymentMethod === "other" && <MoreHorizontal size={11} />}
+                    Paid via {a2.paymentMethod.toUpperCase()}
+                  </span>
+                )}
                 <p className="text-[11px] font-medium text-slate-400 mt-0.5">
                   {dateStr}, {startTime}
                 </p>
@@ -343,7 +355,7 @@ export default function BookingDrawer({
           {(isStaff || canManage) && status === "IN_PROGRESS" && (
             <div className="flex gap-2.5 mb-4">
               <button
-                onClick={() => onUpdateStatus(a._id, "COMPLETED")}
+                onClick={() => setShowPaymentModal(true)}
                 disabled={isUpdating}
                 className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition-all shadow-xs"
               >
@@ -351,6 +363,16 @@ export default function BookingDrawer({
               </button>
             </div>
           )}
+
+          <PaymentMethodModal
+            open={showPaymentModal}
+            loading={isUpdating}
+            onClose={() => setShowPaymentModal(false)}
+            onConfirm={(method) => {
+              onUpdateStatus(a._id, "COMPLETED", undefined, method);
+              setShowPaymentModal(false);
+            }}
+          />
         </div>
 
         {/* Modal Bottom Footer */}
