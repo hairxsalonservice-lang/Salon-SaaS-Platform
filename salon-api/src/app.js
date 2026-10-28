@@ -71,9 +71,11 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    return callback(
-      new Error(`CORS Security Violation: Origin ${origin} is not allowed by CORS policy.`)
+    const error = new Error(
+      `CORS Security Violation: Origin ${origin} is not allowed by CORS policy.`
     );
+    error.statusCode = 403;
+    return callback(error);
   },
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: [

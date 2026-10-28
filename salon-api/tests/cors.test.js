@@ -21,6 +21,8 @@ describe('Security & CORS Integration Tests', () => {
       .get('/health')
       .set('Origin', maliciousOrigin);
 
+    // Rejected origins get a 4xx, not a server error.
+    expect(res.status).toBe(403);
     // Assert evil origin is never reflected in Access-Control-Allow-Origin
     expect(res.headers['access-control-allow-origin']).not.toBe(maliciousOrigin);
     expect(res.headers['access-control-allow-origin']).not.toBe('*');
