@@ -281,7 +281,7 @@ function getStyles() {
     },
     subtitle: {
       fontSize: 13,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: "rgba(255, 255, 255, 0.88)",
       marginBottom: S.md,
       lineHeight: 17,

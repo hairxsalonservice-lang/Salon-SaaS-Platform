@@ -10,8 +10,8 @@ import {
   TouchableWithoutFeedback,
   Linking,
   Platform,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { C, S, R } from "../theme";
 import { paiseToINR } from "../services/apiClient";
@@ -254,7 +254,7 @@ export default function AppointmentDetailModal({
                 {/* 1. Salon Info Card */}
                 <View style={styles.card}>
                   <View style={styles.salonInfoRow}>
-                    <Image source={{ uri: coverImage }} style={styles.salonImage} resizeMode="cover" />
+                    <Image source={coverImage} style={styles.salonImage} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
                     <View style={styles.salonDetailsCol}>
                       <View style={styles.salonNameRow}>
                         <Text style={styles.salonNameText} numberOfLines={1}>{salonName}</Text>

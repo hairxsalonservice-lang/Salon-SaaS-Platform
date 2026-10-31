@@ -427,7 +427,7 @@ function getStyles(COLORS) {
     // ── Tagline ────────────────────────────────────────────────
     tagline: {
       fontSize: 14,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: COLORS.muted,
       letterSpacing: 0.3,
       textAlign: "center",

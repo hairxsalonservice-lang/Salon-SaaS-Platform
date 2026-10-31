@@ -237,7 +237,7 @@ function getStyles(isDark) {
     locationSubText: {
       color: C.mutedSoft,
       fontSize: 12,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       letterSpacing: 0.1,
       marginTop: 1,
     },
@@ -276,7 +276,7 @@ function getStyles(isDark) {
     searchInput: {
       flex: 1,
       fontSize: 13.5,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.ink,
       paddingVertical: 0,
     },
@@ -346,7 +346,7 @@ function getStyles(isDark) {
     },
     rowQuery: {
       fontSize: 13.5,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.ink,
     },
   });

@@ -162,7 +162,7 @@ function getStyles(isDark) {
     },
     answerText: {
       fontSize: 13.5,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
       lineHeight: 20,
     },

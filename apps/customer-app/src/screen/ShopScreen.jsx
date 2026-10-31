@@ -195,7 +195,7 @@ function getStyles(isDark) {
     },
     subtitle: {
       fontSize: 14,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
       textAlign: "center",
       lineHeight: 22,

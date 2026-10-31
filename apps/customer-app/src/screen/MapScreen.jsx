@@ -338,7 +338,7 @@ export default function MapScreen({ navigate }) {
             <View style={styles.searchPill}>
               <Ionicons name="search-outline" size={18} color={theme.muted} style={{ marginRight: 8 }} />
               <TouchableOpacity activeOpacity={1} onPress={() => navigate && navigate("Explore")} style={{ flex: 1, paddingVertical: 14 }}>
-                <Text style={{ fontSize: 14, fontFamily: "Oswald_400Regular", color: theme.muted }}>
+                <Text style={{ fontSize: 14, fontFamily: "DMSans_400Regular", color: theme.muted }}>
                   Search by salon name...
                 </Text>
               </TouchableOpacity>
@@ -613,7 +613,7 @@ function getStyles(p, isDark, insets) {
     },
     emptySub: {
       fontSize: 12,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: p.muted,
       marginTop: 2,
     },

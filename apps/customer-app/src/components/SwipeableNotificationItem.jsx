@@ -455,7 +455,7 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 12,
     lineHeight: 19,
-    fontFamily: "Oswald_400Regular",
+    fontFamily: "DMSans_400Regular",
     marginTop: 4,
   },
   footerRow: {
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: 12,
-    fontFamily: "Oswald_400Regular",
+    fontFamily: "DMSans_400Regular",
   },
   action: {
     flexDirection: "row",

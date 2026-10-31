@@ -350,7 +350,7 @@ function getStyles(theme, isDark) {
     },
     subtitleText: {
       fontSize: 15,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
       lineHeight: 22,
       marginBottom: 24,
@@ -364,7 +364,7 @@ function getStyles(theme, isDark) {
       padding: 12,
       borderRadius: 14,
       fontSize: 14,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       marginBottom: 16,
     },
     inputPill: {
@@ -386,7 +386,7 @@ function getStyles(theme, isDark) {
       height: "100%",
       fontSize: 15,
       color: C.ink,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
     },
     eyeBtn: {
       padding: 6,
@@ -447,7 +447,7 @@ function getStyles(theme, isDark) {
     },
     popupSubtitle: {
       fontSize: 15,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
       lineHeight: 22,
       textAlign: "center",

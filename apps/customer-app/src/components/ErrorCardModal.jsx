@@ -141,7 +141,7 @@ function getStyles(theme, isDark) {
     },
     message: {
       fontSize: 14,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
       textAlign: "center",
       lineHeight: 20,

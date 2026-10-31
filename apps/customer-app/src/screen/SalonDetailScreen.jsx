@@ -5,7 +5,6 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Dimensions,
   Platform,
   Modal,
@@ -13,6 +12,7 @@ import {
   Easing,
   Linking,
 } from "react-native";
+import { Image } from "expo-image";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from "@expo/vector-icons";
 import { C, FF } from "../theme";
@@ -1134,7 +1134,7 @@ function SalonDetailScreen({ salon, initialSalonId, initialBranchId, goBack, nav
                       accessibilityRole="button"
                       accessibilityLabel={`View photo ${index + 1}`}
                     >
-                      <Image source={{ uri: image }} style={styles.galleryPhoto} resizeMode="cover" />
+                      <Image source={image} style={styles.galleryPhoto} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
@@ -1311,7 +1311,7 @@ function SalonDetailScreen({ salon, initialSalonId, initialBranchId, goBack, nav
             <Ionicons name="arrow-back" size={19} color={theme.ink} />
           </TouchableOpacity>
 
-          <Image source={{ uri: carouselImages[0] }} style={styles.compactThumb} resizeMode="cover" />
+          <Image source={carouselImages[0]} style={styles.compactThumb} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
 
           <View style={styles.compactCopy}>
             <Text style={styles.compactTitle} numberOfLines={1}>
@@ -1469,7 +1469,7 @@ function SalonDetailScreen({ salon, initialSalonId, initialBranchId, goBack, nav
           >
             {galleryImages.map((image, index) => (
               <View key={`${image}-${index}`} style={styles.gallerySlide}>
-                <Image source={{ uri: image }} style={styles.galleryImage} resizeMode="contain" />
+                <Image source={image} style={styles.galleryImage} contentFit="contain" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
               </View>
             ))}
           </ScrollView>

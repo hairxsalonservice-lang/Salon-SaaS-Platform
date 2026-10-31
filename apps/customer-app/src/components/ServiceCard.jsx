@@ -156,7 +156,7 @@ function getStyles(theme, isDark) {
     },
     addBtnText: {
       fontSize: 13,
-      fontFamily: FF.display,
+      fontFamily: FF.bodySemiBold,
     },
     addBtnTextDefault: {
       color: theme.primaryActive,

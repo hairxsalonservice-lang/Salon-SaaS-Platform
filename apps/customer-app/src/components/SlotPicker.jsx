@@ -294,7 +294,7 @@ function getStyles(theme, isDark) {
     },
     monthYearText: {
       fontSize: 14,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: mutedColor,
     },
     dateList: {
@@ -323,7 +323,7 @@ function getStyles(theme, isDark) {
     dateWeek: {
       fontSize: 13,
       color: mutedColor,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
     },
     dateWeekSelected: {
       color: "#FFFFFF",
@@ -357,7 +357,7 @@ function getStyles(theme, isDark) {
     },
     timeTabTxt: {
       fontSize: 14,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: mutedColor,
     },
     timeTabTxtActive: {

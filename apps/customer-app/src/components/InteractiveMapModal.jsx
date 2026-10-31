@@ -10,8 +10,8 @@ import {
   ActivityIndicator,
   Linking,
   Dimensions,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { C } from "../theme";
 import { getCurrentLocation, calculateDistance } from "../services/locationService";
@@ -197,9 +197,11 @@ export default function InteractiveMapModal({ visible, onClose, salons = [], onS
           ) : (
             <View style={styles.mapGraphicContainer}>
               <Image
-                source={{ uri: "https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop" }}
+                source="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop"
                 style={StyleSheet.absoluteFill}
-                resizeMode="cover"
+                contentFit="cover"
+                placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }}
+                transition={300}
               />
               <View style={styles.mapDarkMask} />
 
@@ -374,7 +376,7 @@ function getStyles() {
   loadingText: {
     color: C.bg,
     fontSize: 12,
-    fontFamily: "Oswald_500Medium",
+    fontFamily: "DMSans_500Medium",
   },
   mapGraphicContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -477,7 +479,7 @@ function getStyles() {
     fontSize: 12,
     color: C.muted,
     marginTop: 2,
-    fontFamily: "Oswald_500Medium",
+    fontFamily: "DMSans_500Medium",
   },
   ratingBox: {
     flexDirection: "row",

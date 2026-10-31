@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Image,
   Platform,
   StatusBar,
   Linking,
@@ -224,7 +223,7 @@ function getStyles(isDark) {
     },
     taglineText: {
       fontSize: 13.5,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.muted,
       textAlign: "center",
     },
@@ -243,7 +242,7 @@ function getStyles(isDark) {
     },
     bodyText: {
       fontSize: 14,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.textSecondary,
       lineHeight: 22,
     },
@@ -279,7 +278,7 @@ function getStyles(isDark) {
     },
     featureSub: {
       fontSize: 12.5,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
     },
     linkRow: {
@@ -317,7 +316,7 @@ function getStyles(isDark) {
     },
     allRightsText: {
       fontSize: 12,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: isDark ? C.muted : C.muted,
     },
   });

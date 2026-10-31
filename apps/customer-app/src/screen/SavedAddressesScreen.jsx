@@ -223,7 +223,7 @@ function getStyles() {
     },
     tagText: {
       fontSize: FS.bodySm,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.ink,
     },
     tagTextActive: {
@@ -250,7 +250,7 @@ function getStyles() {
     saveBtnText: {
       color: C.bg,
       fontSize: FS.bodySm,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
     },
     addressCard: {
       backgroundColor: C.surface,
@@ -300,7 +300,7 @@ function getStyles() {
     },
     streetText: {
       fontSize: FS.bodySm,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.ink,
     },
     cityText: {

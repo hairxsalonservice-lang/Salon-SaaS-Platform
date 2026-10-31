@@ -1,5 +1,6 @@
 import React, { memo, useCallback } from "react";
-import { View, Text, Image, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import VerifiedBadge from "./VerifiedBadge";
 import { C, S, FS, FW, FF, R, SHADOWS, FONT_FAMILY, getPlatformCardStyle } from "../theme";
@@ -152,7 +153,7 @@ function SalonCard({ salon, onPress, isHorizontal = false, index = 0, variant = 
         accessibilityLabel={`View ${salon.name}`}
       >
         <View style={styles.compactImageWrap}>
-          <Image source={{ uri: coverImage }} style={styles.compactImage} resizeMode="cover" />
+          <Image source={coverImage} style={styles.compactImage} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
           {lowestServicePrice !== null ? (
             <View style={styles.pricePill}>
               <Text style={styles.pricePillIcon}>✦</Text>
@@ -198,7 +199,7 @@ function SalonCard({ salon, onPress, isHorizontal = false, index = 0, variant = 
     >
       {/* Image container */}
       <View style={styles.imageFrame}>
-        <Image source={{ uri: coverImage }} style={styles.image} resizeMode="cover" />
+        <Image source={coverImage} style={styles.image} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
 
         {/* Top-Left Rating Badge Pill */}
         <View style={styles.ratingBadge}>
@@ -369,6 +370,7 @@ function getStyles(theme = {}, isDark = false) {
       letterSpacing: 0.1,
     },
     compactAddress: {
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
       fontSize: 11,
       marginBottom: 6,
@@ -391,7 +393,7 @@ function getStyles(theme = {}, isDark = false) {
     distanceText: {
       color: C.muted,
       fontSize: 12,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
     },
     imageFrame: {
       height: 160,
@@ -422,7 +424,7 @@ function getStyles(theme = {}, isDark = false) {
     reviewsText: {
       color: C.textSecondary,
       fontSize: 12,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
     },
     favBtn: {
       position: "absolute",
@@ -485,7 +487,7 @@ function getStyles(theme = {}, isDark = false) {
     locationText: {
       color: C.muted,
       fontSize: 12,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       flexShrink: 1,
     },
     tagsRow: {

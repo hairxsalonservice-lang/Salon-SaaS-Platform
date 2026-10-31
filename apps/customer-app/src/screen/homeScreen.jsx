@@ -783,7 +783,7 @@ function buildStyles(theme, isDark) {
     categoryLabel: {
       fontSize: 11,
       color: p.body,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       textAlign: "center",
     },
 

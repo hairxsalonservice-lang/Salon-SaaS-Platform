@@ -539,7 +539,7 @@ function getStyles() {
     },
     iosTabLabel: {
       fontSize: 10,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.muted,
       marginTop: 2,
     },

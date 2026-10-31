@@ -140,7 +140,7 @@ function getStyles() {
     },
     locationCity: {
       fontSize: FS.bodySm,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.ink,
     },
     notifBtn: {

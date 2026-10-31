@@ -289,7 +289,7 @@ function getStyles(theme, isDark) {
     },
     removeBarText: {
       fontSize: 11.5,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.herat || C.error,
     },
   });

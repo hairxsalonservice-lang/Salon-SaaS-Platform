@@ -1,6 +1,7 @@
 // src/components/StaffPicker.jsx
 import React from "react";
-import { View, Text, ScrollView, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { C, R } from "../theme";
 import { useTheme } from "../context/ThemeContext";
@@ -131,14 +132,10 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
                   </View>
                 ) : (
                   <Image
-                    source={{
-                      uri:
-                        staff.avatar ||
-                        staff.photoUrl ||
-                        staff.image ||
-                        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop",
-                    }}
+                    source={staff.avatar || staff.photoUrl || staff.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"}
                     style={styles.avatar}
+                    placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }}
+                    transition={300}
                   />
                 )}
 
@@ -265,7 +262,7 @@ function getStyles(theme, isDark) {
     },
     title: {
       fontSize: 11,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.muted,
       textAlign: "center",
       marginTop: 2,

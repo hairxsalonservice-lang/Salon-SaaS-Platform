@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   },
   headerSubtitle: {
     fontSize: 13,
-    fontFamily: "Oswald_400Regular",
+    fontFamily: "DMSans_400Regular",
     marginTop: 2,
   },
   searchPill: {
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 14,
-    fontFamily: "Oswald_400Regular",
+    fontFamily: "DMSans_400Regular",
     paddingVertical: 0,
   },
   filterButton: {
@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
   },
   popularText: {
     fontSize: 14,
-    fontFamily: "Oswald_500Medium",
+    fontFamily: "DMSans_500Medium",
   },
   historyHeader: {
     flexDirection: "row",
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
   },
   historyText: {
     fontSize: 14,
-    fontFamily: "Oswald_500Medium",
+    fontFamily: "DMSans_500Medium",
     flex: 1,
   },
   illustrationContainer: {

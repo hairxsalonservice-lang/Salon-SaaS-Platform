@@ -391,7 +391,7 @@ function getStyles(isDark) {
     },
     subtitle: {
       fontSize: 13,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
       marginTop: 2,
     },

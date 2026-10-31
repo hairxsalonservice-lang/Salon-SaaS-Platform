@@ -762,7 +762,7 @@ function buildStyles(isDark) {
     },
     tagText: {
       fontSize: 10,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: isDark ? C.textSecondary : C.muted,
     },
     rightActions: {

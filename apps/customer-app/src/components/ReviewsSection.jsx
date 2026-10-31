@@ -5,9 +5,9 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   TextInput,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { C, FF } from "../theme";
 import { useTheme } from "../context/ThemeContext";
@@ -281,7 +281,7 @@ export default function ReviewsSection({
             <View key={reviewId} style={styles.reviewCard}>
               <View style={styles.reviewHead}>
                 {avatar ? (
-                  <Image source={{ uri: avatar }} style={styles.avatarImage} />
+                  <Image source={avatar} style={styles.avatarImage} placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
                 ) : (
                   <View style={styles.avatar}>
                     <Text style={styles.avatarText}>{getInitials(reviewerName)}</Text>

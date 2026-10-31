@@ -55,7 +55,7 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
                   <Text
                     style={[
                       styles.iosTabLabel,
-                      { color: iconColor, fontFamily: isSelected ? "Oswald_600SemiBold" : "Oswald_400Regular" },
+                      { color: iconColor, fontFamily: isSelected ? "DMSans_600SemiBold" : "DMSans_400Regular" },
                     ]}
                   >
                     {tab.label}
@@ -98,7 +98,7 @@ export default function AndroidExpandingTabBar({ tabs, currentTab, onSelectTab }
                   styles.androidTabLabel,
                   {
                     color: iconColor,
-                    fontFamily: isSelected ? "Oswald_600SemiBold" : "Oswald_400Regular",
+                    fontFamily: isSelected ? "DMSans_600SemiBold" : "DMSans_400Regular",
                   },
                 ]}
               >

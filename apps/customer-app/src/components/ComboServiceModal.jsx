@@ -4,13 +4,13 @@ import {
   View,
   Text,
   Modal,
-  Image,
   ScrollView,
   StyleSheet,
   Dimensions,
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { C, S, FS, FW, R, FONT_FAMILY } from "../theme";
@@ -111,9 +111,11 @@ function ComboServiceModal({
             {/* Banner Image */}
             <View style={styles.imageCard}>
               <Image
-                source={{ uri: coverImage }}
+                source={coverImage}
                 style={styles.bannerImage}
-                resizeMode="cover"
+                contentFit="cover"
+                placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }}
+                transition={300}
               />
               <View style={styles.comboBadgePill}>
                 <Text style={styles.comboBadgeText}>✦ ALL-IN-ONE COMBO</Text>

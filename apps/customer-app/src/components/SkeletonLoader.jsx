@@ -92,7 +92,7 @@ export function ServiceCardSkeleton() {
 function getStyles() {
   return StyleSheet.create({
   box: {
-    backgroundColor: C.border,
+    backgroundColor: C.shimmer,
   },
   cardSkeleton: {
     backgroundColor: C.surface,

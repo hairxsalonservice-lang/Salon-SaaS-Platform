@@ -453,7 +453,7 @@ function getStyles(isDark) {
     },
     userSubtext: {
       fontSize: 13,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
       lineHeight: 18,
       marginBottom: 14,
@@ -622,7 +622,7 @@ function getStyles(isDark) {
     },
     menuSub: {
       fontSize: 12,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: C.muted,
     },
   });

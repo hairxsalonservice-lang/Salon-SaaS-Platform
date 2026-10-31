@@ -282,7 +282,7 @@ function getStyles() {
   },
   tabLabel: {
     fontSize: FS.xs,
-    fontFamily: "Oswald_500Medium",
+    fontFamily: "DMSans_500Medium",
   },
   tabLabelActive: {
     fontFamily: "Oswald_700Bold",

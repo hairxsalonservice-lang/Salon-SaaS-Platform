@@ -327,12 +327,12 @@ function getStyles(isDark) {
     textInput: {
       flex: 1,
       fontSize: 14.5,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.ink,
     },
     selectText: {
       fontSize: 14.5,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.ink,
     },
     saveBtn: {
@@ -381,7 +381,7 @@ function getStyles(isDark) {
     },
     genderOptionText: {
       fontSize: 15,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.ink,
     },
   });

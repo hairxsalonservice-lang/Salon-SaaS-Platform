@@ -509,7 +509,7 @@ function buildStyles(isDark, insets) {
     resultsCountText: {
       fontSize: 13,
       color: C.muted,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
     },
     sortBtn: {
       flexDirection: "row",

@@ -796,7 +796,7 @@ function getStyles() {
     },
     skipText: {
       fontSize: 13,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: C.main || C.main,
     },
 
@@ -926,7 +926,7 @@ function getStyles() {
     },
     subtitleText: {
       fontSize: 15,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: COLORS.body,
       textAlign: "center",
       lineHeight: 23,
@@ -974,7 +974,7 @@ function getStyles() {
     },
     ctaButtonText: {
       fontSize: 15,
-      fontFamily: "Oswald_500Medium",
+      fontFamily: "DMSans_500Medium",
       color: COLORS.onPrimary,
       letterSpacing: 0.2,
     },
@@ -991,7 +991,7 @@ function getStyles() {
     // ── Terms Hint ────────────────────────────────────────────
     termsHint: {
       fontSize: 11,
-      fontFamily: "Oswald_400Regular",
+      fontFamily: "DMSans_400Regular",
       color: COLORS.mutedSoft,
       textAlign: "center",
       marginTop: 14,
