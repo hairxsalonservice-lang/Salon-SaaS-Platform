@@ -62,15 +62,7 @@ export function SalonCardSkeleton({ variant = "default" }) {
 
   return (
     <View style={styles.cardSkeleton}>
-      <SkeletonBox height={160} borderRadius={R.lg} style={{ marginBottom: S.xs }} />
-      <View style={{ paddingHorizontal: S.xs }}>
-        <SkeletonBox width="70%" height={18} style={{ marginBottom: 8 }} />
-        <SkeletonBox width="45%" height={14} style={{ marginBottom: 12 }} />
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <SkeletonBox width="30%" height={14} />
-          <SkeletonBox width="25%" height={14} />
-        </View>
-      </View>
+      <SkeletonBox width="100%" height={220} borderRadius={R.lg} />
     </View>
   );
 }
@@ -95,12 +87,9 @@ function getStyles() {
     backgroundColor: C.shimmer,
   },
   cardSkeleton: {
-    backgroundColor: C.surface,
     borderRadius: R.lg,
-    padding: S.xs,
     marginBottom: S.sm,
-    borderWidth: 1,
-    borderColor: C.border,
+    overflow: "hidden",
   },
   compactCardSkeleton: {
     flexDirection: "row",

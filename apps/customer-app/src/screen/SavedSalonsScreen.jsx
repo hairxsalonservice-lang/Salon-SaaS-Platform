@@ -22,7 +22,7 @@ import SalonCard from "../components/SalonCard";
 export default function SavedSalonsScreen({ navigate, onBack }) {
   const { theme, isDark } = useTheme();
   const { favorites: localFavorites, toggleFavorite } = useFavorites();
-  const styles = getStyles(theme, isDark);
+  const styles = React.useMemo(() => getStyles(theme, isDark), [theme, isDark]);
 
   const [remoteFavorites, setRemoteFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -154,28 +154,33 @@ export default function SavedSalonsScreen({ navigate, onBack }) {
 }
 
 function getStyles(theme, isDark) {
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const ink = isDark ? "#F5F3F4" : C.ink;
+
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: C.bg,
+      backgroundColor: bg,
     },
     header: {
       paddingTop: Platform.OS === "ios" ? 54 : 44,
       paddingHorizontal: S.md,
       paddingBottom: S.md,
-      backgroundColor: C.bg,
+      backgroundColor: bg,
       flexDirection: "row",
       alignItems: "center",
       borderBottomWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
     },
     backBtn: {
       width: 38,
       height: 38,
       borderRadius: R.md,
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
       alignItems: "center",
       justifyContent: "center",
       marginRight: S.sm,
@@ -193,7 +198,7 @@ function getStyles(theme, isDark) {
       fontFamily: FONT_FAMILY.serif,
       fontSize: 24,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       letterSpacing: 0.15,
       marginTop: 2,
     },
@@ -230,12 +235,12 @@ function getStyles(theme, isDark) {
       gap: S.md,
     },
     emptyCard: {
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderRadius: R.lg,
       padding: S.xl,
       alignItems: "center",
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
       marginTop: S.lg,
     },
     emptyIconCircle: {
@@ -250,7 +255,7 @@ function getStyles(theme, isDark) {
     emptyTitle: {
       fontSize: FS.h3,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       marginBottom: S.xs,
     },
     emptySubtitle: {

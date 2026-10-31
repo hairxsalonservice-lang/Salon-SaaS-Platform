@@ -24,6 +24,7 @@ const HISTORY_KEY = "@recent_searches";
 export default function ExploreScreen({ goBack, navigate }) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
+  const styles = React.useMemo(() => getStyles(isDark), [isDark]);
   const selectedCity = useLocationStore((state) => state.selectedCity);
   const setSelectedCity = useLocationStore((state) => state.setSelectedCity);
   const [locationModalVisible, setLocationModalVisible] = useState(false);
@@ -219,177 +220,178 @@ export default function ExploreScreen({ goBack, navigate }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 40,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 20,
-  },
-  backButton: {
-    paddingRight: 14,
-    paddingTop: 4,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontFamily: FF.displayBold,
-    fontSize: 22,
-    letterSpacing: 0.2,
-  },
-  headerSubtitle: {
-    fontSize: 13,
-    fontFamily: "DMSans_400Regular",
-    marginTop: 2,
-  },
-  searchPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 24,
-    paddingLeft: 16,
-    paddingRight: 6,
-    height: 48,
-    marginBottom: 24,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    fontFamily: "DMSans_400Regular",
-    paddingVertical: 0,
-  },
-  filterButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: C.ink,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  sectionContainer: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontFamily: "Oswald_700Bold",
-    marginBottom: 12,
-  },
-  popularRow: {
-    paddingRight: 20,
-  },
-  popularPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginRight: 10,
-  },
-  pillIconBg: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  popularText: {
-    fontSize: 14,
-    fontFamily: "DMSans_500Medium",
-  },
-  historyHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  clearText: {
-    fontSize: 13,
-    color: C.main,
-    fontFamily: "Oswald_600SemiBold",
-  },
-  historyCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  historyItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-  },
-  historyText: {
-    fontSize: 14,
-    fontFamily: "DMSans_500Medium",
-    flex: 1,
-  },
-  illustrationContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 20,
-    paddingVertical: 20,
-  },
-  graphicWrapper: {
-    width: 140,
-    height: 120,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  blobBackgroundLarge: {
-    position: "absolute",
-    width: 100,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: C.crimsonTint,
-    transform: [{ rotate: "-15deg" }],
-    top: 10,
-    right: 10,
-  },
-  blobBackgroundSmall: {
-    position: "absolute",
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: C.crimsonTint,
-    bottom: 5,
-    left: 15,
-  },
-  magnifierCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 5,
-    borderColor: C.muted,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-    transform: [{ rotate: "-10deg" }],
-  },
-  illustrationTitle: {
-    fontSize: 18,
-    fontFamily: "Oswald_700Bold",
-    marginBottom: 6,
-  },
-  illustrationSubtitle: {
-    fontSize: 13,
-    textAlign: "center",
-    lineHeight: 18,
-  },
-});
-
+function getStyles(isDark) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      marginBottom: 20,
+    },
+    backButton: {
+      paddingRight: 14,
+      paddingTop: 4,
+    },
+    titleContainer: {
+      flex: 1,
+    },
+    headerTitle: {
+      fontFamily: FF.displayBold,
+      fontSize: 22,
+      letterSpacing: 0.3,
+    },
+    headerSubtitle: {
+      fontSize: 13,
+      fontFamily: "DMSans_400Regular",
+      marginTop: 2,
+    },
+    searchPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      borderRadius: 14,
+      paddingLeft: 16,
+      paddingRight: 6,
+      height: 48,
+      marginBottom: 24,
+      borderWidth: 1,
+      borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+    },
+    searchInput: {
+      flex: 1,
+      fontSize: 14,
+      fontFamily: "DMSans_400Regular",
+      paddingVertical: 0,
+    },
+    filterButton: {
+      width: 36,
+      height: 36,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: isDark ? "rgba(255,255,255,0.08)" : C.surface,
+    },
+    sectionContainer: {
+      marginBottom: 24,
+    },
+    sectionTitle: {
+      fontSize: 16,
+      fontFamily: "Oswald_600SemiBold",
+      letterSpacing: 0.3,
+    },
+    popularRow: {
+      paddingRight: 20,
+    },
+    popularPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingHorizontal: 14,
+      height: 40,
+      borderRadius: 20,
+      borderWidth: 1,
+      marginRight: 10,
+    },
+    pillIconBg: {
+      width: 24,
+      height: 24,
+      borderRadius: 12,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 8,
+    },
+    popularText: {
+      fontSize: 14,
+      fontFamily: "DMSans_500Medium",
+    },
+    historyHeader: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 12,
+    },
+    clearText: {
+      fontSize: 12,
+      color: C.main,
+      fontFamily: "DMSans_600SemiBold",
+    },
+    historyCard: {
+      borderRadius: 16,
+      borderWidth: 1,
+      overflow: "hidden",
+    },
+    historyItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      paddingVertical: 13,
+      paddingHorizontal: 16,
+    },
+    historyText: {
+      fontSize: 14,
+      fontFamily: "DMSans_400Regular",
+      flex: 1,
+    },
+    illustrationContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: 32,
+      paddingVertical: 20,
+    },
+    graphicWrapper: {
+      width: 140,
+      height: 120,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 20,
+    },
+    blobBackgroundLarge: {
+      position: "absolute",
+      width: 100,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: isDark ? "rgba(255,96,130,0.12)" : C.crimsonTint,
+      transform: [{ rotate: "-15deg" }],
+      top: 10,
+      right: 10,
+    },
+    blobBackgroundSmall: {
+      position: "absolute",
+      width: 70,
+      height: 70,
+      borderRadius: 35,
+      backgroundColor: isDark ? "rgba(255,96,130,0.08)" : C.crimsonTint,
+      bottom: 5,
+      left: 15,
+    },
+    magnifierCircle: {
+      width: 72,
+      height: 72,
+      borderRadius: 36,
+      borderWidth: 4,
+      borderColor: isDark ? "rgba(255,255,255,0.15)" : C.muted,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "transparent",
+      transform: [{ rotate: "-10deg" }],
+    },
+    illustrationTitle: {
+      fontSize: 18,
+      fontFamily: "Oswald_600SemiBold",
+      marginBottom: 6,
+      letterSpacing: 0.3,
+    },
+    illustrationSubtitle: {
+      fontSize: 13,
+      fontFamily: "DMSans_400Regular",
+      textAlign: "center",
+      lineHeight: 20,
+    },
+  });
+}

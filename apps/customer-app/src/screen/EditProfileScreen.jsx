@@ -8,19 +8,19 @@ import {
   ScrollView,
   StyleSheet,
   ActivityIndicator,
-  Image,
   Platform,
   StatusBar,
   Alert,
   Modal,
   KeyboardAvoidingView,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { authService } from "../services/authService";
-import { C } from "../theme";
+import { C, FF } from "../theme";
 
 const MALE_AVATAR_ASSET = require("../../assets/male-avatar.png");
 const FEMALE_AVATAR_ASSET = require("../../assets/female-avatar.png");
@@ -125,7 +125,7 @@ export default function EditProfileScreen({ goBack }) {
     return MALE_AVATAR_ASSET;
   };
 
-  const styles = getStyles(isDark);
+  const styles = React.useMemo(() => getStyles(isDark), [isDark]);
   const helperColor = C.muted;
 
   return (
@@ -144,7 +144,7 @@ export default function EditProfileScreen({ goBack }) {
         <View style={styles.topHeader}>
           <View style={{ flex: 1 }} />
           <TouchableOpacity onPress={goBack} style={styles.closeBtn} activeOpacity={0.7} disabled={saving}>
-            <Ionicons name="close" size={24} color={C.ink} />
+            <Ionicons name="close" size={24} color={isDark ? "#F5F3F4" : C.ink} />
           </TouchableOpacity>
         </View>
 
@@ -261,10 +261,16 @@ export default function EditProfileScreen({ goBack }) {
 }
 
 function getStyles(isDark) {
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const lifted = isDark ? "#1A1A1A" : C.lifted;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const ink = isDark ? "#F5F3F4" : C.ink;
+
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: C.bg,
+      backgroundColor: bg,
     },
     scrollContent: {
       paddingHorizontal: 24,
@@ -290,7 +296,7 @@ function getStyles(isDark) {
       height: 72,
       borderRadius: 24,
       overflow: "hidden",
-      backgroundColor: C.lifted,
+      backgroundColor: lifted,
       marginRight: 16,
     },
     avatarImg: {
@@ -318,7 +324,9 @@ function getStyles(isDark) {
     inputBox: {
       height: 52,
       borderRadius: 14,
-      backgroundColor: C.lifted,
+      backgroundColor: lifted,
+      borderWidth: isDark ? 1 : 0,
+      borderColor: border,
       paddingHorizontal: 16,
       flexDirection: "row",
       alignItems: "center",
@@ -328,12 +336,12 @@ function getStyles(isDark) {
       flex: 1,
       fontSize: 14.5,
       fontFamily: "DMSans_500Medium",
-      color: C.ink,
+      color: ink,
     },
     selectText: {
       fontSize: 14.5,
       fontFamily: "DMSans_500Medium",
-      color: C.ink,
+      color: ink,
     },
     saveBtn: {
       height: 54,
@@ -354,21 +362,23 @@ function getStyles(isDark) {
     },
     modalOverlay: {
       flex: 1,
-      backgroundColor: "rgba(0,0,0,0.4)",
+      backgroundColor: "rgba(0,0,0,0.55)",
       alignItems: "center",
       justifyContent: "center",
       padding: 24,
     },
     modalContent: {
       width: "100%",
-      backgroundColor: C.surface,
+      backgroundColor: isDark ? "#1A1A1A" : C.surface,
       borderRadius: 20,
       padding: 20,
+      borderWidth: isDark ? 1 : 0,
+      borderColor: border,
     },
     modalTitle: {
       fontSize: 17,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       marginBottom: 16,
     },
     genderOption: {
@@ -377,12 +387,12 @@ function getStyles(isDark) {
       justifyContent: "space-between",
       paddingVertical: 14,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: C.border,
+      borderBottomColor: border,
     },
     genderOptionText: {
       fontSize: 15,
       fontFamily: "DMSans_500Medium",
-      color: C.ink,
+      color: ink,
     },
   });
 }

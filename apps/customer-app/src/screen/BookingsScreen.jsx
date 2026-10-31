@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { C, FF } from "../theme";
+import { triggerHaptic } from "../theme/appleMotion";
 import { appointmentService } from "../services/appointmentService";
 import { paiseToINR } from "../services/apiClient";
 import { useAuth } from "../context/AuthContext";
@@ -179,6 +180,7 @@ export default function BookingsScreen({ navigate, onScroll }) {
   appointmentsRef.current = appointments;
 
   const switchTab = (tab) => {
+    triggerHaptic("selection");
     setActiveTab(tab);
     Animated.spring(segmentAnim, {
       toValue: TABS.indexOf(tab),
@@ -889,10 +891,10 @@ function GuestView({ styles, brand, navigate }) {
 }
 
 function getStyles(theme = {}, isDark = false) {
-  const bg = isDark ? C.ink : C.bg;
-  const surface = C.surface;
-  const border = isDark ? C.border : C.border;
-  const text = isDark ? C.lifted : C.ink;
+  const bg = theme?.canvas || C.bg;
+  const surface = theme?.surface || C.surface;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const text = theme?.ink || C.ink;
   const muted = C.muted;
   const brand = C.main;
 
@@ -902,13 +904,13 @@ function getStyles(theme = {}, isDark = false) {
 
     /* Header */
     header: { paddingTop: 56, paddingHorizontal: 20, paddingBottom: 12, backgroundColor: bg },
-    title: { fontFamily: FF.displayBold, fontSize: 30, color: text, letterSpacing: 0.3 },
-    subTitle: { fontSize: 14, color: muted, marginTop: 2, marginBottom: 16 },
+    title: { fontFamily: "Oswald_700Bold", fontSize: 28, color: text, letterSpacing: 0.5 },
+    subTitle: { fontSize: 13, fontFamily: "DMSans_400Regular", color: muted, marginTop: 2, marginBottom: 16 },
 
     /* Segmented control */
     segment: {
       flexDirection: "row",
-      backgroundColor: isDark ? C.ink : C.lifted,
+      backgroundColor: isDark ? "rgba(255,255,255,0.04)" : C.lifted,
       borderRadius: 14,
       padding: 4,
     },
@@ -966,14 +968,16 @@ function getStyles(theme = {}, isDark = false) {
 
     /* Next-visit hero */
     heroCard: {
-      backgroundColor: isDark ? C.ink : C.ink,
+      backgroundColor: isDark ? "#1A1A1A" : "#111111",
       borderRadius: 24,
       padding: 18,
-      shadowColor: C.ink,
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.18,
-      shadowRadius: 20,
-      elevation: 6,
+      borderWidth: isDark ? 1 : 0,
+      borderColor: "rgba(255,255,255,0.06)",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 12 },
+      shadowOpacity: 0.25,
+      shadowRadius: 24,
+      elevation: 8,
     },
     heroTopRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 },
     heroCountdownPill: {
@@ -987,7 +991,7 @@ function getStyles(theme = {}, isDark = false) {
     heroCountdownText: { color: C.textLight, fontSize: 12, fontFamily: "Oswald_700Bold" },
     heroBody: { flexDirection: "row", alignItems: "center" },
     heroSalon: { fontSize: 19, fontFamily: "Oswald_700Bold", color: C.textLight, letterSpacing: 0.15, marginBottom: 6 },
-    heroMuted: { fontSize: 13, color: "rgba(255,255,255,0.7)", marginLeft: 5, flexShrink: 1 },
+    heroMuted: { fontSize: 13, fontFamily: "DMSans_400Regular", color: "rgba(255,255,255,0.7)", marginLeft: 5, flexShrink: 1 },
     heroServices: {
       marginTop: 16,
       paddingTop: 14,
@@ -1033,8 +1037,8 @@ function getStyles(theme = {}, isDark = false) {
     cardRow: { flexDirection: "row", alignItems: "center" },
     cardInfo: { flex: 1, marginLeft: 14, marginRight: 6 },
     cardSalon: { fontSize: 15, fontFamily: "Oswald_700Bold", color: text },
-    cardMeta: { fontSize: 12.5, color: muted, marginTop: 2 },
-    cardServices: { fontSize: 12.5, color: C.textSecondary, marginTop: 4 },
+    cardMeta: { fontSize: 12.5, fontFamily: "DMSans_400Regular", color: muted, marginTop: 2 },
+    cardServices: { fontSize: 12.5, fontFamily: "DMSans_400Regular", color: C.textSecondary, marginTop: 4 },
     cardFooter: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 },
     cardPrice: { fontSize: 13, fontFamily: "Oswald_700Bold", color: text },
 
@@ -1102,7 +1106,7 @@ function getStyles(theme = {}, isDark = false) {
       marginBottom: 16,
     },
     emptyTitle: { fontSize: 19, fontFamily: "Oswald_700Bold", color: text, textAlign: "center", letterSpacing: 0.15 },
-    emptySub: { fontSize: 14, color: muted, textAlign: "center", lineHeight: 20, marginTop: 6, maxWidth: 300 },
+    emptySub: { fontSize: 14, fontFamily: "DMSans_400Regular", color: muted, textAlign: "center", lineHeight: 20, marginTop: 6, maxWidth: 300 },
     emptyCta: {
       flexDirection: "row",
       alignItems: "center",
@@ -1113,7 +1117,7 @@ function getStyles(theme = {}, isDark = false) {
       marginTop: 22,
     },
     emptyCtaText: { color: C.textLight, fontSize: 15, fontFamily: "Oswald_700Bold" },
-    skeleton: { backgroundColor: isDark ? C.ink : C.lifted },
+    skeleton: { backgroundColor: C.shimmer },
 
     /* Guest */
     guestContent: { alignItems: "center", paddingHorizontal: 20, paddingTop: 32, paddingBottom: 120 },

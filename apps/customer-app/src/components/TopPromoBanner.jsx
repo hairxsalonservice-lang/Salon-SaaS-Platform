@@ -3,13 +3,13 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
-  Image,
   StyleSheet,
   Dimensions,
   ScrollView,
   TouchableOpacity,
   AppState,
 } from "react-native";
+import { Image } from "expo-image";
 import { C, S, R, FF } from "../theme";
 import BouncyButton from "./BouncyButton";
 import { apiClient } from "../services/apiClient";
@@ -169,7 +169,7 @@ export default function TopPromoBanner({ onPressBanner, refreshTrigger }) {
             onPress={() => handleBannerClick(banner)}
           >
             {/* Rich Photography */}
-            <Image source={{ uri: banner.image }} style={styles.image} resizeMode="cover" />
+            <Image source={banner.image} style={styles.image} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} cachePolicy="memory-disk" />
 
             {/* Dark Gradient Overlay */}
             <View style={styles.gradientOverlay} />

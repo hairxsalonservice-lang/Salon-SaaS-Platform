@@ -29,7 +29,7 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function LoginScreen({ navigate, goBack, routeParams }) {
   const { theme, isDark } = useTheme();
-  const styles = getStyles(theme, isDark);
+  const styles = React.useMemo(() => getStyles(theme, isDark), [theme, isDark]);
   const insets = useSafeAreaInsets();
   const isAndroid = Platform.OS === "android";
   const topInset = Math.max(insets.top, isAndroid ? (StatusBar.currentHeight || 24) : 12) + 8;
@@ -267,11 +267,15 @@ export default function LoginScreen({ navigate, goBack, routeParams }) {
 
 function getStyles(theme, isDark) {
   const accentColor = C.main;
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const ink = isDark ? "#F5F3F4" : C.ink;
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: C.bg,
+      backgroundColor: bg,
     },
     scrollContent: {
       paddingHorizontal: 24,
@@ -290,7 +294,7 @@ function getStyles(theme, isDark) {
       borderRadius: 20,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: isDark ? C.surface : C.border,
+      backgroundColor: isDark ? surface : C.border,
     },
     skipBtn: {
       flexDirection: "row",
@@ -298,7 +302,7 @@ function getStyles(theme, isDark) {
       paddingVertical: 6,
       paddingHorizontal: 12,
       borderRadius: 16,
-      backgroundColor: isDark ? C.surface : C.border,
+      backgroundColor: isDark ? surface : C.border,
     },
     skipText: {
       fontSize: 14,
@@ -313,7 +317,7 @@ function getStyles(theme, isDark) {
     titleText: {
       fontFamily: PLATFORM_TYPO.titleFont,
       fontSize: PLATFORM_TYPO.titleSize,
-      color: C.ink,
+      color: ink,
       letterSpacing: PLATFORM_TYPO.letterSpacing,
       marginBottom: 6,
       textAlign: "center",
@@ -343,7 +347,7 @@ function getStyles(theme, isDark) {
       flex: 1,
       height: "100%",
       fontSize: 15,
-      color: C.ink,
+      color: ink,
       fontFamily: "DMSans_500Medium",
     },
     eyeBtn: {
@@ -360,7 +364,7 @@ function getStyles(theme, isDark) {
       width: 22,
       height: 22,
       borderRadius: 6,
-      backgroundColor: isDark ? C.lifted : C.border,
+      backgroundColor: isDark ? "#1A1A1A" : C.border,
       alignItems: "center",
       justifyContent: "center",
       marginRight: 10,
@@ -404,12 +408,12 @@ function getStyles(theme, isDark) {
       width: 58,
       height: 58,
       borderRadius: 18,
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: isDark ? C.border : C.border,
-      shadowColor: C.ink,
+      borderColor: border,
+      shadowColor: isDark ? "#000" : C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.05,
       shadowRadius: 8,

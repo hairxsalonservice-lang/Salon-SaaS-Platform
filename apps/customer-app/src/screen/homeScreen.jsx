@@ -10,9 +10,11 @@ import {
   RefreshControl,
   ImageBackground,
   Dimensions,
+  Platform,
 } from "react-native";
 import { C, S, FS, FW, FF, R, TYPO, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle } from "../theme";
 import { useTheme } from "../context/ThemeContext";
+import { triggerHaptic } from "../theme/appleMotion";
 import { Ionicons } from "@expo/vector-icons";
 import SalonCard from "../components/SalonCard";
 import * as Location from "expo-location";
@@ -319,6 +321,7 @@ function HomeScreen({ navigate, onScroll }) {
   }, [loadData]);
 
   const onRefresh = useCallback(() => {
+    triggerHaptic("light");
     setRefreshing(true);
     loadData(true);
   }, [loadData]);
@@ -381,6 +384,12 @@ function HomeScreen({ navigate, onScroll }) {
             {unreadCount > 0 ? <View style={styles.headerBellBadge} /> : null}
           </TouchableOpacity>
         </View>
+
+        {/* SEARCH BAR */}
+        <TouchableOpacity style={styles.searchBar} onPress={handleSearchClick} activeOpacity={0.8}>
+          <Ionicons name="search-outline" size={18} color={palette.muted} />
+          <Text style={styles.searchPlaceholder}>Search salons, services…</Text>
+        </TouchableOpacity>
 
         {/* HERO BANNER & CATEGORIES — Only shown when salons are available */}
         {!loading && (salons.length === 0 || loadError) ? null : (
@@ -457,6 +466,19 @@ function HomeScreen({ navigate, onScroll }) {
                     );
                   })}
                 </ScrollView>
+                {displayBanners.length > 1 && (
+                  <View style={styles.bannerDots}>
+                    {displayBanners.map((_, i) => (
+                      <View
+                        key={i}
+                        style={[
+                          styles.dot,
+                          i === activeBannerIndex ? styles.dotActive : styles.dotInactive,
+                        ]}
+                      />
+                    ))}
+                  </View>
+                )}
               </View>
             ) : null}
 
@@ -472,9 +494,10 @@ function HomeScreen({ navigate, onScroll }) {
                 <TouchableOpacity
                   key={idx}
                   style={styles.categoryItem}
-                  onPress={() =>
-                    navigate && navigate("CategoryDetail", { category: cat.label })
-                  }
+                  onPress={() => {
+                    triggerHaptic("light");
+                    navigate && navigate("CategoryDetail", { category: cat.label });
+                  }}
                 >
                   <View style={[styles.categoryIconCircle, { backgroundColor: CATEGORY_TINTS[cat.id][isDark ? 1 : 0] }]}>
                     <Ionicons name={cat.icon} size={24} color={palette.ink} />
@@ -526,6 +549,7 @@ function HomeScreen({ navigate, onScroll }) {
 
             {/* THANK YOU LETTER */}
             <View style={styles.noteCard}>
+              <View style={styles.noteAccentLine} />
               <Text style={styles.noteEyebrow}>
                 A NOTE FROM US
               </Text>
@@ -533,7 +557,7 @@ function HomeScreen({ navigate, onScroll }) {
                 "Thank you for letting us be a part of your beauty journey. We promise to bring you the best experts, the finest salons, and an experience you'll love."
               </Text>
               <Text style={styles.noteSignature}>
-                — The Salon Team
+                — The HairX Team
               </Text>
             </View>
 
@@ -608,26 +632,30 @@ function buildStyles(theme, isDark) {
     sectionHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
-      alignItems: "flex-end",
+      alignItems: "center",
       paddingHorizontal: S.md,
-      marginBottom: S.sm,
+      marginBottom: 14,
     },
     sectionTitleBlock: {
       flex: 1,
     },
     sectionTitle: {
-      fontFamily: FF.displayBold,
-      fontSize: FS.titleLg,
+      fontFamily: "Oswald_600SemiBold",
+      fontSize: 20,
       color: p.ink,
-      letterSpacing: 0.2,
+      letterSpacing: 0.3,
     },
     seeAllBtn: {
       flexDirection: "row",
       alignItems: "center",
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderRadius: 20,
+      backgroundColor: isDark ? "rgba(255,96,130,0.1)" : "rgba(255,96,130,0.06)",
     },
     seeAllText: {
-      fontFamily: FF.bodySemiBold,
-      fontSize: 13,
+      fontFamily: "DMSans_600SemiBold",
+      fontSize: 12,
       color: p.primary,
     },
 
@@ -637,31 +665,33 @@ function buildStyles(theme, isDark) {
       justifyContent: "space-between",
       alignItems: "center",
       paddingHorizontal: 16,
-      paddingTop: 56,
-      paddingBottom: 12,
-      backgroundColor: p.header,
+      paddingTop: Platform.OS === "ios" ? 56 : 48,
+      paddingBottom: 8,
+      backgroundColor: p.canvas,
     },
     headerLocation: {
       flexDirection: "row",
       alignItems: "center",
     },
     headerCityText: {
-      fontSize: 16,
+      fontSize: 18,
       fontFamily: "Oswald_700Bold",
       color: p.ink,
+      letterSpacing: 0.5,
     },
     headerSubtitleText: {
-      fontSize: 12,
+      fontSize: 11,
+      fontFamily: "DMSans_400Regular",
       color: p.muted,
-      marginTop: 2,
+      marginTop: 1,
     },
     headerBellBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      backgroundColor: p.surface,
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: isDark ? "rgba(255,255,255,0.06)" : p.surface,
       borderWidth: 1,
-      borderColor: p.hairline,
+      borderColor: isDark ? "rgba(255,255,255,0.08)" : p.hairline,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -669,20 +699,63 @@ function buildStyles(theme, isDark) {
       position: "absolute",
       top: 10,
       right: 12,
-      width: 6,
+      width: 7,
+      height: 7,
+      borderRadius: 4,
+      backgroundColor: C.error,
+      borderWidth: 1.5,
+      borderColor: p.canvas,
+    },
+
+    // Search bar
+    searchBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginHorizontal: 16,
+      marginBottom: 20,
+      paddingHorizontal: 16,
+      height: 46,
+      borderRadius: 14,
+      backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "#F5F3F4",
+      borderWidth: 1,
+      borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+      gap: 10,
+    },
+    searchPlaceholder: {
+      fontSize: 14,
+      fontFamily: "DMSans_400Regular",
+      color: p.muted,
+    },
+
+    // Banner dots
+    bannerDots: {
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 12,
+      gap: 6,
+    },
+    dot: {
       height: 6,
       borderRadius: 3,
-      backgroundColor: C.error,
+    },
+    dotActive: {
+      width: 20,
+      backgroundColor: p.primary,
+    },
+    dotInactive: {
+      width: 6,
+      backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.12)",
     },
 
     // Hero banner — ImageBackground handles cross-platform image + content stacking
     heroBannerContainer: {
       marginHorizontal: 16,
-      borderRadius: PLATFORM_RADIUS.card,
+      borderRadius: 20,
       overflow: "hidden",
       height: 200,
       backgroundColor: isDark ? p.surface : C.border,
-      marginBottom: 20,
+      marginBottom: 0,
     },
     heroBannerImage: {
       width: "100%",
@@ -766,60 +839,77 @@ function buildStyles(theme, isDark) {
       justifyContent: "space-between",
       alignItems: "flex-start",
       paddingHorizontal: 16,
-      marginBottom: 32,
+      marginBottom: 28,
     },
     categoryItem: {
       flex: 1,
       alignItems: "center",
     },
     categoryIconCircle: {
-      width: 52,
-      height: 52,
-      borderRadius: 26,
+      width: 56,
+      height: 56,
+      borderRadius: 18,
       alignItems: "center",
       justifyContent: "center",
-      marginBottom: 6,
+      marginBottom: 8,
+      borderWidth: 1,
+      borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
     },
     categoryLabel: {
       fontSize: 11,
       color: p.body,
       fontFamily: "DMSans_500Medium",
       textAlign: "center",
+      letterSpacing: 0.1,
     },
 
     // "A note from us" card
     noteCard: {
       marginHorizontal: 16,
-      marginTop: 20,
-      borderRadius: PLATFORM_RADIUS.card,
-      padding: 20,
+      marginTop: 24,
+      borderRadius: 20,
+      paddingVertical: 28,
+      paddingHorizontal: 24,
       justifyContent: "center",
-      backgroundColor: C.surface,
+      backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "#FAFAFA",
       borderWidth: 1,
-      borderColor: p.hairline,
+      borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+      overflow: "hidden",
+    },
+    noteAccentLine: {
+      position: "absolute",
+      top: 0,
+      left: 24,
+      right: 24,
+      height: 2,
+      backgroundColor: p.primary,
+      borderRadius: 1,
+      opacity: 0.6,
     },
     noteEyebrow: {
-      fontSize: 12,
+      fontSize: 10,
       fontFamily: "Oswald_600SemiBold",
-      color: p.muted,
-      letterSpacing: 0.8,
-      marginBottom: 10,
+      color: p.primary,
+      letterSpacing: 1.5,
+      marginBottom: 14,
       textAlign: "center",
       textTransform: "uppercase",
     },
     noteQuote: {
-      fontSize: 16,
+      fontSize: 15,
+      fontFamily: "DMSans_400Regular",
       fontStyle: "italic",
-      color: p.ink,
+      color: isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)",
       lineHeight: 24,
       textAlign: "center",
-      marginBottom: 10,
+      marginBottom: 14,
     },
     noteSignature: {
-      fontSize: 13,
+      fontSize: 12,
       fontFamily: "Oswald_600SemiBold",
       color: p.muted,
       textAlign: "center",
+      letterSpacing: 0.5,
     },
 
     horizontalCarousel: {

@@ -355,7 +355,7 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={C.bg} />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0A0A0A" : C.bg} />
 
       <FlatList
         data={loading ? [] : displayedSalons}
@@ -392,10 +392,16 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
 }
 
 function buildStyles(isDark, insets) {
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const lifted = isDark ? "#1A1A1A" : C.lifted;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const ink = isDark ? "#F5F3F4" : C.ink;
+
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: C.bg,
+      backgroundColor: bg,
     },
     flatListContent: {
       paddingTop: Math.max(insets?.top || 20, 20) + 12,
@@ -417,7 +423,7 @@ function buildStyles(isDark, insets) {
       width: 40,
       height: 40,
       borderRadius: 20,
-      backgroundColor: C.lifted,
+      backgroundColor: lifted,
       alignItems: "center",
       justifyContent: "center",
       marginBottom: 16,
@@ -431,7 +437,7 @@ function buildStyles(isDark, insets) {
       flex: 1,
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: C.lifted,
+      backgroundColor: lifted,
       height: 48,
       borderRadius: 24,
       paddingHorizontal: 16,
@@ -440,7 +446,7 @@ function buildStyles(isDark, insets) {
     searchInput: {
       flex: 1,
       fontSize: 14,
-      color: C.ink,
+      color: ink,
       paddingVertical: 0,
     },
     filterBtn: {
@@ -474,9 +480,9 @@ function buildStyles(isDark, insets) {
       backgroundColor: C.main,
     },
     catPillInactive: {
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
     },
     catIconWrap: {
       width: 24,
@@ -498,7 +504,7 @@ function buildStyles(isDark, insets) {
       color: C.textLight,
     },
     catTextInactive: {
-      color: isDark ? C.lifted : C.textSecondary,
+      color: isDark ? "#F5F3F4" : C.textSecondary,
     },
     resultsHeaderRow: {
       flexDirection: "row",
@@ -518,7 +524,7 @@ function buildStyles(isDark, insets) {
     sortBtnText: {
       fontSize: 13,
       fontFamily: "Oswald_600SemiBold",
-      color: C.ink,
+      color: ink,
     },
     centerBlock: {
       padding: 32,

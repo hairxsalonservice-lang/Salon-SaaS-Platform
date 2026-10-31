@@ -6,11 +6,11 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Image,
   StyleSheet,
   StatusBar,
   ActivityIndicator,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 import { C, FF } from "../theme";
@@ -204,16 +204,16 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
 
   const toggleSort = (sort) => setActiveSort((prev) => (prev === sort ? "Recommended" : sort));
 
-  const styles = buildStyles(isDark);
+  const styles = React.useMemo(() => buildStyles(isDark), [isDark]);
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? C.bg : C.lifted }]}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? C.bg : C.lifted} />
+    <View style={[styles.container, { backgroundColor: isDark ? "#0A0A0A" : C.lifted }]}>
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0A0A0A" : C.lifted} />
 
       {/* Header Bar */}
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
         <TouchableOpacity style={styles.backBtn} onPress={goBack} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={22} color={C.ink} />
+          <Ionicons name="arrow-back" size={22} color={isDark ? "#F5F3F4" : C.ink} />
         </TouchableOpacity>
 
         <View style={styles.headerTextWrap}>
@@ -226,7 +226,7 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
           onPress={() => setIsSearching((prev) => !prev)}
           activeOpacity={0.7}
         >
-          <Ionicons name={isSearching ? "close" : "search-outline"} size={20} color={C.ink} />
+          <Ionicons name={isSearching ? "close" : "search-outline"} size={20} color={isDark ? "#F5F3F4" : C.ink} />
         </TouchableOpacity>
       </View>
 
@@ -265,9 +265,12 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
 
           <View style={styles.heroRight}>
             <Image
-              source={{ uri: config.heroImage }}
+              source={config.heroImage}
               style={styles.heroImage}
-              resizeMode="cover"
+              contentFit="cover"
+              placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }}
+              transition={300}
+              cachePolicy="memory-disk"
             />
             {/* Stamp Badge */}
             <View style={styles.badgeStamp}>
@@ -375,9 +378,13 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
                 {/* Salon Thumbnail Box */}
                 <View style={styles.salonThumbWrap}>
                   <Image
-                    source={{ uri: salon.coverImage }}
+                    source={salon.coverImage}
                     style={styles.salonThumb}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }}
+                    transition={300}
+                    cachePolicy="memory-disk"
+                    recyclingKey={salon._id}
                   />
                 </View>
 
@@ -492,6 +499,12 @@ export default function CategoryDetailScreen({ goBack, navigate, routeParams = {
 }
 
 function buildStyles(isDark) {
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const lifted = isDark ? "#1A1A1A" : C.lifted;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const ink = isDark ? "#F5F3F4" : C.ink;
+
   return StyleSheet.create({
     container: {
       flex: 1,
@@ -501,7 +514,7 @@ function buildStyles(isDark) {
       alignItems: "center",
       paddingHorizontal: 16,
       paddingBottom: 12,
-      backgroundColor: isDark ? C.bg : C.lifted,
+      backgroundColor: isDark ? bg : C.lifted,
     },
     backBtn: {
       width: 36,
@@ -517,7 +530,7 @@ function buildStyles(isDark) {
     headerTitle: {
       fontFamily: FF.displayBold,
       fontSize: 20,
-      color: C.ink,
+      color: ink,
       letterSpacing: 0.2,
     },
     headerSubtitle: {
@@ -529,7 +542,7 @@ function buildStyles(isDark) {
       width: 38,
       height: 38,
       borderRadius: 19,
-      backgroundColor: isDark ? C.surface : C.lifted,
+      backgroundColor: isDark ? surface : C.lifted,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -538,7 +551,7 @@ function buildStyles(isDark) {
       alignItems: "center",
       marginHorizontal: 16,
       marginBottom: 12,
-      backgroundColor: isDark ? C.surface : C.lifted,
+      backgroundColor: isDark ? surface : C.lifted,
       borderRadius: 20,
       paddingHorizontal: 14,
       height: 44,
@@ -546,7 +559,7 @@ function buildStyles(isDark) {
     searchInput: {
       flex: 1,
       fontSize: 14,
-      color: C.ink,
+      color: ink,
       paddingVertical: 0,
     },
     scrollContent: {
@@ -556,7 +569,7 @@ function buildStyles(isDark) {
     /* Hero Card */
     heroCard: {
       flexDirection: "row",
-      backgroundColor: isDark ? C.surface : C.lifted,
+      backgroundColor: isDark ? surface : C.lifted,
       borderRadius: 20,
       padding: 16,
       marginBottom: 16,
@@ -578,7 +591,7 @@ function buildStyles(isDark) {
     heroTitle: {
       fontSize: 22,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       lineHeight: 26,
       letterSpacing: 0.15,
       marginBottom: 8,
@@ -604,13 +617,13 @@ function buildStyles(isDark) {
       position: "absolute",
       bottom: 8,
       right: 8,
-      backgroundColor: "rgba(255, 255, 255, 0.92)",
+      backgroundColor: isDark ? "rgba(20,20,20,0.88)" : "rgba(255, 255, 255, 0.92)",
       borderRadius: 10,
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderWidth: 1,
       borderColor: "rgba(192, 82, 120, 0.3)",
-      shadowColor: C.ink,
+      shadowColor: isDark ? "#000" : C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.15,
       shadowRadius: 4,
@@ -632,9 +645,9 @@ function buildStyles(isDark) {
     filterPill: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
       paddingHorizontal: 14,
       paddingVertical: 8,
       borderRadius: 20,
@@ -642,7 +655,7 @@ function buildStyles(isDark) {
     },
     filterPillActive: {
       borderColor: C.main,
-      backgroundColor: isDark ? C.surface : C.infoBg,
+      backgroundColor: isDark ? surface : C.infoBg,
     },
     filterPillText: {
       fontSize: 13,
@@ -662,12 +675,12 @@ function buildStyles(isDark) {
     salonsCountText: {
       fontSize: 15,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
     },
     mapViewBtn: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? C.surface : C.infoBg,
+      backgroundColor: isDark ? surface : C.infoBg,
       borderWidth: 1,
       borderColor: "rgba(192, 82, 120, 0.3)",
       paddingHorizontal: 12,
@@ -682,13 +695,13 @@ function buildStyles(isDark) {
     /* Salon Cards */
     salonCard: {
       flexDirection: "row",
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderRadius: 18,
       padding: 12,
       marginBottom: 14,
       borderWidth: 1,
-      borderColor: C.border,
-      shadowColor: C.ink,
+      borderColor: border,
+      shadowColor: isDark ? "#000" : C.ink,
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.04,
       shadowRadius: 6,
@@ -718,7 +731,7 @@ function buildStyles(isDark) {
     salonName: {
       fontSize: 15,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       flexShrink: 1,
     },
     ratingRow: {
@@ -729,7 +742,7 @@ function buildStyles(isDark) {
     ratingScore: {
       fontSize: 12,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       marginLeft: 4,
       marginRight: 3,
     },
@@ -753,7 +766,7 @@ function buildStyles(isDark) {
       flexWrap: "wrap",
     },
     tagPill: {
-      backgroundColor: C.border,
+      backgroundColor: isDark ? "rgba(255,255,255,0.06)" : C.border,
       paddingHorizontal: 8,
       paddingVertical: 3,
       borderRadius: 8,
@@ -774,7 +787,7 @@ function buildStyles(isDark) {
       padding: 4,
     },
     bookNowBtn: {
-      backgroundColor: isDark ? C.surface : C.infoBg,
+      backgroundColor: isDark ? lifted : C.infoBg,
       paddingHorizontal: 12,
       paddingVertical: 7,
       borderRadius: 12,
@@ -789,7 +802,7 @@ function buildStyles(isDark) {
     ctaBanner: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? C.ink : C.infoBg,
+      backgroundColor: isDark ? surface : C.infoBg,
       borderRadius: 18,
       padding: 14,
       marginTop: 10,
@@ -811,7 +824,7 @@ function buildStyles(isDark) {
     ctaTitle: {
       fontSize: 13,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
     },
     ctaSub: {
       fontSize: 11,
@@ -821,7 +834,7 @@ function buildStyles(isDark) {
     chatNowBtn: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: isDark ? C.ink : C.crimsonTint,
+      backgroundColor: isDark ? lifted : C.crimsonTint,
       paddingHorizontal: 12,
       paddingVertical: 7,
       borderRadius: 14,
@@ -847,7 +860,7 @@ function buildStyles(isDark) {
     emptyTitle: {
       fontSize: 16,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       marginTop: 10,
     },
     emptySub: {

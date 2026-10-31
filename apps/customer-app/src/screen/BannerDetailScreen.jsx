@@ -4,7 +4,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
@@ -13,6 +12,7 @@ import {
   Clipboard,
   StatusBar,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { C, S, FS, FW, R, TYPO, FONT_FAMILY } from "../theme";
 import { useTheme } from "../context/ThemeContext";
@@ -23,7 +23,7 @@ import LocationPickerModal from "../components/LocationPickerModal";
 
 export default function BannerDetailScreen({ routeParams, onBack, navigate }) {
   const { theme, isDark } = useTheme();
-  const styles = getStyles(theme, isDark);
+  const styles = React.useMemo(() => getStyles(theme, isDark), [theme, isDark]);
   const selectedCity = useLocationStore((state) => state.selectedCity);
   const setSelectedCity = useLocationStore((state) => state.setSelectedCity);
   const [locationModalVisible, setLocationModalVisible] = useState(false);
@@ -78,7 +78,7 @@ export default function BannerDetailScreen({ routeParams, onBack, navigate }) {
           onPress={() => (onBack ? onBack() : navigate && navigate("Home"))}
           activeOpacity={0.8}
         >
-          <Ionicons name="chevron-back" size={20} color={C.ink} />
+          <Ionicons name="chevron-back" size={20} color={isDark ? "#F5F3F4" : C.ink} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>OFFER DETAILS</Text>
         <View style={{ width: 40 }} />
@@ -100,9 +100,11 @@ export default function BannerDetailScreen({ routeParams, onBack, navigate }) {
         {/* Banner Hero Image */}
         <View style={styles.heroWrapper}>
           <Image
-            source={{ uri: banner.image || banner.imageUrl }}
+            source={banner.image || banner.imageUrl}
             style={styles.heroImage}
-            resizeMode="cover"
+            contentFit="cover"
+            placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }}
+            transition={300}
           />
           <View style={styles.tagBadge}>
             <Text style={styles.tagBadgeText}>{banner.tag || "PROMO OFFER"}</Text>
@@ -214,10 +216,16 @@ export default function BannerDetailScreen({ routeParams, onBack, navigate }) {
 }
 
 function getStyles(theme, isDark) {
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const lifted = isDark ? "#1A1A1A" : C.lifted;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const ink = isDark ? "#F5F3F4" : C.ink;
+
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: C.bg,
+      backgroundColor: bg,
     },
     topHeader: {
       flexDirection: "row",
@@ -227,16 +235,16 @@ function getStyles(theme, isDark) {
       paddingTop: Platform.OS === "ios" ? 10 : 20,
       paddingBottom: S.sm,
       borderBottomWidth: 1,
-      borderColor: C.border,
-      backgroundColor: C.surface,
+      borderColor: border,
+      backgroundColor: surface,
     },
     backBtn: {
       width: 40,
       height: 40,
       borderRadius: R.md,
-      backgroundColor: C.bg,
+      backgroundColor: bg,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
       alignItems: "center",
       justifyContent: "center",
     },
@@ -256,7 +264,7 @@ function getStyles(theme, isDark) {
       position: "relative",
       marginBottom: S.md,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
     },
     heroImage: {
       width: "100%",
@@ -286,7 +294,7 @@ function getStyles(theme, isDark) {
       fontFamily: FONT_FAMILY.serif,
       fontSize: 24,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       lineHeight: 30,
       marginBottom: 6,
     },
@@ -296,7 +304,7 @@ function getStyles(theme, isDark) {
       lineHeight: 22,
     },
     voucherCard: {
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderRadius: R.lg,
       padding: S.md,
       flexDirection: "row",
@@ -326,12 +334,12 @@ function getStyles(theme, isDark) {
     copyBtn: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: C.bg,
+      backgroundColor: bg,
       paddingHorizontal: S.md,
       paddingVertical: 10,
       borderRadius: R.md,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
       gap: 6,
     },
     copyBtnSuccess: {
@@ -341,14 +349,14 @@ function getStyles(theme, isDark) {
     copyBtnText: {
       fontSize: FS.bodySm,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
     },
     detailsBlock: {
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderRadius: R.lg,
       padding: S.md,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
       marginBottom: S.md,
     },
     detailsHeader: {
@@ -360,7 +368,7 @@ function getStyles(theme, isDark) {
     detailsHeaderTitle: {
       fontSize: FS.body,
       fontFamily: "Oswald_600SemiBold",
-      color: C.ink,
+      color: ink,
     },
     detailsBodyText: {
       fontSize: FS.bodySm,
@@ -368,17 +376,17 @@ function getStyles(theme, isDark) {
       lineHeight: 20,
     },
     stepsCard: {
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderRadius: R.lg,
       padding: S.md,
       borderWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
       gap: 12,
     },
     stepsTitle: {
       fontSize: FS.body,
       fontFamily: "Oswald_600SemiBold",
-      color: C.ink,
+      color: ink,
       marginBottom: 4,
     },
     stepRow: {
@@ -410,11 +418,11 @@ function getStyles(theme, isDark) {
       bottom: 0,
       left: 0,
       right: 0,
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       paddingHorizontal: S.md,
       paddingVertical: S.md,
       borderTopWidth: 1,
-      borderColor: C.border,
+      borderColor: border,
     },
     primaryCtaBtn: {
       flexDirection: "row",

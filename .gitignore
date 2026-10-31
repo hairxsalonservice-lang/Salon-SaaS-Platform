@@ -40,5 +40,6 @@ Thumbs.db
 *.sln
 *.swp
 
-# Security audit output (agent-generated, not source)
+# Security audit output and skills
 security-audit-report/
+.agents/

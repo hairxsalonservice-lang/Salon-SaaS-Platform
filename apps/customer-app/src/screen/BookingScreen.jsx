@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet, Platform, StatusBar, Image, TextInput } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, StyleSheet, Platform, StatusBar, TextInput } from 'react-native';
+import { Image } from 'expo-image';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { C, FF } from '../theme';
+import { triggerHaptic } from '../theme/appleMotion';
+import SuccessAnimation from '../components/SuccessAnimation';
 import SlotPicker from '../components/SlotPicker';
 import ErrorCardModal from '../components/ErrorCardModal';
 import ConflictModal from '../components/ConflictModal';
@@ -158,6 +161,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
         slotId, serviceId, serviceIds, customerNotes: '', guests: 1,
       });
       setBookingSuccess(true);
+      triggerHaptic("success");
     } catch (err) {
       if (err.conflictAppointment || (err.message && err.message.toLowerCase().includes('already have an appointment'))) {
         setConflictData(err.conflictAppointment || { salonName: salon?.name, serviceName: service?.name, date: selectedDate, startTime: selectedSlot?.startTime });
@@ -170,7 +174,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
     }
   };
 
-  const styles = getStyles();
+  const styles = React.useMemo(() => getStyles(isDark), [isDark]);
 
 
 
@@ -293,9 +297,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
     return (
       <ScrollView contentContainerStyle={[styles.successScreenWrapper, { paddingTop: topInset + 40 }]} showsVerticalScrollIndicator={false}>
         <View style={styles.successHeader}>
-          <View style={styles.successCheckRing}>
-            <Ionicons name="checkmark" size={44} color={C.textLight} />
-          </View>
+          <SuccessAnimation size={80} color={C.main} bgColor={C.crimsonTint} delay={200} />
           <Text style={styles.successTitle}>Booking Successful!</Text>
           <Text style={styles.successSub}>
             Your appointment has been confirmed.{"\n"}We look forward to seeing you!
@@ -304,7 +306,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
 
         <View style={styles.successDetailsCard}>
           <View style={styles.successServiceRow}>
-            <Image source={{ uri: primarySvc.image || salon?.coverImage || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500' }} style={styles.successServiceImg} />
+            <Image source={primarySvc.image || salon?.coverImage || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500'} style={styles.successServiceImg} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
             <View style={styles.successServiceInfo}>
               <Text style={styles.successServiceName}>{primarySvc.name || "Haircut & Styling"}</Text>
               <Text style={styles.successServiceDesc}>Professional haircut with styling</Text>
@@ -414,7 +416,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
         </Text>
 
         <View style={styles.salonCard}>
-          <Image source={{ uri: salon?.coverImage || salon?.images?.[0] || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500' }} style={styles.salonImg} />
+          <Image source={salon?.coverImage || salon?.images?.[0] || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=500'} style={styles.salonImg} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
           <View style={styles.salonInfo}>
             <Text style={styles.salonName} numberOfLines={1}>{branchName}</Text>
             <View style={styles.ratingRow}>
@@ -592,89 +594,94 @@ export default function BookingScreen({ salon, branch, service, selectedServices
   );
 }
 
-function getStyles() {
+function getStyles(isDark = false) {
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const cardBg = isDark ? "#1A1A1A" : C.textLight;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const ink = isDark ? "#F5F3F4" : C.ink;
+
   return StyleSheet.create({
-    container: { flex: 1, backgroundColor: C.bg },
-    header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingBottom: 10, backgroundColor: C.bg },
+    container: { flex: 1, backgroundColor: bg },
+    header: { flexDirection: "row", alignItems: "center", paddingHorizontal: 20, paddingBottom: 10, backgroundColor: bg },
     backBtn: { width: 36, height: 36, justifyContent: "center" },
     contentContainer: { paddingHorizontal: 20, paddingTop: 10, paddingBottom: 140 },
-    pageTitle: { fontFamily: FF.displayBold, fontSize: 26, color: C.ink, letterSpacing: 0.2, marginBottom: 4 },
-    pageSubTitle: { fontSize: 13, color: C.muted, marginBottom: 24, lineHeight: 18},
-    salonCard: { flexDirection: "row", backgroundColor: C.textLight, borderRadius: 16, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: C.border },
+    pageTitle: { fontFamily: "Oswald_700Bold", fontSize: 26, color: ink, letterSpacing: 0.3, marginBottom: 4 },
+    pageSubTitle: { fontSize: 13, fontFamily: "DMSans_400Regular", color: C.muted, marginBottom: 24, lineHeight: 18},
+    salonCard: { flexDirection: "row", backgroundColor: cardBg, borderRadius: 16, padding: 12, marginBottom: 16, borderWidth: 1, borderColor: border },
     salonImg: { width: 60, height: 60, borderRadius: 12, marginRight: 12 },
     salonInfo: { flex: 1, justifyContent: "center" },
-    salonName: { fontSize: 15, fontFamily: "Oswald_700Bold", color: C.ink, marginBottom: 4 },
+    salonName: { fontSize: 15, fontFamily: "Oswald_700Bold", color: ink, marginBottom: 4 },
     ratingRow: { flexDirection: "row", alignItems: "center", marginBottom: 2 },
     ratingTxt: { fontSize: 12, color: "#666", marginLeft: 4, fontFamily: "DMSans_500Medium" },
     locationRow: { flexDirection: "row", alignItems: "center" },
     locationTxt: { fontSize: 12, color: C.muted, marginLeft: 4 },
-    serviceCard: { flexDirection: "row", alignItems: "center", backgroundColor: C.lifted, borderRadius: 16, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: C.borderLight },
-    svcIconWrap: { width: 44, height: 44, borderRadius: 12, backgroundColor: C.crimsonTint, alignItems: "center", justifyContent: "center", marginRight: 12 },
+    serviceCard: { flexDirection: "row", alignItems: "center", backgroundColor: isDark ? "rgba(255,255,255,0.04)" : C.lifted, borderRadius: 16, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: border },
+    svcIconWrap: { width: 44, height: 44, borderRadius: 12, backgroundColor: isDark ? "rgba(255,96,130,0.12)" : C.crimsonTint, alignItems: "center", justifyContent: "center", marginRight: 12 },
     svcInfo: { flex: 1, flexShrink: 1, paddingRight: 8 },
-    svcName: { fontSize: 15, fontFamily: "Oswald_600SemiBold", color: C.ink, marginBottom: 2 },
+    svcName: { fontSize: 15, fontFamily: "Oswald_600SemiBold", color: ink, marginBottom: 2 },
     svcSub: { fontSize: 12, color: C.muted },
-    svcPrice: { fontSize: 15, fontFamily: "Oswald_700Bold", color: C.ink, flexShrink: 0 },
+    svcPrice: { fontSize: 15, fontFamily: "Oswald_700Bold", color: ink, flexShrink: 0 },
     summarySection: { marginBottom: 24 },
-    sectionTitle: { fontFamily: FF.display, fontSize: 16, color: C.ink, letterSpacing: 0.1, marginBottom: 12 },
-    summaryCard: { backgroundColor: C.textLight, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: C.border },
+    sectionTitle: { fontFamily: "Oswald_600SemiBold", fontSize: 16, color: ink, letterSpacing: 0.3, marginBottom: 12 },
+    summaryCard: { backgroundColor: cardBg, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: border },
     summaryRow: { flexDirection: "row", alignItems: "flex-start", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: C.lifted },
     summaryIcon: { width: 24, marginTop: 2 },
     summaryLabel: { flex: 1, fontSize: 14, color: C.muted, marginTop: 1 },
     summaryValWrap: { flex: 2, alignItems: "flex-end" },
-    summaryVal: { fontSize: 14, fontFamily: "Oswald_600SemiBold", color: C.ink, textAlign: "right" },
+    summaryVal: { fontSize: 14, fontFamily: "Oswald_600SemiBold", color: ink, textAlign: "right" },
     summaryValSub: { fontSize: 12, color: C.muted, marginTop: 2, textAlign: "right" },
     priceLabel: { flex: 1, fontSize: 14, color: C.muted },
-    priceVal: { fontSize: 15, fontFamily: "Oswald_600SemiBold", color: C.ink },
-    totalLabel: { flex: 1, fontSize: 16, fontFamily: "Oswald_700Bold", color: C.ink },
-    totalVal: { fontSize: 18, fontFamily: "Oswald_700Bold", color: C.ink },
+    priceVal: { fontSize: 15, fontFamily: "Oswald_600SemiBold", color: ink },
+    totalLabel: { flex: 1, fontSize: 16, fontFamily: "Oswald_700Bold", color: ink },
+    totalVal: { fontSize: 18, fontFamily: "Oswald_700Bold", color: ink },
     promoInputRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-    promoInput: { flex: 1, height: 48, backgroundColor: C.surface, borderRadius: 12, paddingHorizontal: 16, fontSize: 15, fontFamily: "DMSans_500Medium", color: C.ink, borderWidth: 1, borderColor: C.border, letterSpacing: 0.5 },
+    promoInput: { flex: 1, height: 48, backgroundColor: surface, borderRadius: 12, paddingHorizontal: 16, fontSize: 15, fontFamily: "DMSans_500Medium", color: ink, borderWidth: 1, borderColor: border, letterSpacing: 0.5 },
     promoApplyBtn: { height: 48, paddingHorizontal: 22, borderRadius: 12, backgroundColor: C.main, alignItems: "center", justifyContent: "center" },
     promoApplyText: { fontSize: 15, fontFamily: "Oswald_600SemiBold", color: C.textLight, letterSpacing: 0.3 },
     promoErrorText: { fontSize: 12, fontFamily: "DMSans_400Regular", color: C.error, marginTop: 8 },
     promoAppliedCard: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", backgroundColor: C.successBg, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: "rgba(46,125,50,0.15)" },
     promoAppliedLeft: { flexDirection: "row", alignItems: "center", flex: 1, gap: 10 },
     promoAppliedInfo: { flex: 1 },
-    promoAppliedCode: { fontSize: 15, fontFamily: "Oswald_700Bold", color: C.ink, letterSpacing: 0.5 },
+    promoAppliedCode: { fontSize: 15, fontFamily: "Oswald_700Bold", color: ink, letterSpacing: 0.5 },
     promoAppliedLabel: { fontSize: 12, fontFamily: "DMSans_400Regular", color: C.success, marginTop: 2 },
     cancellationBanner: { flexDirection: "row", alignItems: "center", backgroundColor: C.successBg, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: C.successBg, marginBottom: 20 },
     cancelTextWrap: { flex: 1, marginLeft: 10 },
     cancelTitle: { fontSize: 13, fontFamily: "Oswald_700Bold", color: C.success, marginBottom: 2 },
     cancelSub: { fontSize: 11, color: C.success },
-    bottomBar: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: C.bg, paddingHorizontal: 20, paddingTop: 16 },
+    bottomBar: { position: "absolute", bottom: 0, left: 0, right: 0, backgroundColor: bg, paddingHorizontal: 20, paddingTop: 16, borderTopWidth: 1, borderTopColor: border },
     mainBtn: { backgroundColor: C.main, height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center" },
     btnDisabled: { opacity: 0.5 },
     mainBtnText: { color: C.textLight, fontSize: 16, fontFamily: "Oswald_600SemiBold" },
     loadingBox: { padding: 40, alignItems: "center" },
     loadingText: { marginTop: 12, color: C.muted, fontSize: 14 },
-    successScreenWrapper: { flexGrow: 1, backgroundColor: C.textLight, paddingHorizontal: 20, paddingTop: 30, paddingBottom: 30, alignItems: "center" },
+    successScreenWrapper: { flexGrow: 1, backgroundColor: bg, paddingHorizontal: 20, paddingTop: 30, paddingBottom: 30, alignItems: "center" },
     successHeader: { alignItems: "center", marginBottom: 24, marginTop: 10 },
-    successCheckRing: { width: 72, height: 72, borderRadius: 36, backgroundColor: C.main, alignItems: "center", justifyContent: "center", marginBottom: 16, borderWidth: 6, borderColor: C.crimsonTint },
-    successTitle: { fontFamily: FF.displayBold, fontSize: 22, color: C.ink, textAlign: "center", letterSpacing: 0.2, marginBottom: 6 },
+    successTitle: { fontFamily: "Oswald_700Bold", fontSize: 24, color: ink, textAlign: "center", letterSpacing: 0.3, marginBottom: 6, marginTop: 20 },
     successSub: { fontSize: 13, color: C.muted, textAlign: "center", lineHeight: 20},
-    successDetailsCard: { width: "100%", backgroundColor: C.textLight, borderRadius: 16, padding: 16, marginBottom: 20, shadowColor: C.ink, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.04, shadowRadius: 12, elevation: 2, borderWidth: 1, borderColor: C.border },
+    successDetailsCard: { width: "100%", backgroundColor: cardBg, borderRadius: 20, padding: 18, marginBottom: 20, borderWidth: 1, borderColor: border },
     successServiceRow: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
     successServiceImg: { width: 50, height: 50, borderRadius: 10, marginRight: 12 },
     successServiceInfo: { flex: 1 },
-    successServiceName: { fontSize: 15, fontFamily: "Oswald_700Bold", color: C.ink, marginBottom: 2 },
+    successServiceName: { fontSize: 15, fontFamily: "Oswald_700Bold", color: ink, marginBottom: 2 },
     successServiceDesc: { fontSize: 12, color: C.muted, marginBottom: 6 },
     successServiceMeta: { flexDirection: "row", alignItems: "center" },
     successServiceMetaText: { fontSize: 12, color: C.textSecondary, marginLeft: 4, fontFamily: "DMSans_500Medium" },
-    successDivider: { height: 1, backgroundColor: C.border, marginVertical: 12 },
+    successDivider: { height: 1, backgroundColor: border, marginVertical: 12 },
     successDetailRow: { flexDirection: "row", alignItems: "center" },
     successIconBox: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", marginRight: 12 },
     successDetailTextWrap: { flex: 1 },
-    successDetailLabel: { fontSize: 12, fontFamily: "Oswald_600SemiBold", color: C.ink, marginBottom: 2 },
+    successDetailLabel: { fontSize: 12, fontFamily: "Oswald_600SemiBold", color: ink, marginBottom: 2 },
     successDetailValue: { fontSize: 13, color: C.textSecondary },
     successDetailSubValue: { fontSize: 12, color: C.muted, marginTop: 2 },
-    copyBtn: { backgroundColor: C.lifted, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
+    copyBtn: { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : C.lifted, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 6 },
     copyBtnText: { color: C.main, fontSize: 11, fontFamily: "Oswald_600SemiBold" },
     viewBookingsBtn: { width: "100%", height: 52, borderRadius: 26, backgroundColor: C.main, flexDirection: "row", alignItems: "center", justifyContent: "center", marginBottom: 12 },
     viewBookingsText: { fontSize: 15, fontFamily: "Oswald_700Bold", color: C.textLight },
-    shareBtn: { width: "100%", height: 52, borderRadius: 26, backgroundColor: C.lifted, flexDirection: "row", alignItems: "center", justifyContent: "center", marginBottom: 30 },
+    shareBtn: { width: "100%", height: 52, borderRadius: 26, backgroundColor: isDark ? "rgba(255,255,255,0.06)" : C.lifted, flexDirection: "row", alignItems: "center", justifyContent: "center", marginBottom: 30, borderWidth: 1, borderColor: border },
     shareBtnText: { fontSize: 15, fontFamily: "Oswald_700Bold", color: C.main },
     successFooter: { alignItems: "center", marginTop: "auto" },
-    leafCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: C.lifted, alignItems: "center", justifyContent: "center", marginBottom: 8 },
+    leafCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: isDark ? "rgba(255,96,130,0.12)" : C.lifted, alignItems: "center", justifyContent: "center", marginBottom: 8 },
     footerQuote: { fontSize: 12, color: C.main, textAlign: "center", fontFamily: "DMSans_500Medium", lineHeight: 16, marginBottom: 10 },
     heartRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", opacity: 0.5 },
     heartLine: { width: 24, height: 1, backgroundColor: C.main }

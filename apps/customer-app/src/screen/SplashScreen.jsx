@@ -9,8 +9,8 @@ import {
   Dimensions,
   Platform,
   StatusBar,
-  Image,
 } from "react-native";
+import { Image } from "expo-image";
 import { useTheme } from "../context/ThemeContext";
 import { C, FF } from "../theme";
 
@@ -297,7 +297,7 @@ export default function SplashScreen({ onFinish }) {
             <Image
               source={require("../../assets/logo.png")}
               style={{ width: 68, height: 68, borderRadius: 14 }}
-              resizeMode="contain"
+              contentFit="contain"
               accessibilityLabel={`${BRAND_NAME} logo`}
             />
           </Animated.View>

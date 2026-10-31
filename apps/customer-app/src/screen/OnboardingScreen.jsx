@@ -11,7 +11,6 @@ import {
   StatusBar,
   Platform,
   Easing,
-  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -87,8 +86,8 @@ const SLIDES = [
 ];
 
 export default function OnboardingScreen({ onFinish, navigate }) {
-  const styles = getStyles();
   const { isDark } = useTheme();
+  const styles = React.useMemo(() => getStyles(isDark), [isDark]);
   const insets = useSafeAreaInsets();
   const isAndroid = Platform.OS === "android";
   const topInset = Math.max(insets.top, isAndroid ? (StatusBar.currentHeight || 24) : 12) + 8;
@@ -459,7 +458,7 @@ export default function OnboardingScreen({ onFinish, navigate }) {
                 },
               ]}
             >
-              <Ionicons name={item.icon} size={48} color={COLORS.ink} />
+              <Ionicons name={item.icon} size={48} color={isDark ? "#F5F3F4" : COLORS.ink} />
             </Animated.View>
           </Animated.View>
 
@@ -522,7 +521,7 @@ export default function OnboardingScreen({ onFinish, navigate }) {
               },
             ]}
           >
-            <Ionicons name="sparkles" size={10} color={COLORS.ink} style={{ marginRight: 5 }} />
+            <Ionicons name="sparkles" size={10} color={isDark ? "#F5F3F4" : COLORS.ink} style={{ marginRight: 5 }} />
             <Text style={styles.badgeText}>{item.badge}</Text>
           </Animated.View>
         </Animated.View>
@@ -564,7 +563,7 @@ export default function OnboardingScreen({ onFinish, navigate }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={COLORS.canvas} />
+      <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={isDark ? "#0A0A0A" : COLORS.canvas} />
 
       {/* ── Header (staggered entrance: slide down + fade) ──── */}
       {/* <Animated.View
@@ -748,12 +747,17 @@ export default function OnboardingScreen({ onFinish, navigate }) {
   );
 }
 
-function getStyles() {
+function getStyles(isDark) {
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const ink = isDark ? "#F5F3F4" : C.ink;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+
   return StyleSheet.create({
     // ── Root ──────────────────────────────────────────────────
     container: {
       flex: 1,
-      backgroundColor: COLORS.canvas,
+      backgroundColor: bg,
     },
 
     // ── Header ────────────────────────────────────────────────
@@ -773,16 +777,16 @@ function getStyles() {
       width: 32,
       height: 32,
       borderRadius: 16,
-      backgroundColor: COLORS.surface,
+      backgroundColor: surface,
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: COLORS.hairline,
+      borderColor: border,
     },
     logoText: {
       fontSize: 12,
       fontFamily: "Oswald_600SemiBold",
-      color: COLORS.ink,
+      color: ink,
       letterSpacing: 2,
       marginLeft: 10,
     },
@@ -790,9 +794,9 @@ function getStyles() {
       paddingHorizontal: 16,
       paddingVertical: 18,
       borderRadius: 9999,
-      backgroundColor: COLORS.surface,
+      backgroundColor: surface,
       borderWidth: 1,
-      borderColor: COLORS.hairline,
+      borderColor: border,
     },
     skipText: {
       fontSize: 13,
@@ -818,11 +822,11 @@ function getStyles() {
       width: width - 56,
       height: height * 0.38,
       borderRadius: 12,
-      backgroundColor: COLORS.surface,
+      backgroundColor: surface,
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 1,
-      borderColor: COLORS.hairline,
+      borderColor: border,
       overflow: "hidden",
     },
 
@@ -905,7 +909,7 @@ function getStyles() {
     badgeText: {
       fontSize: 10,
       fontFamily: "Oswald_600SemiBold",
-      color: COLORS.ink,
+      color: ink,
       letterSpacing: 1.2,
     },
 
@@ -919,7 +923,7 @@ function getStyles() {
     titleText: {
       fontFamily: FF.display,
       fontSize: 28,
-      color: COLORS.ink,
+      color: ink,
       textAlign: "center",
       lineHeight: 36,
       letterSpacing: 0.2,
@@ -927,7 +931,7 @@ function getStyles() {
     subtitleText: {
       fontSize: 15,
       fontFamily: "DMSans_400Regular",
-      color: COLORS.body,
+      color: isDark ? "rgba(245,243,244,0.65)" : COLORS.body,
       textAlign: "center",
       lineHeight: 23,
       marginTop: 12,
@@ -968,14 +972,14 @@ function getStyles() {
       left: 0,
       width: 80,
       height: "100%",
-      backgroundColor: "rgba(6, 6, 6, 0.12)",
+      backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(6, 6, 6, 0.12)",
       // Angled via skew not available natively — use a wide band
       borderRadius: 8,
     },
     ctaButtonText: {
       fontSize: 15,
       fontFamily: "DMSans_500Medium",
-      color: COLORS.onPrimary,
+      color: C.textLight,
       letterSpacing: 0.2,
     },
     ctaArrowCircle: {

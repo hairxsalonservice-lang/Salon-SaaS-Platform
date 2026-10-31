@@ -8,15 +8,16 @@ import {
   StyleSheet,
   StatusBar,
   Platform,
-  Image,
   AppState,
   Alert,
   Share,
 } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { C, FONT_FAMILY, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle, getPlatformButtonStyle } from "../theme";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { triggerHaptic } from "../theme/appleMotion";
 import { useFavorites } from "../context/FavoritesContext";
 import VerifyEmailModal from "../components/VerifyEmailModal";
 
@@ -27,7 +28,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
   const { user, isAuthenticated, logout, refreshProfile } = useAuth();
   const { isDark, themeMode, setThemeMode } = useTheme();
   const { favorites } = useFavorites();
-  const styles = getStyles(isDark);
+  const styles = React.useMemo(() => getStyles(isDark), [isDark]);
   const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   const isVerified = Boolean(user?.isEmailVerified || user?.email_verified);
@@ -132,7 +133,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
                 onPress={() => navigate && navigate("NotificationCenter")}
                 activeOpacity={0.75}
               >
-                <Ionicons name="notifications-outline" size={20} color={C.ink} />
+                <Ionicons name="notifications-outline" size={20} color={isDark ? "#F5F3F4" : C.ink} />
                 <View style={styles.redBadgeDot} />
               </TouchableOpacity>
 
@@ -141,7 +142,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
                 onPress={() => navigate && navigate("SavedSalons")}
                 activeOpacity={0.75}
               >
-                <Ionicons name="heart-outline" size={20} color={C.ink} />
+                <Ionicons name="heart-outline" size={20} color={isDark ? "#F5F3F4" : C.ink} />
                 {favorites.length > 0 && <View style={styles.favBadgeDot} />}
               </TouchableOpacity>
             </View>
@@ -204,7 +205,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
           <View style={styles.themeSegmentRow}>
             <TouchableOpacity
               style={[styles.themeTab, themeMode === "light" && styles.themeTabActive]}
-              onPress={() => setThemeMode("light")}
+              onPress={() => { triggerHaptic("selection"); setThemeMode("light"); }}
               activeOpacity={0.8}
             >
               <Ionicons
@@ -219,7 +220,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
 
             <TouchableOpacity
               style={[styles.themeTab, themeMode === "dark" && styles.themeTabActive]}
-              onPress={() => setThemeMode("dark")}
+              onPress={() => { triggerHaptic("selection"); setThemeMode("dark"); }}
               activeOpacity={0.8}
             >
               <Ionicons
@@ -234,7 +235,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
 
             <TouchableOpacity
               style={[styles.themeTab, themeMode === "system" && styles.themeTabActive]}
-              onPress={() => setThemeMode("system")}
+              onPress={() => { triggerHaptic("selection"); setThemeMode("system"); }}
               activeOpacity={0.8}
             >
               <Ionicons
@@ -362,11 +363,15 @@ export default function ProfileScreen({ navigate, onScroll }) {
 
 function getStyles(isDark) {
   const accentColor = C.main;
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const border = isDark ? "rgba(255,255,255,0.06)" : C.border;
+  const ink = isDark ? "#F5F3F4" : C.ink;
 
   return StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: C.bg,
+      backgroundColor: bg,
     },
     scrollContent: {
       paddingHorizontal: 20,
@@ -387,7 +392,7 @@ function getStyles(isDark) {
       height: 72,
       borderRadius: 36,
       position: "relative",
-      backgroundColor: isDark ? C.surface : C.border,
+      backgroundColor: isDark ? surface : C.border,
     },
     avatarImage: {
       width: 72,
@@ -406,7 +411,7 @@ function getStyles(isDark) {
       alignItems: "center",
       justifyContent: "center",
       borderWidth: 2,
-      borderColor: C.bg,
+      borderColor: bg,
     },
     topRightActions: {
       flexDirection: "row",
@@ -417,9 +422,9 @@ function getStyles(isDark) {
       width: 44,
       height: 44,
       borderRadius: 14,
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       borderWidth: 1,
-      borderColor: isDark ? C.border : C.border,
+      borderColor: border,
       alignItems: "center",
       justifyContent: "center",
       position: "relative",
@@ -433,7 +438,7 @@ function getStyles(isDark) {
       top: 10,
       right: 10,
       borderWidth: 1.5,
-      borderColor: C.surface,
+      borderColor: surface,
     },
     favBadgeDot: {
       width: 8,
@@ -447,8 +452,8 @@ function getStyles(isDark) {
     userNameText: {
       fontFamily: FONT_FAMILY.displayBold,
       fontSize: 22,
-      color: C.ink,
-      letterSpacing: 0.2,
+      color: ink,
+      letterSpacing: 0.3,
       marginBottom: 4,
     },
     userSubtext: {
@@ -477,14 +482,14 @@ function getStyles(isDark) {
       fontFamily: "Oswald_700Bold",
     },
     secondaryAuthBtn: {
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 16,
       height: 44,
       borderRadius: 14,
       borderWidth: 1,
-      borderColor: isDark ? C.border : C.border,
+      borderColor: border,
     },
     secondaryAuthBtnText: {
       color: C.muted,
@@ -492,7 +497,7 @@ function getStyles(isDark) {
       fontFamily: "Oswald_600SemiBold",
     },
     promoCard: {
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       ...getPlatformCardStyle(isDark),
       padding: 16,
       marginBottom: 16,
@@ -521,7 +526,7 @@ function getStyles(isDark) {
     promoTitle: {
       fontSize: 16,
       fontFamily: "Oswald_700Bold",
-      color: C.ink,
+      color: ink,
       letterSpacing: 0.15,
       marginBottom: 4,
     },
@@ -549,7 +554,7 @@ function getStyles(isDark) {
       justifyContent: "center",
     },
     themeCard: {
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       ...getPlatformCardStyle(isDark),
       padding: 14,
       marginBottom: 16,
@@ -563,7 +568,7 @@ function getStyles(isDark) {
     },
     themeSegmentRow: {
       flexDirection: "row",
-      backgroundColor: isDark ? C.lifted : C.border,
+      backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#F0EEEF",
       borderRadius: 10,
       padding: 3,
     },
@@ -599,7 +604,7 @@ function getStyles(isDark) {
     menuCard: {
       flexDirection: "row",
       alignItems: "center",
-      backgroundColor: C.surface,
+      backgroundColor: surface,
       ...getPlatformCardStyle(isDark),
       padding: 14,
     },
@@ -617,7 +622,7 @@ function getStyles(isDark) {
     menuTitle: {
       fontSize: 14.5,
       fontFamily: "Oswald_600SemiBold",
-      color: C.ink,
+      color: ink,
       marginBottom: 2,
     },
     menuSub: {

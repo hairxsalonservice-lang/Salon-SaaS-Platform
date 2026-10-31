@@ -48,7 +48,7 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
   const { isDark } = useTheme();
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
-  const styles = getStyles(isDark);
+  const styles = React.useMemo(() => getStyles(isDark), [isDark]);
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -386,12 +386,12 @@ export default function NotificationCenterScreen({ navigate, onBack }) {
 }
 
 function getStyles(isDark) {
-  const bg = isDark ? C.bg : C.bg;
-  const surface = C.surface;
-  const ink = isDark ? C.lifted : C.ink;
-  const muted = isDark ? C.muted : C.muted;
-  const hairline = isDark ? C.border : C.lifted;
-  const accent = isDark ? C.main : C.main;
+  const bg = isDark ? "#0A0A0A" : C.bg;
+  const surface = isDark ? "#141414" : C.surface;
+  const ink = isDark ? "#F5F3F4" : C.ink;
+  const muted = C.muted;
+  const hairline = isDark ? "rgba(255,255,255,0.06)" : C.lifted;
+  const accent = C.main;
   const accentTint = isDark ? "rgba(255, 122, 154, 0.14)" : "rgba(255, 96, 130, 0.09)";
 
   return StyleSheet.create({
