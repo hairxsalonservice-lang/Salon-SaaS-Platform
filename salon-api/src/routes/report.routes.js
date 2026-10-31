@@ -5,7 +5,8 @@ const {
   getPopularServices,
   getStaffPerformance,
   getDailyBookings,
-  getSlotUtilization
+  getSlotUtilization,
+  getBookingBreakdown
 } = require('../controllers/report.controller')
 
 const authenticate = require('../middleware/authenticate')
@@ -19,5 +20,6 @@ router.get('/popular-services',  getPopularServices)
 router.get('/staff-performance', getStaffPerformance)
 router.get('/daily-bookings',    getDailyBookings)
 router.get('/slot-utilization',  getSlotUtilization)
+router.get('/booking-breakdown', getBookingBreakdown)
 
 module.exports = router

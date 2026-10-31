@@ -24,6 +24,11 @@ import {
   Calendar,
   CalendarCheck,
   ArrowRight,
+  Store,
+  Phone,
+  Banknote,
+  CreditCard,
+  Smartphone,
 } from "lucide-react";
 import { toLocalDateStr } from "@/lib/utils";
 
@@ -101,6 +106,33 @@ interface DailyBooking {
   completed: number;
   cancelled: number;
   revenue: number;
+}
+
+interface SourceBreakdownItem {
+  source: "APP" | "WALK_IN" | "PHONE";
+  count: number;
+  completed: number;
+  percentage: number;
+}
+
+interface PaymentBreakdownItem {
+  method: "cash" | "upi" | "card" | "other" | "not_recorded";
+  count: number;
+  amount: number;
+  percentage: number;
+}
+
+interface BookingBreakdown {
+  period: { startDate: string; endDate: string };
+  sources: {
+    total: number;
+    items: SourceBreakdownItem[];
+  };
+  payments: {
+    completedAppointments: number;
+    totalCollected: number;
+    items: PaymentBreakdownItem[];
+  };
 }
 
 // ── Helpers ──
@@ -206,6 +238,37 @@ const CATEGORY_COLORS: Record<string, string> = {
   other: "#64748b",
 };
 
+const SOURCE_META = {
+  APP: {
+    label: "App bookings",
+    description: "Booked by customers from the app",
+    color: "#0071e3",
+    icon: Smartphone,
+  },
+  WALK_IN: {
+    label: "Walk-in",
+    description: "Direct visit without a prior booking",
+    color: "#10b981",
+    icon: Store,
+  },
+  PHONE: {
+    label: "Phone",
+    description: "Booked by calling the salon",
+    color: "#f59e0b",
+    icon: Phone,
+  },
+} as const;
+
+const PAYMENT_META = {
+  cash: { label: "Cash", color: "#10b981", icon: Banknote },
+  upi: { label: "UPI", color: "#8b5cf6", icon: Smartphone },
+  card: { label: "Card", color: "#3b82f6", icon: CreditCard },
+  other: { label: "Other", color: "#64748b", icon: IndianRupee },
+  not_recorded: { label: "Not recorded", color: "#94a3b8", icon: AlertCircle },
+} as const;
+
+const PRIMARY_PAYMENT_METHODS = ["cash", "upi", "card"] as const;
+
 // SVG Sparkline Component
 function Sparkline({ color }: { color: string }) {
   return (
@@ -233,6 +296,7 @@ export default function ReportsPage() {
   const [popularServices, setPopularServices] = useState<PopularService[]>([]);
   const [staffPerf, setStaffPerf] = useState<StaffPerf[]>([]);
   const [dailyBookings, setDailyBookings] = useState<DailyBooking[]>([]);
+  const [breakdown, setBreakdown] = useState<BookingBreakdown | null>(null);
   const [hoveredDay, setHoveredDay] = useState<DailyBooking | null>(null);
 
   const fetchReports = useCallback(async () => {
@@ -241,8 +305,12 @@ export default function ReportsPage() {
     try {
       const params = { startDate: dates.startDate, endDate: dates.endDate };
 
-      const overviewRes = await apiClient.get("/reports/overview", { params });
+      const [overviewRes, breakdownRes] = await Promise.all([
+        apiClient.get("/reports/overview", { params }),
+        apiClient.get("/reports/booking-breakdown", { params }),
+      ]);
       setOverview(overviewRes.data.data);
+      setBreakdown(breakdownRes.data.data);
       setLoading(false);
 
       const [popularRes, staffRes, dailyRes] = await Promise.all([
@@ -273,6 +341,23 @@ export default function ReportsPage() {
   const maxBookingsVal = Math.max(...fullDailyList.map((d) => d.total), 5);
 
   const labelStep = fullDailyList.length > 20 ? 5 : fullDailyList.length > 10 ? 3 : 1;
+
+  const sourceByKey = new Map<SourceBreakdownItem["source"], SourceBreakdownItem>();
+  (breakdown?.sources.items || []).forEach((item) => sourceByKey.set(item.source, item));
+
+  const paymentByKey = new Map<PaymentBreakdownItem["method"], PaymentBreakdownItem>();
+  (breakdown?.payments.items || []).forEach((item) => paymentByKey.set(item.method, item));
+
+  const appCount = sourceByKey.get("APP")?.count ?? 0;
+  const directCount =
+    (sourceByKey.get("WALK_IN")?.count ?? 0) + (sourceByKey.get("PHONE")?.count ?? 0);
+  const totalSourceCount = breakdown?.sources.total ?? 0;
+  const appShare = totalSourceCount > 0 ? Math.round((appCount / totalSourceCount) * 100) : 0;
+  const directShare = totalSourceCount > 0 ? Math.round((directCount / totalSourceCount) * 100) : 0;
+
+  const supplementaryPayments = (breakdown?.payments.items || []).filter(
+    (item) => item.method === "other" || item.method === "not_recorded"
+  );
 
   return (
     <ProtectedRoute page="reports">
@@ -649,6 +734,196 @@ export default function ReportsPage() {
                 </div>
               )}
             </div>
+          </div>
+
+        </div>
+
+        {/* Booking Source & Payment Breakdown */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Booking Sources */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs">
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <div>
+                <h3 className="font-extrabold text-base text-slate-900">Booking Sources</h3>
+                <p className="text-xs font-medium text-slate-400 mt-0.5">
+                  App bookings compared with direct visits
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                  Total bookings
+                </p>
+                <p className="text-xl font-black text-slate-900 mt-0.5">
+                  {totalSourceCount}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 mb-5">
+              <div className="rounded-xl bg-blue-50/70 border border-blue-100 p-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-blue-600">
+                  From app
+                </p>
+                <p className="text-xl font-black text-slate-900 mt-1">{appCount}</p>
+                <p className="text-[10px] font-bold text-slate-500">{appShare}% of bookings</p>
+              </div>
+              <div className="rounded-xl bg-emerald-50/70 border border-emerald-100 p-3">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-600">
+                  Direct visits
+                </p>
+                <p className="text-xl font-black text-slate-900 mt-1">{directCount}</p>
+                <p className="text-[10px] font-bold text-slate-500">{directShare}% of bookings</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {(["APP", "WALK_IN", "PHONE"] as const).map((source) => {
+                const item = sourceByKey.get(source);
+                const count = item?.count ?? 0;
+                const meta = SOURCE_META[source];
+                const Icon = meta.icon;
+
+                return (
+                  <div key={source}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ backgroundColor: `${meta.color}14`, color: meta.color }}
+                        >
+                          <Icon size={15} strokeWidth={2.3} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-extrabold text-slate-900">{meta.label}</p>
+                          <p className="text-[10px] font-medium text-slate-400 truncate">
+                            {meta.description}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-black text-slate-900">
+                          {count}
+                          <span className="text-[10px] font-bold text-slate-400 ml-1">
+                            ({item?.percentage ?? 0}%)
+                          </span>
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-400">
+                          {item?.completed ?? 0} completed
+                        </p>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-2">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${Math.max(item?.percentage ?? 0, count > 0 ? 3 : 0)}%`,
+                          backgroundColor: meta.color,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Payments Collected */}
+          <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-xs flex flex-col">
+            <div className="flex items-start justify-between gap-4 mb-5">
+              <div>
+                <h3 className="font-extrabold text-base text-slate-900">Payments Collected</h3>
+                <p className="text-xs font-medium text-slate-400 mt-0.5">
+                  Cash, UPI and card totals from completed appointments
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                  Total collected
+                </p>
+                <p className="text-xl font-black text-slate-900 mt-0.5">
+                  {formatPrice(breakdown?.payments.totalCollected ?? 0)}
+                </p>
+                <p className="text-[10px] font-bold text-slate-400">
+                  {breakdown?.payments.completedAppointments ?? 0} completed
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {PRIMARY_PAYMENT_METHODS.map((method) => {
+                const item = paymentByKey.get(method);
+                const meta = PAYMENT_META[method];
+                const Icon = meta.icon;
+
+                return (
+                  <div key={method}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div
+                          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ backgroundColor: `${meta.color}14`, color: meta.color }}
+                        >
+                          <Icon size={15} strokeWidth={2.3} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-extrabold text-slate-900">{meta.label}</p>
+                          <p className="text-[10px] font-medium text-slate-400">
+                            {item?.count ?? 0} payment{item?.count === 1 ? "" : "s"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-black text-slate-900">
+                          {formatPrice(item?.amount ?? 0)}
+                        </p>
+                        <p className="text-[10px] font-bold text-slate-400">
+                          {item?.percentage ?? 0}% of collected
+                        </p>
+                      </div>
+                    </div>
+                    <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mt-2">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${Math.max(item?.percentage ?? 0, (item?.count ?? 0) > 0 ? 3 : 0)}%`,
+                          backgroundColor: meta.color,
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {supplementaryPayments.length > 0 && (
+              <div className="mt-5 pt-4 border-t border-slate-100 space-y-2">
+                {supplementaryPayments.map((item) => {
+                  const meta = PAYMENT_META[item.method];
+                  const Icon = meta.icon;
+                  return (
+                    <div
+                      key={item.method}
+                      className="flex items-center justify-between text-[11px] font-bold"
+                    >
+                      <span className="flex items-center gap-1.5 text-slate-500">
+                        <Icon size={12} />
+                        {meta.label}
+                        <span className="text-slate-400 font-medium">({item.count})</span>
+                      </span>
+                      <span className="text-slate-700">{formatPrice(item.amount)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {breakdown && breakdown.payments.completedAppointments === 0 && (
+              <div className="mt-5 rounded-xl bg-slate-50 border border-slate-100 px-3 py-2.5 text-[11px] font-medium text-slate-500">
+                Payment splits appear once appointments are marked completed and a payment
+                method is recorded.
+              </div>
+            )}
           </div>
 
         </div>

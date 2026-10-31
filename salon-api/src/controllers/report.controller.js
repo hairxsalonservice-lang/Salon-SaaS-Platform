@@ -487,10 +487,151 @@ const getSlotUtilization = async (req, res, next) => {
   }
 }
 
+// ================================
+// GET /api/v1/reports/booking-breakdown
+// booking sources (app / walk-in / phone) and
+// completed payments by method (cash / upi / card)
+// ================================
+const SOURCE_KEYS = ['APP', 'WALK_IN', 'PHONE']
+const PAYMENT_KEYS = ['cash', 'upi', 'card', 'other', 'not_recorded']
+
+const getBookingBreakdown = async (req, res, next) => {
+  try {
+    const { role, branchId, salonId } = req.user
+    const { startDate, endDate } = req.query
+
+    const start = startDate || dayjs().startOf('month').format('YYYY-MM-DD')
+    const end = endDate || dayjs().endOf('month').format('YYYY-MM-DD')
+
+    const cacheKey = reportCacheKey('booking-breakdown', {
+      role,
+      salonId,
+      branchId,
+      suffix: `${start}:${end}`,
+    })
+    const cached = await getCache(cacheKey)
+    if (cached) {
+      return res.status(200).json({ success: true, cached: true, data: cached })
+    }
+
+    const matchFilter = {
+      date: { $gte: start, $lte: end }
+    }
+
+    if (role === 'manager') matchFilter.branchId = branchId
+    if (role === 'owner') matchFilter.salonId = salonId
+
+    // One aggregation for both breakdowns. Payment figures only include
+    // COMPLETED appointments because that is when money is actually collected.
+    const aggregation = await Appointment.aggregate([
+      { $match: matchFilter },
+      {
+        $facet: {
+          sources: [
+            {
+              $group: {
+                _id: { $ifNull: ['$source', 'APP'] },
+                count: { $sum: 1 },
+                completed: {
+                  $sum: { $cond: [{ $eq: ['$status', 'COMPLETED'] }, 1, 0] }
+                }
+              }
+            }
+          ],
+          payments: [
+            { $match: { status: 'COMPLETED' } },
+            {
+              $group: {
+                _id: { $ifNull: ['$paymentMethod', 'not_recorded'] },
+                count: { $sum: 1 },
+                amount: { $sum: { $ifNull: ['$pricePaid', 0] } }
+              }
+            }
+          ]
+        }
+      }
+    ])
+
+    const result = aggregation[0] || {}
+    const sourceMap = new Map(
+      (result.sources || []).map((row) => [row._id, row])
+    )
+    const paymentMap = new Map(
+      (result.payments || []).map((row) => [row._id, row])
+    )
+
+    const totalBookings = (result.sources || []).reduce(
+      (sum, row) => sum + (row.count || 0),
+      0
+    )
+
+    const sourceItems = SOURCE_KEYS.map((source) => {
+      const row = sourceMap.get(source) || { count: 0, completed: 0 }
+      return {
+        source,
+        count: row.count || 0,
+        completed: row.completed || 0,
+        percentage: totalBookings > 0
+          ? Number((((row.count || 0) / totalBookings) * 100).toFixed(1))
+          : 0
+      }
+    })
+
+    const paymentItems = PAYMENT_KEYS.map((method) => {
+      const row = paymentMap.get(method) || { count: 0, amount: 0 }
+      return {
+        method,
+        count: row.count || 0,
+        amount: row.amount || 0
+      }
+    })
+
+    const completedAppointments = paymentItems.reduce(
+      (sum, row) => sum + row.count,
+      0
+    )
+    const totalCollected = paymentItems.reduce(
+      (sum, row) => sum + row.amount,
+      0
+    )
+
+    const paymentItemsWithShare = paymentItems.map((row) => ({
+      ...row,
+      percentage: totalCollected > 0
+        ? Number(((row.amount / totalCollected) * 100).toFixed(1))
+        : 0
+    }))
+
+    const responseData = {
+      period: { startDate: start, endDate: end },
+      sources: {
+        total: totalBookings,
+        items: sourceItems
+      },
+      payments: {
+        completedAppointments,
+        totalCollected,
+        items: paymentItemsWithShare
+      }
+    }
+
+    await setCache(cacheKey, responseData, 120)
+
+    res.status(200).json({
+      success: true,
+      cached: false,
+      data: responseData
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   getOverview,
   getPopularServices,
   getStaffPerformance,
   getDailyBookings,
-  getSlotUtilization
+  getSlotUtilization,
+  getBookingBreakdown
 }
