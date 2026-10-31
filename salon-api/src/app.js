@@ -87,6 +87,9 @@ const corsOptions = {
   ],
   exposedHeaders: ["X-Response-Time"],
   credentials: true,
+  // Cache preflight responses so authenticated cross-origin requests don't
+  // pay for an OPTIONS round trip on every dashboard load.
+  maxAge: 600,
 };
 
 app.use(cors(corsOptions));

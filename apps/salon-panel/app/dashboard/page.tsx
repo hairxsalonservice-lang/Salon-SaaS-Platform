@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -19,7 +19,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import type { UserRole } from "@/lib/api";
-import { SkeletonDashboard } from "@/components/ui/Skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { socketClient } from "@/lib/socket-client";
 
 // ── Types ──
@@ -100,40 +100,84 @@ export default function DashboardPage() {
   const role = (user?.role || "owner") as UserRole;
   const router = useRouter();
 
-  const [loading, setLoading] = useState(true);
+  const [todayLoading, setTodayLoading] = useState(true);
+  const [monthLoading, setMonthLoading] = useState(true);
+  const [yesterdayLoading, setYesterdayLoading] = useState(true);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(true);
   const [todayOverview, setTodayOverview] = useState<OverviewData | null>(null);
   const [monthOverview, setMonthOverview] = useState<OverviewData | null>(null);
   const [yesterdayRevenue, setYesterdayRevenue] = useState<number>(0);
   const [appointments, setAppointments] = useState<AppointmentItem[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
-  const fetchDashboard = useCallback(async () => {
-    setLoading(true);
+  // Prevent overlapping refreshes (socket bursts used to fire several full
+  // dashboard reloads at once).
+  const inFlightRef = useRef(false);
+  const refreshTimerRef = useRef<number | null>(null);
+
+  const fetchDashboard = useCallback(async (options: { silent?: boolean } = {}) => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+
+    const today = getToday();
+    const monthStart = getMonthStart();
+    const monthEnd = getMonthEnd();
+
+    const yesterdayObj = new Date();
+    yesterdayObj.setDate(yesterdayObj.getDate() - 1);
+    const yesterday = toLocalDateStr(yesterdayObj);
+
+    // Only show skeletons on the first load. Socket refreshes stay silent so
+    // existing values remain visible while new data arrives.
+    if (!options.silent) {
+      setTodayLoading(true);
+      setMonthLoading(true);
+      setYesterdayLoading(true);
+      setAppointmentsLoading(true);
+    }
+
     try {
-      const today = getToday();
-      const monthStart = getMonthStart();
-      const monthEnd = getMonthEnd();
+      // Each request updates its own section as soon as it resolves, instead
+      // of making the whole page wait for the slowest call.
+      const requests = [
+        apiClient
+          .get("/reports/overview", { params: { startDate: today, endDate: today } })
+          .then((res) => {
+            if (res.data?.data) setTodayOverview(res.data.data);
+          })
+          .catch(() => {})
+          .finally(() => setTodayLoading(false)),
 
-      const yesterdayObj = new Date();
-      yesterdayObj.setDate(yesterdayObj.getDate() - 1);
-      const yesterday = toLocalDateStr(yesterdayObj);
+        apiClient
+          .get("/reports/overview", { params: { startDate: monthStart, endDate: monthEnd } })
+          .then((res) => {
+            if (res.data?.data) setMonthOverview(res.data.data);
+          })
+          .catch(() => {})
+          .finally(() => setMonthLoading(false)),
 
-      const [todayRes, monthRes, yesterdayRes, apptRes] = await Promise.all([
-        apiClient.get("/reports/overview", { params: { startDate: today, endDate: today } }).catch(() => null),
-        apiClient.get("/reports/overview", { params: { startDate: monthStart, endDate: monthEnd } }).catch(() => null),
-        apiClient.get("/reports/overview", { params: { startDate: yesterday, endDate: yesterday } }).catch(() => null),
-        apiClient.get("/appointments", { params: { limit: 20 } }).catch(() => null),
-      ]);
+        apiClient
+          .get("/reports/overview", { params: { startDate: yesterday, endDate: yesterday } })
+          .then((res) => {
+            setYesterdayRevenue(res.data?.data?.revenue?.total || 0);
+          })
+          .catch(() => {})
+          .finally(() => setYesterdayLoading(false)),
 
-      if (todayRes?.data?.data) setTodayOverview(todayRes.data.data);
-      if (monthRes?.data?.data) setMonthOverview(monthRes.data.data);
-      if (yesterdayRes?.data?.data) setYesterdayRevenue(yesterdayRes.data.data.revenue?.total || 0);
+        apiClient
+          .get("/appointments", { params: { limit: 20 } })
+          .then((res) => {
+            if (res.data) {
+              const apptData = res.data.data || res.data;
+              const list = Array.isArray(apptData) ? apptData : apptData?.appointments || [];
+              setAppointments(list);
+            }
+          })
+          .catch(() => {})
+          .finally(() => setAppointmentsLoading(false)),
+      ];
 
-      if (apptRes?.data) {
-        const apptData = apptRes.data.data || apptRes.data;
-        const list = Array.isArray(apptData) ? apptData : apptData?.appointments || [];
-        setAppointments(list);
-      }
+      await Promise.allSettled(requests);
 
       const now = new Date();
       setLastUpdated(
@@ -142,7 +186,7 @@ export default function DashboardPage() {
         now.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })
       );
     } finally {
-      setLoading(false);
+      inFlightRef.current = false;
     }
   }, []);
 
@@ -157,7 +201,12 @@ export default function DashboardPage() {
     socketClient.connect({ branchId, salonId });
 
     const handleRealtime = () => {
-      fetchDashboard();
+      // Debounce bursts of appointment events into one background refresh.
+      if (refreshTimerRef.current !== null) return;
+      refreshTimerRef.current = window.setTimeout(() => {
+        refreshTimerRef.current = null;
+        fetchDashboard({ silent: true });
+      }, 400);
     };
 
     const unsub1 = socketClient.onAppointmentCreated(handleRealtime);
@@ -168,11 +217,20 @@ export default function DashboardPage() {
       unsub1();
       unsub2();
       unsub3();
+      if (refreshTimerRef.current !== null) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
     };
   }, [user, fetchDashboard]);
 
   const upcomingList = appointments.slice(0, 5);
   const userName = user?.name?.split(" ")[0] || "Owner";
+
+  const todayCardLoading = todayLoading && !todayOverview;
+  const revenueDeltaLoading = todayLoading || yesterdayLoading;
+  const monthCardLoading = monthLoading && !monthOverview;
+  const appointmentsLoadingEmpty = appointmentsLoading && appointments.length === 0;
 
   // Compute revenue change vs yesterday
   const todayRev = todayOverview?.revenue?.total ?? 0;
@@ -182,14 +240,6 @@ export default function DashboardPage() {
   } else {
     const diffPct = Math.round(((todayRev - yesterdayRevenue) / yesterdayRevenue) * 100);
     vsYesterdayText = `${diffPct >= 0 ? "+" : ""}${diffPct}%`;
-  }
-
-  if (loading) {
-    return (
-      <ProtectedRoute page="dashboard">
-        <SkeletonDashboard />
-      </ProtectedRoute>
-    );
   }
 
   return (
@@ -223,14 +273,22 @@ export default function DashboardPage() {
                 <BarChart3 size={16} strokeWidth={2.2} />
               </div>
             </div>
-            <p className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
-              {formatPrice(todayOverview?.revenue?.total ?? 0)}
-            </p>
-            <div className="flex items-center gap-1 mt-1 text-emerald-600 font-bold text-[11px]">
-              <TrendingUp size={12} />
-              <span>{vsYesterdayText}</span>
-              <span className="text-slate-400 font-normal">vs. yesterday</span>
-            </div>
+            {todayCardLoading ? (
+              <Skeleton className="h-8 w-32 mt-0.5" />
+            ) : (
+              <p className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
+                {formatPrice(todayOverview?.revenue?.total ?? 0)}
+              </p>
+            )}
+            {revenueDeltaLoading ? (
+              <Skeleton className="h-3.5 w-36 mt-2" />
+            ) : (
+              <div className="flex items-center gap-1 mt-1 text-emerald-600 font-bold text-[11px]">
+                <TrendingUp size={12} />
+                <span>{vsYesterdayText}</span>
+                <span className="text-slate-400 font-normal">vs. yesterday</span>
+              </div>
+            )}
           </div>
 
           {/* Card 2: Today's Bookings */}
@@ -241,12 +299,20 @@ export default function DashboardPage() {
                 <CalendarDays size={16} strokeWidth={2.2} />
               </div>
             </div>
-            <p className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
-              {todayOverview?.appointments?.total ?? 0}
-            </p>
-            <p className="text-[11px] font-medium text-slate-500 mt-1">
-              {todayOverview?.appointments?.completed ?? 0} done · {(todayOverview?.appointments?.pending ?? 0) + (todayOverview?.appointments?.confirmed ?? 0)} upcoming
-            </p>
+            {todayCardLoading ? (
+              <Skeleton className="h-8 w-20 mt-0.5" />
+            ) : (
+              <p className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
+                {todayOverview?.appointments?.total ?? 0}
+              </p>
+            )}
+            {todayCardLoading ? (
+              <Skeleton className="h-3.5 w-32 mt-2" />
+            ) : (
+              <p className="text-[11px] font-medium text-slate-500 mt-1">
+                {todayOverview?.appointments?.completed ?? 0} done · {(todayOverview?.appointments?.pending ?? 0) + (todayOverview?.appointments?.confirmed ?? 0)} upcoming
+              </p>
+            )}
           </div>
 
           {/* Card 3: Completed Today */}
@@ -257,12 +323,20 @@ export default function DashboardPage() {
                 <CheckCircle2 size={16} strokeWidth={2.2} />
               </div>
             </div>
-            <p className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
-              {todayOverview?.appointments?.completed ?? 0}
-            </p>
-            <p className="text-[11px] font-medium text-slate-500 mt-1">
-              Completion rate: {todayOverview?.appointments?.completionRate ?? "0%"}
-            </p>
+            {todayCardLoading ? (
+              <Skeleton className="h-8 w-20 mt-0.5" />
+            ) : (
+              <p className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
+                {todayOverview?.appointments?.completed ?? 0}
+              </p>
+            )}
+            {todayCardLoading ? (
+              <Skeleton className="h-3.5 w-32 mt-2" />
+            ) : (
+              <p className="text-[11px] font-medium text-slate-500 mt-1">
+                Completion rate: {todayOverview?.appointments?.completionRate ?? "0%"}
+              </p>
+            )}
           </div>
 
           {/* Card 4: This Month Revenue */}
@@ -273,12 +347,20 @@ export default function DashboardPage() {
                 ₹
               </div>
             </div>
-            <p className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
-              {formatPrice(monthOverview?.revenue?.total ?? 0)}
-            </p>
-            <p className="text-[11px] font-medium text-slate-500 mt-1">
-              {monthOverview?.appointments?.total ?? 0} booking{(monthOverview?.appointments?.total ?? 0) !== 1 ? "s" : ""}
-            </p>
+            {monthCardLoading ? (
+              <Skeleton className="h-8 w-32 mt-0.5" />
+            ) : (
+              <p className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight">
+                {formatPrice(monthOverview?.revenue?.total ?? 0)}
+              </p>
+            )}
+            {monthCardLoading ? (
+              <Skeleton className="h-3.5 w-24 mt-2" />
+            ) : (
+              <p className="text-[11px] font-medium text-slate-500 mt-1">
+                {monthOverview?.appointments?.total ?? 0} booking{(monthOverview?.appointments?.total ?? 0) !== 1 ? "s" : ""}
+              </p>
+            )}
           </div>
 
         </div>
@@ -308,7 +390,18 @@ export default function DashboardPage() {
               </div>
 
               {/* Appointments Table */}
-              {upcomingList.length === 0 ? (
+              {appointmentsLoadingEmpty ? (
+                <div className="space-y-3 py-3">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <Skeleton className="h-3.5 w-12" />
+                      <Skeleton className="h-3.5 flex-1" />
+                      <Skeleton className="h-3.5 w-24" />
+                      <Skeleton className="h-3.5 w-16" />
+                    </div>
+                  ))}
+                </div>
+              ) : upcomingList.length === 0 ? (
                 <div className="py-8 text-center">
                   <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2">
                     <CalendarDays size={18} />
@@ -438,7 +531,17 @@ export default function DashboardPage() {
                 </button>
               </div>
 
-              {upcomingList.length === 0 ? (
+              {appointmentsLoadingEmpty ? (
+                <div className="space-y-2.5 py-2">
+                  {[0, 1, 2].map((i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <Skeleton className="h-3 w-24" />
+                      <Skeleton className="h-3 flex-1" />
+                      <Skeleton className="h-3 w-12" />
+                    </div>
+                  ))}
+                </div>
+              ) : upcomingList.length === 0 ? (
                 <p className="text-xs font-medium text-slate-400 py-3 text-center">No recent bookings found.</p>
               ) : (
                 <div className="overflow-x-auto">

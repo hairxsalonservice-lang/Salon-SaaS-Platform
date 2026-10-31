@@ -2,7 +2,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import { RootState } from "@/store";
 import { selectBranch } from "@/store/slices/authSlice";
-import apiClient, { tokenStorage } from "@/lib/api-client";
+import { tokenStorage } from "@/lib/api-client";
+import { fetchBranches } from "@/lib/branchCache";
 import type { UserRole } from "@/lib/api";
 
 const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
@@ -62,11 +63,10 @@ export function useBranch() {
 
   useEffect(() => {
     if (!salonId) return;
-    async function fetchBranches() {
+    async function loadBranches() {
       setBranchesLoading(true);
       try {
-        const { data } = await apiClient.get(`/salons/${salonId}/branches`);
-        const branchList = data.data?.branches || [];
+        const branchList = await fetchBranches(salonId);
         setBranches(branchList);
         if (!selectedBranchId && branchList.length > 0) {
           const targetBranch = userBranchId
@@ -79,7 +79,7 @@ export function useBranch() {
         setBranchesLoading(false);
       }
     }
-    fetchBranches();
+    loadBranches();
   }, [salonId, userBranchId, dispatch, selectedBranchId]);
 
   return {

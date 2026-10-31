@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { selectBranch } from "@/store/slices/authSlice";
-import apiClient from "@/lib/api-client";
+import { fetchBranches } from "@/lib/branchCache";
+import { defer } from "@/lib/defer";
 import { MapPin, AlertCircle } from "lucide-react";
 
 interface BranchOption {
@@ -24,7 +25,6 @@ export default function BranchSelectorModal() {
   const { user, salon, selectedBranch } = useSelector((state: RootState) => state.auth);
 
   const [branches, setBranches] = useState<BranchOption[]>([]);
-  const [loading, setLoading] = useState(true);
   const [show, setShow] = useState(false);
 
   const role = user?.role;
@@ -41,11 +41,13 @@ export default function BranchSelectorModal() {
       (user as any)?.salon;
     if (!salonId) return;
 
-    async function fetchBranches() {
-      setLoading(true);
+    let cancelled = false;
+
+    const start = defer(async () => {
       try {
-        const { data } = await apiClient.get(`/salons/${salonId}/branches`);
-        const list: BranchOption[] = data.data?.branches || data.data || [];
+        const list = await fetchBranches<BranchOption>(salonId);
+        if (cancelled) return;
+
         setBranches(list);
 
         if (list.length === 1) {
@@ -65,12 +67,13 @@ export default function BranchSelectorModal() {
         }
       } catch {
         // silent
-      } finally {
-        setLoading(false);
       }
-    }
+    }, 400);
 
-    fetchBranches();
+    return () => {
+      cancelled = true;
+      start();
+    };
   }, [role, salon, selectedBranch, dispatch]);
 
   if (!show || branches.length === 0) return null;

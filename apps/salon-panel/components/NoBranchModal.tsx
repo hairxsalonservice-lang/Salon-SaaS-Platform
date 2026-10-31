@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { useRouter, usePathname } from "next/navigation";
-import apiClient from "@/lib/api-client";
+import { fetchBranches } from "@/lib/branchCache";
+import { defer } from "@/lib/defer";
 import { Building2, ArrowRight, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 
@@ -29,22 +30,28 @@ export default function NoBranchModal() {
     const salonId = salon?._id;
     if (!salonId) return;
 
-    async function checkBranches() {
+    let cancelled = false;
+
+    // This prompt is only needed after the page has painted, so give the
+    // dashboard requests a head start.
+    const start = defer(async () => {
       setChecking(true);
       try {
-        const { data } = await apiClient.get(`/salons/${salonId}/branches`);
-        const list = data.data?.branches || data.data || [];
-        if (Array.isArray(list) && list.length === 0) {
+        const list = await fetchBranches(salonId);
+        if (!cancelled && Array.isArray(list) && list.length === 0) {
           setOpen(true);
         }
       } catch {
         // silent fail
       } finally {
-        setChecking(false);
+        if (!cancelled) setChecking(false);
       }
-    }
+    }, 1200);
 
-    checkBranches();
+    return () => {
+      cancelled = true;
+      start();
+    };
   }, [user, salon, pathname]);
 
   if (!open || checking) return null;

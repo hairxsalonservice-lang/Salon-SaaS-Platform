@@ -5,7 +5,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { useRouter } from "next/navigation";
 import { RootState } from "@/store";
 import { selectBranch } from "@/store/slices/authSlice";
-import apiClient from "@/lib/api-client";
+import { fetchBranches } from "@/lib/branchCache";
+import { defer } from "@/lib/defer";
 import { getUnreadCount } from "@/api/services/notificationService";
 import { MapPin, ChevronDown, Check, AlertCircle, Bell } from "lucide-react";
 
@@ -25,7 +26,6 @@ export default function BranchTopBar() {
 
   const [branches, setBranches] = useState<BranchOption[]>([]);
   const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [unread, setUnread] = useState(0);
 
   const role = user?.role;
@@ -39,7 +39,8 @@ export default function BranchTopBar() {
       } catch {}
     };
 
-    fetchUnread();
+    // Unread count is decorative; let the dashboard requests start first.
+    const start = defer(() => { fetchUnread(); }, 900);
     const interval = setInterval(fetchUnread, 30000);
 
     const handleUnreadEvent = () => { fetchUnread(); };
@@ -50,6 +51,7 @@ export default function BranchTopBar() {
 
     return () => {
       cancelled = true;
+      start();
       clearInterval(interval);
       if (typeof window !== "undefined") {
         window.removeEventListener("notifications_unread_updated", handleUnreadEvent);
@@ -60,19 +62,24 @@ export default function BranchTopBar() {
   useEffect(() => {
     if (!role) return;
 
-    async function fetchBranches() {
-      setLoading(true);
-      try {
-        const salonId =
-          salon?._id ||
-          (typeof salon === "string" ? salon : null) ||
-          (user as any)?.salonId ||
-          (user as any)?.salon?._id ||
-          (user as any)?.salon;
-        if (!salonId) return;
+    const salonId =
+      salon?._id ||
+      (typeof salon === "string" ? salon : null) ||
+      (user as any)?.salonId ||
+      (user as any)?.salon?._id ||
+      (user as any)?.salon;
 
-        const { data } = await apiClient.get(`/salons/${salonId}/branches`);
-        const list: BranchOption[] = data.data?.branches || data.data || [];
+    if (!salonId) return;
+
+    let cancelled = false;
+
+    const start = defer(async () => {
+      try {
+        // Shared cache/in-flight request: the selector modal, the no-branch
+        // prompt and page hooks all reuse this result.
+        const list = await fetchBranches<BranchOption>(salonId);
+        if (cancelled) return;
+
         setBranches(list);
 
         if (!selectedBranch && list.length > 0) {
@@ -92,10 +99,13 @@ export default function BranchTopBar() {
             }));
           }
         }
-      } catch {} finally { setLoading(false); }
-    }
+      } catch {}
+    }, 250);
 
-    fetchBranches();
+    return () => {
+      cancelled = true;
+      start();
+    };
   }, [role, salon, dispatch]);
 
   const [currentDateStr, setCurrentDateStr] = useState<string>("");
@@ -113,8 +123,7 @@ export default function BranchTopBar() {
   }, []);
 
   if (role !== "owner" && role !== "manager") return null;
-  if (loading && !selectedBranch) return null;
-  if (!loading && branches.length === 0) return null;
+  if (!selectedBranch && branches.length === 0) return null;
 
   return (
     <div className="relative">

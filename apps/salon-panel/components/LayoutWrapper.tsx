@@ -15,6 +15,7 @@ import { tokenStorage } from "@/lib/api-client";
 import { pathnameToPage, canAccess } from "@/lib/rbac";
 import type { UserRole } from "@/lib/api";
 import apiClient from "@/lib/api-client";
+import { defer } from "@/lib/defer";
 import { clearUnreadCountCache } from "@/api/services/notificationService";
 
 // Public routes — accessible without an authenticated session
@@ -83,7 +84,8 @@ export default function LayoutWrapper({
     }
   }
 
-  checkSalonStatus();
+  const start = defer(() => { checkSalonStatus(); }, 900);
+  return () => start();
 }, [user, salon]);
 
   const [salonDetails, setSalonDetails] = useState<{ name: string } | null>(null);
