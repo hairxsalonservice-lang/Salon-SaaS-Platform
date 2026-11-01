@@ -84,6 +84,10 @@ const corsOptions = {
     "bypass-tunnel-reminder",
     "ngrok-skip-browser-warning",
     "X-Requested-With",
+    // Required by the booking endpoints (POST /appointments, /appointments/staff).
+    // Without this the browser's preflight fails and axios reports "Network Error".
+    "Idempotency-Key",
+    "X-Idempotency-Key",
   ],
   exposedHeaders: ["X-Response-Time"],
   credentials: true,
