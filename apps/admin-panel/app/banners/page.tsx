@@ -126,7 +126,7 @@ export default function BannersPage() {
     try {
       const data = new FormData();
       data.append("file", file);
-      data.append("folder", "banners");
+      data.append("category", "platform-banners");
       if (formData.title.trim()) {
         data.append("title", formData.title.trim());
       }
@@ -135,9 +135,7 @@ export default function BannersPage() {
       }
 
       const res = await apiClient.post("/upload/single", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        timeout: 60000,
       });
 
       const uploadedUrl = res.data?.data?.url;

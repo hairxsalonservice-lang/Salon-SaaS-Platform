@@ -29,8 +29,14 @@ export default function GalleryPage() {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Existing images from the salon object
-  const existingImages = salon?.images || (salon?.coverImage ? [salon.coverImage] : []);
+  // Existing images from the salon object. Fall back to the cover image when
+  // the gallery array is empty so an existing cover is never hidden.
+  const existingImages =
+    salon?.images && salon.images.length > 0
+      ? salon.images
+      : salon?.coverImage
+        ? [salon.coverImage]
+        : [];
 
   const handleResetForm = () => {
     setSelectedFiles([]);
@@ -77,8 +83,7 @@ export default function GalleryPage() {
       return;
     }
 
-    // @ts-ignore
-    const salonId = salon?._id || (user as any)?.salonId || (user as any)?.salon?._id || (typeof (user as any)?.salon === 'string' ? (user as any).salon : null);
+    const salonId = salon?._id || user?.salonId;
     if (!salonId) {
       setError("Salon ID not found. Please refresh the page.");
       return;
@@ -91,11 +96,12 @@ export default function GalleryPage() {
       // 1. Upload images
       const formData = new FormData();
       selectedFiles.forEach(file => formData.append("files", file));
+      formData.append("category", "gallery");
       
+      // Let Axios/browser set the multipart boundary automatically. Batches of
+      // up to 5 images need more than the client's default 15s timeout.
       const uploadRes = await apiClient.post("/upload/multiple", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        timeout: 60000,
       });
 
       const imageUrls = uploadRes.data?.data?.map((d: { url: string }) => d.url) || [];
@@ -134,20 +140,23 @@ export default function GalleryPage() {
   const handleDeleteImage = async (imageUrlToRemove: string) => {
     if (!confirm("Are you sure you want to remove this image?")) return;
 
-    // @ts-ignore
-    const salonId = salon?._id || (user as any)?.salonId || (user as any)?.salon?._id || (typeof (user as any)?.salon === 'string' ? (user as any).salon : null);
+    const salonId = salon?._id || user?.salonId;
     if (!salonId) return;
 
     try {
       const updatedImages = existingImages.filter((img: string) => img !== imageUrlToRemove);
       
       const res = await apiClient.patch(`/salons/${salonId}`, {
-        coverImage: updatedImages.length > 0 ? updatedImages[0] : "",
+        coverImage: updatedImages.length > 0 ? updatedImages[0] : null,
         images: updatedImages
       });
 
       if (res.data?.data) {
-         dispatch(loginSuccess({ user: user!, token: token!, salon: res.data.data }));
+         dispatch(loginSuccess({
+           user: user!,
+           token: token!,
+           salon: res.data.data.salon || res.data.data,
+         }));
       }
       
       showSuccess("Image removed successfully.");

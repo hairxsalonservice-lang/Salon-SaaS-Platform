@@ -160,7 +160,7 @@ describe('Presigned upload validation', () => {
     ).toBe(true);
   });
 
-  test('generated keys are tenant-prefixed and never use client paths', async () => {
+  test('generated keys use the canonical category layout and ignore client paths', async () => {
     const salonId = '64f000000000000000000001';
 
     const result = await StorageService.generatePresignedUploadUrl({
@@ -171,8 +171,9 @@ describe('Presigned upload validation', () => {
       salonId,
     });
 
-    expect(result.key.startsWith(`salons/${salonId}/secret/`)).toBe(true);
+    expect(result.key.startsWith(`salons/${salonId}/misc/`)).toBe(true);
     expect(result.key).not.toContain('..');
+    expect(result.key).not.toContain('secret');
   });
 
   test('service refuses invalid types even when called directly', async () => {

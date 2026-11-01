@@ -38,7 +38,7 @@ const updateSalonValidator = [
     .isEmail().withMessage('Must be a valid email'),
 
   body('coverImage')
-    .optional()
+    .optional({ values: 'null' })
     .trim()
     .isURL().withMessage('Must be a valid URL'),
 

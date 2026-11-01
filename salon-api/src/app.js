@@ -178,6 +178,34 @@ app.get("/health", async (req, res) => {
 
   const { isConfigured: isR2Configured, bucketName: r2Bucket } = require("./config/r2.config");
 
+  // A present configuration does not mean the credentials still work. Do a
+  // real (cached) bucket check so revoked or rotated keys are visible here
+  // instead of only surfacing as a 500 on the first upload attempt.
+  let r2Status = isR2Configured
+    ? "NOT CHECKED"
+    : "DEVELOPMENT FALLBACK MODE (Set R2 credentials in .env for production cloud storage)";
+  let r2Reachable = false;
+
+  if (isR2Configured) {
+    try {
+      const StorageService = require("./services/storage.service");
+      const r2Health = await StorageService.checkConnectivity();
+      const statusLabels = {
+        CONNECTED: "CONNECTED (Cloud Storage Ready)",
+        UNAUTHORIZED: "UNAUTHORIZED (R2 credentials are invalid or revoked)",
+        TIMEOUT: "UNREACHABLE (Storage check timed out)",
+        UNREACHABLE: "UNREACHABLE (Check R2 endpoint and bucket name)",
+      };
+      r2Reachable = r2Health.reachable;
+      r2Status = statusLabels[r2Health.status] || r2Health.status;
+      if (r2Health.httpStatus) {
+        r2Status += ` [HTTP ${r2Health.httpStatus}]`;
+      }
+    } catch (error) {
+      r2Status = `UNREACHABLE (${error.message})`;
+    }
+  }
+
   const isHealthy = isDbHealthy;
   const statusCode = isHealthy ? 200 : 503;
 
@@ -197,9 +225,8 @@ app.get("/health", async (req, res) => {
     r2Diagnostics: {
       configured: isR2Configured,
       bucket: r2Bucket,
-      status: isR2Configured
-        ? "CONNECTED (Cloud Storage Ready)"
-        : "DEVELOPMENT FALLBACK MODE (Set R2 credentials in .env for production cloud storage)",
+      reachable: r2Reachable,
+      status: r2Status,
     },
   });
 });

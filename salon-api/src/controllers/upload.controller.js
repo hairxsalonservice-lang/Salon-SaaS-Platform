@@ -1,12 +1,35 @@
+const mongoose = require("mongoose");
 const StorageService = require("../services/storage.service");
 const { validatePresignedUpload } = require("../utils/uploadValidation");
-const logger = require("../utils/logger");
+const { normalizeCategory } = require("../utils/storageKey");
+const Branch = require("../models/branch.model");
 
-const sanitizeFolder = (folder) => {
-  if (!folder || typeof folder !== "string") return "general";
-  const sanitized = folder.replace(/[^a-zA-Z0-9_-]/g, "").substring(0, 50);
-  return sanitized || "general";
+/**
+ * Resolve the upload category from the modern `category` field, falling back to
+ * the legacy `folder` field used by older panel builds. Unknown values map to
+ * the safe default (`misc`) so a bad client can never control the key prefix.
+ */
+const resolveCategory = (source = {}) =>
+  normalizeCategory(source.category || source.folder);
+
+/**
+ * Branch-scoped assets (services/staff) may be uploaded by an owner who has no
+ * branch on their own session. Accept a requested branch only when it belongs
+ * to the authenticated salon; managers/staff stay pinned to their own branch.
+ */
+const resolveBranchId = async ({ requestedBranchId, user }) => {
+  if (user?.branchId) return user.branchId;
+  if (!requestedBranchId || !user?.salonId) return undefined;
+  if (!mongoose.isValidObjectId(requestedBranchId)) return undefined;
+
+  const belongsToSalon = await Branch.exists({
+    _id: requestedBranchId,
+    salonId: user.salonId,
+  });
+
+  return belongsToSalon ? requestedBranchId : undefined;
 };
+
 
 /**
  * Handle single file upload
@@ -20,8 +43,15 @@ const uploadSingle = async (req, res, next) => {
       });
     }
 
-    const folder = sanitizeFolder(req.query.folder || req.body.folder);
-    const { userId, role, salonId, branchId } = req.user || {};
+    const category = resolveCategory({
+      category: req.query.category || req.body.category,
+      folder: req.query.folder || req.body.folder,
+    });
+    const { userId, salonId } = req.user || {};
+    const branchId = await resolveBranchId({
+      requestedBranchId: req.query.branchId || req.body.branchId,
+      user: req.user,
+    });
 
     let customName = req.body.customName || req.query.customName;
     const title = req.body.title || req.query.title;
@@ -34,7 +64,7 @@ const uploadSingle = async (req, res, next) => {
       buffer: req.file.buffer,
       originalName: req.file.originalname,
       mimeType: req.file.mimetype,
-      folder,
+      category,
       customName,
       uploadedBy: userId,
       salonId,
@@ -65,8 +95,15 @@ const uploadMultiple = async (req, res, next) => {
       });
     }
 
-    const folder = sanitizeFolder(req.query.folder || req.body.folder);
-    const { userId, role, salonId, branchId } = req.user || {};
+    const category = resolveCategory({
+      category: req.query.category || req.body.category,
+      folder: req.query.folder || req.body.folder,
+    });
+    const { userId, salonId } = req.user || {};
+    const branchId = await resolveBranchId({
+      requestedBranchId: req.query.branchId || req.body.branchId,
+      user: req.user,
+    });
 
     let customName = req.body.customName || req.query.customName;
     const title = req.body.title || req.query.title;
@@ -80,7 +117,7 @@ const uploadMultiple = async (req, res, next) => {
         buffer: file.buffer,
         originalName: file.originalname,
         mimeType: file.mimetype,
-        folder,
+        category,
         customName: customName ? `${customName}-${idx + 1}` : undefined,
         uploadedBy: userId,
         salonId,
@@ -105,7 +142,7 @@ const uploadMultiple = async (req, res, next) => {
  */
 const getPresignedUrl = async (req, res, next) => {
   try {
-    const { fileName, fileType, folder } = req.body;
+    const { fileName, fileType, category, folder } = req.body;
     const fileSize = req.body.fileSize ?? req.body.size;
 
     const validation = validatePresignedUpload({ fileName, fileType, fileSize });
@@ -116,13 +153,17 @@ const getPresignedUrl = async (req, res, next) => {
       });
     }
 
-    const { userId, salonId, branchId } = req.user;
+    const { userId, salonId } = req.user;
+    const branchId = await resolveBranchId({
+      requestedBranchId: req.body.branchId,
+      user: req.user,
+    });
 
     const result = await StorageService.generatePresignedUploadUrl({
       fileName,
       fileType: validation.fileType,
       fileSize: validation.fileSize,
-      folder: sanitizeFolder(folder),
+      category: resolveCategory({ category, folder }),
       uploadedBy: userId,
       salonId,
       branchId,

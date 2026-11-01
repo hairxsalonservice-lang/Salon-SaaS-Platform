@@ -37,6 +37,12 @@ const salonSchema = new mongoose.Schema(
       default: null
     },
 
+    // gallery images (coverImage is also shown in the gallery)
+    images: {
+      type: [String],
+      default: []
+    },
+
     // contact for the brand (not branch-specific)
     contactEmail: {
       type: String,

@@ -2,36 +2,39 @@ const {
   PutObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadBucketCommand,
 } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-const crypto = require("crypto");
-const path = require("path");
 const { s3Client, bucketName, publicDomain, isConfigured } = require("../config/r2.config");
 const logger = require("../utils/logger");
+const { buildObjectKey, normalizeCategory } = require("../utils/storageKey");
 const UploadedFile = require("../models/uploadedFile.model");
 const Salon = require("../models/salon.model");
 const sharp = require("sharp");
 
+// Provider failures must never reach the client as an opaque 500. These messages
+// are intentionally user-safe; the provider's response is only written to logs.
+const STORAGE_CONFIG_ERROR_MESSAGE =
+  "Image storage is temporarily unavailable due to a configuration error. Please contact support.";
+const STORAGE_UNAVAILABLE_MESSAGE =
+  "Image storage is temporarily unavailable. Please try again in a few minutes.";
+
+const createStorageError = (cause) => {
+  const httpStatus = cause?.$metadata?.httpStatusCode;
+  const isAuthFailure = httpStatus === 401 || httpStatus === 403;
+  const error = new Error(
+    isAuthFailure ? STORAGE_CONFIG_ERROR_MESSAGE : STORAGE_UNAVAILABLE_MESSAGE
+  );
+  error.name = "StorageServiceError";
+  error.statusCode = 503;
+  error.code = isAuthFailure ? "STORAGE_UNAUTHORIZED" : "STORAGE_UNAVAILABLE";
+  error.cause = cause;
+  return error;
+};
+
+let healthCache = null;
+
 class StorageService {
-  /**
-   * Helper to derive file extension safely
-   */
-  static _getExtension(originalName, mimeType) {
-    const ext = path.extname(originalName || "").toLowerCase();
-    if (ext) return ext.replace(".", "");
-
-    const mimeMap = {
-      "image/jpeg": "jpg",
-      "image/jpg": "jpg",
-      "image/png": "png",
-      "image/webp": "webp",
-      "image/gif": "gif",
-      "image/svg+xml": "svg",
-      "application/pdf": "pdf",
-    };
-    return mimeMap[mimeType] || "bin";
-  }
-
   /**
    * Helper to format public CDN URL for an R2 object key
    */
@@ -43,24 +46,22 @@ class StorageService {
   }
 
   /**
-   * Helper to slugify filenames cleanly
-   */
-  static _slugify(text) {
-    if (!text || typeof text !== "string") return "";
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .substring(0, 80);
-  }
-
-  /**
    * Upload a raw file Buffer to Cloudflare R2
    */
-  static async uploadBuffer({ buffer, originalName, mimeType, folder = "uploads", customName, uploadedBy, salonId, branchId }) {
+  static async uploadBuffer({
+    buffer,
+    originalName,
+    mimeType,
+    category,
+    folder,
+    customName,
+    uploadedBy,
+    salonId,
+    branchId,
+  }) {
+    const safeCategory = normalizeCategory(category || folder);
     let finalBuffer = buffer;
-    let finalExt = this._getExtension(originalName, mimeType);
+    let finalExt;
     let finalMimeType = mimeType;
 
     // Optimize images with sharp (skip SVGs and PDFs)
@@ -77,16 +78,16 @@ class StorageService {
       }
     }
 
-    const uniqueHash = crypto.randomBytes(4).toString("hex");
-    let key;
-    if (customName) {
-      const slug = this._slugify(customName);
-      key = slug
-        ? `${folder}/${slug}-${uniqueHash}.${finalExt}`
-        : `${folder}/${Date.now()}-${uniqueHash}.${finalExt}`;
-    } else {
-      key = `${folder}/${Date.now()}-${uniqueHash}.${finalExt}`;
-    }
+    const key = buildObjectKey({
+      category: safeCategory,
+      originalName,
+      mimeType: finalMimeType,
+      extension: finalExt,
+      customName,
+      salonId,
+      branchId,
+      userId: uploadedBy,
+    });
 
     if (!isConfigured || !s3Client) {
       logger.warn(
@@ -107,7 +108,7 @@ class StorageService {
           originalName,
           mimeType: finalMimeType,
           size: finalBuffer ? finalBuffer.length : 0,
-          folder,
+          folder: safeCategory,
           uploadedBy,
           salonId,
           branchId,
@@ -146,7 +147,7 @@ class StorageService {
           originalName,
           mimeType: finalMimeType,
           size: finalBuffer.length,
-          folder,
+          folder: safeCategory,
           uploadedBy,
           salonId,
           branchId,
@@ -156,8 +157,12 @@ class StorageService {
 
       return result;
     } catch (error) {
-      logger.error(`🚨 Cloudflare R2 Upload Error for key '${key}': ${error.message}`);
-      throw new Error(`Cloud storage upload failed: ${error.message}`);
+      const httpStatus = error?.$metadata?.httpStatusCode;
+      logger.error(
+        `🚨 Cloudflare R2 Upload Error for key '${key}': ${error.name || "Error"}` +
+        `${httpStatus ? ` (HTTP ${httpStatus})` : ""} — ${error.message}`
+      );
+      throw createStorageError(error);
     }
   }
 
@@ -278,7 +283,17 @@ class StorageService {
   /**
    * Generate a Presigned Upload URL for direct client-to-R2 uploads
    */
-  static async generatePresignedUploadUrl({ fileName, fileType, fileSize, folder = "uploads", expiresIn = 900, uploadedBy, salonId, branchId }) {
+  static async generatePresignedUploadUrl({
+    fileName,
+    fileType,
+    fileSize,
+    category,
+    folder,
+    expiresIn = 900,
+    uploadedBy,
+    salonId,
+    branchId,
+  }) {
     const { validatePresignedUpload } = require("../utils/uploadValidation");
     const validation = validatePresignedUpload({ fileName, fileType, fileSize });
 
@@ -290,20 +305,18 @@ class StorageService {
 
     const normalizedType = validation.fileType;
     const normalizedSize = validation.fileSize;
-    const ext = this._getExtension(fileName, normalizedType);
-    const uniqueHash = crypto.randomBytes(8).toString("hex");
-    // Defense in depth: callers must not be able to inject path segments into
-    // the object key, regardless of whether they passed through the controller.
-    const safeFolder =
-      String(folder || "")
-        .replace(/[^a-zA-Z0-9_-]/g, "")
-        .substring(0, 50) || "uploads";
-    const tenantPrefix = salonId
-      ? `salons/${salonId}`
-      : uploadedBy
-        ? `users/${uploadedBy}`
-        : "general";
-    const key = `${tenantPrefix}/${safeFolder}/${Date.now()}-${uniqueHash}.${ext}`;
+    const safeCategory = normalizeCategory(category || folder);
+
+    // Defense in depth: the key is built here from the authenticated tenant, so
+    // callers cannot inject path segments even if validation is bypassed.
+    const key = buildObjectKey({
+      category: safeCategory,
+      originalName: fileName,
+      mimeType: normalizedType,
+      salonId,
+      branchId,
+      userId: uploadedBy,
+    });
 
     if (!isConfigured || !s3Client) {
       logger.warn(`[StorageService] R2 not configured. Mocking presigned URL for key '${key}'.`);
@@ -321,7 +334,7 @@ class StorageService {
           originalName: fileName,
           mimeType: normalizedType,
           size: normalizedSize,
-          folder: safeFolder,
+          folder: safeCategory,
           uploadedBy,
           salonId,
           branchId,
@@ -360,7 +373,7 @@ class StorageService {
           originalName: fileName,
           mimeType: normalizedType,
           size: normalizedSize,
-          folder: safeFolder,
+          folder: safeCategory,
           uploadedBy,
           salonId,
           branchId,
@@ -370,9 +383,65 @@ class StorageService {
 
       return result;
     } catch (error) {
-      logger.error(`🚨 Cloudflare R2 Presigned URL Error: ${error.message}`);
-      throw new Error(`Failed to generate presigned upload URL: ${error.message}`);
+      const httpStatus = error?.$metadata?.httpStatusCode;
+      logger.error(
+        `🚨 Cloudflare R2 Presigned URL Error: ${error.name || "Error"}` +
+        `${httpStatus ? ` (HTTP ${httpStatus})` : ""} — ${error.message}`
+      );
+      throw createStorageError(error);
     }
+  }
+
+  /**
+   * Verify that the object-storage credentials can actually reach the bucket.
+   * Configuration being present is not proof that the key works, so the health
+   * endpoint uses this instead of only checking environment variables.
+   */
+  static async checkConnectivity({ timeoutMs = 3000, cacheTtlMs = 60000 } = {}) {
+    if (!isConfigured || !s3Client) {
+      return { configured: false, reachable: false, status: "NOT_CONFIGURED" };
+    }
+
+    if (healthCache && Date.now() - healthCache.checkedAt < cacheTtlMs) {
+      return healthCache.result;
+    }
+
+    let result;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      await s3Client.send(new HeadBucketCommand({ Bucket: bucketName }), {
+        abortSignal: controller.signal,
+      });
+      result = { configured: true, reachable: true, status: "CONNECTED" };
+    } catch (error) {
+      const httpStatus = error?.$metadata?.httpStatusCode || null;
+      let status = "UNREACHABLE";
+
+      if (httpStatus === 401 || httpStatus === 403) {
+        status = "UNAUTHORIZED";
+      } else if (error?.name === "AbortError" || error?.name === "TimeoutError") {
+        status = "TIMEOUT";
+      }
+
+      logger.warn(
+        `[StorageService] R2 connectivity check failed (${status}` +
+        `${httpStatus ? `, HTTP ${httpStatus}` : ""}): ${error.message}`
+      );
+
+      result = {
+        configured: true,
+        reachable: false,
+        status,
+        ...(httpStatus ? { httpStatus } : {}),
+      };
+    } finally {
+      clearTimeout(timer);
+    }
+
+    healthCache = { checkedAt: Date.now(), result };
+    return result;
   }
 }
 

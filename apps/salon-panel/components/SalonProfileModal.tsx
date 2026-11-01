@@ -94,11 +94,11 @@ export default function SalonProfileModal({
       // 1. Upload images
       const formData = new FormData();
       selectedFiles.forEach(file => formData.append("files", file));
+      formData.append("category", "branding");
       
+      // Let the browser set the multipart boundary automatically.
       const uploadRes = await apiClient.post("/upload/multiple", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        timeout: 60000,
       });
 
       const imageUrls = uploadRes.data?.data?.map((d: any) => d.url) || [];

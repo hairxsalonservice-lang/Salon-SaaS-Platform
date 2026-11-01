@@ -594,15 +594,14 @@ function ServiceFormModal({
     try {
       const data = new FormData();
       data.append("file", file);
-      data.append("folder", "services");
+      data.append("category", "services");
+      data.append("branchId", branchId);
       if (form.name.trim()) {
         data.append("title", form.name.trim());
       }
 
       const res = await apiClient.post("/upload/single", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        timeout: 60000,
       });
 
       const uploadedUrl = res.data?.data?.url;
