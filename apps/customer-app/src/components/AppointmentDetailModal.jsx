@@ -476,7 +476,7 @@ function getStyles() {
     
     /* 1. Salon Info Card */
     card: {
-      backgroundColor: C.textLight,
+      backgroundColor: C.surface,
       borderRadius: 16,
       padding: 16,
       marginBottom: 12,
@@ -579,7 +579,7 @@ function getStyles() {
 
     /* 3. QR Code Card */
     qrCard: {
-      backgroundColor: C.textLight,
+      backgroundColor: C.surface,
       borderRadius: 16,
       padding: 24,
       alignItems: "center",
@@ -593,7 +593,7 @@ function getStyles() {
     qrVisualBox: {
       width: 180,
       height: 180,
-      backgroundColor: C.textLight,
+      backgroundColor: C.surface,
       borderRadius: 16,
       alignItems: "center",
       justifyContent: "center",
@@ -601,7 +601,7 @@ function getStyles() {
     },
     qrContainer: {
       padding: 10,
-      backgroundColor: C.textLight,
+      backgroundColor: C.surface,
       borderRadius: 12,
     },
     qrGrid: {
@@ -637,7 +637,7 @@ function getStyles() {
 
     /* 4. Details Card */
     detailsCard: {
-      backgroundColor: C.textLight,
+      backgroundColor: C.surface,
       borderRadius: 16,
       padding: 16,
       marginBottom: 20,
@@ -685,7 +685,7 @@ function getStyles() {
       borderRadius: 12,
       borderWidth: 1,
       borderColor: C.crimsonTint,
-      backgroundColor: C.textLight,
+      backgroundColor: C.surface,
     },
     actionBtnOutlineText: {
       fontSize: 14,

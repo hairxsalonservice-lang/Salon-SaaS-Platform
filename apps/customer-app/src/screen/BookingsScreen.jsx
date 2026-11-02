@@ -1012,9 +1012,9 @@ function getStyles(theme = {}, isDark = false) {
       justifyContent: "center",
       height: 46,
       borderRadius: 14,
-      backgroundColor: C.textLight,
+      backgroundColor: "#FFFFFF",
     },
-    heroPrimaryBtnText: { fontSize: 14, fontFamily: "Oswald_700Bold", color: C.ink },
+    heroPrimaryBtnText: { fontSize: 14, fontFamily: "Oswald_700Bold", color: "#1A1A2E" },
     heroIconBtn: {
       height: 46,
       paddingHorizontal: 12,
@@ -1023,7 +1023,7 @@ function getStyles(theme = {}, isDark = false) {
       alignItems: "center",
       justifyContent: "center",
     },
-    heroIconBtnText: { fontSize: 10, fontFamily: "Oswald_600SemiBold", color: "rgba(255,255,255,0.85)", marginTop: 2 },
+    heroIconBtnText: { fontSize: 11, fontFamily: "Oswald_600SemiBold", color: "#FFFFFF", marginTop: 2 },
 
     /* Compact card */
     card: {
