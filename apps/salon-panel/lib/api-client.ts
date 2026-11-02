@@ -55,14 +55,17 @@ export const tokenStorage = {
 // Axios instance
 // ──────────────────────────────────────────
 
+// Do not set a global Content-Type here. Axios picks the right one from the
+// request body (application/json for objects, multipart/form-data with a
+// boundary for FormData). Forcing application/json made file uploads serialize
+// the FormData as JSON, so multer received no `files` field.
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 15000,
-  headers: { "Content-Type": "application/json" },
 });
 
 // ──────────────────────────────────────────
-// REQUEST interceptor — attach Bearer token
+// REQUEST interceptor — attach Bearer token & fix FormData headers
 // ──────────────────────────────────────────
 
 apiClient.interceptors.request.use(
@@ -71,6 +74,14 @@ apiClient.interceptors.request.use(
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Safety net for callers that set a JSON content type before sending a
+    // FormData body: drop it so the browser can add the multipart boundary.
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      config.headers.delete("Content-Type");
+      config.headers.delete("content-type");
+    }
+
     return config;
   },
   (error) => Promise.reject(error),
