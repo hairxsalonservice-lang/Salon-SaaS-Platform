@@ -1069,6 +1069,9 @@ const verifyEmailLanding = async (req, res) => {
     }
   }
 
+  const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const safeToken = token ? encodeURIComponent(token) : '';
+
   const html = `
 <!DOCTYPE html>
 <html>
@@ -1088,9 +1091,9 @@ const verifyEmailLanding = async (req, res) => {
 <body>
   <div class="card">
     <div class="icon">${success ? "✨" : "❌"}</div>
-    <h1>${title}</h1>
-    <p>${message}</p>
-    ${success ? `<a href="stcut://verify-email?token=${token}" class="btn">Open HairX App</a>` : `<p style="color:#D49B45; font-weight:600;">Return to HairX app to request a new link.</p>`}
+    <h1>${esc(title)}</h1>
+    <p>${esc(message)}</p>
+    ${success ? `<a href="stcut://verify-email?token=${safeToken}" class="btn">Open HairX App</a>` : `<p style="color:#D49B45; font-weight:600;">Return to HairX app to request a new link.</p>`}
   </div>
 </body>
 </html>

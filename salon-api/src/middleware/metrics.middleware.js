@@ -27,6 +27,12 @@ const metricsMiddleware = (req, res, next) => {
 const metricsHandler = async (req, res) => {
   try {
     const requiredToken = process.env.METRICS_AUTH_TOKEN;
+    if (!requiredToken && process.env.NODE_ENV === "production") {
+      return res.status(403).json({
+        success: false,
+        message: "Metrics endpoint disabled: METRICS_AUTH_TOKEN not configured",
+      });
+    }
     if (requiredToken) {
       const authHeader = req.headers.authorization;
       if (!authHeader || authHeader !== `Bearer ${requiredToken}`) {

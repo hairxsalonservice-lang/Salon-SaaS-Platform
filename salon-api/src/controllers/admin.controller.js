@@ -6,6 +6,10 @@ const Role = require('../models/role.model')
 const OwnerRegistrationRequest = require('../models/ownerRegistrationRequest.model')
 const AppError = require('../utils/AppError')
 const bcrypt = require('bcryptjs')
+
+function escapeRegex(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 const { sendOwnerRegistrationApprovedEmail, sendOwnerRegistrationRejectedEmail } = require('../services/email.service')
 
 // ================================
@@ -87,7 +91,7 @@ const getAllSalons = async (req, res, next) => {
 
     let matchingOwnerIds = []
     if (req.query.search) {
-      const s = req.query.search.trim()
+      const s = escapeRegex(req.query.search.trim())
       const matchingOwners = await User.find({
         $or: [
           { name: { $regex: s, $options: 'i' } },
@@ -341,7 +345,7 @@ const getAllOwners = async (req, res, next) => {
     }
 
     if (req.query.search) {
-      const s = req.query.search.trim()
+      const s = escapeRegex(req.query.search.trim())
       const matchingSalons = await Salon.find({
         name: { $regex: s, $options: 'i' }
       }).select('_id').lean()
@@ -556,7 +560,7 @@ const getAllCustomers = async (req, res, next) => {
     const query = { role: customerRole._id }
 
     if (req.query.search) {
-      const s = req.query.search.trim()
+      const s = escapeRegex(req.query.search.trim())
       query.$or = [
         { name: { $regex: s, $options: 'i' } },
         { email: { $regex: s, $options: 'i' } },
@@ -1098,8 +1102,11 @@ const deleteAdmin = async (req, res, next) => {
       return next(new AppError('You cannot delete your own admin account', 400))
     }
 
-    const admin = await User.findByIdAndDelete(id)
+    const superadminRole = await Role.findOne({ name: 'superadmin' }).select('_id').lean()
+    const admin = await User.findOne({ _id: id, role: superadminRole?._id })
     if (!admin) return next(new AppError('Admin not found', 404))
+
+    await User.deleteOne({ _id: admin._id })
 
     res.status(200).json({
       success: true,
