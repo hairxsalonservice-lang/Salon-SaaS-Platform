@@ -557,9 +557,11 @@ const googleLogin = async (req, res, next) => {
       return next(new AppError("Customer role not found. Please run database seeder.", 500));
     }
 
+    let isNewUser = false;
     let user = await User.findOne({ email }).populate("role", "name");
 
     if (!user) {
+      isNewUser = true;
       try {
         user = await User.create({
           name: name || email.split("@")[0],
@@ -570,7 +572,7 @@ const googleLogin = async (req, res, next) => {
           isEmailVerified: true,
         });
 
-        // Send Welcome email asynchronously for Google Sign-In
+        // Send Welcome email asynchronously for new Google Sign-In registration
         sendWelcomeOAuthEmail({
           to: user.email,
           userName: user.name,
@@ -595,13 +597,6 @@ const googleLogin = async (req, res, next) => {
       if (!user.googleId) user.googleId = googleId;
       if (picture && !user.avatar) user.avatar = picture;
     }
-
-    // Always send Welcome Email on Google Sign-In/Register
-    sendWelcomeOAuthEmail({
-      to: user.email,
-      userName: user.name,
-      provider: "Google",
-    }).catch((err) => console.error("Error sending Google welcome email:", err));
 
     const payload = {
       _id: user._id,

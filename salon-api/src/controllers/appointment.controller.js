@@ -183,9 +183,8 @@ const bookAppointment = async (req, res, next) => {
           bookingId: appointment._id,
         });
 
-        // Track email dispatch on appointment document
+        // Track email queueing on appointment document
         await Appointment.findByIdAndUpdate(appointment._id, {
-          emailSent: true,
           lastEmailSentAt: new Date(),
           $push: {
             emailLogs: {
@@ -965,10 +964,9 @@ const updateAppointmentStatus = async (req, res, next) => {
             cancellationReason: appointment.cancellation?.reason || note,
           });
 
-          // Track email dispatch on appointment document
+          // Track email queueing on appointment document
           const logType = appointment.status === "CONFIRMED" ? "APPOINTMENT_ACCEPTED" : appointment.status === "COMPLETED" ? "THANK_YOU_SENT" : `STATUS_${appointment.status}`;
           await Appointment.findByIdAndUpdate(appointment._id, {
-            emailSent: true,
             lastEmailSentAt: new Date(),
             $push: {
               emailLogs: {

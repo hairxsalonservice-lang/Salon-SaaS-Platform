@@ -13,9 +13,31 @@ const parseFromString = (fromStr) => {
   return { name: process.env.MAIL_FROM_NAME || 'HairX', email: fromStr || process.env.MAIL_FROM || 'stcut8454@gmail.com' }
 }
 
+// Secondary fallback: SMTP relay (e.g. Gmail SMTP or custom relay)
+const createSmtpTransporter = () => {
+  const host = process.env.SMTP_HOST || (process.env.GMAIL_USER ? 'smtp.gmail.com' : undefined)
+  const port = process.env.SMTP_PORT || (process.env.GMAIL_USER ? 465 : 587)
+  const user = process.env.SMTP_USER || process.env.GMAIL_USER
+  const pass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD
+
+  if (host && user && pass) {
+    return nodemailer.createTransport({
+      host,
+      port: Number(port),
+      secure: Number(port) === 465,
+      auth: { user, pass },
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+    })
+  }
+  return null
+}
+
 // Initialize Transporter — uses Brevo HTTP API if BREVO_API_KEY exists, else falls back to SMTP / Mock
 const createTransporter = () => {
   const brevoApiKey = process.env.BREVO_API_KEY
+  const smtpTransporter = createSmtpTransporter()
 
   if (brevoApiKey) {
     return {
@@ -46,30 +68,26 @@ const createTransporter = () => {
           console.log(`✅ [BREVO EMAIL DISPATCH SUCCESS] MessageId: ${result?.messageId || result?.body?.messageId} to ${mailOptions.to}`)
           return { messageId: result?.messageId || result?.body?.messageId || `brevo-${Date.now()}` }
         } catch (apiError) {
-          const errMsg = apiError?.response?.body?.message || apiError?.message || apiError
+          const errMsg = apiError?.response?.body?.message || apiError?.message || String(apiError)
           console.error(`❌ [BREVO API ERROR] Failed to send to ${mailOptions.to}:`, errMsg)
+
+          if (String(errMsg).toLowerCase().includes('not yet activated')) {
+            console.error(`🚨 [BREVO ACTIVATION REQUIRED] Brevo rejected transactional email dispatch because the Brevo account SMTP is not yet activated. Contact contact@brevo.com or validate your account at https://app.brevo.com to enable sending.`)
+          }
+
+          if (smtpTransporter) {
+            console.log(`🔄 [EMAIL FALLBACK] Falling back to secondary SMTP for ${mailOptions.to}...`)
+            return await smtpTransporter.sendMail(mailOptions)
+          }
+
           throw new Error(`Brevo Dispatch Failed: ${errMsg}`)
         }
       },
     }
   }
 
-  // Secondary fallback: SMTP relay (Brevo SMTP or Gmail SMTP)
-  const host = process.env.SMTP_HOST
-  const port = process.env.SMTP_PORT || 587
-  const user = process.env.SMTP_USER
-  const pass = process.env.SMTP_PASS
-
-  if (host && user && pass) {
-    return nodemailer.createTransport({
-      host,
-      port: Number(port),
-      secure: Number(port) === 465,
-      auth: { user, pass },
-      pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-    })
+  if (smtpTransporter) {
+    return smtpTransporter
   }
 
   // Final fallback: console log transport for local dev / testing
@@ -87,6 +105,43 @@ const createTransporter = () => {
 
 const transporter = createTransporter()
 const EMAIL_FROM = process.env.EMAIL_FROM || '"HairX" <stcut8454@gmail.com>'
+
+// Update appointment email dispatch state accurately in DB
+const handleDispatchOutcome = async (mailOptions, success, err = null) => {
+  const appointmentId = mailOptions?.metadata?.appointmentId
+  if (!appointmentId) return
+
+  try {
+    const Appointment = require('../models/appointment.model')
+    if (success) {
+      await Appointment.findByIdAndUpdate(appointmentId, {
+        emailSent: true,
+        lastEmailSentAt: new Date(),
+        $push: {
+          emailLogs: {
+            type: mailOptions.metadata.logType || 'EMAIL_SENT',
+            sentTo: mailOptions.to,
+            sentAt: new Date(),
+          },
+        },
+      })
+    } else {
+      await Appointment.findByIdAndUpdate(appointmentId, {
+        emailSent: false,
+        $push: {
+          emailLogs: {
+            type: 'DISPATCH_FAILED',
+            sentTo: mailOptions.to,
+            error: err ? err.message : 'Unknown dispatch error',
+            sentAt: new Date(),
+          },
+        },
+      })
+    }
+  } catch (dbErr) {
+    // Non-blocking log
+  }
+}
 
 // ── BullMQ & Connection Setup ─────────────────────────────
 const isRedisEnabled =
@@ -141,8 +196,10 @@ if (isRedisEnabled && isRedisConfigured) {
         const mailOptions = job.data
         try {
           await createTransporter().sendMail(mailOptions)
+          await handleDispatchOutcome(mailOptions, true)
           if (logger.info) logger.info(`BullMQ Worker: Sent email [${job.id}] to ${mailOptions.to}`)
         } catch (err) {
+          await handleDispatchOutcome(mailOptions, false, err)
           console.warn(`⚠️ [EMAIL DISPATCH WARN] Could not send email (${err.message}). Printing mail to console:`)
           console.log(`📧 To: ${mailOptions.to}`)
           console.log(`📌 Subject: ${mailOptions.subject}`)
@@ -189,7 +246,9 @@ const dispatchEmail = async (mailOptions) => {
   setImmediate(async () => {
     try {
       await createTransporter().sendMail(mailOptions)
+      await handleDispatchOutcome(mailOptions, true)
     } catch (err) {
+      await handleDispatchOutcome(mailOptions, false, err)
       console.warn(`⚠️ [EMAIL DISPATCH WARN] To: ${mailOptions.to} — ${err.message}`)
       console.log(`📧 Mock Fallback To: ${mailOptions.to}`)
       console.log(`📌 Subject: ${mailOptions.subject}`)
@@ -322,7 +381,11 @@ const sendBookingConfirmationEmail = async ({ to, customerName, salonName, branc
     to,
     subject,
     text: `Thank you for your booking! Your appointment at ${displaySalon} for ${displayService} on ${date} ${time ? `at ${time}` : ''} is received. Booking ID: ${bookingId}`,
-    html
+    html,
+    metadata: {
+      appointmentId: bookingId,
+      logType: 'BOOKING_SUBMITTED',
+    },
   })
 }
 
@@ -399,12 +462,17 @@ const sendAppointmentStatusEmail = async ({ to, customerName, status, salonName,
     ` : ''}
   `)
 
+  const logType = status === 'CONFIRMED' ? 'APPOINTMENT_ACCEPTED' : status === 'COMPLETED' ? 'THANK_YOU_SENT' : `STATUS_${status}`
   await dispatchEmail({
     from: EMAIL_FROM,
     to,
     subject,
     text: `${heading} ${subtext} Date: ${date} ${time ? `at ${time}` : ''}.`,
-    html
+    html,
+    metadata: {
+      appointmentId: bookingId,
+      logType,
+    },
   })
 }
 
