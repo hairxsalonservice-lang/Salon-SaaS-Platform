@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { C, FS, FW, R, S } from "../theme";
 import { useAuth } from "../context/AuthContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 
 const DEFAULT_WEB_CLIENT_ID = "23232568516-arksroglu4uhc0ogqm94uh3e6cbln9lv.apps.googleusercontent.com";
 const DEFAULT_ANDROID_CLIENT_ID = "23232568516-744mk3m6va3up35md674td07vdqseqnh.apps.googleusercontent.com";
@@ -22,22 +23,28 @@ const androidClientId = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || DEFA
 
 const isGoogleConfigured = Boolean(webClientId || iosClientId || androidClientId);
 
+const isExpoGo =
+  Constants?.executionEnvironment === ExecutionEnvironment?.StoreClient ||
+  Constants?.appOwnership === "expo";
+
 let GoogleSignin = null;
 let isGoogleSdkAvailable = false;
 
-try {
-  const GoogleModule = require("@react-native-google-signin/google-signin");
-  GoogleSignin = GoogleModule.GoogleSignin;
-  if (GoogleSignin && typeof GoogleSignin.configure === "function") {
-    GoogleSignin.configure({
-      webClientId,
-      offlineAccess: false,
-    });
-    isGoogleSdkAvailable = true;
+if (!isExpoGo) {
+  try {
+    const GoogleModule = require("@react-native-google-signin/google-signin");
+    GoogleSignin = GoogleModule.GoogleSignin;
+    if (GoogleSignin && typeof GoogleSignin.configure === "function") {
+      GoogleSignin.configure({
+        webClientId,
+        offlineAccess: false,
+      });
+      isGoogleSdkAvailable = true;
+    }
+  } catch (err) {
+    console.log("[GoogleSignin Native Module]", err?.message || err);
+    isGoogleSdkAvailable = false;
   }
-} catch (err) {
-  console.warn("[GoogleSignin Native Module Warning]", err?.message || err);
-  isGoogleSdkAvailable = false;
 }
 
 export default function GoogleSignInModal({ visible, onClose, onSuccess }) {
@@ -57,7 +64,11 @@ export default function GoogleSignInModal({ visible, onClose, onSuccess }) {
     setError("");
 
     if (!isGoogleSdkAvailable) {
-      setError("Google Sign-In native module ('RNGoogleSignin') is not registered in this binary. Please rebuild your APK using 'npx expo run:android'.");
+      setError(
+        isExpoGo
+          ? "Google Sign-In requires a development build (npx expo run:android / run:ios) and is not supported in Expo Go."
+          : "Google Sign-In native module ('RNGoogleSignin') is not registered in this binary. Please rebuild your app using 'npx expo run:android'."
+      );
       return;
     }
 

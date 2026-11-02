@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { C, S, FS, FW, R, TYPO } from "../theme";
 import { toLocalDateStr } from "../services/apiClient";
@@ -38,6 +38,7 @@ export default function SlotPicker({
   onSelectSlot,
   selectedDate,
   onSelectDate,
+  workingHours,
 }) {
   const { theme, isDark } = useTheme();
   const styles = useMemo(() => getStyles(theme, isDark), [theme, isDark]);
@@ -123,13 +124,21 @@ export default function SlotPicker({
     return map;
   }, [uniqueSlots, serviceDurationMinutes, nowMins]);
 
+  const isDayOpen = useCallback((dateObj) => {
+    if (!Array.isArray(workingHours) || workingHours.length === 0) return true;
+    const dayOfWeek = dateObj.getDay();
+    const found = workingHours.find((w) => w.day === dayOfWeek);
+    return found ? found.isOpen !== false : true;
+  }, [workingHours]);
+
   const dates = Array.from({ length: 30 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i);
     const isoStr = toLocalDateStr(d);
     const dayName = d.toLocaleDateString("en-US", { weekday: "short" });
     const dayNum = d.getDate();
-    return { isoStr, dayName, dayNum, dateObj: d };
+    const isOpen = isDayOpen(d);
+    return { isoStr, dayName, dayNum, dateObj: d, isOpen };
   });
 
   const selectedDateObj = useMemo(() => parseLocalDate(selectedDate), [selectedDate]);
@@ -154,6 +163,15 @@ export default function SlotPicker({
     return false;
   });
 
+  const selectedDayInfo = dates.find((d) => d.isoStr === selectedDate);
+  const isSelectedDayClosed = selectedDayInfo ? !selectedDayInfo.isOpen : false;
+
+  useEffect(() => {
+    if (!isSelectedDayClosed) return;
+    const nextOpen = dates.find((d) => d.isOpen && d.isoStr !== selectedDate);
+    if (nextOpen) onSelectDate(nextOpen.isoStr);
+  }, [selectedDate, isSelectedDayClosed]);
+
   return (
     <View style={styles.container}>
       <View style={styles.dateHeaderRow}>
@@ -169,92 +187,105 @@ export default function SlotPicker({
       >
         {dates.map((d) => {
           const isSelected = selectedDate === d.isoStr;
+          const isClosed = !d.isOpen;
           return (
             <AppleTouchable
               key={d.isoStr}
-              style={[styles.dateCard, isSelected && styles.dateCardSelected]}
-              onPress={() => onSelectDate(d.isoStr)}
-              scaleTo={0.94}
-              hapticType="selection"
+              style={[styles.dateCard, isSelected && styles.dateCardSelected, isClosed && styles.dateCardClosed]}
+              onPress={() => { if (!isClosed) onSelectDate(d.isoStr); }}
+              scaleTo={isClosed ? 1 : 0.94}
+              hapticType={isClosed ? "none" : "selection"}
+              disabled={isClosed}
             >
-              <Text style={[styles.dateWeek, isSelected && styles.dateWeekSelected]}>
+              <Text style={[styles.dateWeek, isSelected && styles.dateWeekSelected, isClosed && styles.dateTextClosed]}>
                 {d.dayName}
               </Text>
-              <Text style={[styles.dateNum, isSelected && styles.dateNumSelected]}>
+              <Text style={[styles.dateNum, isSelected && styles.dateNumSelected, isClosed && styles.dateTextClosed]}>
                 {d.dayNum}
               </Text>
+              {isClosed && <Text style={styles.closedLabel}>Closed</Text>}
             </AppleTouchable>
           );
         })}
       </ScrollView>
 
-      <View style={[styles.sectionHeader, { marginTop: 24 }]}>
-        <Text style={styles.sectionHeading}>Select Time</Text>
-      </View>
-
-      <View style={styles.timeTabs}>
-        {["Morning", "Afternoon", "Evening"].map(tab => (
-          <TouchableOpacity
-            key={tab}
-            style={[styles.timeTabBtn, timeTab === tab && styles.timeTabBtnActive]}
-            onPress={() => setTimeTab(tab)}
-            activeOpacity={0.7}
-          >
-            <Text style={[styles.timeTabTxt, timeTab === tab && styles.timeTabTxtActive]}>
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {(!filteredSlots || filteredSlots.length === 0) ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No available slots for {timeTab.toLowerCase()}.</Text>
+      {isSelectedDayClosed ? (
+        <View style={styles.closedDayContainer}>
+          <Ionicons name="moon-outline" size={32} color={theme?.muted || C.muted} />
+          <Text style={styles.closedDayTitle}>Closed Today</Text>
+          <Text style={styles.closedDayText}>The salon is not open on this day. Please select another date.</Text>
         </View>
       ) : (
-        <View style={styles.slotGrid}>
-          {filteredSlots.map((slot) => {
-            const slotId = slot._id || slot.id;
-            const availability = slotAvailabilityMap.get(slotId);
-            const isBooked = availability ? availability.isBooked : false;
-            const displayEndTime = availability?.calculatedEndTime || slot.endTime;
+        <>
+          <View style={[styles.sectionHeader, { marginTop: 24 }]}>
+            <Text style={styles.sectionHeading}>Select Time</Text>
+          </View>
 
-            const isSelected =
-              (currentSlotId && currentSlotId === slotId) ||
-              (selectedSlot && selectedSlot.startTime && selectedSlot.startTime === slot.startTime);
-
-            const handlePress = () => {
-              if (isBooked) return;
-              onSelectSlot({ ...slot, endTime: displayEndTime });
-            };
-
-            return (
-              <AppleTouchable
-                key={slotId}
-                disabled={isBooked}
-                style={[
-                  styles.slotChip,
-                  isBooked && styles.slotChipBooked,
-                  isSelected && styles.slotChipSelected,
-                ]}
-                onPress={handlePress}
-                scaleTo={isBooked ? 1 : 0.94}
-                hapticType={isBooked ? "none" : "selection"}
+          <View style={styles.timeTabs}>
+            {["Morning", "Afternoon", "Evening"].map(tab => (
+              <TouchableOpacity
+                key={tab}
+                style={[styles.timeTabBtn, timeTab === tab && styles.timeTabBtnActive]}
+                onPress={() => setTimeTab(tab)}
+                activeOpacity={0.7}
               >
-                <Text
-                  numberOfLines={1}
-                  style={[
-                    styles.slotStart,
-                    isBooked && styles.slotStartBooked,
-                    isSelected && styles.slotStartSelected,
-                  ]}
-                >
-                  {formatAMPM(slot.startTime || slot.time)}
+                <Text style={[styles.timeTabTxt, timeTab === tab && styles.timeTabTxtActive]}>
+                  {tab}
                 </Text>
-              </AppleTouchable>
-            );
-          })}
-        </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {(!filteredSlots || filteredSlots.length === 0) ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No available slots for {timeTab.toLowerCase()}.</Text>
+            </View>
+          ) : (
+            <View style={styles.slotGrid}>
+              {filteredSlots.map((slot) => {
+                const slotId = slot._id || slot.id;
+                const availability = slotAvailabilityMap.get(slotId);
+                const isBooked = availability ? availability.isBooked : false;
+                const displayEndTime = availability?.calculatedEndTime || slot.endTime;
+
+                const isSelected =
+                  (currentSlotId && currentSlotId === slotId) ||
+                  (selectedSlot && selectedSlot.startTime && selectedSlot.startTime === slot.startTime);
+
+                const handlePress = () => {
+                  if (isBooked) return;
+                  onSelectSlot({ ...slot, endTime: displayEndTime });
+                };
+
+                return (
+                  <AppleTouchable
+                    key={slotId}
+                    disabled={isBooked}
+                    style={[
+                      styles.slotChip,
+                      isBooked && styles.slotChipBooked,
+                      isSelected && styles.slotChipSelected,
+                    ]}
+                    onPress={handlePress}
+                    scaleTo={isBooked ? 1 : 0.94}
+                    hapticType={isBooked ? "none" : "selection"}
+                  >
+                    <Text
+                      numberOfLines={1}
+                      style={[
+                        styles.slotStart,
+                        isBooked && styles.slotStartBooked,
+                        isSelected && styles.slotStartSelected,
+                      ]}
+                    >
+                      {formatAMPM(slot.startTime || slot.time)}
+                    </Text>
+                  </AppleTouchable>
+                );
+              })}
+            </View>
+          )}
+        </>
       )}
     </View>
   );
@@ -276,6 +307,12 @@ function getStyles(theme, isDark) {
   const borderColor = theme?.hairline || (isDark ? "rgba(255,255,255,0.12)" : C.border);
   const liftedBg = theme?.canvasSoft || (isDark ? "#1C1C26" : C.lifted);
   const mainColor = theme?.primary || C.main;
+
+  const screenWidth = Dimensions.get("window").width;
+  const gridPadding = 20 * 2;
+  const gap = 10;
+  const columns = 3;
+  const chipWidth = (screenWidth - gridPadding - gap * (columns - 1)) / columns;
 
   return StyleSheet.create({
     container: {
@@ -319,6 +356,20 @@ function getStyles(theme, isDark) {
     dateCardSelected: {
       backgroundColor: mainColor,
       borderColor: mainColor,
+    },
+    dateCardClosed: {
+      opacity: 0.45,
+    },
+    dateTextClosed: {
+      textDecorationLine: "line-through",
+      color: mutedColor,
+    },
+    closedLabel: {
+      fontSize: 8,
+      fontFamily: "Oswald_600SemiBold",
+      color: isDark ? "#FF6B6B" : "#D32F2F",
+      marginTop: -2,
+      letterSpacing: 0.3,
     },
     dateWeek: {
       fontSize: 13,
@@ -367,31 +418,34 @@ function getStyles(theme, isDark) {
     slotGrid: {
       flexDirection: "row",
       flexWrap: "wrap",
-      gap: 10,
+      gap: gap,
     },
     slotChip: {
-      width: "31.3%",
-      height: 48,
-      borderRadius: 8,
+      width: chipWidth,
+      height: 46,
+      borderRadius: 10,
       backgroundColor: cardBg,
       borderWidth: 1,
       borderColor: borderColor,
       alignItems: "center",
       justifyContent: "center",
+      paddingHorizontal: 4,
     },
     slotChipSelected: {
       backgroundColor: isDark ? "rgba(255, 96, 130, 0.16)" : (C.lifted || "#F7F3F4"),
       borderColor: mainColor,
+      borderWidth: 1.5,
     },
     slotChipBooked: {
       backgroundColor: isDark ? "#161620" : cardBg,
       borderColor: borderColor,
-      opacity: 0.5,
+      opacity: 0.4,
     },
     slotStart: {
       fontSize: 13,
       fontFamily: "Oswald_600SemiBold",
       color: inkColor,
+      textAlign: "center",
     },
     slotStartSelected: {
       color: mainColor,
@@ -408,6 +462,27 @@ function getStyles(theme, isDark) {
     emptyText: {
       color: mutedColor,
       fontSize: 14,
+      fontFamily: "DMSans_400Regular",
+    },
+    closedDayContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 40,
+      paddingHorizontal: 20,
+      gap: 8,
+    },
+    closedDayTitle: {
+      fontSize: 18,
+      fontFamily: "Oswald_700Bold",
+      color: inkColor,
+      marginTop: 4,
+    },
+    closedDayText: {
+      fontSize: 13,
+      fontFamily: "DMSans_400Regular",
+      color: mutedColor,
+      textAlign: "center",
+      lineHeight: 19,
     },
   });
 }

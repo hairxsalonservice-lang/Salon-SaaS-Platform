@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const tenantPlugin = require('../utils/tenantPlugin')
 
 // Notification = an in-app alert for a specific user (owner, manager, staff).
@@ -76,5 +78,7 @@ notificationSchema.index({ recipientId: 1, isRead: 1, createdAt: -1 })
 notificationSchema.index({ salonId: 1, recipientId: 1 })
 
 notificationSchema.plugin(tenantPlugin)
+
+notificationSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.notification });
 
 module.exports = mongoose.model('Notification', notificationSchema)

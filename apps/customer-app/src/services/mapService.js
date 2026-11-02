@@ -51,8 +51,30 @@ export function generateMapHtml({
   // Sanitize coordinates to guarantee valid finite numbers for Leaflet
   const validLat = Number.isFinite(Number(centerLat)) ? Number(centerLat) : 19.3150;
   const validLng = Number.isFinite(Number(centerLng)) ? Number(centerLng) : 84.7941;
-  const validUserLat = Number.isFinite(Number(userLat)) ? Number(userLat) : validLat;
-  const validUserLng = Number.isFinite(Number(userLng)) ? Number(userLng) : validLng;
+
+  // Only draw the blue "you are here" dot for a real GPS fix. Falling back to
+  // the city centre would show a fake position when permission is denied.
+  const hasUserLocation =
+    userLat !== null &&
+    userLat !== undefined &&
+    userLng !== null &&
+    userLng !== undefined &&
+    Number.isFinite(Number(userLat)) &&
+    Number.isFinite(Number(userLng));
+  const validUserLat = hasUserLocation ? Number(userLat) : null;
+  const validUserLng = hasUserLocation ? Number(userLng) : null;
+
+  const userMarkerScript = hasUserLocation
+    ? `
+        var userIcon = L.divIcon({
+          className: 'user-pin-container',
+          html: '<div class="user-gps-dot"></div>',
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        });
+        L.marker([${validUserLat}, ${validUserLng}], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+      `
+    : "";
 
   const sanitizedSalons = salons
     .filter((s) => s && Number.isFinite(Number(s.latitude)) && Number.isFinite(Number(s.longitude)))
@@ -303,16 +325,8 @@ export function generateMapHtml({
         var markersData = ${markersJson};
         var currentCircle = null;
 
-        // Render User Location Dot
-        if (${Boolean(validUserLat && validUserLng)}) {
-          var userIcon = L.divIcon({
-            className: 'user-pin-container',
-            html: '<div class="user-gps-dot"></div>',
-            iconSize: [22, 22],
-            iconAnchor: [11, 11]
-          });
-          L.marker([${validUserLat}, ${validUserLng}], { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
-        }
+        // Render User Location Dot only when a real GPS fix is available
+        ${userMarkerScript}
 
         // Render Salon Teardrop Markers
         markersData.forEach(function(s) {

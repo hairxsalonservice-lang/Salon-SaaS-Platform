@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
   StyleSheet,
   RefreshControl,
-  ImageBackground,
   Dimensions,
   Platform,
 } from "react-native";
+import { Image } from "expo-image";
 import { C, S, FS, FW, FF, R, TYPO, PLATFORM_RADIUS, PLATFORM_SPACING, getPlatformCardStyle } from "../theme";
 import { useTheme } from "../context/ThemeContext";
 import { triggerHaptic } from "../theme/appleMotion";
@@ -62,6 +62,7 @@ const SalonVerticalList = memo(({ salons, onSalonPress, styles }) => (
 ));
 
 const GLOBAL_SALON_CACHE = {};
+const GLOBAL_BANNER_CACHE = {};
 
 function getSalonRating(s) {
   if (!s) return 0;
@@ -99,9 +100,28 @@ function HomeScreen({ navigate, onScroll }) {
   const detectCurrentLocation = useLocationStore((state) => state.detectCurrentLocation);
   const initialCleanCity = cleanCityName(selectedCity || "Brahmapur");
   const initialSalons = GLOBAL_SALON_CACHE[initialCleanCity] || [];
+  const initialBanners = GLOBAL_BANNER_CACHE[initialCleanCity] || [];
   const [salons, setSalons] = useState(initialSalons);
-  const [banners, setBanners] = useState([]);
+  const [banners, setBanners] = useState(initialBanners);
   const [loading, setLoading] = useState(initialSalons.length === 0);
+
+  // Restore cached banners from disk storage on startup for immediate display
+  useEffect(() => {
+    let isCancelled = false;
+    (async () => {
+      try {
+        const saved = await storage.getItem(`@salon_banners_${initialCleanCity}`);
+        if (saved && !isCancelled) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            GLOBAL_BANNER_CACHE[initialCleanCity] = parsed;
+            setBanners((prev) => (prev.length === 0 ? parsed : prev));
+          }
+        }
+      } catch (e) {}
+    })();
+    return () => { isCancelled = true; };
+  }, [initialCleanCity]);
   const [refreshing, setRefreshing] = useState(false);
   const [loadError, setLoadError] = useState(null);
   const [locationModalVisible, setLocationModalVisible] = useState(false);
@@ -253,6 +273,23 @@ function HomeScreen({ navigate, onScroll }) {
       const cached = GLOBAL_SALON_CACHE[cleanCity] || salonCacheRef.current[cleanCity];
       if (cached && cached.length > 0) { setSalons(cached); setLoading(false); }
       else { setSalons([]); setLoading(true); }
+
+      const cachedBanners = GLOBAL_BANNER_CACHE[cleanCity];
+      if (cachedBanners && cachedBanners.length > 0) {
+        setBanners(cachedBanners);
+      } else {
+        storage.getItem(`@salon_banners_${cleanCity}`).then((saved) => {
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              if (Array.isArray(parsed) && parsed.length > 0) {
+                GLOBAL_BANNER_CACHE[cleanCity] = parsed;
+                setBanners(parsed);
+              }
+            } catch (e) {}
+          }
+        }).catch(() => {});
+      }
       setLoadError(null);
     }
   }, [selectedCity]);
@@ -275,12 +312,17 @@ function HomeScreen({ navigate, onScroll }) {
       setSalons(salonList);
 
       try {
-        const bannerRes = await browseService.getBanners({ city: cleanCity, bypassCache: true });
+        // Reuse client cache unless explicitly pulling to refresh
+        const bannerRes = await browseService.getBanners({ city: cleanCity, bypassCache: false });
         const fetchedBanners =
           (Array.isArray(bannerRes?.data) ? bannerRes.data : null) ||
           (Array.isArray(bannerRes?.data?.data) ? bannerRes.data.data : null) ||
           (Array.isArray(bannerRes) ? bannerRes : null) ||
           [];
+        if (fetchedBanners.length > 0) {
+          GLOBAL_BANNER_CACHE[cleanCity] = fetchedBanners;
+          storage.setItem(`@salon_banners_${cleanCity}`, JSON.stringify(fetchedBanners)).catch(() => {});
+        }
         if (!isStale()) setBanners(fetchedBanners);
       } catch (e) {
         console.warn("Failed to fetch banners", e);
@@ -432,12 +474,14 @@ function HomeScreen({ navigate, onScroll }) {
                             { width: cardWidth, marginBottom: 0, marginHorizontal: 0 },
                           ]}
                         >
-                          <ImageBackground
-                            source={{ uri: bannerImgUri }}
-                            style={styles.heroBannerImage}
-                            imageStyle={{ borderRadius: 16 }}
-                            resizeMode="cover"
-                          >
+                          <View style={styles.heroBannerImageWrap}>
+                            <Image
+                              source={{ uri: bannerImgUri }}
+                              style={StyleSheet.absoluteFillObject}
+                              contentFit="cover"
+                              cachePolicy="memory-disk"
+                              priority="high"
+                            />
                             {/* Dark gradient scrim so text is always legible */}
                             <View style={styles.heroBannerOverlay}>
                               <View style={styles.heroBannerContent}>
@@ -458,9 +502,8 @@ function HomeScreen({ navigate, onScroll }) {
                                   <Ionicons name="arrow-forward" size={16} color={C.textLight} style={{ marginLeft: 6 }} />
                                 </View>
                               </View>
-
                             </View>
-                          </ImageBackground>
+                          </View>
                         </TouchableOpacity>
                       </View>
                     );
@@ -757,9 +800,10 @@ function buildStyles(theme, isDark) {
       backgroundColor: isDark ? p.surface : C.border,
       marginBottom: 0,
     },
-    heroBannerImage: {
+    heroBannerImageWrap: {
       width: "100%",
       height: "100%",
+      position: "relative",
     },
     // Overlay is now a normal flex child inside ImageBackground — no z-index needed
     heroBannerOverlay: {

@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
@@ -165,6 +167,26 @@ const userSchema = new mongoose.Schema(
       },
     ],
 
+    referralCode: {
+      type: String,
+      unique: true,
+      sparse: true,
+      uppercase: true,
+      trim: true,
+    },
+
+    referredBy: {
+      type: String,
+      default: null,
+      uppercase: true,
+      trim: true,
+    },
+
+    referralCount: {
+      type: Number,
+      default: 0,
+    },
+
     isEmailVerified: {
       type: Boolean,
       default: false,
@@ -204,12 +226,13 @@ userSchema.index({ phone: 1 }, { unique: true, sparse: true });
 // "pre save hook" — runs automatically before every .save()
 // we use next-less async style which works correctly in mongoose v8+
 userSchema.pre("save", async function () {
-  // only hash if password was changed/is new
-  // without this check, re-saving a user would double-hash the password
-  if (!this.password || !this.isModified("password")) return;
+  if (!this.referralCode && this.isNew) {
+    const name = (this.name || "USER").toUpperCase().replace(/[^A-Z]/g, "").slice(0, 4) || "USER";
+    const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+    this.referralCode = `${name}${rand}`;
+  }
 
-  // 12 = salt rounds — higher = more secure but slower
-  // 12 is a good balance for production
+  if (!this.password || !this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
 
@@ -229,5 +252,7 @@ userSchema.methods.invalidateTokens = async function () {
   this.tokenVersion += 1;
   await this.save();
 };
+
+userSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.user });
 
 module.exports = mongoose.model("User", userSchema);

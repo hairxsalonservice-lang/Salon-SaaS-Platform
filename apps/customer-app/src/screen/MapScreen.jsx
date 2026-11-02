@@ -79,7 +79,7 @@ function getStartingPrice(s) {
   return typeof p === "number" && p > 0 ? p : null;
 }
 
-export default function MapScreen({ navigate }) {
+export default function MapScreen({ navigate, isActive = false }) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const styles = useMemo(() => getStyles(theme, isDark, insets), [theme, isDark, insets]);
@@ -98,6 +98,8 @@ export default function MapScreen({ navigate }) {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filterModalVisible, setFilterModalVisible] = useState(false);
   const [locationModalVisible, setLocationModalVisible] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [locationNotice, setLocationNotice] = useState(null);
   const [filters, setFilters] = useState({
     minRating: "all",
     priceRange: "all",
@@ -106,20 +108,25 @@ export default function MapScreen({ navigate }) {
   });
 
   const webViewRef = useRef(null);
+  const locatingRef = useRef(false);
+  const lastFixAtRef = useRef(0);
 
   const cleanCity = cleanCityName(selectedCity || "");
   const cityKey = cleanCity.toLowerCase();
   const isCityLive = LIVE_CITIES.includes(cityKey);
 
+  const gpsLat = Number.isFinite(locationDetails?.latitude) ? locationDetails.latitude : null;
+  const gpsLng = Number.isFinite(locationDetails?.longitude) ? locationDetails.longitude : null;
+
   // The user's real position is only meaningful when it's in the city being browsed
   const hasGpsInCity =
     Boolean(locationDetails?.city) &&
     cleanCityName(locationDetails.city).toLowerCase() === cityKey &&
-    Number.isFinite(locationDetails?.latitude) &&
-    Number.isFinite(locationDetails?.longitude);
+    gpsLat !== null &&
+    gpsLng !== null;
   const cityCenter = CITY_COORDINATES[cityKey] || DEFAULT_CENTER;
-  const centerLat = hasGpsInCity ? locationDetails.latitude : cityCenter.lat;
-  const centerLng = hasGpsInCity ? locationDetails.longitude : cityCenter.lng;
+  const centerLat = hasGpsInCity ? gpsLat : cityCenter.lat;
+  const centerLng = hasGpsInCity ? gpsLng : cityCenter.lng;
 
   const locationAddressText = hasGpsInCity
     ? locationDetails?.formattedAddress || locationDetails?.area || selectedCity || ""
@@ -224,10 +231,10 @@ export default function MapScreen({ navigate }) {
       centerLng,
       selectedSalonId: null,
       isDark,
-      userLat: centerLat,
-      userLng: centerLng,
+      userLat: gpsLat,
+      userLng: gpsLng,
     });
-  }, [pinned, isDark, centerLat, centerLng]);
+  }, [pinned, isDark, centerLat, centerLng, gpsLat, gpsLng]);
 
   const openSalon = useCallback((id) => {
     const salon = salons.find((s) => String(s._id || s.id) === String(id));
@@ -249,20 +256,69 @@ export default function MapScreen({ navigate }) {
     return () => window.removeEventListener("message", listener);
   }, []);
 
-  const handleRecenterLocation = async () => {
+  const locateUser = useCallback(async ({ auto = false } = {}) => {
+    if (locatingRef.current) return;
+    locatingRef.current = true;
+    setLocating(true);
+    setLocationNotice(null);
+
     try {
-      await detectCurrentLocation();
-      const freshLoc = useLocationStore.getState().locationDetails;
-      mapService.recenterMap({
-        webViewRef,
-        iframeId: "leaflet-map-iframe",
-        lat: freshLoc?.latitude || centerLat,
-        lng: freshLoc?.longitude || centerLng,
-      });
-    } catch (e) {
-      console.warn("Recenter error:", e);
+      const geo = await detectCurrentLocation();
+      const lat = geo?.latitude;
+      const lng = geo?.longitude;
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+        throw new Error("Current location unavailable");
+      }
+
+      lastFixAtRef.current = Date.now();
+
+      if (geo.isApproximate) {
+        setLocationNotice("Showing an approximate location. Enable GPS for your exact position.");
+      }
+
+      const recenter = () =>
+        mapService.recenterMap({
+          webViewRef,
+          iframeId: "leaflet-map-iframe",
+          lat,
+          lng,
+        });
+
+      // The map HTML re-renders with the new centre; nudge the live map too.
+      recenter();
+      setTimeout(recenter, 450);
+    } catch (err) {
+      setLocationNotice(
+        auto
+          ? "Location access is off. Tap the target to try again."
+          : "Couldn't get your exact location. Check location permission and try again."
+      );
+    } finally {
+      locatingRef.current = false;
+      setLocating(false);
     }
-  };
+  }, [detectCurrentLocation]);
+
+  // Detect and centre on the real position whenever the Map tab becomes active.
+  useEffect(() => {
+    if (!isActive) return;
+
+    if (Date.now() - lastFixAtRef.current < 30_000) {
+      const fresh = useLocationStore.getState().locationDetails;
+      if (Number.isFinite(fresh?.latitude) && Number.isFinite(fresh?.longitude)) {
+        mapService.recenterMap({
+          webViewRef,
+          iframeId: "leaflet-map-iframe",
+          lat: fresh.latitude,
+          lng: fresh.longitude,
+        });
+      }
+      return;
+    }
+
+    locateUser({ auto: true });
+  }, [isActive, locateUser]);
 
   const handleApplyFilters = useCallback((next) => {
     setFilters(next);
@@ -431,8 +487,30 @@ export default function MapScreen({ navigate }) {
           {renderNotice()}
 
           {/* Floating Map Controls */}
-          <TouchableOpacity activeOpacity={0.85} onPress={handleRecenterLocation} style={[styles.mapControlButton, { top: Math.max(insets?.top || 20, 20) + 160 }]}>
-            <Ionicons name="locate-outline" size={20} color={iconColor} />
+          {locationNotice ? (
+            <TouchableOpacity
+              activeOpacity={0.85}
+              onPress={() => locateUser()}
+              style={[styles.locationNotice, { bottom: bottomBarInset + 72 }]}
+            >
+              <Ionicons name="location-outline" size={15} color={theme.primary} />
+              <Text style={styles.locationNoticeText}>{locationNotice}</Text>
+            </TouchableOpacity>
+          ) : null}
+
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => locateUser()}
+            disabled={locating}
+            accessibilityRole="button"
+            accessibilityLabel="Show my current location"
+            style={[styles.mapControlButton, { bottom: bottomBarInset + 16 }]}
+          >
+            {locating ? (
+              <ActivityIndicator size="small" color={theme.primary} />
+            ) : (
+              <Ionicons name="locate-outline" size={20} color={iconColor} />
+            )}
           </TouchableOpacity>
         </View>
       )}
@@ -595,6 +673,27 @@ function getStyles(p, isDark, insets) {
       ...pillElevation,
       ...(isIOS ? {} : { elevation: 6 }),
       zIndex: 15,
+    },
+    locationNotice: {
+      position: "absolute",
+      left: 16,
+      right: 72,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      backgroundColor: pillBg,
+      borderRadius: PLATFORM_RADIUS.button,
+      paddingHorizontal: 12,
+      paddingVertical: 9,
+      ...pillShadow,
+      ...pillElevation,
+      zIndex: 15,
+    },
+    locationNoticeText: {
+      flex: 1,
+      fontSize: 11,
+      fontFamily: "DMSans_400Regular",
+      color: p.body,
     },
 
     emptyCard: {

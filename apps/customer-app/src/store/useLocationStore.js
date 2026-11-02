@@ -43,24 +43,30 @@ export const useLocationStore = create((set, get) => ({
     set({ isDetecting: true });
     try {
       const geoResult = await getCurrentLocation();
-      if (geoResult && geoResult.city) {
-        const detectedCity = cleanCityName(geoResult.city);
+      if (
+        geoResult &&
+        Number.isFinite(geoResult.latitude) &&
+        Number.isFinite(geoResult.longitude)
+      ) {
+        const detectedCity = geoResult.city
+          ? cleanCityName(geoResult.city)
+          : get().selectedCity;
+        set({
+          selectedCity: detectedCity,
+          locationDetails: geoResult,
+          isDetecting: false,
+        });
         if (detectedCity) {
-          set({
-            selectedCity: detectedCity,
-            locationDetails: geoResult,
-            isDetecting: false,
-          });
           await storage.setItem(STORAGE_CITY_KEY, detectedCity);
-          return detectedCity;
         }
+        return geoResult;
       }
     } catch (err) {
       console.warn("[LocationStore] Auto-detect location failed:", err.message);
     } finally {
       set({ isDetecting: false });
     }
-    return get().selectedCity;
+    return null;
   },
 
   initLocation: async () => {
@@ -73,7 +79,8 @@ export const useLocationStore = create((set, get) => ({
         set({ selectedCity: cleaned });
         return cleaned;
       }
-      return await get().detectCurrentLocation();
+      await get().detectCurrentLocation();
+      return get().selectedCity;
     } catch (err) {
       console.warn("[LocationStore] Init failed:", err.message);
     }

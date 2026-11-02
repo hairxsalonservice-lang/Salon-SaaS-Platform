@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 
 // A permission is a single action on a resource
 // format: "resource:action"
@@ -44,5 +46,7 @@ permissionSchema.index({ resource: 1, action: 1 }, { unique: true })
 permissionSchema.virtual('key').get(function () {
   return `${this.resource}:${this.action}`
 })
+
+permissionSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.permission });
 
 module.exports = mongoose.model('Permission', permissionSchema)

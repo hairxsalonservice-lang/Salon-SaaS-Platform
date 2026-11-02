@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 
 const uploadedFileSchema = new mongoose.Schema(
   {
@@ -53,5 +55,7 @@ const uploadedFileSchema = new mongoose.Schema(
 );
 
 uploadedFileSchema.index({ uploadedBy: 1, createdAt: -1 });
+
+uploadedFileSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.uploadedFile });
 
 module.exports = mongoose.model("UploadedFile", uploadedFileSchema);

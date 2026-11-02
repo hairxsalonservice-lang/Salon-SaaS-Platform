@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const tenantPlugin = require('../utils/tenantPlugin')
 
 // Service = what a branch offers
@@ -137,4 +139,6 @@ serviceSchema.pre("save", function () {
 //   return `₹${(this.price / 100).toFixed(2)}`;
 // });
 serviceSchema.plugin(tenantPlugin)
+serviceSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.service });
+
 module.exports = mongoose.model("Service", serviceSchema);

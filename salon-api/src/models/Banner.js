@@ -1,5 +1,7 @@
 // salon-api/src/models/Banner.js
 const mongoose = require('mongoose');
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 
 const bannerSchema = new mongoose.Schema(
   {
@@ -27,5 +29,10 @@ const bannerSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+bannerSchema.index({ isActive: 1, displayOrder: 1 });
+bannerSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
+
+bannerSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.banner });
 
 module.exports = mongoose.model('Banner', bannerSchema);

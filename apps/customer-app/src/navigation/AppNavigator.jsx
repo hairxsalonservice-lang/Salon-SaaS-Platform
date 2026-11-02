@@ -38,6 +38,7 @@ import AboutScreen from "../screen/AboutScreen";
 import ShopScreen from "../screen/ShopScreen";
 import MapScreen from "../screen/MapScreen";
 import OnboardingScreen from "../screen/OnboardingScreen";
+import InviteFriendsScreen from "../screen/InviteFriendsScreen";
 import SplashScreen from "../screen/SplashScreen";
 import CategoryDetailScreen from "../screen/CategoryDetailScreen";
 import AndroidExpandingTabBar from "../components/AndroidExpandingTabBar";
@@ -76,7 +77,7 @@ const stripSalonParams = (state) => {
 
 // Opening a shared salon link lands directly on that salon, with an optional branch preselected.
 const linking = {
-  prefixes: ["stcut://", "https://stcut.app"],
+  prefixes: ["hairx://", "https://hairx.app"],
   config: {
     initialRouteName: "MainTabs",
     screens: {
@@ -103,6 +104,7 @@ const MainTabsScreen = React.memo(function MainTabsScreen({
   navigate,
   handleScroll,
   tabParams,
+  currentTab,
   renderTabBar,
 }) {
   return (
@@ -125,7 +127,11 @@ const MainTabsScreen = React.memo(function MainTabsScreen({
           />
         </View>
         <View style={{ width: SCREEN_WIDTH }}>
-          <MapScreen navigate={navigate} onScroll={handleScroll} />
+          <MapScreen
+            navigate={navigate}
+            onScroll={handleScroll}
+            isActive={currentTab === "Map"}
+          />
         </View>
         <View style={{ width: SCREEN_WIDTH }}>
           <ShopScreen navigate={navigate} onScroll={handleScroll} />
@@ -326,10 +332,11 @@ export default function AppNavigator() {
         navigate={navigate}
         handleScroll={handleScroll}
         tabParams={tabParams}
+        currentTab={currentTab}
         renderTabBar={renderTabBar}
       />
     ),
-    [slideAnim, navigate, handleScroll, tabParams, renderTabBar]
+    [slideAnim, navigate, handleScroll, tabParams, currentTab, renderTabBar]
   );
 
   if (showSplash) {
@@ -482,6 +489,9 @@ export default function AppNavigator() {
             </Stack.Screen>
             <Stack.Screen name="About">
               {() => <AboutScreen goBack={goBack} navigate={navigate} />}
+            </Stack.Screen>
+            <Stack.Screen name="InviteFriends">
+              {() => <InviteFriendsScreen goBack={goBack} navigate={navigate} />}
             </Stack.Screen>
             <Stack.Screen name="Shop">
               {() => <ShopScreen navigate={navigate} onScroll={handleScroll} />}

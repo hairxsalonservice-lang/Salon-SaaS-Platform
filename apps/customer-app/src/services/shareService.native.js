@@ -1,6 +1,20 @@
-import { Share } from "react-native";
+import { Share, Platform } from "react-native";
+import Constants, { ExecutionEnvironment } from "expo-constants";
+import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import { File, Paths } from "expo-file-system";
+
+const isExpoGo =
+  Constants?.executionEnvironment === ExecutionEnvironment?.StoreClient ||
+  Constants?.appOwnership === "expo";
+
+let RNShare = null;
+if (!isExpoGo) {
+  try {
+    RNShare = require("react-native-share").default || require("react-native-share");
+  } catch (e) {
+    RNShare = null;
+  }
+}
 
 const MIME_BY_EXTENSION = {
   gif: "image/gif",
@@ -22,42 +36,55 @@ function getImageFormat(url) {
   return { extension: "jpg", mimeType: "image/jpeg" };
 }
 
-async function downloadCoverImage(imageUrl) {
+async function downloadImage(imageUrl) {
   const { extension, mimeType } = getImageFormat(imageUrl);
-  const destination = new File(Paths.cache, `salon-share-cover.${extension}`);
-  const file = await File.downloadFileAsync(imageUrl, destination, {
-    idempotent: true,
-  });
-
-  return { uri: file.uri, mimeType };
+  const fileUri = `${FileSystem.cacheDirectory}salon-share-cover.${extension}`;
+  const { uri } = await FileSystem.downloadAsync(imageUrl, fileUri);
+  return { uri, mimeType };
 }
 
-/**
- * Shares the salon details using the platform share sheet.
- * Compatible with Expo Go, custom dev builds, and production binaries.
- */
 export async function shareSalon({ title, message, imageUrl }) {
+  // Try RNShare (image + text together)
+  if (imageUrl && RNShare) {
+    try {
+      const { uri, mimeType } = await downloadImage(imageUrl);
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      await RNShare.open({
+        title,
+        message,
+        url: `data:${mimeType};base64,${base64}`,
+        type: mimeType,
+        failOnCancel: false,
+      });
+      return;
+    } catch (error) {
+      if (error?.message === "User did not share") return;
+      console.log("RNShare failed:", error?.message);
+    }
+  }
+
+  // Fallback: expo-sharing (image only, no text)
   if (imageUrl) {
     try {
-      const isSharingAvailable = await Sharing.isAvailableAsync();
-      if (isSharingAvailable) {
-        const cover = await downloadCoverImage(imageUrl);
-        await Sharing.shareAsync(cover.uri, {
+      const available = await Sharing.isAvailableAsync();
+      if (available) {
+        const { uri, mimeType } = await downloadImage(imageUrl);
+        await Sharing.shareAsync(uri, {
           dialogTitle: title,
-          mimeType: cover.mimeType,
+          mimeType,
         });
         return;
       }
     } catch (error) {
-      console.log("Could not share salon cover image:", error?.message);
+      console.log("expo-sharing failed:", error?.message);
     }
   }
 
+  // Final fallback: text only
   try {
-    await Share.share({
-      title,
-      message,
-    });
+    await Share.share({ title, message });
   } catch (error) {
     if (error?.name !== "AbortError") {
       console.log("Could not share salon:", error?.message);

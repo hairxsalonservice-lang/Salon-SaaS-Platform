@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const tenantPlugin = require('../utils/tenantPlugin')
 
 // Slot = a bookable time window for a specific staff on a specific day
@@ -130,4 +132,6 @@ slotSchema.index(
   { unique: true }
 )
 slotSchema.plugin(tenantPlugin)
+slotSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.slot });
+
 module.exports = mongoose.model('Slot', slotSchema)

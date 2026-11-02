@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const tenantPlugin = require('../utils/tenantPlugin')
 
 // StaffLeave = when a staff member is NOT available
@@ -172,5 +174,7 @@ staffLeaveSchema.index({ staffId: 1, isActive: 1, status: 1 })
 staffLeaveSchema.index({ branchId: 1, isActive: 1, status: 1 })
 staffLeaveSchema.index({ staffId: 1, startDate: 1, endDate: 1, isActive: 1, status: 1 })
 staffLeaveSchema.plugin(tenantPlugin)
+
+staffLeaveSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.staffLeave });
 
 module.exports = mongoose.model('StaffLeave', staffLeaveSchema)

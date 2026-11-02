@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const tenantPlugin = require('../utils/tenantPlugin')
 
 // Branch = a single physical location of a salon
@@ -183,5 +185,7 @@ branchSchema.index({ salonId: 1, isActive: 1 })
 // city filter drives salons/homescreens — exact match on slug can use the index
 branchSchema.index({ citySlug: 1, isActive: 1 })
 branchSchema.plugin(tenantPlugin)
+
+branchSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.branch });
 
 module.exports = mongoose.model('Branch', branchSchema)

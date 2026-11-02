@@ -67,8 +67,8 @@ export default function AllSalonsScreen({ navigate, goBack, routeParams }) {
   const setSelectedCity = useLocationStore((state) => state.setSelectedCity);
   const initLocation = useLocationStore((state) => state.initLocation);
 
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [search, setSearch] = useState(routeParams?.search || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(routeParams?.search || "");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [salons, setSalons] = useState([]);
   const [loading, setLoading] = useState(true);

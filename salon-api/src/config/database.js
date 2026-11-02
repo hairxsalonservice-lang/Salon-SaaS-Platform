@@ -71,6 +71,70 @@ const connectDB = async (retryCount = 0) => {
       console.log('CitySlug backfill error:', e.message)
     }
 
+    // Backfill publicId on documents created before the sequential-ID system
+    try {
+      const { PUBLIC_ID_PREFIXES, allocatePublicIds } = require('../utils/publicId')
+      const modelEntries = [
+        ['Salon', '../models/salon.model'],
+        ['Branch', '../models/branch.model'],
+        ['User', '../models/user.model'],
+        ['Service', '../models/service.model'],
+        ['Slot', '../models/slot.model'],
+        ['Appointment', '../models/appointment.model'],
+        ['Attendance', '../models/attendance.model'],
+        ['StaffLeave', '../models/staffLeave.model'],
+        ['Notification', '../models/notification.model'],
+        ['UploadedFile', '../models/uploadedFile.model'],
+        ['Banner', '../models/Banner'],
+        ['OwnerRegistrationRequest', '../models/ownerRegistrationRequest.model'],
+        ['Permission', '../models/permission.model'],
+        ['Role', '../models/role.model'],
+        ['Referral', '../models/referral.model'],
+      ]
+      const prefixMap = {
+        Salon: PUBLIC_ID_PREFIXES.salon,
+        Branch: PUBLIC_ID_PREFIXES.branch,
+        User: PUBLIC_ID_PREFIXES.user,
+        Service: PUBLIC_ID_PREFIXES.service,
+        Slot: PUBLIC_ID_PREFIXES.slot,
+        Appointment: PUBLIC_ID_PREFIXES.appointment,
+        Attendance: PUBLIC_ID_PREFIXES.attendance,
+        StaffLeave: PUBLIC_ID_PREFIXES.staffLeave,
+        Notification: PUBLIC_ID_PREFIXES.notification,
+        UploadedFile: PUBLIC_ID_PREFIXES.uploadedFile,
+        Banner: PUBLIC_ID_PREFIXES.banner,
+        OwnerRegistrationRequest: PUBLIC_ID_PREFIXES.ownerRegistrationRequest,
+        Permission: PUBLIC_ID_PREFIXES.permission,
+        Role: PUBLIC_ID_PREFIXES.role,
+        Referral: PUBLIC_ID_PREFIXES.referral,
+      }
+      let totalBackfilled = 0
+      for (const [name, modelPath] of modelEntries) {
+        try {
+          const M = require(modelPath)
+          const docs = await M.find(
+            { $or: [{ publicId: { $exists: false } }, { publicId: null }, { publicId: '' }] },
+            { _id: 1 },
+          ).sort({ _id: 1 }).lean()
+          if (docs.length === 0) continue
+          const ids = await allocatePublicIds(prefixMap[name], docs.length)
+          const ops = docs.map((d, i) => ({
+            updateOne: { filter: { _id: d._id }, update: { $set: { publicId: ids[i] } } },
+          }))
+          await M.bulkWrite(ops, { ordered: false })
+          totalBackfilled += docs.length
+          console.log(`🔢 Backfilled ${docs.length} publicId(s) on ${name}`)
+        } catch (innerErr) {
+          // Non-fatal per model
+        }
+      }
+      if (totalBackfilled > 0) {
+        console.log(`🔢 Total publicIds backfilled: ${totalBackfilled}`)
+      }
+    } catch (e) {
+      console.log('PublicId backfill error:', e.message)
+    }
+
     // Drop legacy non-sparse phone_1 index if present
     try {
       const User = require('../models/user.model')

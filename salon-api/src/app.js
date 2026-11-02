@@ -44,6 +44,10 @@ require("./models/appointment.model");
 require("./models/staffLeave.model");
 require("./models/notification.model");
 require("./models/ownerRegistrationRequest.model");
+require("./models/attendance.model");
+require("./models/uploadedFile.model");
+require("./models/Banner");
+require("./models/referral.model");
 const adminRoutes = require('./routes/admin.routes')
 const adminController = require('./controllers/admin.controller')
 

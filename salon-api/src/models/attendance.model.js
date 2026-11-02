@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const tenantPlugin = require("../utils/tenantPlugin");
 
 const attendanceSchema = new mongoose.Schema(
@@ -66,5 +68,7 @@ attendanceSchema.index({ branchId: 1, date: 1, status: 1 });
 attendanceSchema.index({ salonId: 1, date: 1 });
 
 attendanceSchema.plugin(tenantPlugin);
+
+attendanceSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.attendance });
 
 module.exports = mongoose.model("Attendance", attendanceSchema);

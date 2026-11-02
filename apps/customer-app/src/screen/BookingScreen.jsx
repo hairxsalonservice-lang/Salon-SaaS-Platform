@@ -47,6 +47,8 @@ export default function BookingScreen({ salon, branch, service, selectedServices
   const [promoApplied, setPromoApplied] = useState(null);
   const [promoError, setPromoError] = useState('');
   const [promoLoading, setPromoLoading] = useState(false);
+  const [staffList, setStaffList] = useState([]);
+  const [selectedStaff, setSelectedStaff] = useState(null);
 
   const discountAmount = promoApplied ? promoApplied.discount : 0;
   const finalTotal = Math.max(0, rawTotalPrice - discountAmount);
@@ -84,6 +86,15 @@ export default function BookingScreen({ salon, branch, service, selectedServices
 
   useEffect(() => {
     if (!branch) return;
+    const branchId = branch._id || branch.id || branch;
+    browseService.getBranchStaff(branchId).then((res) => {
+      const staff = res?.data?.data?.staff || res?.data?.staff || [];
+      setStaffList(staff);
+    }).catch(() => {});
+  }, [branch]);
+
+  useEffect(() => {
+    if (!branch) return;
     let cancelled = false;
     const fetchSlots = async () => {
       setLoadingSlots(true);
@@ -92,7 +103,8 @@ export default function BookingScreen({ salon, branch, service, selectedServices
       try {
         const branchId = branch._id || branch.id || branch;
         const sId = service ? (service._id || service.id) : undefined;
-        const res = await browseService.getBranchSlots(branchId, selectedDate, undefined, sId);
+        const staffId = selectedStaff ? (selectedStaff._id || selectedStaff.id) : undefined;
+        const res = await browseService.getBranchSlots(branchId, selectedDate, staffId, sId);
         if (cancelled) return;
         const raw = res.data?.availability || res.data?.slots || (Array.isArray(res.data) ? res.data : []);
         const slotMap = new Map();
@@ -136,7 +148,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
     };
     fetchSlots();
     return () => { cancelled = true; };
-  }, [branch, selectedDate]);
+  }, [branch, selectedDate, selectedStaff]);
 
   const handleConfirmBooking = async () => {
     setErrorMessage(null);
@@ -270,7 +282,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
               </div>
               <div class="row">
                 <div class="label">Stylist</div>
-                <div class="value">Any Available</div>
+                <div class="value">${selectedStaff?.name || "Any Available"}</div>
               </div>
             </div>
             <div class="footer">
@@ -327,7 +339,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
             </View>
             <View style={styles.successDetailTextWrap}>
               <Text style={styles.successDetailLabel}>Stylist</Text>
-              <Text style={styles.successDetailValue}>Any Available</Text>
+              <Text style={styles.successDetailValue}>{selectedStaff?.name || "Any Available"}</Text>
             </View>
           </View>
 
@@ -436,10 +448,50 @@ export default function BookingScreen({ salon, branch, service, selectedServices
               <View style={styles.svcIconWrap}><Ionicons name="cut-outline" size={20} color={C.main} /></View>
               <View style={styles.svcInfo}>
                 <Text style={styles.svcName} numberOfLines={1}>{primarySvc.name || "Haircut - Classic"}</Text>
-                <Text style={styles.svcSub}>{totalDurationMinutes} mins · Stylist: Any</Text>
+                <Text style={styles.svcSub}>{totalDurationMinutes} mins · Stylist: {selectedStaff?.name || "Any"}</Text>
               </View>
               <Text style={styles.svcPrice}>{paiseToINR(rawTotalPrice)}</Text>
             </View>
+
+            {/* Stylist Picker */}
+            {staffList.length > 0 && (
+              <View style={{ marginBottom: 24 }}>
+                <Text style={styles.sectionTitle}>Select Stylist</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingVertical: 4 }}>
+                  <TouchableOpacity
+                    style={[styles.stylistChip, !selectedStaff && styles.stylistChipSelected]}
+                    onPress={() => setSelectedStaff(null)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={[styles.stylistAvatar, !selectedStaff && styles.stylistAvatarSelected]}>
+                      <Ionicons name="people" size={16} color={!selectedStaff ? "#FFFFFF" : C.muted} />
+                    </View>
+                    <Text style={[styles.stylistName, !selectedStaff && styles.stylistNameSelected]}>Any</Text>
+                  </TouchableOpacity>
+                  {staffList.map((staff) => {
+                    const isSelected = selectedStaff?._id === staff._id;
+                    const initial = (staff.name || "S").charAt(0).toUpperCase();
+                    return (
+                      <TouchableOpacity
+                        key={staff._id}
+                        style={[styles.stylistChip, isSelected && styles.stylistChipSelected]}
+                        onPress={() => setSelectedStaff(staff)}
+                        activeOpacity={0.7}
+                      >
+                        {staff.avatar || staff.photoUrl ? (
+                          <Image source={staff.avatar || staff.photoUrl} style={[styles.stylistAvatarImg, isSelected && styles.stylistAvatarSelected]} contentFit="cover" />
+                        ) : (
+                          <View style={[styles.stylistAvatar, isSelected && styles.stylistAvatarSelected]}>
+                            <Text style={[styles.stylistInitial, isSelected && { color: "#FFFFFF" }]}>{initial}</Text>
+                          </View>
+                        )}
+                        <Text style={[styles.stylistName, isSelected && styles.stylistNameSelected]} numberOfLines={1}>{staff.name}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              </View>
+            )}
 
             {loadingSlots ? (
               <View style={styles.loadingBox}>
@@ -447,7 +499,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
                 <Text style={styles.loadingText}>Fetching available time slots…</Text>
               </View>
             ) : (
-              <SlotPicker slots={slots} selectedSlot={selectedSlot} serviceDurationMinutes={totalDurationMinutes} onSelectSlot={setSelectedSlot} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+              <SlotPicker slots={slots} selectedSlot={selectedSlot} serviceDurationMinutes={totalDurationMinutes} onSelectSlot={setSelectedSlot} selectedDate={selectedDate} onSelectDate={setSelectedDate} workingHours={branch?.workingHours} />
             )}
           </>
         ) : (
@@ -476,7 +528,7 @@ export default function BookingScreen({ salon, branch, service, selectedServices
                 <View style={styles.summaryRow}>
                   <Ionicons name="person-outline" size={16} color={C.main} style={styles.summaryIcon} />
                   <Text style={styles.summaryLabel}>Stylist</Text>
-                  <Text style={styles.summaryVal}>Any Available</Text>
+                  <Text style={styles.summaryVal}>{selectedStaff?.name || "Any Available"}</Text>
                 </View>
                 <View style={styles.summaryRow}>
                   <Ionicons name="location-outline" size={16} color={C.main} style={styles.summaryIcon} />
@@ -617,6 +669,14 @@ function getStyles(isDark = false) {
     locationRow: { flexDirection: "row", alignItems: "center" },
     locationTxt: { fontSize: 12, color: C.muted, marginLeft: 4 },
     serviceCard: { flexDirection: "row", alignItems: "center", backgroundColor: isDark ? "rgba(255,255,255,0.04)" : C.lifted, borderRadius: 16, padding: 16, marginBottom: 24, borderWidth: 1, borderColor: border },
+    stylistChip: { alignItems: "center", paddingHorizontal: 12, paddingVertical: 10, borderRadius: 14, backgroundColor: cardBg, borderWidth: 1, borderColor: border, minWidth: 72 },
+    stylistChipSelected: { backgroundColor: isDark ? "rgba(255,96,130,0.16)" : C.crimsonTint, borderColor: C.main },
+    stylistAvatar: { width: 40, height: 40, borderRadius: 20, backgroundColor: isDark ? "rgba(255,255,255,0.08)" : C.lifted, alignItems: "center", justifyContent: "center", marginBottom: 6 },
+    stylistAvatarImg: { width: 40, height: 40, borderRadius: 20, marginBottom: 6 },
+    stylistAvatarSelected: { backgroundColor: C.main },
+    stylistInitial: { fontSize: 15, fontFamily: "Oswald_700Bold", color: isDark ? "#AAA" : C.muted },
+    stylistName: { fontSize: 11, fontFamily: "DMSans_500Medium", color: isDark ? "#999" : C.muted, textAlign: "center", maxWidth: 64 },
+    stylistNameSelected: { color: C.main, fontFamily: "Oswald_600SemiBold" },
     svcIconWrap: { width: 44, height: 44, borderRadius: 12, backgroundColor: isDark ? "rgba(255,96,130,0.12)" : C.crimsonTint, alignItems: "center", justifyContent: "center", marginRight: 12 },
     svcInfo: { flex: 1, flexShrink: 1, paddingRight: 8 },
     svcName: { fontSize: 15, fontFamily: "Oswald_600SemiBold", color: ink, marginBottom: 2 },

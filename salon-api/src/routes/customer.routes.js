@@ -15,6 +15,11 @@ const {
   removeFavorite,
 } = require('../controllers/customer.controller')
 
+const {
+  getMyReferral,
+  applyReferralCode,
+} = require('../controllers/referral.controller')
+
 const authenticate = require('../middleware/authenticate')
 
 router.use(authenticate)
@@ -51,5 +56,11 @@ router.delete('/me/push-token', removeMyPushToken)
 // DELETE /api/v1/customers/me/push-token/:token
 // remove one device token
 router.delete('/me/push-token/:token', removeMyPushToken)
+
+// ================================
+// Referrals
+// ================================
+router.get('/me/referral', getMyReferral)
+router.post('/me/referral/apply', applyReferralCode)
 
 module.exports = router

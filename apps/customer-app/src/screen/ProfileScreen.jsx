@@ -53,7 +53,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
   const handleShareApp = async () => {
     try {
       await Share.share({
-        message: "Book your luxury salon appointments on HairX! Download now: https://stcut.app",
+        message: "Book your luxury salon appointments on HairX! Download now: https://hairx.app",
       });
     } catch (error) {
       console.log(error.message);
@@ -120,7 +120,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
               onPress={() => (isAuthenticated ? navigate && navigate("EditProfile") : navigate && navigate("Login"))}
               activeOpacity={0.85}
             >
-              <Image source={userAvatarSource} style={styles.avatarImage} />
+              <Image source={userAvatarSource} style={styles.avatarImage} contentFit="cover" />
               <View style={styles.editBadge}>
                 <Ionicons name="pencil" size={12} color={C.textLight} />
               </View>
@@ -288,7 +288,7 @@ export default function ProfileScreen({ navigate, onScroll }) {
           {/* 5. Invite Friends */}
           <TouchableOpacity
             style={styles.menuCard}
-            onPress={handleShareApp}
+            onPress={() => navigate && navigate("InviteFriends")}
             activeOpacity={0.7}
           >
             <View style={[styles.menuIconBox, { backgroundColor: isDark ? "rgba(139, 92, 246, 0.15)" : C.infoBg }]}>
@@ -398,7 +398,6 @@ function getStyles(isDark) {
       width: 72,
       height: 72,
       borderRadius: 36,
-      resizeMode: "cover",
     },
     editBadge: {
       position: "absolute",

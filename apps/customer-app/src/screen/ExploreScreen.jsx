@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   FlatList,
   StyleSheet,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
@@ -16,33 +17,84 @@ import { storage } from "../services/storage";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import FilterModal from "../components/FilterModal";
 import { useLocationStore } from "../store/useLocationStore";
+import { browseService } from "../services/browseService";
+import { cleanCityName } from "../services/locationService";
 import ComingSoonLocation from "../components/ComingSoonLocation";
 import LocationPickerModal from "../components/LocationPickerModal";
+import SalonCard from "../components/SalonCard";
 
 const HISTORY_KEY = "@recent_searches";
 
-export default function ExploreScreen({ goBack, navigate }) {
+export default function ExploreScreen({ goBack, navigate, routeParams }) {
   const { theme, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const styles = React.useMemo(() => getStyles(isDark), [isDark]);
+  const styles = useMemo(() => getStyles(isDark, theme), [isDark, theme]);
   const selectedCity = useLocationStore((state) => state.selectedCity);
   const setSelectedCity = useLocationStore((state) => state.setSelectedCity);
   const [locationModalVisible, setLocationModalVisible] = useState(false);
   const LIVE_CITIES = ["brahmapur", "bhubaneswar"];
   const isCityEmpty = selectedCity && !LIVE_CITIES.includes(selectedCity.toLowerCase());
-  const [searchQuery, setSearchQuery] = useState("");
+
+  const initialSearch = routeParams?.search || "";
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialSearch);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [filters, setFilters] = useState({});
-  const [history, setHistory] = useState([
-    "Royal Cut Salon",
-    "Haircut near me",
-    "Facial in Brahmapur",
-    "Unisex salon"
-  ]);
+  const [history, setHistory] = useState([]);
+
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const requestIdRef = useRef(0);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     loadHistory();
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!debouncedQuery) {
+      setResults([]);
+      setSearched(false);
+      return;
+    }
+    fetchResults(debouncedQuery);
+  }, [debouncedQuery, selectedCity]);
+
+  const fetchResults = useCallback(async (query) => {
+    const reqId = ++requestIdRef.current;
+    setLoading(true);
+    setSearched(true);
+    try {
+      const params = {
+        city: cleanCityName(selectedCity),
+        search: query,
+        limit: 50,
+        bypassCache: true,
+      };
+      const res = await browseService.getSalons(params);
+      let list = [];
+      if (Array.isArray(res?.data?.data?.salons)) list = res.data.data.salons;
+      else if (Array.isArray(res?.data?.salons)) list = res.data.salons;
+      else if (Array.isArray(res?.data?.data)) list = res.data.data;
+      else if (Array.isArray(res?.data)) list = res.data;
+      else if (Array.isArray(res)) list = res;
+
+      if (reqId !== requestIdRef.current) return;
+      setResults(list);
+    } catch (err) {
+      if (reqId !== requestIdRef.current) return;
+      console.warn("ExploreScreen search error:", err?.message);
+      setResults([]);
+    } finally {
+      if (reqId === requestIdRef.current) setLoading(false);
+    }
+  }, [selectedCity]);
 
   const loadHistory = async () => {
     try {
@@ -58,145 +110,201 @@ export default function ExploreScreen({ goBack, navigate }) {
     }
   };
 
-  const saveHistory = async (newHistory) => {
-    try {
-      setHistory(newHistory);
-      await storage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
-    } catch (e) {
-      console.warn("Failed to save history", e);
-    }
-  };
-
-  const handleExecuteSearch = (queryText) => {
-    const q = (queryText || searchQuery).trim();
-    if (!q) return;
+  const saveToHistory = (q) => {
     const filtered = history.filter(item => item.toLowerCase() !== q.toLowerCase());
     const newHistory = [q, ...filtered].slice(0, 15);
-    saveHistory(newHistory);
-    setSearchQuery(q);
+    setHistory(newHistory);
+    storage.setItem(HISTORY_KEY, JSON.stringify(newHistory)).catch(() => {});
+  };
+
+  const handleSubmitSearch = () => {
+    const q = searchQuery.trim();
+    if (!q) return;
+    saveToHistory(q);
+    setDebouncedQuery(q);
+  };
+
+  const handleHistoryTap = (item) => {
+    setSearchQuery(item);
+    setDebouncedQuery(item);
+    saveToHistory(item);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setDebouncedQuery("");
+    setResults([]);
+    setSearched(false);
+    inputRef.current?.focus();
   };
 
   const handleClearAll = () => {
-    saveHistory([]);
+    setHistory([]);
+    storage.setItem(HISTORY_KEY, JSON.stringify([])).catch(() => {});
   };
+
+  const handleSalonPress = useCallback((salon) => {
+    if (navigate) navigate("SalonDetail", { salon });
+  }, [navigate]);
+
+  const showHistory = !searched && history.length > 0;
+  const showEmptyIllustration = !searched && history.length === 0;
+  const showResults = searched;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.canvas }]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} backgroundColor={theme.canvas} />
 
-      {/* Main Content Area with ScrollView */}
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.scrollContent,
-          { paddingTop: Math.max(insets.top || 20, 20) + 8 }
-        ]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Header Bar */}
+      <View style={[styles.header, { paddingTop: Math.max(insets.top || 20, 20) + 8 }]}>
         <View style={styles.headerRow}>
           <TouchableOpacity style={styles.backButton} onPress={goBack} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="arrow-back" size={24} color={C.ink} />
+            <Ionicons name="arrow-back" size={24} color={theme.ink} />
           </TouchableOpacity>
           <View style={styles.titleContainer}>
-            <Text style={[styles.headerTitle, { color: C.ink }]}>Search Salons</Text>
-            <Text style={[styles.headerSubtitle, { color: C.muted }]}>
+            <Text style={[styles.headerTitle, { color: theme.ink }]}>Search Salons</Text>
+            <Text style={[styles.headerSubtitle, { color: theme.muted }]}>
               Find your favorite salons and services
             </Text>
           </View>
         </View>
 
-        {isCityEmpty ? (
+        {!isCityEmpty && (
+          <View style={styles.searchPill}>
+            <Ionicons name="search-outline" size={20} color={theme.muted} style={{ marginRight: 10 }} />
+            <TextInput
+              ref={inputRef}
+              style={[styles.searchInput, { color: theme.ink }]}
+              placeholder="Search by salon name, area or service..."
+              placeholderTextColor={theme.muted}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              onSubmitEditing={handleSubmitSearch}
+              returnKeyType="search"
+              autoFocus
+            />
+            {searchQuery.length > 0 ? (
+              <TouchableOpacity onPress={handleClearSearch} style={{ padding: 4, marginRight: 6 }}>
+                <Ionicons name="close-circle" size={18} color={theme.muted} />
+              </TouchableOpacity>
+            ) : null}
+            <TouchableOpacity
+              style={styles.filterButton}
+              activeOpacity={0.8}
+              onPress={() => setIsFilterOpen(true)}
+            >
+              <Ionicons name="options-outline" size={18} color={theme.ink} />
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
+
+      {isCityEmpty ? (
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
           <ComingSoonLocation
             city={selectedCity}
             onChangeLocation={() => setLocationModalVisible(true)}
             onSelectQuickCity={(c) => setSelectedCity(c)}
           />
-        ) : (
-          <>
-            {/* Search Bar Input */}
-            <View style={[styles.searchPill, { backgroundColor: C.lifted }]}>
-              <Ionicons name="search-outline" size={20} color={C.muted} style={{ marginRight: 10 }} />
-              <TextInput
-                style={[styles.searchInput, { color: C.ink }]}
-                placeholder="Search by salon name, area or service..."
-                placeholderTextcolor={C.muted}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                onSubmitEditing={() => handleExecuteSearch(searchQuery)}
-                returnKeyType="search"
-                autoFocus={false}
-              />
-              {searchQuery.length > 0 ? (
-                <TouchableOpacity onPress={() => setSearchQuery("")} style={{ padding: 4, marginRight: 6 }}>
-                  <Ionicons name="close-circle" size={18} color={C.muted} />
-                </TouchableOpacity>
-              ) : null}
-              <TouchableOpacity 
-                style={[styles.filterButton, { backgroundColor: C.surface }]}
-                activeOpacity={0.8}
-                onPress={() => setIsFilterOpen(true)}
-              >
-                <Ionicons name="options-outline" size={18} color={C.textSecondary} />
-              </TouchableOpacity>
-            </View>
-
-            {/* Recent Searches */}
-            {history.length > 0 && (
-              <View style={styles.sectionContainer}>
-                <View style={styles.historyHeader}>
-                  <Text style={[styles.sectionTitle, { color: C.ink }]}>Recent Searches</Text>
-                  <TouchableOpacity onPress={handleClearAll} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                    <Text style={styles.clearText}>Clear All</Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View style={[styles.historyCard, { backgroundColor: C.surface, borderColor: C.border }]}>
-                  {history.map((item, index) => (
-                    <TouchableOpacity
-                      key={`${item}-${index}`}
-                      style={[
-                        styles.historyItem,
-                        index < history.length - 1 && {
-                          borderBottomWidth: 1,
-                          borderBottomColor: C.border
-                        }
-                      ]}
-                      onPress={() => handleExecuteSearch(item)}
-                      activeOpacity={0.6}
-                    >
-                      <Ionicons name="time-outline" size={19} color={C.muted} style={{ marginRight: 12 }} />
-                      <Text style={[styles.historyText, { color: C.ink }]} numberOfLines={1}>
-                        {item}
-                      </Text>
-                      <Ionicons name="chevron-forward" size={18} color={C.muted} />
-                    </TouchableOpacity>
-                  ))}
-                </View>
+        </ScrollView>
+      ) : showResults ? (
+        <FlatList
+          data={results}
+          keyExtractor={(item) => String(item._id || item.id)}
+          contentContainerStyle={styles.resultsContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item, index }) => (
+            <SalonCard salon={item} isHorizontal={false} index={index} onPress={handleSalonPress} />
+          )}
+          ListHeaderComponent={
+            !loading ? (
+              <Text style={styles.resultsCount}>
+                {results.length === 0
+                  ? `No results for "${debouncedQuery}"`
+                  : `${results.length} ${results.length === 1 ? "result" : "results"} for "${debouncedQuery}"`}
+              </Text>
+            ) : null
+          }
+          ListEmptyComponent={
+            loading ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color={theme.primary} />
+                <Text style={styles.loadingText}>Searching...</Text>
               </View>
-            )}
+            ) : (
+              <View style={styles.noResultsContainer}>
+                <View style={styles.noResultsIcon}>
+                  <Ionicons name="search-outline" size={28} color={theme.muted} />
+                </View>
+                <Text style={styles.noResultsTitle}>No salons found</Text>
+                <Text style={styles.noResultsSub}>Try a different name, service or area</Text>
+              </View>
+            )
+          }
+        />
+      ) : (
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {showHistory && (
+            <View style={styles.sectionContainer}>
+              <View style={styles.historyHeader}>
+                <Text style={[styles.sectionTitle, { color: theme.ink }]}>Recent Searches</Text>
+                <TouchableOpacity onPress={handleClearAll} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                  <Text style={styles.clearText}>Clear All</Text>
+                </TouchableOpacity>
+              </View>
 
-            {/* Empty State / Center Illustration */}
+              <View style={[styles.historyCard, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
+                {history.map((item, index) => (
+                  <TouchableOpacity
+                    key={`${item}-${index}`}
+                    style={[
+                      styles.historyItem,
+                      index < history.length - 1 && {
+                        borderBottomWidth: 1,
+                        borderBottomColor: theme.hairline,
+                      }
+                    ]}
+                    onPress={() => handleHistoryTap(item)}
+                    activeOpacity={0.6}
+                  >
+                    <Ionicons name="time-outline" size={19} color={theme.muted} style={{ marginRight: 12 }} />
+                    <Text style={[styles.historyText, { color: theme.ink }]} numberOfLines={1}>
+                      {item}
+                    </Text>
+                    <Ionicons name="arrow-forward-outline" size={16} color={theme.muted} />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {showEmptyIllustration && (
             <View style={styles.illustrationContainer}>
               <View style={styles.graphicWrapper}>
                 <View style={styles.blobBackgroundLarge} />
                 <View style={styles.blobBackgroundSmall} />
                 <View style={styles.magnifierCircle}>
-                  <Ionicons name="search-outline" size={44} color={C.muted} />
+                  <Ionicons name="search-outline" size={44} color={theme.muted} />
                 </View>
               </View>
-              <Text style={[styles.illustrationTitle, { color: C.ink }]}>Search for Salons</Text>
-              <Text style={[styles.illustrationSubtitle, { color: C.muted }]}>
+              <Text style={[styles.illustrationTitle, { color: theme.ink }]}>Search for Salons</Text>
+              <Text style={[styles.illustrationSubtitle, { color: theme.muted }]}>
                 Type a salon name, service or area{"\n"}to find the best results
               </Text>
             </View>
-          </>
-        )}
+          )}
+        </ScrollView>
+      )}
 
-      </ScrollView>
-
-      {/* Filter Modal */}
       <FilterModal
         visible={isFilterOpen}
         filters={filters}
@@ -220,22 +328,19 @@ export default function ExploreScreen({ goBack, navigate }) {
   );
 }
 
-function getStyles(isDark) {
+function getStyles(isDark, theme) {
   return StyleSheet.create({
     container: {
       flex: 1,
     },
-    scrollView: {
-      flex: 1,
-    },
-    scrollContent: {
+    header: {
       paddingHorizontal: 20,
-      paddingBottom: 40,
+      paddingBottom: 8,
     },
     headerRow: {
       flexDirection: "row",
       alignItems: "flex-start",
-      marginBottom: 20,
+      marginBottom: 16,
     },
     backButton: {
       paddingRight: 14,
@@ -261,9 +366,10 @@ function getStyles(isDark) {
       paddingLeft: 16,
       paddingRight: 6,
       height: 48,
-      marginBottom: 24,
+      marginBottom: 8,
       borderWidth: 1,
       borderColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+      backgroundColor: isDark ? "rgba(255,255,255,0.04)" : C.lifted,
     },
     searchInput: {
       flex: 1,
@@ -279,6 +385,56 @@ function getStyles(isDark) {
       justifyContent: "center",
       backgroundColor: isDark ? "rgba(255,255,255,0.08)" : C.surface,
     },
+
+    // Results
+    resultsContent: {
+      paddingHorizontal: 20,
+      paddingBottom: 40,
+    },
+    resultsCount: {
+      fontSize: 13,
+      fontFamily: "DMSans_400Regular",
+      color: C.muted,
+      marginBottom: 12,
+    },
+    loadingContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 60,
+    },
+    loadingText: {
+      marginTop: 10,
+      fontSize: 13,
+      fontFamily: "DMSans_400Regular",
+      color: C.muted,
+    },
+    noResultsContainer: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 50,
+    },
+    noResultsIcon: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: isDark ? "rgba(255,96,130,0.12)" : C.crimsonTint,
+      marginBottom: 12,
+    },
+    noResultsTitle: {
+      fontSize: 16,
+      fontFamily: "Oswald_600SemiBold",
+      color: C.ink,
+    },
+    noResultsSub: {
+      marginTop: 4,
+      fontSize: 13,
+      fontFamily: "DMSans_400Regular",
+      color: C.muted,
+    },
+
+    // History
     sectionContainer: {
       marginBottom: 24,
     },
@@ -286,30 +442,6 @@ function getStyles(isDark) {
       fontSize: 16,
       fontFamily: "Oswald_600SemiBold",
       letterSpacing: 0.3,
-    },
-    popularRow: {
-      paddingRight: 20,
-    },
-    popularPill: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingHorizontal: 14,
-      height: 40,
-      borderRadius: 20,
-      borderWidth: 1,
-      marginRight: 10,
-    },
-    pillIconBg: {
-      width: 24,
-      height: 24,
-      borderRadius: 12,
-      alignItems: "center",
-      justifyContent: "center",
-      marginRight: 8,
-    },
-    popularText: {
-      fontSize: 14,
-      fontFamily: "DMSans_500Medium",
     },
     historyHeader: {
       flexDirection: "row",
@@ -338,6 +470,8 @@ function getStyles(isDark) {
       fontFamily: "DMSans_400Regular",
       flex: 1,
     },
+
+    // Illustration
     illustrationContainer: {
       alignItems: "center",
       justifyContent: "center",

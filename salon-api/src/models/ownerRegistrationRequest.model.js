@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const bcrypt = require("bcryptjs");
 
 // OwnerRegistrationRequest = a salon owner who self-registered from the
@@ -101,6 +103,10 @@ ownerRegistrationRequestSchema.methods.comparePassword = async function (
 ) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
+
+ownerRegistrationRequestSchema.index({ status: 1, createdAt: -1 });
+
+ownerRegistrationRequestSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.ownerRegistrationRequest });
 
 module.exports = mongoose.model(
   "OwnerRegistrationRequest",

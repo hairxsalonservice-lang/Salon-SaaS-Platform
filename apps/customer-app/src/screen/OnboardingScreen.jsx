@@ -587,7 +587,7 @@ export default function OnboardingScreen({ onFinish, navigate }) {
           <Image
             source={require("../../assets/logo.png")}
             style={{ width: 36, height: 36, borderRadius: 8, marginRight: 8 }}
-            resizeMode="contain"
+            contentFit="contain"
           />
           <Text style={styles.logoText}>HairX</Text>
         </View>

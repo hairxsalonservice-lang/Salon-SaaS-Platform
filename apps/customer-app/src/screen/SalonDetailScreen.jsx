@@ -549,7 +549,7 @@ function SalonDetailScreen({ salon, initialSalonId, initialBranchId, goBack, nav
         : null,
     ].filter(Boolean).join(" · ");
     const link = routeSalonId
-      ? `stcut://salon/${encodeURIComponent(routeSalonId)}${
+      ? `hairx://salon/${encodeURIComponent(routeSalonId)}${
           selectedBranchId ? `?branchId=${encodeURIComponent(selectedBranchId)}` : ""
         }`
       : null;
@@ -775,7 +775,7 @@ function SalonDetailScreen({ salon, initialSalonId, initialBranchId, goBack, nav
           <Image
             source={{ uri: carouselImages[0] }}
             style={styles.heroImage}
-            resizeMode="cover"
+            contentFit="cover"
           />
 
           <LinearGradient

@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 
 // A Role groups multiple permissions together
 // e.g. "manager" role has ["staff:read", "appointment:update", ...]
@@ -39,5 +41,7 @@ const roleSchema = new mongoose.Schema(
     timestamps: true
   }
 )
+
+roleSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.role });
 
 module.exports = mongoose.model('Role', roleSchema)

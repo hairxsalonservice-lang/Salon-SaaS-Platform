@@ -151,7 +151,7 @@ export default function EditProfileScreen({ goBack }) {
         {/* Avatar Area with "Change Avatar" */}
         <View style={styles.avatarRow}>
           <TouchableOpacity style={styles.avatarContainer} onPress={handlePickAvatar} activeOpacity={0.85}>
-            <Image source={getAvatarSource()} style={styles.avatarImg} />
+            <Image source={getAvatarSource()} style={styles.avatarImg} contentFit="cover" />
           </TouchableOpacity>
           <TouchableOpacity onPress={handlePickAvatar} activeOpacity={0.7} style={styles.changeAvatarBtn}>
             <Text style={styles.changeAvatarText}>Change Avatar</Text>
@@ -302,7 +302,6 @@ function getStyles(isDark) {
     avatarImg: {
       width: "100%",
       height: "100%",
-      resizeMode: "cover",
     },
     changeAvatarBtn: {
       paddingVertical: 6,

@@ -161,12 +161,14 @@ export async function getCurrentLocation() {
         throw new Error("Foreground location permission not granted");
       }
       const position = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+        accuracy: Location.Accuracy.High,
+        mayShowUserSettingsDialog: true,
       });
       if (position?.coords) {
         return {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy ?? null,
         };
       }
     } catch (err) {
@@ -187,6 +189,7 @@ export async function getCurrentLocation() {
           resolve({
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy ?? null,
           });
         },
         (err) => {
@@ -228,6 +231,7 @@ export async function getCurrentLocation() {
   };
 
   let coords;
+  let isApproximate = false;
   try {
     coords = await getExpoLocation();
   } catch (expoErr) {
@@ -235,11 +239,18 @@ export async function getCurrentLocation() {
       coords = await getNavLocation();
     } catch (navError) {
       coords = await getIpLocation();
+      isApproximate = true;
     }
   }
 
   const geoResult = await reverseGeocode(coords.latitude, coords.longitude);
-  return geoResult;
+  return {
+    ...geoResult,
+    latitude: coords.latitude,
+    longitude: coords.longitude,
+    accuracy: Number.isFinite(coords.accuracy) ? coords.accuracy : null,
+    isApproximate,
+  };
 }
 
 /**

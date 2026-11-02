@@ -281,7 +281,7 @@ export default function ReviewsSection({
             <View key={reviewId} style={styles.reviewCard}>
               <View style={styles.reviewHead}>
                 {avatar ? (
-                  <Image source={avatar} style={styles.avatarImage} placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
+                  <Image source={avatar} style={styles.avatarImage} contentFit="cover" placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }} transition={300} />
                 ) : (
                   <View style={styles.avatar}>
                     <Text style={styles.avatarText}>{getInitials(reviewerName)}</Text>
@@ -388,7 +388,7 @@ function getStyles(theme, isDark) {
     },
     scoreNumber: {
       fontSize: 28,
-      lineHeight: 20,
+      lineHeight: 30,
       fontFamily: FF.display,
       color: theme.ink,
       letterSpacing: 0.2,
@@ -436,7 +436,7 @@ function getStyles(theme, isDark) {
       gap: 3,
     },
     verifiedMiniText: {
-      fontSize: 14,
+      fontSize: 11,
       fontFamily: FF.bodyMedium,
       color: verifiedGreen,
     },
@@ -462,7 +462,7 @@ function getStyles(theme, isDark) {
       gap: 4,
     },
     writeLinkText: {
-      fontSize: 18,
+      fontSize: 13,
       fontFamily: FF.bodyMedium,
       color: theme.primaryActive,
     },
@@ -529,7 +529,7 @@ function getStyles(theme, isDark) {
       gap: 10,
     },
     charCount: {
-      fontSize: 14,
+      fontSize: 11,
       fontFamily: FF.body,
       color: theme.muted,
     },
@@ -553,7 +553,7 @@ function getStyles(theme, isDark) {
       elevation: 0,
     },
     postReviewBtnText: {
-      fontSize: 28,
+      fontSize: 13,
       fontFamily: FF.display,
       color: theme.onPrimary,
     },
@@ -592,7 +592,7 @@ function getStyles(theme, isDark) {
       backgroundColor: theme.surfaceStrong,
     },
     avatarText: {
-      fontSize: 28,
+      fontSize: 13,
       fontFamily: FF.display,
       color: theme.primaryActive,
       letterSpacing: 0.2,
@@ -609,7 +609,7 @@ function getStyles(theme, isDark) {
     },
     reviewName: {
       flexShrink: 1,
-      fontSize: 28,
+      fontSize: 14,
       fontFamily: FF.display,
       color: theme.ink,
     },
@@ -624,7 +624,7 @@ function getStyles(theme, isDark) {
       flexShrink: 0,
     },
     verifiedBadgeText: {
-      fontSize: 28,
+      fontSize: 9,
       fontFamily: FF.display,
       color: verifiedGreen,
       letterSpacing: 0.2,
@@ -638,13 +638,13 @@ function getStyles(theme, isDark) {
     reviewDate: {
       flexShrink: 0,
       paddingTop: 3,
-      fontSize: 28,
+      fontSize: 11,
       fontFamily: FF.body,
       color: theme.muted,
     },
     reviewText: {
       marginTop: 8,
-      fontSize: 28,
+      fontSize: 13,
       lineHeight: 20,
       fontFamily: FF.body,
       color: theme.body,
@@ -670,13 +670,13 @@ function getStyles(theme, isDark) {
       marginBottom: 10,
     },
     emptyReviewsTitle: {
-      fontSize: 28,
+      fontSize: 16,
       fontFamily: FF.display,
       color: theme.ink,
     },
     emptyReviewsCopy: {
       marginTop: 4,
-      fontSize: 28,
+      fontSize: 13,
       fontFamily: FF.body,
       color: theme.muted,
       textAlign: "center",
@@ -693,7 +693,7 @@ function getStyles(theme, isDark) {
       backgroundColor: theme.surfaceStrong,
     },
     showAllText: {
-      fontSize: 28,
+      fontSize: 12,
       fontFamily: FF.bodyMedium,
       color: theme.primaryActive,
     },
@@ -705,7 +705,7 @@ function getStyles(theme, isDark) {
       gap: 5,
     },
     reviewsFootnoteText: {
-      fontSize: 28,
+      fontSize: 11,
       fontFamily: FF.body,
       color: theme.muted,
     },

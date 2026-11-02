@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 const tenantPlugin = require('../utils/tenantPlugin')
 
 // Appointment = a confirmed booking
@@ -338,4 +340,6 @@ appointmentSchema.pre('save', function () {
   })
 })
 appointmentSchema.plugin(tenantPlugin)
+appointmentSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.appointment });
+
 module.exports = mongoose.model('Appointment', appointmentSchema)

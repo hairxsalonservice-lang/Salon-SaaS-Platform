@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const publicIdPlugin = require("../plugins/publicIdPlugin");
+const { PUBLIC_ID_PREFIXES } = require("../utils/publicId");
 
 // Salon = the parent organization / brand
 // e.g. "Glamour Studios" — one owner, multiple branches
@@ -94,5 +96,7 @@ salonSchema.index({ owner: 1 })
 
 // browse/filter: every public listing filters by active salon
 salonSchema.index({ isActive: 1, deactivatedByAdmin: 1 })
+
+salonSchema.plugin(publicIdPlugin, { prefix: PUBLIC_ID_PREFIXES.salon });
 
 module.exports = mongoose.model('Salon', salonSchema)

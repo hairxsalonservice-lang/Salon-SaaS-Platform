@@ -106,7 +106,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <TouchableOpacity
             style={styles.linkRow}
-            onPress={() => Linking.openURL("https://stcut.app").catch(() => {})}
+            onPress={() => Linking.openURL("https://hairx.app").catch(() => {})}
             activeOpacity={0.7}
           >
             <View style={styles.linkLeft}>
@@ -118,7 +118,7 @@ export default function AboutScreen({ goBack, navigate }) {
 
           <TouchableOpacity
             style={styles.linkRow}
-            onPress={() => Linking.openURL("mailto:support@stcut.app").catch(() => {})}
+            onPress={() => Linking.openURL("mailto:support@hairx.app").catch(() => {})}
             activeOpacity={0.7}
           >
             <View style={styles.linkLeft}>

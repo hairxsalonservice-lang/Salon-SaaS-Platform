@@ -134,6 +134,7 @@ export default function StaffPicker({ staffList = [], selectedStaffId, selectedS
                   <Image
                     source={staff.avatar || staff.photoUrl || staff.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"}
                     style={styles.avatar}
+                    contentFit="cover"
                     placeholder={{ blurhash: "LKO2?U%2Tw=w]~RBVZRi};RPxuwH" }}
                     transition={300}
                   />
