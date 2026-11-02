@@ -22,9 +22,11 @@ const validateEnvSecrets = () => {
     process.exit(1);
   }
 
-  // Fallback EMAIL_VERIFICATION_SECRET safely to JWT_ACCESS_SECRET if unset, eliminating hardcoded string literals
   if (!process.env.EMAIL_VERIFICATION_SECRET) {
     process.env.EMAIL_VERIFICATION_SECRET = process.env.JWT_ACCESS_SECRET;
+    if (process.env.NODE_ENV === 'production') {
+      console.warn('⚠️  EMAIL_VERIFICATION_SECRET not set — falling back to JWT_ACCESS_SECRET. Set a separate secret for defense in depth.');
+    }
   }
 };
 

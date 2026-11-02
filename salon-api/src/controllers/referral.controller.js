@@ -115,10 +115,19 @@ const applyReferralCode = async (req, res, next) => {
   }
 };
 
-// POST /api/v1/referrals/:referralId/complete  (internal/admin use)
+// POST /api/v1/referrals/:referralId/complete  (admin only)
 const completeReferral = async (req, res, next) => {
   try {
+    const role = req.user?.role;
+    if (role !== "superadmin" && role !== "owner") {
+      return next(new AppError("Access denied. Admin only.", 403));
+    }
+
     const { referralId } = req.params;
+
+    if (!referralId || !referralId.match(/^[a-f\d]{24}$/i)) {
+      return next(new AppError("Invalid referral ID", 400));
+    }
 
     const referral = await Referral.findById(referralId);
     if (!referral) {
