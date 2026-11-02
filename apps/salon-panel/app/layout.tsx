@@ -35,9 +35,26 @@ export default function RootLayout({
 }>) {
   const apiOrigin = getApiOrigin();
 
+  // Resolve the saved theme before first paint. Without this, the server-rendered
+  // light shell flashes briefly before the ThemeProvider hydrates.
+  const themeScript = `
+(function () {
+  try {
+    var key = "salon-panel-theme";
+    var saved = localStorage.getItem(key);
+    var theme = (saved === "light" || saved === "dark")
+      ? saved
+      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    document.documentElement.style.colorScheme = theme;
+  } catch (e) {}
+})();
+`;
+
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {apiOrigin && (
           <>
             <link rel="preconnect" href={apiOrigin} crossOrigin="anonymous" />

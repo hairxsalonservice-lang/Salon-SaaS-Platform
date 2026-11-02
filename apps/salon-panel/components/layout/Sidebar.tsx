@@ -27,6 +27,7 @@ import {
   seedUnreadCount,
 } from "@/api/services/notificationService";
 import { socketClient } from "@/lib/socket-client";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 interface NavItem {
   page: AppPage;
@@ -164,36 +165,58 @@ export default function Sidebar({
         `}
       >
         {/* Brand */}
-        <div className={`px-4 pt-4 pb-5 shrink-0 flex items-center ${collapsed ? "justify-center" : "justify-between"}`}>
-          {!collapsed ? (
-            <div className="flex items-center gap-2.5 min-w-0">
+        <div className={`${collapsed ? "px-2" : "px-4"} pt-4 pb-5 shrink-0 ${collapsed ? "flex flex-col items-center gap-1.5" : "flex items-center justify-between"}`}>
+          {collapsed ? (
+            <>
               <img
                 src="/logo.png"
                 alt="HairX"
                 className="w-8 h-8 rounded-lg object-cover shrink-0"
               />
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold tracking-wider text-[#86868b] uppercase">
-                  HairX
-                </p>
-                <h1 className="text-[13px] font-semibold text-[#1d1d1f] leading-tight truncate">
-                  {salonName || "Salon"}
-                </h1>
+              <div className="flex items-center gap-0.5">
+                <ThemeToggle
+                  size={14}
+                  className="text-[#aeaeb2] hover:text-[#1d1d1f] transition-colors p-1 rounded-md hover:bg-[#f5f5f7]"
+                />
+                <button
+                  onClick={onToggleCollapse}
+                  className="hidden lg:flex text-[#aeaeb2] hover:text-[#1d1d1f] transition-colors p-1 rounded-md hover:bg-[#f5f5f7]"
+                >
+                  <ChevronsRight size={14} />
+                </button>
               </div>
-            </div>
+            </>
           ) : (
-            <img
-              src="/logo.png"
-              alt="HairX"
-              className="w-8 h-8 rounded-lg object-cover shrink-0"
-            />
+            <>
+              <div className="flex items-center gap-2.5 min-w-0">
+                <img
+                  src="/logo.png"
+                  alt="HairX"
+                  className="w-8 h-8 rounded-lg object-cover shrink-0"
+                />
+                <div className="min-w-0">
+                  <p className="text-[10px] font-semibold tracking-wider text-[#86868b] uppercase">
+                    HairX
+                  </p>
+                  <h1 className="text-[13px] font-semibold text-[#1d1d1f] leading-tight truncate">
+                    {salonName || "Salon"}
+                  </h1>
+                </div>
+              </div>
+              <div className="flex items-center gap-0.5 shrink-0">
+                <ThemeToggle
+                  size={14}
+                  className="text-[#aeaeb2] hover:text-[#1d1d1f] transition-colors p-1 rounded-md hover:bg-[#f5f5f7]"
+                />
+                <button
+                  onClick={onToggleCollapse}
+                  className="hidden lg:flex text-[#aeaeb2] hover:text-[#1d1d1f] transition-colors p-1 rounded-md hover:bg-[#f5f5f7]"
+                >
+                  <ChevronsLeft size={14} />
+                </button>
+              </div>
+            </>
           )}
-          <button
-            onClick={onToggleCollapse}
-            className="hidden lg:flex text-[#aeaeb2] hover:text-[#1d1d1f] transition-colors p-1 rounded-md hover:bg-[#f5f5f7]"
-          >
-            {collapsed ? <ChevronsRight size={14} /> : <ChevronsLeft size={14} />}
-          </button>
         </div>
 
         {/* Navigation */}
@@ -262,6 +285,13 @@ export default function Sidebar({
                     <KeyRound size={15} strokeWidth={1.75} />
                   </button>
                 )}
+                <button
+                  onClick={onLogout}
+                  title="Sign out"
+                  className="text-[#aeaeb2] hover:text-[#ff3b30] hover:bg-red-50 transition-colors p-1.5 rounded-lg"
+                >
+                  <LogOut size={15} strokeWidth={1.75} />
+                </button>
               </div>
             )}
           </div>

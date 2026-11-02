@@ -9,6 +9,7 @@ import { fetchBranches } from "@/lib/branchCache";
 import { defer } from "@/lib/defer";
 import { getUnreadCount } from "@/api/services/notificationService";
 import { MapPin, ChevronDown, Check, AlertCircle, Bell } from "lucide-react";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 
 interface BranchOption {
   _id: string;
@@ -148,6 +149,7 @@ export default function BranchTopBar() {
           <span className="text-[11px] font-medium text-[#86868b] hidden md:inline">
             {currentDateStr}
           </span>
+          <ThemeToggle className="w-8 h-8 rounded-full bg-[#f5f5f7] hover:bg-[#e8e8ed] flex items-center justify-center text-[#6e6e73] transition-colors" />
           <button
             onClick={() => router.push("/notifications")}
             className="relative"

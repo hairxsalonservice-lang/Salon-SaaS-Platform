@@ -274,7 +274,9 @@ const login = async (req, res, next) => {
     // Fetch salon data if user belongs to one
     let salon = null;
     if (user.salonId) {
-      salon = await Salon.findById(user.salonId).select("_id name description logo isActive").lean();
+      salon = await Salon.findById(user.salonId)
+        .select("_id name description logo coverImage images isActive")
+        .lean();
     }
 
     res.status(200).json({
@@ -398,7 +400,7 @@ const me = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.userId)
       .populate("role", "name")
-      .populate("salonId", "name")
+      .populate("salonId", "name description logo coverImage images isActive")
       .populate("branchId", "name address")
       .lean();
 

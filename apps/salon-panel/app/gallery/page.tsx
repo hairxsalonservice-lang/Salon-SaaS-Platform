@@ -60,6 +60,16 @@ export default function GalleryPage() {
       return;
     }
 
+    const remainingSlots = Math.max(0, 5 - existingImages.length);
+    if (files.length > remainingSlots) {
+      setError(
+        remainingSlots === 0
+          ? "Your gallery is full. Remove an image before adding a new one."
+          : `Your gallery can hold 5 images. You can add ${remainingSlots} more.`,
+      );
+      return;
+    }
+
     const validFiles = files.filter(f => f.type.startsWith("image/"));
     if (validFiles.length !== files.length) {
       setError("Please select valid image files only.");
@@ -110,7 +120,7 @@ export default function GalleryPage() {
       }
 
       // Combine existing and new images
-      const combinedImages = [...existingImages, ...imageUrls].slice(0, 10); // arbitrary max 10 total
+      const combinedImages = [...existingImages, ...imageUrls].slice(0, 5);
 
       // 2. Update salon coverImage and images array
       const res = await apiClient.patch(`/salons/${salonId}`, {
@@ -240,8 +250,13 @@ export default function GalleryPage() {
         {/* Upload New Section */}
         <div className="bg-white border border-slate-200/80 rounded-2xl p-5 md:p-6 shadow-sm">
           <h2 className="text-sm font-bold text-slate-900 mb-1">Add New Images</h2>
-          <p className="text-xs text-slate-500 mb-4">Upload up to 5 images at once. These will be added to your gallery.</p>
-          
+          <p className="text-xs text-slate-500 mb-4">
+            {existingImages.length >= 5
+              ? "Your gallery is full. Remove an image to upload a replacement."
+              : `Upload up to ${5 - existingImages.length} more image${5 - existingImages.length === 1 ? "" : "s"}. The first image is used as your cover photo.`}
+          </p>
+
+          {existingImages.length < 5 && (
           <form onSubmit={handleUploadSubmit}>
             <div 
               onClick={() => fileInputRef.current?.click()}
@@ -307,6 +322,7 @@ export default function GalleryPage() {
               </div>
             )}
           </form>
+          )}
         </div>
 
       </div>

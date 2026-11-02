@@ -824,16 +824,10 @@ function ServiceFormModal({
           </div>
         )}
 
-        {/* Service Image (Cloudflare R2) */}
+        {/* Service Image */}
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-            <span>
-              Service Image (Cloudflare R2:{" "}
-              <code className="text-[10px] text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded">
-                services/
-              </code>
-              )
-            </span>
+            <span>Service Image</span>
             {form.imageUrl && (
               <span className="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
                 <Check size={12} /> Image Ready
@@ -872,7 +866,7 @@ function ServiceFormModal({
                 {uploadingImage ? (
                   <>
                     <Loader2 size={15} className="animate-spin text-indigo-600" />
-                    <span className="text-indigo-600">Uploading to Cloudflare R2...</span>
+                    <span className="text-indigo-600">Uploading image...</span>
                   </>
                 ) : (
                   <>
@@ -882,12 +876,7 @@ function ServiceFormModal({
                 )}
               </div>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                Saved as:{" "}
-                <code className="text-slate-500">
-                  services/
-                  {form.name ? form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "service"}
-                  -[hash].webp
-                </code>
+                Stored in your salon&apos;s media library.
               </p>
               <input
                 type="file"
