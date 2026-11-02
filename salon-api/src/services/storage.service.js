@@ -58,6 +58,14 @@ class StorageService {
     uploadedBy,
     salonId,
     branchId,
+    salonName,
+    ownerName,
+    contextBranchName,
+    contextBranchAddress,
+    branchName,
+    branchAddress,
+    batchId,
+    sequence,
   }) {
     const safeCategory = normalizeCategory(category || folder);
     let finalBuffer = buffer;
@@ -87,6 +95,14 @@ class StorageService {
       salonId,
       branchId,
       userId: uploadedBy,
+      salonName,
+      ownerName,
+      contextBranchName,
+      contextBranchAddress,
+      branchName,
+      branchAddress,
+      batchId,
+      sequence,
     });
 
     if (!isConfigured || !s3Client) {
@@ -293,6 +309,14 @@ class StorageService {
     uploadedBy,
     salonId,
     branchId,
+    salonName,
+    ownerName,
+    contextBranchName,
+    contextBranchAddress,
+    branchName,
+    branchAddress,
+    batchId,
+    sequence,
   }) {
     const { validatePresignedUpload } = require("../utils/uploadValidation");
     const validation = validatePresignedUpload({ fileName, fileType, fileSize });
@@ -316,6 +340,14 @@ class StorageService {
       salonId,
       branchId,
       userId: uploadedBy,
+      salonName,
+      ownerName,
+      contextBranchName,
+      contextBranchAddress,
+      branchName,
+      branchAddress,
+      batchId,
+      sequence,
     });
 
     if (!isConfigured || !s3Client) {

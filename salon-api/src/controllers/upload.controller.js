@@ -1,8 +1,14 @@
 const mongoose = require("mongoose");
 const StorageService = require("../services/storage.service");
 const { validatePresignedUpload } = require("../utils/uploadValidation");
-const { normalizeCategory } = require("../utils/storageKey");
+const {
+  normalizeCategory,
+  createBatchId,
+  formatBranchAddress,
+} = require("../utils/storageKey");
 const Branch = require("../models/branch.model");
+const Salon = require("../models/salon.model");
+const User = require("../models/user.model");
 
 /**
  * Resolve the upload category from the modern `category` field, falling back to
@@ -30,6 +36,43 @@ const resolveBranchId = async ({ requestedBranchId, user }) => {
   return belongsToSalon ? requestedBranchId : undefined;
 };
 
+/**
+ * Resolve the readable folder parts for an upload.
+ *
+ * The salon's first branch is always used for the top-level folder so all of a
+ * salon's assets stay under one prefix even when it has many branches.
+ * Branch-scoped categories additionally get their own branch subfolder.
+ */
+const resolveNamingContext = async ({ salonId, branchId }) => {
+  if (!salonId || !mongoose.isValidObjectId(salonId)) return {};
+
+  const salon = await Salon.findById(salonId).select("name owner").lean();
+  if (!salon) return {};
+
+  const [owner, branches] = await Promise.all([
+    salon.owner
+      ? User.findById(salon.owner).select("name").lean()
+      : Promise.resolve(null),
+    Branch.find({ salonId })
+      .select("name address createdAt")
+      .sort({ createdAt: 1, _id: 1 })
+      .lean(),
+  ]);
+
+  const primaryBranch = branches[0] || null;
+  const uploadBranch = branchId
+    ? branches.find((branch) => String(branch._id) === String(branchId)) || null
+    : null;
+
+  return {
+    salonName: salon.name,
+    ownerName: owner?.name,
+    contextBranchName: primaryBranch?.name,
+    contextBranchAddress: formatBranchAddress(primaryBranch?.address),
+    branchName: uploadBranch?.name,
+    branchAddress: formatBranchAddress(uploadBranch?.address),
+  };
+};
 
 /**
  * Handle single file upload
@@ -60,6 +103,8 @@ const uploadSingle = async (req, res, next) => {
       customName = [title, promoCode].filter(Boolean).join("-");
     }
 
+    const naming = await resolveNamingContext({ salonId, branchId });
+
     const result = await StorageService.uploadBuffer({
       buffer: req.file.buffer,
       originalName: req.file.originalname,
@@ -69,6 +114,9 @@ const uploadSingle = async (req, res, next) => {
       uploadedBy: userId,
       salonId,
       branchId,
+      ...naming,
+      batchId: createBatchId(),
+      sequence: 1,
     });
 
     return res.status(201).json({
@@ -112,16 +160,22 @@ const uploadMultiple = async (req, res, next) => {
       customName = [title, promoCode].filter(Boolean).join("-");
     }
 
+    const naming = await resolveNamingContext({ salonId, branchId });
+    const batchId = createBatchId();
+
     const uploadPromises = req.files.map((file, idx) =>
       StorageService.uploadBuffer({
         buffer: file.buffer,
         originalName: file.originalname,
         mimeType: file.mimetype,
         category,
-        customName: customName ? `${customName}-${idx + 1}` : undefined,
+        customName,
         uploadedBy: userId,
         salonId,
         branchId,
+        ...naming,
+        batchId,
+        sequence: idx + 1,
       })
     );
 
@@ -158,6 +212,7 @@ const getPresignedUrl = async (req, res, next) => {
       requestedBranchId: req.body.branchId,
       user: req.user,
     });
+    const naming = await resolveNamingContext({ salonId, branchId });
 
     const result = await StorageService.generatePresignedUploadUrl({
       fileName,
@@ -167,6 +222,9 @@ const getPresignedUrl = async (req, res, next) => {
       uploadedBy: userId,
       salonId,
       branchId,
+      ...naming,
+      batchId: createBatchId(),
+      sequence: 1,
     });
 
     return res.status(200).json({
