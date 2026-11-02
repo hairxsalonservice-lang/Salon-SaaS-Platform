@@ -198,6 +198,17 @@ const dispatchEmail = async (mailOptions) => {
   })
 }
 
+// Sanitize dynamic user inputs for safe HTML email rendering
+const escapeHtml = (str) => {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
 // Shared HTML Template Base
 const wrapTemplate = (title, content) => `
 <!DOCTYPE html>
@@ -205,7 +216,7 @@ const wrapTemplate = (title, content) => `
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title}</title>
+  <title>${escapeHtml(title)}</title>
   <style>
     body { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #090d16; margin: 0; padding: 24px; color: #f8fafc; }
     .container { max-width: 580px; margin: 0 auto; background: #111827; border-radius: 20px; overflow: hidden; border: 1px solid #1e293b; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
@@ -255,39 +266,49 @@ const sendBookingConfirmationEmail = async ({ to, customerName, salonName, branc
   const displayService = serviceName || 'Service'
   const subject = `Booking Received — ${displaySalon} (#${String(bookingId).slice(-6)})`
 
+  const safeCustomer = escapeHtml(customerName || 'Valued Client')
+  const safeSalon = escapeHtml(displaySalon)
+  const safeBranch = branchName ? `(${escapeHtml(branchName)})` : ''
+  const safeService = escapeHtml(displayService)
+  const safeStaff = escapeHtml(staffName || 'Any Available Staff')
+  const safeDate = escapeHtml(date || '')
+  const safeTime = time ? ` &nbsp;•&nbsp; ${escapeHtml(time)}` : ''
+  const safePrice = escapeHtml(price || '0')
+  const safeBookingId = escapeHtml(bookingId || '')
+
   const html = wrapTemplate('Booking Confirmed', `
     <div class="badge badge-confirmed">✓ BOOKING SUBMITTED</div>
-    <h2 style="margin-top:0; color:#ffffff;">Thank You for Your Booking, ${customerName || 'Valued Client'}!</h2>
+    <h2 style="margin-top:0; color:#ffffff;">Thank You for Your Booking, ${safeCustomer}!</h2>
     <p style="color:#cbd5e1; font-size:14.5px; line-height:1.6;">
-      Your appointment request for <strong style="color:#818cf8;">${displayService}</strong> at <strong style="color:#ffffff;">${displaySalon}</strong> has been received!
+      Your appointment request for <strong style="color:#818cf8;">${safeService}</strong> at <strong style="color:#ffffff;">${safeSalon}</strong> has been received!
     </p>
 
     <!-- Prominently Highlighted Date & Time Banner -->
     <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid #6366f1; border-radius: 16px; padding: 20px; text-align: center; margin: 24px 0; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);">
       <p style="color: #a5b4fc; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 6px 0;">🗓 APPOINTMENT DATE &amp; TIME</p>
-      <p style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${date}${time ? ` &nbsp;•&nbsp; ${time}` : ''}</p>
+      <p style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${safeDate}${safeTime}</p>
     </div>
     
     <div class="details-box">
       <div class="detail-row">
         <span class="detail-label">Salon</span>
-        <span class="detail-value" style="color:#818cf8; font-weight:700;">${displaySalon} ${branchName ? `(${branchName})` : ''}</span>
+        <span class="detail-value" style="color:#818cf8; font-weight:700;">${safeSalon} ${safeBranch}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Service</span>
-        <span class="detail-value" style="color:#ffffff; font-weight:700;">${displayService}</span>
+        <span class="detail-value" style="color:#ffffff; font-weight:700;">${safeService}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Specialist</span>
-        <span class="detail-value">${staffName || 'Any Available Staff'}</span>
+        <span class="detail-value">${safeStaff}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Price</span>
-        <span class="detail-value" style="color:#34d399;">₹${price || '0'}</span>
+        <span class="detail-value" style="color:#34d399;">₹${safePrice}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Booking ID</span>
-        <span class="detail-value">#${bookingId}</span>
+        <span class="detail-value">#${safeBookingId}</span>
       </div>
     </div>
 
@@ -314,52 +335,59 @@ const sendAppointmentStatusEmail = async ({ to, customerName, status, salonName,
   const displaySalon = salonName || 'Salon'
   const displayService = serviceName || 'Service'
 
+  const safeCustomer = escapeHtml(customerName || 'Valued Client')
+  const safeSalon = escapeHtml(displaySalon)
+  const safeService = escapeHtml(displayService)
+  const safeDate = escapeHtml(date || '')
+  const safeTime = time ? ` &nbsp;•&nbsp; ${escapeHtml(time)}` : ''
+  const safeReason = escapeHtml(cancellationReason || '')
+
   let badgeClass = 'badge-confirmed'
   let subject = `Appointment Status Update: ${status} — ${displaySalon}`
-  let heading = `Hello ${customerName || 'Valued Client'},`
-  let subtext = `Your appointment status has been updated to <strong style="color:#ffffff;">${status}</strong>.`
+  let heading = `Hello ${safeCustomer},`
+  let subtext = `Your appointment status has been updated to <strong style="color:#ffffff;">${escapeHtml(status)}</strong>.`
 
   if (status === 'CONFIRMED') {
     badgeClass = 'badge-confirmed'
     subject = `Appointment Accepted! 🎉 — ${displaySalon}`
-    heading = `Great news, ${customerName || 'Valued Client'}!`
-    subtext = `Your appointment for <strong style="color:#818cf8;">${displayService}</strong> has been <strong style="color:#34d399;">ACCEPTED</strong> by <strong style="color:#ffffff;">${displaySalon}</strong>. We look forward to hosting you!`
+    heading = `Great news, ${safeCustomer}!`
+    subtext = `Your appointment for <strong style="color:#818cf8;">${safeService}</strong> has been <strong style="color:#34d399;">ACCEPTED</strong> by <strong style="color:#ffffff;">${safeSalon}</strong>. We look forward to hosting you!`
   } else if (status === 'COMPLETED') {
     badgeClass = 'badge-completed'
     subject = `Thank You for Visiting ${displaySalon}! 🌟`
-    heading = `Thank You for Visiting Us, ${customerName || 'Valued Client'}!`
-    subtext = `We hope you enjoyed your <strong style="color:#818cf8;">${displayService}</strong> service at <strong style="color:#ffffff;">${displaySalon}</strong>! Thank you for choosing us today.`
+    heading = `Thank You for Visiting Us, ${safeCustomer}!`
+    subtext = `We hope you enjoyed your <strong style="color:#818cf8;">${safeService}</strong> service at <strong style="color:#ffffff;">${safeSalon}</strong>! Thank you for choosing us today.`
   } else if (status === 'CANCELLED') {
     badgeClass = 'badge-cancelled'
     subject = `Appointment Cancelled — ${displaySalon}`
     heading = `Appointment Cancelled`
-    subtext = `Your appointment for <strong style="color:#f87171;">${displayService}</strong> at ${displaySalon} was cancelled.`
+    subtext = `Your appointment for <strong style="color:#f87171;">${safeService}</strong> at ${safeSalon} was cancelled.`
   }
 
   const html = wrapTemplate(`Appointment ${status}`, `
-    <div class="badge ${badgeClass}">${status === 'CONFIRMED' ? '✓ ACCEPTED & CONFIRMED' : status === 'COMPLETED' ? '✨ SERVICE COMPLETED' : status}</div>
+    <div class="badge ${badgeClass}">${status === 'CONFIRMED' ? '✓ ACCEPTED & CONFIRMED' : status === 'COMPLETED' ? '✨ SERVICE COMPLETED' : escapeHtml(status)}</div>
     <h2 style="margin-top:0; color:#ffffff;">${heading}</h2>
     <p style="color:#cbd5e1; font-size:14.5px; line-height:1.6;">${subtext}</p>
 
     <!-- Prominently Highlighted Date & Time Banner -->
     <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid #6366f1; border-radius: 16px; padding: 20px; text-align: center; margin: 24px 0; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);">
       <p style="color: #a5b4fc; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 6px 0;">🗓 APPOINTMENT DATE &amp; TIME</p>
-      <p style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${date}${time ? ` &nbsp;•&nbsp; ${time}` : ''}</p>
+      <p style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${safeDate}${safeTime}</p>
     </div>
     
     <div class="details-box">
       <div class="detail-row">
         <span class="detail-label">Salon</span>
-        <span class="detail-value" style="color:#818cf8; font-weight:700;">${displaySalon}</span>
+        <span class="detail-value" style="color:#818cf8; font-weight:700;">${safeSalon}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Service</span>
-        <span class="detail-value" style="color:#ffffff; font-weight:700;">${displayService}</span>
+        <span class="detail-value" style="color:#ffffff; font-weight:700;">${safeService}</span>
       </div>
-      ${cancellationReason ? `
+      ${safeReason ? `
       <div class="detail-row">
         <span class="detail-label">Reason</span>
-        <span class="detail-value" style="color:#f87171;">${cancellationReason}</span>
+        <span class="detail-value" style="color:#f87171;">${safeReason}</span>
       </div>` : ''}
     </div>
 
@@ -386,24 +414,32 @@ const sendAppointmentStatusEmail = async ({ to, customerName, status, salonName,
 const sendRescheduleConfirmationEmail = async ({ to, customerName, salonName, serviceName, oldDate, oldTime, newDate, newTime, bookingId }) => {
   if (!to) return
 
-  const subject = `Appointment Rescheduled - ${salonName}`
+  const safeCustomer = escapeHtml(customerName || 'Valued Client')
+  const safeSalon = escapeHtml(salonName || 'Salon')
+  const safeService = escapeHtml(serviceName || 'Service')
+  const safeOldDate = escapeHtml(oldDate || '')
+  const safeOldTime = escapeHtml(oldTime || '')
+  const safeNewDate = escapeHtml(newDate || '')
+  const safeNewTime = escapeHtml(newTime || '')
+
+  const subject = `Appointment Rescheduled - ${safeSalon}`
   const html = wrapTemplate('Appointment Rescheduled', `
     <div class="badge badge-rescheduled">🗓 RESCHEDULED</div>
-    <h2 style="margin-top:0; color:#ffffff;">Hello ${customerName || 'Valued Client'},</h2>
-    <p style="color:#cbd5e1; font-size:14px;">Your appointment at <strong>${salonName}</strong> has been successfully rescheduled.</p>
+    <h2 style="margin-top:0; color:#ffffff;">Hello ${safeCustomer},</h2>
+    <p style="color:#cbd5e1; font-size:14px;">Your appointment at <strong>${safeSalon}</strong> has been successfully rescheduled.</p>
     
     <div class="details-box">
       <div class="detail-row">
         <span class="detail-label">Service</span>
-        <span class="detail-value">${serviceName}</span>
+        <span class="detail-value">${safeService}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Previous Slot</span>
-        <span class="detail-value" style="text-decoration: line-through; color: #64748b;">${oldDate} at ${oldTime}</span>
+        <span class="detail-value" style="text-decoration: line-through; color: #64748b;">${safeOldDate} at ${safeOldTime}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">New Slot</span>
-        <span class="detail-value" style="color: #818cf8; font-weight: bold;">${newDate} at ${newTime}</span>
+        <span class="detail-value" style="color: #818cf8; font-weight: bold;">${safeNewDate} at ${safeNewTime}</span>
       </div>
     </div>
   `)
@@ -412,7 +448,7 @@ const sendRescheduleConfirmationEmail = async ({ to, customerName, salonName, se
     from: EMAIL_FROM,
     to,
     subject,
-    text: `Your appointment at ${salonName} has been rescheduled to ${newDate} at ${newTime}.`,
+    text: `Your appointment at ${salonName || 'Salon'} has been rescheduled to ${newDate} at ${newTime}.`,
     html
   })
 }
@@ -423,20 +459,23 @@ const sendRescheduleConfirmationEmail = async ({ to, customerName, salonName, se
 const sendOwnerRegistrationReceivedEmail = async ({ to, ownerName, salonName }) => {
   if (!to) return
 
-  const subject = `Registration Received — ${salonName}`
+  const safeOwner = escapeHtml(ownerName || 'Salon Owner')
+  const safeSalon = escapeHtml(salonName || 'Salon')
+
+  const subject = `Registration Received — ${safeSalon}`
   const html = wrapTemplate('Registration Received', `
     <div class="badge badge-rescheduled">⏳ PENDING APPROVAL</div>
-    <h2 style="margin-top:0; color:#ffffff;">Hello ${ownerName || 'Salon Owner'},</h2>
-    <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">Thank you for registering your salon <strong>"${salonName}"</strong> on HairX!</p>
+    <h2 style="margin-top:0; color:#ffffff;">Hello ${safeOwner},</h2>
+    <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">Thank you for registering your salon <strong>"${safeSalon}"</strong> on HairX!</p>
     
     <div class="details-box">
       <div class="detail-row">
         <span class="detail-label">Salon Name</span>
-        <span class="detail-value">${salonName}</span>
+        <span class="detail-value">${safeSalon}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Owner Name</span>
-        <span class="detail-value">${ownerName}</span>
+        <span class="detail-value">${safeOwner}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Status</span>
@@ -468,20 +507,24 @@ const sendOwnerRegistrationReceivedEmail = async ({ to, ownerName, salonName }) 
 const sendOwnerRegistrationApprovedEmail = async ({ to, ownerName, salonName }) => {
   if (!to) return
 
-  const subject = `Account Approved! Welcome to HairX — ${salonName}`
+  const safeOwner = escapeHtml(ownerName || 'Salon Owner')
+  const safeSalon = escapeHtml(salonName || 'Salon')
+  const safeEmail = escapeHtml(to)
+
+  const subject = `Account Approved! Welcome to HairX — ${safeSalon}`
   const html = wrapTemplate('Account Approved', `
     <div class="badge badge-confirmed">✓ APPROVED & ACTIVATED</div>
-    <h2 style="margin-top:0; color:#ffffff;">Congratulations, ${ownerName}!</h2>
-    <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">Great news! Your registration request for <strong>"${salonName}"</strong> has been approved by our superadmin team.</p>
+    <h2 style="margin-top:0; color:#ffffff;">Congratulations, ${safeOwner}!</h2>
+    <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">Great news! Your registration request for <strong>"${safeSalon}"</strong> has been approved by our superadmin team.</p>
     
     <div class="details-box">
       <div class="detail-row">
         <span class="detail-label">Salon Name</span>
-        <span class="detail-value">${salonName}</span>
+        <span class="detail-value">${safeSalon}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Login Email</span>
-        <span class="detail-value">${to}</span>
+        <span class="detail-value">${safeEmail}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Account Status</span>
@@ -509,21 +552,25 @@ const sendOwnerRegistrationApprovedEmail = async ({ to, ownerName, salonName }) 
 const sendOwnerRegistrationRejectedEmail = async ({ to, ownerName, salonName, note }) => {
   if (!to) return
 
-  const subject = `Registration Request Update — ${salonName}`
+  const safeOwner = escapeHtml(ownerName || 'Salon Owner')
+  const safeSalon = escapeHtml(salonName || 'Salon')
+  const safeNote = escapeHtml(note || '')
+
+  const subject = `Registration Request Update — ${safeSalon}`
   const html = wrapTemplate('Registration Update', `
     <div class="badge badge-cancelled">❌ REQUEST NOT APPROVED</div>
-    <h2 style="margin-top:0; color:#ffffff;">Hello ${ownerName || 'Salon Owner'},</h2>
-    <p style="color:#cbd5e1; font-size:14px;">We reviewed your registration request for <strong>"${salonName}"</strong>.</p>
+    <h2 style="margin-top:0; color:#ffffff;">Hello ${safeOwner},</h2>
+    <p style="color:#cbd5e1; font-size:14px;">We reviewed your registration request for <strong>"${safeSalon}"</strong>.</p>
     
     <div class="details-box">
       <div class="detail-row">
         <span class="detail-label">Salon Name</span>
-        <span class="detail-value">${salonName}</span>
+        <span class="detail-value">${safeSalon}</span>
       </div>
-      ${note ? `
+      ${safeNote ? `
       <div class="detail-row">
         <span class="detail-label">Admin Note</span>
-        <span class="detail-value" style="color: #f87171;">${note}</span>
+        <span class="detail-value" style="color: #f87171;">${safeNote}</span>
       </div>` : ''}
     </div>
 
@@ -547,18 +594,21 @@ const sendOwnerRegistrationRejectedEmail = async ({ to, ownerName, salonName, no
 const sendPasswordResetOtpEmail = async ({ to, userName, otp }) => {
   if (!to) return;
 
+  const safeUser = escapeHtml(userName || "User");
+  const safeOtp = escapeHtml(otp || "");
+
   const subject = `Your Password Reset OTP Code: ${otp}`;
   const html = wrapTemplate("Password Reset Verification", `
     <div class="badge badge-rescheduled">🔒 SECURITY VERIFICATION</div>
     <h2 style="margin-top:0; color:#ffffff;">Password Reset Request</h2>
     <p style="color:#cbd5e1; font-size:14.5px; line-height:1.6;">
-      Hello ${userName || "User"}, we received a request to reset your password. Use the verification code below:
+      Hello ${safeUser}, we received a request to reset your password. Use the verification code below:
     </p>
 
     <!-- Prominently Highlighted OTP Banner -->
     <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid #6366f1; border-radius: 16px; padding: 24px; text-align: center; margin: 24px 0; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);">
       <p style="color: #a5b4fc; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px 0;">YOUR 6-DIGIT VERIFICATION CODE</p>
-      <p style="color: #ffffff; font-size: 36px; font-weight: 800; margin: 0; letter-spacing: 8px; font-family: monospace;">${otp}</p>
+      <p style="color: #ffffff; font-size: 36px; font-weight: 800; margin: 0; letter-spacing: 8px; font-family: monospace;">${safeOtp}</p>
     </div>
 
     <p style="color: #94a3b8; font-size: 13px; line-height: 1.5;">
@@ -599,10 +649,13 @@ const sendEmailVerificationLink = async ({ to, userName, token }) => {
   const baseUrl = process.env.APP_BASE_URL || `http://${getLocalIp()}:${port}`;
   const verifyUrl = `${baseUrl}/api/v1/auth/verify-email-landing?token=${token}`;
 
+  const safeUser = escapeHtml(userName || "Valued Member");
+  const safeVerifyUrl = escapeHtml(verifyUrl);
+
   const subject = "Confirm your HairX email address";
   const html = wrapTemplate("Confirm Your Email", `
     <div class="badge badge-rescheduled">✉️ EMAIL VERIFICATION</div>
-    <h2 style="margin-top:0; color:#ffffff;">Confirm Your Account, ${userName || "Valued Member"}!</h2>
+    <h2 style="margin-top:0; color:#ffffff;">Confirm Your Account, ${safeUser}!</h2>
     <p style="color:#cbd5e1; font-size:14.5px; line-height:1.6;">
       Thank you for creating an account with <strong>HairX</strong>. Tap the button below to confirm your email address and activate your account:
     </p>
@@ -616,7 +669,7 @@ const sendEmailVerificationLink = async ({ to, userName, token }) => {
 
     <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; text-align: center;">
       Link not working? Copy and paste this URL into your web browser:<br/>
-      <a href="${verifyUrl}" style="color: #d49b45; word-break: break-all;">${verifyUrl}</a>
+      <a href="${verifyUrl}" style="color: #d49b45; word-break: break-all;">${safeVerifyUrl}</a>
     </p>
 
     <p style="color: #64748b; font-size: 12.5px; line-height: 1.5; margin-top: 24px;">
@@ -644,8 +697,9 @@ const sendEmailVerificationLink = async ({ to, userName, token }) => {
 const sendWelcomeOAuthEmail = async ({ to, userName, provider = "Google" }) => {
   if (!to) return;
 
-  const isGoogle = provider.toLowerCase() === "google";
-  const subject = `Welcome to HairX, ${userName || "Valued Member"}! 🎉`;
+  const isGoogle = String(provider).toLowerCase() === "google";
+  const safeUser = escapeHtml(userName || "Valued Member");
+  const subject = `Welcome to HairX, ${safeUser}! 🎉`;
   const badgeText = isGoogle ? "✓ VERIFIED WITH GOOGLE" : "✓ ACCOUNT ACTIVATED";
   const bodyText = isGoogle
     ? "Your account has been successfully signed up using <strong>Google Sign-In</strong>."
@@ -653,7 +707,7 @@ const sendWelcomeOAuthEmail = async ({ to, userName, provider = "Google" }) => {
 
   const html = wrapTemplate("Welcome to HairX", `
     <div class="badge badge-confirmed">${badgeText}</div>
-    <h2 style="margin-top:0; color:#ffffff;">Welcome to HairX, ${userName || "Valued Member"}!</h2>
+    <h2 style="margin-top:0; color:#ffffff;">Welcome to HairX, ${safeUser}!</h2>
     <p style="color:#cbd5e1; font-size:14.5px; line-height:1.6;">
       ${bodyText}
     </p>
@@ -687,41 +741,51 @@ const sendWelcomeOAuthEmail = async ({ to, userName, provider = "Google" }) => {
 const sendNewBookingAlertToSalon = async ({ to, ownerOrManagerName, customerName, customerPhone, salonName, branchName, serviceName, staffName, date, time, bookingId }) => {
   if (!to) return;
 
-  const subject = `🔔 New Booking Received — ${customerName || 'Customer'} (#${String(bookingId).slice(-6)})`;
+  const safeManager = escapeHtml(ownerOrManagerName || 'Salon Team');
+  const safeCustomer = escapeHtml(customerName || 'Customer');
+  const safePhone = escapeHtml(customerPhone || '');
+  const safeSalon = escapeHtml(salonName || 'Salon');
+  const safeService = escapeHtml(serviceName || 'Service');
+  const safeStaff = escapeHtml(staffName || 'Any Specialist');
+  const safeDate = escapeHtml(date || '');
+  const safeTime = time ? ` &nbsp;•&nbsp; ${escapeHtml(time)}` : '';
+  const safeBookingId = escapeHtml(bookingId || '');
+
+  const subject = `🔔 New Booking Received — ${safeCustomer} (#${String(bookingId).slice(-6)})`;
   const html = wrapTemplate('New Appointment Alert', `
     <div class="badge badge-rescheduled">🔔 NEW BOOKING REQUEST</div>
-    <h2 style="margin-top:0; color:#ffffff;">Hello ${ownerOrManagerName || 'Salon Team'},</h2>
+    <h2 style="margin-top:0; color:#ffffff;">Hello ${safeManager},</h2>
     <p style="color:#cbd5e1; font-size:14.5px; line-height:1.6;">
-      A new customer appointment has just been requested for <strong>${salonName}</strong>!
+      A new customer appointment has just been requested for <strong>${safeSalon}</strong>!
     </p>
 
     <!-- Prominently Highlighted Date & Time Banner -->
     <div style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border: 1px solid #6366f1; border-radius: 16px; padding: 20px; text-align: center; margin: 24px 0; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.2);">
       <p style="color: #a5b4fc; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 6px 0;">🗓 SCHEDULED APPOINTMENT TIME</p>
-      <p style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${date}${time ? ` &nbsp;•&nbsp; ${time}` : ''}</p>
+      <p style="color: #ffffff; font-size: 22px; font-weight: 800; margin: 0; letter-spacing: -0.5px;">${safeDate}${safeTime}</p>
     </div>
 
     <div class="details-box">
       <div class="detail-row">
         <span class="detail-label">Customer Name</span>
-        <span class="detail-value" style="color:#ffffff; font-weight:700;">${customerName || 'Client'}</span>
+        <span class="detail-value" style="color:#ffffff; font-weight:700;">${safeCustomer}</span>
       </div>
-      ${customerPhone ? `
+      ${safePhone ? `
       <div class="detail-row">
         <span class="detail-label">Customer Phone</span>
-        <span class="detail-value" style="color:#34d399;">${customerPhone}</span>
+        <span class="detail-value" style="color:#34d399;">${safePhone}</span>
       </div>` : ''}
       <div class="detail-row">
         <span class="detail-label">Service Requested</span>
-        <span class="detail-value" style="color:#818cf8; font-weight:700;">${serviceName || 'Service'}</span>
+        <span class="detail-value" style="color:#818cf8; font-weight:700;">${safeService}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Assigned Specialist</span>
-        <span class="detail-value">${staffName || 'Any Specialist'}</span>
+        <span class="detail-value">${safeStaff}</span>
       </div>
       <div class="detail-row">
         <span class="detail-label">Booking ID</span>
-        <span class="detail-value">#${bookingId}</span>
+        <span class="detail-value">#${safeBookingId}</span>
       </div>
     </div>
 
@@ -750,6 +814,7 @@ module.exports = {
   sendPasswordResetOtpEmail,
   sendEmailVerificationLink,
   sendWelcomeOAuthEmail,
+  escapeHtml,
   emailQueue,
   emailWorker,
 };

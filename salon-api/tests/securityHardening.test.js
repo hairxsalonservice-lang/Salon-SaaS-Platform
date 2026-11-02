@@ -13,6 +13,8 @@ const {
 
 const reportCacheKey = require('../src/utils/reportCacheKey');
 const StorageService = require('../src/services/storage.service');
+const { escapeHtml } = require('../src/services/email.service');
+const { metricsHandler } = require('../src/middleware/metrics.middleware');
 
 describe('CORS origin policy', () => {
   test('does not trust arbitrary railway.app subdomains', () => {
@@ -234,5 +236,79 @@ describe('Report cache keys', () => {
     });
 
     expect(first).not.toBe(second);
+  });
+});
+
+describe('HTML entity escaping for emails', () => {
+  test('escapes special HTML characters', () => {
+    expect(escapeHtml('<script>alert("xss")</script>')).toBe(
+      '&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;',
+    );
+    expect(escapeHtml("John & Jane's Salon")).toBe(
+      'John &amp; Jane&#39;s Salon',
+    );
+  });
+
+  test('handles null and undefined safely', () => {
+    expect(escapeHtml(null)).toBe('');
+    expect(escapeHtml(undefined)).toBe('');
+    expect(escapeHtml(12345)).toBe('12345');
+  });
+});
+
+describe('Prometheus metrics endpoint protection', () => {
+  const originalToken = process.env.METRICS_AUTH_TOKEN;
+
+  afterEach(() => {
+    if (originalToken !== undefined) {
+      process.env.METRICS_AUTH_TOKEN = originalToken;
+    } else {
+      delete process.env.METRICS_AUTH_TOKEN;
+    }
+  });
+
+  test('allows scraping when no token is configured', async () => {
+    delete process.env.METRICS_AUTH_TOKEN;
+    const req = { headers: {} };
+    const res = {
+      set: jest.fn(),
+      end: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await metricsHandler(req, res);
+    expect(res.end).toHaveBeenCalled();
+  });
+
+  test('rejects unauthorized requests when METRICS_AUTH_TOKEN is set', async () => {
+    process.env.METRICS_AUTH_TOKEN = 'secret-token-123';
+    const req = { headers: {} };
+    const res = {
+      set: jest.fn(),
+      end: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await metricsHandler(req, res);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({ success: false }),
+    );
+  });
+
+  test('allows scraping when correct Bearer token is provided', async () => {
+    process.env.METRICS_AUTH_TOKEN = 'secret-token-123';
+    const req = { headers: { authorization: 'Bearer secret-token-123' } };
+    const res = {
+      set: jest.fn(),
+      end: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await metricsHandler(req, res);
+    expect(res.end).toHaveBeenCalled();
   });
 });

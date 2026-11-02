@@ -26,6 +26,17 @@ const metricsMiddleware = (req, res, next) => {
 
 const metricsHandler = async (req, res) => {
   try {
+    const requiredToken = process.env.METRICS_AUTH_TOKEN;
+    if (requiredToken) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || authHeader !== `Bearer ${requiredToken}`) {
+        return res.status(401).json({
+          success: false,
+          message: "Unauthorized: Invalid or missing Prometheus metrics token",
+        });
+      }
+    }
+
     res.set("Content-Type", register.contentType);
     res.end(await register.metrics());
   } catch (err) {
