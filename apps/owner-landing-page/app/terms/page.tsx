@@ -196,6 +196,11 @@ export default function TermsPage() {
             <h2 className="text-[17px] font-semibold text-[#1d1d1f] dark:text-white mb-3">25. Acceptance of Terms</h2>
             <p>By registering for, logging into, accessing or using the Hair X Salon Partner Web Platform, the Salon Partner confirms that it has read and understood these Terms and Conditions and agrees to be bound by them, subject to applicable law.</p>
           </section>
+
+          <section>
+            <h2 className="text-[17px] font-semibold text-[#1d1d1f] dark:text-white mb-3">26. Developer Disclaimer</h2>
+            <p>The Platform is developed and maintained by an independent software developer solely as a technology service provider. The developer is not responsible or liable for any illegal, unlawful, fraudulent, or unauthorised activities conducted by any user, Salon Partner, or third party through or in connection with the Platform. The developer does not control, endorse, or guarantee the actions, conduct, or services of any user or Salon Partner. All users are solely responsible for their own compliance with applicable laws. Any legal consequences arising from misuse of the Platform shall be borne entirely by the individual or entity responsible for such misuse, and not by the developer.</p>
+          </section>
         </div>
       </main>
 
